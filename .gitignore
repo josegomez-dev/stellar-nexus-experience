@@ -93,3 +93,4 @@ temp/
 # Stellar specific
 stellar-keys/
 *.key
+.vercel
