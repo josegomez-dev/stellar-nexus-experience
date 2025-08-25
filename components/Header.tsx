@@ -38,7 +38,7 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-white/80 hover:text-white transition-colors relative group">
+            <a href="https://github.com/josegomez-dev/trustless-poc" target='_blank' className="text-white/80 hover:text-white transition-colors relative group">
               📦 Github Repo
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
@@ -103,7 +103,8 @@ export const Header = () => {
           <div className="md:hidden border-t border-white/20 bg-white/5 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <a
-                href="#home"
+                target='_blank'
+                href="https://github.com/josegomez-dev/trustless-poc"
                 className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >

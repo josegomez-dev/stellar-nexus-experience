@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  // Optimized for Vercel deployment
+  output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: false,
 }
 
 module.exports = nextConfig
