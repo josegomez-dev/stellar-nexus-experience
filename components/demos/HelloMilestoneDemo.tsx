@@ -202,19 +202,19 @@ export const HelloMilestoneDemo = () => {
   const getStepColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'border-green-500 bg-green-500/10'
+        return 'border-success-500 bg-success-500/10'
       case 'current':
-        return 'border-blue-500 bg-blue-500/10'
+        return 'border-brand-500 bg-brand-500/10'
       default:
-        return 'border-gray-500 bg-gray-500/10'
+        return 'border-neutral-500 bg-neutral-500/10'
     }
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400 mb-4">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-success-400 to-success-300 mb-4">
             🚀 Hello Milestone Demo
           </h2>
           <p className="text-white/80 text-lg">
@@ -229,7 +229,7 @@ export const HelloMilestoneDemo = () => {
             {currentStep > 0 && (
               <button
                 onClick={resetDemo}
-                className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors"
+                className="px-4 py-2 bg-danger-500/20 hover:bg-danger-500/30 border border-danger-400/30 rounded-lg text-danger-300 hover:text-danger-200 transition-colors"
               >
                 🔄 Reset Demo
               </button>
@@ -253,8 +253,8 @@ export const HelloMilestoneDemo = () => {
                     disabled={step.disabled}
                     className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                       step.disabled
-                        ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
-                        : 'bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-green-300 hover:text-green-200'
+                        ? 'bg-neutral-500/20 text-neutral-400 cursor-not-allowed'
+                        : 'bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 text-success-300 hover:text-success-200'
                     } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
                     data-step-id={step.id}
                   >
@@ -278,21 +278,21 @@ export const HelloMilestoneDemo = () => {
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-white/70">Contract ID:</p>
-                <p className="font-mono text-green-300 bg-green-900/30 px-2 py-1 rounded">
+                <p className="font-mono text-success-300 bg-success-900/30 px-2 py-1 rounded">
                   {contractId.slice(0, 20)}...
                 </p>
               </div>
               <div>
                 <p className="text-white/70">Status:</p>
-                <p className="text-green-300">{escrowData?.status || 'Active'}</p>
+                <p className="text-success-300">{escrowData?.status || 'Active'}</p>
               </div>
               <div>
                 <p className="text-white/70">Amount:</p>
-                <p className="text-green-300">10 USDC</p>
+                <p className="text-success-300">10 USDC</p>
               </div>
               <div>
                 <p className="text-white/70">Milestone Status:</p>
-                <p className={`${milestoneStatus === 'completed' ? 'text-green-300' : 'text-yellow-300'}`}>
+                <p className={`${milestoneStatus === 'completed' ? 'text-success-300' : 'text-warning-300'}`}>
                   {milestoneStatus === 'completed' ? 'Completed' : 'Pending'}
                 </p>
               </div>
@@ -302,9 +302,9 @@ export const HelloMilestoneDemo = () => {
 
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
-          <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-lg">
-            <h4 className="font-semibold text-red-300 mb-2">Error Occurred</h4>
-            <p className="text-red-200 text-sm">
+          <div className="p-4 bg-danger-500/20 border border-danger-400/30 rounded-lg">
+            <h4 className="font-semibold text-danger-300 mb-2">Error Occurred</h4>
+            <p className="text-danger-200 text-sm">
               {initError?.message || fundError?.message || statusError?.message || 
                approveError?.message || releaseError?.message}
             </p>
@@ -313,9 +313,9 @@ export const HelloMilestoneDemo = () => {
 
         {/* Success Message */}
         {currentStep === 5 && (
-          <div className="p-6 bg-green-500/20 border border-green-400/30 rounded-lg text-center">
+          <div className="p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
             <div className="text-4xl mb-4">🎉</div>
-            <h3 className="text-2xl font-bold text-green-300 mb-2">Demo Completed Successfully!</h3>
+            <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
             <p className="text-green-200">
               You've successfully completed the entire trustless escrow flow. 
               Funds were automatically released upon milestone approval.
@@ -324,16 +324,16 @@ export const HelloMilestoneDemo = () => {
         )}
 
         {/* Demo Instructions */}
-        <div className="mt-8 p-6 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-          <h3 className="text-lg font-semibold text-blue-300 mb-3">📚 How This Demo Works</h3>
-          <ul className="text-blue-200 text-sm space-y-2">
+        <div className="mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg">
+          <h3 className="text-lg font-semibold text-brand-300 mb-3">📚 How This Demo Works</h3>
+          <ul className="text-brand-200 text-sm space-y-2">
             <li>• <strong>Initialize:</strong> Creates a smart contract on Stellar for the escrow</li>
             <li>• <strong>Fund:</strong> Locks USDC tokens in the escrow contract</li>
             <li>• <strong>Complete:</strong> Worker signals task completion (simulated)</li>
             <li>• <strong>Approve:</strong> Client approves the completed work</li>
             <li>• <strong>Release:</strong> Smart contract automatically releases funds to worker</li>
           </ul>
-          <p className="text-blue-200 text-sm mt-3">
+          <p className="text-brand-200 text-sm mt-3">
             This demonstrates the core trustless escrow flow where no third party is needed - 
             the smart contract handles everything automatically once conditions are met.
           </p>

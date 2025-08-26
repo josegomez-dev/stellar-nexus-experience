@@ -90,10 +90,10 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         `
-        button.classList.add('bg-green-500/20', 'text-green-200', 'border-green-400/50')
+        button.classList.add('bg-success-500/20', 'text-success-200', 'border-success-400/50')
         setTimeout(() => {
           button.innerHTML = originalHTML
-          button.classList.remove('bg-green-500/20', 'text-green-200', 'border-green-400/50')
+          button.classList.remove('bg-success-500/20', 'text-success-200', 'border-success-400/50')
         }, 2000)
       }
     }

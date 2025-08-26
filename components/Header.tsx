@@ -50,22 +50,22 @@ export const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <a href="/" className="text-white/80 hover:text-white transition-colors relative group">
               🏠 Home
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
             <a href="/demos" className="text-white/80 hover:text-white transition-colors relative group">
               🧪 Demos
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
             <a href="https://github.com/josegomez-dev/trustless-poc" target='_blank' className="text-white/80 hover:text-white transition-colors relative group">
               📦 Github Repo
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))}
               className="text-white/80 hover:text-white transition-colors relative group"
             >
               🔐 Wallet
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </button>
           </nav>
 
@@ -76,8 +76,8 @@ export const Header = () => {
               <span className="text-xs text-white/60">Network:</span>
               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 stellarConfig.network === 'TESTNET' 
-                  ? 'bg-yellow-500/30 text-yellow-200 border border-yellow-400/30'
-                  : 'bg-green-500/30 text-green-200 border border-green-400/30'
+                  ? 'bg-warning-500/30 text-warning-200 border border-warning-400/30'
+                  : 'bg-success-500/30 text-success-200 border border-success-400/30'
               }`}>
                 {stellarConfig.network}
               </span>

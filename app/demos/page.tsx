@@ -36,7 +36,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Basic Escrow Flow Demo',
       description: 'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
       icon: '/images/demos/babysteps.png',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-brand-500 to-brand-400'
     },
     {
       id: 'milestone-voting',
@@ -44,7 +44,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Multi-Stakeholder Approval System',
       description: 'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
       icon: '/images/demos/democracyinaction.png',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-success-500 to-success-400'
     },
     {
       id: 'dispute-resolution',
@@ -52,7 +52,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Dispute Resolution & Arbitration',
       description: 'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
       icon: '/images/demos/drama.png',
-      color: 'from-orange-500 to-red-500'
+      color: 'from-warning-500 to-warning-400'
     },
     {
       id: 'micro-marketplace',
@@ -60,7 +60,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Micro-Task Marketplace',
       description: 'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
       icon: '/images/demos/babysteps.png',
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-accent-500 to-accent-400'
     }
   ]
 
@@ -87,7 +87,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
             />
           </div>
           <h3 className="font-bold text-white mb-2 text-left text-lg leading-tight">{demo.title}</h3>
-          <h4 className="font-semibold text-cyan-300 mb-3 text-left text-sm uppercase tracking-wide">{demo.subtitle}</h4>
+          <h4 className="font-semibold text-brand-300 mb-3 text-left text-sm uppercase tracking-wide">{demo.subtitle}</h4>
           <p className="text-sm text-white/70 text-left leading-relaxed">{demo.description}</p>
         </button>
       ))}
@@ -131,19 +131,19 @@ const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: {
   
   if (!isConnected || !walletData) {
     return (
-      <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
+      <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-danger-500/20 to-warning-500/20 backdrop-blur-sm border border-danger-400/30 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
         <div className="flex items-center justify-center space-x-6">
           <span className="text-3xl">⚠️</span>
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-red-300 mb-2">
+            <h3 className="text-lg font-semibold text-danger-300 mb-2">
               Wallet Not Connected
             </h3>
-            <p className="hidden sm:block text-sm text-red-200 mb-4">
+            <p className="hidden sm:block text-sm text-danger-200 mb-4">
               Please connect your Stellar wallet to test the demos
             </p>
             <button
               onClick={onOpenWallet}
-              className="wallet-connect-button px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
+              className="wallet-connect-button px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
             >
               🔗 Connect Wallet
             </button>
@@ -158,9 +158,9 @@ const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: {
   }
   
   return (
-    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl shadow-2xl relative overflow-hidden transition-all duration-500 ease-in-out">
+    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl relative overflow-hidden transition-all duration-500 ease-in-out">
       {/* Progress Bar */}
-      <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-100 ease-linear" 
+      <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-success-400 to-success-300 transition-all duration-100 ease-linear" 
            style={{ width: `${progress}%` }}>
       </div>
       
@@ -168,21 +168,21 @@ const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: {
         <div className="flex items-center space-x-3">
           <span className="text-3xl">✅</span>
           <div>
-            <h3 className="text-lg font-semibold text-green-300">
+            <h3 className="text-lg font-semibold text-success-300">
               Wallet Connected
             </h3>
-            <p className="text-sm text-green-200">
+            <p className="text-sm text-success-200">
               Network: {walletData.network}
             </p>
-            <p className="hidden sm:block text-xs text-green-200/80 mt-1">
+            <p className="hidden sm:block text-xs text-success-200/80 mt-1">
               Auto-hiding in {Math.ceil(progress / 10)}s...
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="hidden sm:block text-xs text-green-200 mb-1">Your Address:</p>
+          <p className="hidden sm:block text-xs text-success-200 mb-1">Your Address:</p>
           <div className="flex items-center space-x-2">
-            <p className="font-mono text-sm text-green-300 bg-green-900/50 px-3 py-2 rounded-lg border border-green-400/30">
+            <p className="font-mono text-sm text-success-300 bg-success-900/50 px-3 py-2 rounded-lg border border-success-400/30">
               {walletData.publicKey.slice(0, 8)}...{walletData.publicKey.slice(-8)}
             </p>
             <button
@@ -190,7 +190,7 @@ const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: {
                 navigator.clipboard.writeText(walletData.publicKey);
                 alert('Full wallet address copied to clipboard!');
               }}
-              className="text-green-300 hover:text-green-100 text-lg transition-colors"
+              className="text-success-300 hover:text-success-100 text-lg transition-colors"
               title="Copy full address"
             >
               📋
@@ -306,7 +306,7 @@ function DemosPageContent() {
               <div className="mb-8">
                 <button
                   onClick={() => setShowOnboarding(true)}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
+                  className="px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
                 >
                   <div className="flex items-center space-x-2">
                     <Image
@@ -321,7 +321,7 @@ function DemosPageContent() {
                 </button>
                 {!hasSeenOnboarding && (
                   <div className="mt-3 text-center">
-                    <p className="text-cyan-300 text-sm animate-pulse">
+                    <p className="text-brand-300 text-sm animate-pulse">
                       💡 New here? Start with the tutorial to learn how everything works!
                     </p>
                   </div>
@@ -349,7 +349,7 @@ function DemosPageContent() {
           <div className="fixed top-20 right-4 z-30 lg:hidden">
             <button
               onClick={() => setWalletSidebarOpen(true)}
-              className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+              className="p-3 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
               title="Open Wallet"
             >
               <Image
@@ -370,7 +370,7 @@ function DemosPageContent() {
             }}
           >
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-8">
                 🎭 Pick Your Adventure
               </h2>
               
@@ -389,7 +389,7 @@ function DemosPageContent() {
           <div className="fixed bottom-8 right-8 z-40">
             <button
               onClick={() => setShowOnboarding(true)}
-              className="p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20"
+              className="p-4 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20"
               title="Get Help & Tutorial"
             >
               <Image

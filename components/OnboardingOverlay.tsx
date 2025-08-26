@@ -308,11 +308,11 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
       
       {/* Onboarding content */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-cyan-500/30 shadow-2xl overflow-hidden">
+        <div className="max-w-4xl w-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-brand-500/30 shadow-2xl overflow-hidden">
           {/* Progress bar */}
           <div className="h-2 bg-slate-700">
             <div 
-              className="h-full bg-gradient-to-r from-cyan-500 to-purple-600 transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-brand-500 to-accent-600 transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -339,7 +339,7 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
                     alt="Guide Character"
                     width={120}
                     height={120}
-                    className="rounded-full border-4 border-cyan-500/50 shadow-lg"
+                    className="rounded-full border-4 border-brand-500/50 shadow-lg"
                   />
                   {/* Speech bubble pointer */}
                   <div className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-slate-800 rotate-45 ${
@@ -352,7 +352,7 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
 
               {/* Text content */}
               <div className={`flex-1 ${currentStepData.characterPosition === 'left' ? 'order-2' : 'order-1'}`}>
-                <div className="bg-slate-800 rounded-xl p-6 border border-cyan-500/30 relative">
+                <div className="bg-slate-800 rounded-xl p-6 border border-brand-500/30 relative">
                   {/* Speech bubble pointer */}
                   <div className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-slate-800 rotate-45 ${
                     currentStepData.characterPosition === 'left' 
@@ -401,7 +401,7 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
                 </button>
                 <button
                   onClick={nextStep}
-                  className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+                  className="px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
                 >
                   {isLastStep ? 'Finish Tutorial' : 'Next →'}
                 </button>
