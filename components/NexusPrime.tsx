@@ -65,17 +65,22 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       utterance.pitch = 1.2  // Slightly higher pitch for more energy
       utterance.volume = 0.9  // Increased volume for better clarity
       
-      // Try to use a more natural voice
+      // Try to use a male voice
       const voices = window.speechSynthesis.getVoices()
-      const preferredVoice = voices.find(voice => 
+      const maleVoice = voices.find(voice => 
         voice.name.includes('Alex') || 
-        voice.name.includes('Google') || 
-        voice.name.includes('Natural') ||
-        voice.name.includes('Samantha') ||
-        voice.name.includes('Victoria')
+        voice.name.includes('Daniel') ||
+        voice.name.includes('Google') ||
+        voice.name.includes('Male') ||
+        voice.name.includes('David') ||
+        voice.name.includes('Tom') ||
+        voice.name.includes('Mark') ||
+        voice.name.includes('James') ||
+        voice.name.includes('John') ||
+        voice.name.includes('Michael')
       )
-      if (preferredVoice) {
-        utterance.voice = preferredVoice
+      if (maleVoice) {
+        utterance.voice = maleVoice
       }
       
       utterance.onstart = () => setIsSpeaking(true)

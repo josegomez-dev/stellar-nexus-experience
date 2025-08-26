@@ -177,7 +177,7 @@ function HomeContent() {
                   height={24} 
                   className="w-6 h-6"
                 />
-                <span>ESCROW ARSENAL</span>
+                <span>ESCROW <strong style={{ color: 'gold' }}>ARSENAL</strong></span>
               </a>
 
               <br />

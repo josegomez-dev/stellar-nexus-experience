@@ -1,6 +1,18 @@
-# 🚀 Trustless Work POC
+# 🚀 STELLAR NEXUS | ESCROW ARSENAL
 
-A **proof-of-concept** application demonstrating Trustless Work escrow management on the Stellar blockchain. This POC features a comprehensive demo suite, real Freighter wallet integration, and a modern, responsive interface with global state management.
+A **revolutionary proof-of-concept** application demonstrating the future of Trustless Work escrow management on the Stellar blockchain. This POC features a comprehensive demo suite, real Freighter wallet integration, interactive AI tutorials, and a modern, responsive interface with global state management.
+
+## 🌟 What This POC Demonstrates
+
+- **🔐 Real Wallet Integration**: Connect Freighter wallet or enter any Stellar wallet address
+- **🧪 Interactive Demo Suite**: 4 comprehensive demos showcasing different escrow scenarios
+- **🤖 AI Guardian Tutorial**: NEXUS PRIME AI assistant with voice-guided tutorials
+- **⭐ Stellar Integration**: Built on the Stellar blockchain for fast, low-cost transactions
+- **🌐 Global State Management**: Shared wallet state across all components
+- **🎨 Modern UI**: Beautiful gradient design with glassmorphism effects and smooth animations
+- **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
+- **⚡ Real-Time Updates**: Live wallet state synchronization across the entire application
+- **🎭 Epic Visual Effects**: Legendary animations and professional branding
 
 ## 🌟 What This POC Demonstrates
 
@@ -19,6 +31,26 @@ A **proof-of-concept** application demonstrating Trustless Work escrow managemen
 - **Businesses**: Explore decentralized work and payment solutions
 - **Educators**: Demonstrate blockchain technology in action with hands-on examples
 - **Researchers**: Study different escrow models and consensus mechanisms
+
+## 🚀 Key Features
+
+### 🤖 AI Guardian - NEXUS PRIME
+- **Interactive Tutorials**: Step-by-step guidance through the ESCROW ARSENAL
+- **Voice Navigation**: AI voice reads tutorial content with male voice
+- **Smart Assistance**: Context-aware help based on current demo and wallet status
+- **Floating Magic Button**: Always-accessible AI guardian with epic animations
+
+### 🎭 Epic Visual Experience
+- **Legendary Animations**: Professional-grade animations and transitions
+- **Gradient Mastery**: Beautiful color schemes and glassmorphism effects
+- **Responsive Design**: Seamless experience across all devices
+- **Professional Branding**: STELLAR NEXUS logo integration throughout
+
+### 🔐 Advanced Wallet Management
+- **Freighter Integration**: Native support for popular Stellar wallet
+- **Manual Address Input**: Support for any Stellar wallet address
+- **Real-time Status**: Live wallet connection status with smooth transitions
+- **Network Detection**: Automatic Stellar network detection and switching
 
 ## 🧪 Demo Suite Overview
 
@@ -58,6 +90,34 @@ A **proof-of-concept** application demonstrating Trustless Work escrow managemen
 - Automatic fund release
 **Why**: Bridges dApp escrow functionality with marketplace concepts
 
+## 🚀 Quick Start
+
+### For Developers
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/trustless-poc.git
+cd trustless-poc
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp env.example .env.local
+# Edit .env.local with your configuration
+
+# Run development server
+npm run dev
+
+# Open http://localhost:3000
+```
+
+### For Users
+1. **Visit the deployed app** (link will be provided after deployment)
+2. **Connect your Stellar wallet** (Freighter recommended)
+3. **Start with the tutorial** - Click the floating NEXUS PRIME button
+4. **Explore the demos** - Try different escrow scenarios
+5. **Experience the future** of decentralized work!
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following:
@@ -72,6 +132,69 @@ Before you begin, ensure you have the following:
 - **Any Stellar wallet** with a public address (starts with "G")
 - **Examples**: Freighter, Albedo, xBull, Rabet, or manual address input
 - **Network**: Testnet or Mainnet (POC works with both)
+
+## 🚀 Deployment to Vercel
+
+### Quick Deploy (Recommended)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/trustless-poc)
+
+### Manual Deployment Steps
+
+#### 1. Prepare Your Repository
+```bash
+# Ensure your code is committed and pushed to GitHub
+git add .
+git commit -m "Ready for Vercel deployment"
+git push origin main
+```
+
+#### 2. Deploy to Vercel
+```bash
+# Install Vercel CLI globally
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy from your project directory
+vercel
+
+# Follow the prompts:
+# - Set up and deploy? → Yes
+# - Which scope? → Select your account
+# - Link to existing project? → No
+# - What's your project's name? → stellar-nexus-escrow-arsenal
+# - In which directory is your code located? → ./
+# - Want to override the settings? → No
+```
+
+#### 3. Environment Variables Setup
+After deployment, configure environment variables in Vercel:
+
+1. Go to your project dashboard on Vercel
+2. Navigate to **Settings** → **Environment Variables**
+3. Add the following variables:
+
+**Required:**
+- `NEXT_PUBLIC_STELLAR_NETWORK`: `TESTNET` (or `PUBLIC` for mainnet)
+- `NEXT_PUBLIC_DEFAULT_ASSET_CODE`: `USDC`
+- `NEXT_PUBLIC_DEFAULT_ASSET_ISSUER`: Your asset issuer public key
+- `NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE`: `5`
+
+**Optional:**
+- `NEXT_PUBLIC_APP_NAME`: `STELLAR NEXUS | ESCROW ARSENAL`
+- `NEXT_PUBLIC_APP_VERSION`: `1.0.0`
+- `NEXT_PUBLIC_DEBUG_MODE`: `false`
+
+#### 4. Redeploy with Environment Variables
+```bash
+vercel --prod
+```
+
+### Custom Domain Setup (Optional)
+1. In Vercel dashboard, go to **Settings** → **Domains**
+2. Add your custom domain
+3. Configure DNS records as instructed by Vercel
 
 ## 🔧 Environment Configuration
 
@@ -356,6 +479,26 @@ The app provides comprehensive logging:
 - **GitHub Issues**: Report bugs or request features
 - **Developer Forums**: Get help from the community
 - **Stellar Quest**: Learn and earn with Stellar
+
+## 🚀 Deployment Status
+
+### ✅ Ready for Production
+- **Build Status**: ✅ Successful
+- **TypeScript**: ✅ No errors
+- **Linting**: ✅ Passed
+- **Dependencies**: ✅ All up to date
+- **Environment**: ✅ Configured for Vercel
+
+### 🌐 Live Demo
+- **Production URL**: [Coming soon after Vercel deployment]
+- **Testnet**: Fully functional with Stellar testnet
+- **Mainnet**: Ready for mainnet deployment
+
+### 📱 Performance
+- **Bundle Size**: Optimized for production
+- **Loading Speed**: Fast initial load with Next.js optimization
+- **Mobile**: Fully responsive and optimized
+- **SEO**: Meta tags and structured data ready
 
 ## 🤝 Contributing
 

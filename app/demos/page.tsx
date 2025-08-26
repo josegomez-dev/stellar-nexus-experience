@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { WalletSidebar } from '@/components/WalletSidebar'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -96,12 +96,15 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
 }
 
 // Wallet Status Component
-const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
+const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: { 
+  onOpenWallet: () => void
+  onShowConnectedChange: (show: boolean) => void 
+}) => {
   const { walletData, isConnected } = useGlobalWallet()
   const [showConnected, setShowConnected] = useState(true)
   const [progress, setProgress] = useState(100)
   
-  // Auto-hide connected message after 5 seconds
+  // Auto-hide connected message after 10 seconds
   useEffect(() => {
     if (isConnected && walletData) {
       setShowConnected(true)
@@ -111,19 +114,24 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
         setProgress(prev => {
           if (prev <= 0) {
             setShowConnected(false)
+            onShowConnectedChange(false) // Notify parent component
             return 0
           }
-          return prev - 2 // Decrease by 2% every 100ms (5 seconds total)
+          return prev - 1 // Decrease by 1% every 100ms (10 seconds total)
         })
       }, 100)
       
       return () => clearInterval(interval)
+    } else {
+      // Reset states when wallet disconnects
+      setShowConnected(false)
+      setProgress(0)
     }
   }, [isConnected, walletData])
   
   if (!isConnected || !walletData) {
     return (
-      <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl shadow-2xl">
+      <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
         <div className="flex items-center justify-center space-x-6">
           <span className="text-3xl">⚠️</span>
           <div className="text-center">
@@ -146,11 +154,11 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
   }
   
   if (!showConnected) {
-    return null
+    return null // Completely remove from DOM to eliminate blank space
   }
   
   return (
-    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl shadow-2xl relative overflow-hidden">
+    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl shadow-2xl relative overflow-hidden transition-all duration-500 ease-in-out">
       {/* Progress Bar */}
       <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-100 ease-linear" 
            style={{ width: `${progress}%` }}>
@@ -167,7 +175,7 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
               Network: {walletData.network}
             </p>
             <p className="hidden sm:block text-xs text-green-200/80 mt-1">
-              Auto-hiding in {Math.ceil(progress / 20)}s...
+              Auto-hiding in {Math.ceil(progress / 10)}s...
             </p>
           </div>
         </div>
@@ -201,6 +209,11 @@ function DemosPageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
+  
+  // Prevent layout shifts by maintaining consistent spacing
+  const walletNotificationRef = useRef<HTMLDivElement>(null)
+  const [walletNotificationHeight, setWalletNotificationHeight] = useState(0)
+  const [showWalletConnected, setShowWalletConnected] = useState(true)
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -214,6 +227,20 @@ function DemosPageContent() {
       window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener)
     }
   }, [])
+  
+  // Measure wallet notification height to prevent layout shifts
+  useEffect(() => {
+    if (walletNotificationRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setWalletNotificationHeight(entry.contentRect.height)
+        }
+      })
+      
+      resizeObserver.observe(walletNotificationRef.current)
+      return () => resizeObserver.disconnect()
+    }
+  }, [isConnected])
 
   const handleOpenWallet = () => {
     setWalletSidebarOpen(true)
@@ -261,20 +288,12 @@ function DemosPageContent() {
                   <Image 
                     src="/images/logo/logoicon.png"
                     alt="STELLAR NEXUS Icon"
-                    width={60}
-                    height={60}
-                    className="w-15 h-15"
+                    width={150}
+                    height={150}
                   />
                 </div>
                 <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
                   <div className="flex items-center justify-center space-x-3">
-          <Image 
-            src="/images/logo/logoicon.png" 
-            alt="STELLAR NEXUS" 
-            width={32} 
-            height={32} 
-            className="w-8 h-8"
-          />
           <span>ESCROW ARSENAL</span>
         </div>
                 </h1>
@@ -309,8 +328,20 @@ function DemosPageContent() {
                 )}
               </div>
               
-              {/* Wallet Status */}
-              <WalletStatus onOpenWallet={handleOpenWallet} />
+                        {/* Wallet Status - Stable Container */}
+          <div 
+            ref={walletNotificationRef}
+            style={{ 
+              minHeight: walletNotificationHeight > 0 && isConnected ? walletNotificationHeight : '0px',
+              overflow: 'hidden'
+            }}
+            className="transition-all duration-500 ease-in-out"
+          >
+            <WalletStatus 
+              onOpenWallet={handleOpenWallet} 
+              onShowConnectedChange={setShowWalletConnected}
+            />
+          </div>
             </div>
           </section>
 
@@ -332,7 +363,12 @@ function DemosPageContent() {
           </div>
 
           {/* Demo Selection */}
-          <section className="container mx-auto px-4">
+          <section 
+            className="container mx-auto px-4 transition-all duration-500 ease-in-out"
+            style={{ 
+              marginTop: !showWalletConnected && isConnected ? '-250px' : '0px'
+            }}
+          >
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-8">
                 🎭 Pick Your Adventure
