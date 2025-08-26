@@ -161,8 +161,17 @@ function HomeContent() {
               <div className="flex justify-center -mb-10 relative">
                 <Image src="/images/character/character.png" alt="Nexus Prime" width={200} height={200} />
                 
-                {/* Plasma Ball Effect */}
-                <div className="absolute top-8 right-8 w-16 h-16 animate-float">
+                {/* Alternative Plasma Ball Positions - Uncomment one to try different looks */}
+                {/* Position 1: Perfect Center (Current) */}
+                {/* Position 2: Slightly above center */}
+                {/* <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
+                {/* Position 3: Floating above character */}
+                {/* <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
+                {/* Position 4: Dynamic floating position */}
+                {/* <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
+                
+                {/* Plasma Ball Effect - Centered and positioned for maximum awesomeness */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-50 animate-float">
                   {/* Core Plasma Ball */}
                   <div className="plasma-core absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 animate-pulse"></div>
                   
@@ -192,10 +201,10 @@ function HomeContent() {
                   </div>
                 </div>
               </div>
-                            <button
-                onClick={() => setShowPreloader(true)}
-                className="inline-block px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
-              >
+                             <button
+                 onClick={() => setShowPreloader(true)}
+                 className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
+               >
                 <Image 
                   src="/images/logo/logoicon.png" 
                   alt="STELLAR NEXUS" 
