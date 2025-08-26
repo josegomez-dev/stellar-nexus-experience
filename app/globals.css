@@ -88,3 +88,478 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Onboarding highlight styles */
+.onboarding-highlight {
+  outline: 3px solid #06b6d4 !important;
+  outline-offset: 4px !important;
+  z-index: 1000 !important;
+  position: relative;
+}
+
+.onboarding-highlight::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Smooth transitions for onboarding elements */
+.onboarding-element {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Pulse animation for highlighted elements */
+@keyframes onboardingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(6, 182, 212, 0);
+  }
+}
+
+.onboarding-highlight {
+  animation: onboardingPulse 2s infinite;
+}
+
+/* Writing Machine Effect */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    border-color: transparent;
+  }
+  51%, 100% {
+    border-color: #06b6d4;
+  }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #06b6d4;
+  animation: typewriter 2s steps(40, end), blink 0.75s step-end infinite;
+}
+
+/* Enhanced floating animation for Nexus Prime */
+@keyframes enhancedFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+.enhanced-float {
+  animation: enhancedFloat 6s ease-in-out infinite;
+}
+
+/* EPIC LEGENDARY TEXT ANIMATIONS */
+@keyframes epicGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px #06b6d4,
+      0 0 10px #06b6d4,
+      0 0 15px #06b6d4,
+      0 0 20px #06b6d4,
+      0 0 25px #06b6d4,
+      0 0 30px #06b6d4;
+  }
+  50% {
+    text-shadow: 
+      0 0 10px #06b6d4,
+      0 0 20px #06b6d4,
+      0 0 30px #06b6d4,
+      0 0 40px #06b6d4,
+      0 0 50px #06b6d4,
+      0 0 60px #06b6d4;
+  }
+}
+
+@keyframes epicPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes epicBorderGlow {
+  0%, 100% {
+    border-color: #06b6d4;
+    box-shadow: 
+      0 0 5px #06b6d4,
+      0 0 10px #06b6d4,
+      0 0 15px #06b6d4,
+      inset 0 0 5px #06b6d4;
+  }
+  25% {
+    border-color: #3b82f6;
+    box-shadow: 
+      0 0 5px #3b82f6,
+      0 0 10px #3b82f6,
+      0 0 15px #3b82f6,
+      inset 0 0 5px #3b82f6;
+  }
+  50% {
+    border-color: #8b5cf6;
+    box-shadow: 
+      0 0 5px #8b5cf6,
+      0 0 10px #8b5cf6,
+      0 0 15px #8b5cf6,
+      inset 0 0 5px #8b5cf6;
+  }
+  75% {
+    border-color: #ec4899;
+    box-shadow: 
+      0 0 5px #ec4899,
+      0 0 10px #ec4899,
+      0 0 15px #ec4899,
+      inset 0 0 5px #ec4899;
+  }
+}
+
+@keyframes epicBackgroundShift {
+  0%, 100% {
+    background: linear-gradient(45deg, 
+      rgba(6, 182, 212, 0.1) 0%, 
+      rgba(59, 130, 246, 0.1) 25%, 
+      rgba(139, 92, 246, 0.1) 50%, 
+      rgba(236, 72, 153, 0.1) 75%, 
+      rgba(6, 182, 212, 0.1) 100%);
+  }
+  25% {
+    background: linear-gradient(45deg, 
+      rgba(59, 130, 246, 0.1) 0%, 
+      rgba(139, 92, 246, 0.1) 25%, 
+      rgba(236, 72, 153, 0.1) 50%, 
+      rgba(6, 182, 212, 0.1) 75%, 
+      rgba(59, 130, 246, 0.1) 100%);
+  }
+  50% {
+    background: linear-gradient(45deg, 
+      rgba(139, 92, 246, 0.1) 0%, 
+      rgba(236, 72, 153, 0.1) 25%, 
+      rgba(6, 182, 212, 0.1) 50%, 
+      rgba(59, 130, 246, 0.1) 75%, 
+      rgba(139, 92, 246, 0.1) 100%);
+  }
+  75% {
+    background: linear-gradient(45deg, 
+      rgba(236, 72, 153, 0.1) 0%, 
+      rgba(6, 182, 212, 0.1) 25%, 
+      rgba(59, 130, 246, 0.1) 50%, 
+      rgba(139, 92, 246, 0.1) 75%, 
+      rgba(236, 72, 153, 0.1) 100%);
+  }
+}
+
+@keyframes epicTextReveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  50% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes epicFloatingParticles {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-10px) rotate(90deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-10px) rotate(270deg);
+    opacity: 1;
+  }
+}
+
+/* EPIC LEGENDARY CLASSES */
+.epic-text {
+  animation: epicTextReveal 2s ease-out, epicGlow 3s ease-in-out infinite, epicPulse 4s ease-in-out infinite;
+  background: linear-gradient(45deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #06b6d4);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.epic-container {
+  animation: epicBorderGlow 4s ease-in-out infinite, epicBackgroundShift 6s ease-in-out infinite;
+  border: 2px solid #06b6d4;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.epic-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #06b6d4);
+  background-size: 400% 400%;
+  animation: epicBackgroundShift 6s ease-in-out infinite;
+  border-radius: 20px;
+  z-index: -1;
+}
+
+.epic-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+  animation: epicPulse 4s ease-in-out infinite;
+  border-radius: 20px;
+}
+
+.epic-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #06b6d4;
+  border-radius: 50%;
+  animation: epicFloatingParticles 3s ease-in-out infinite;
+}
+
+.epic-particle:nth-child(1) {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+  background: #06b6d4;
+}
+
+.epic-particle:nth-child(2) {
+  top: 20%;
+  right: 15%;
+  animation-delay: 0.5s;
+  background: #3b82f6;
+}
+
+.epic-particle:nth-child(3) {
+  bottom: 30%;
+  left: 20%;
+  animation-delay: 1s;
+  background: #8b5cf6;
+}
+
+.epic-particle:nth-child(4) {
+  bottom: 15%;
+  right: 25%;
+  animation-delay: 1.5s;
+  background: #ec4899;
+}
+
+.epic-particle:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 2s;
+  background: #06b6d4;
+}
+
+/* Epic Slider Styling */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-track {
+  background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6, #ec4899);
+  height: 8px;
+  border-radius: 4px;
+  border: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #06b6d4, #3b82f6);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+}
+
+.slider::-moz-range-track {
+  background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6, #ec4899);
+  height: 8px;
+  border-radius: 4px;
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #06b6d4, #3b82f6);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  transition: all 0.3s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+}
+
+/* Plasma Ball Effect Animations */
+@keyframes plasmaFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
+@keyframes plasmaGlow {
+  0%, 100% {
+    opacity: 0.6;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes plasmaSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes plasmaPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes plasmaArc {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleY(1.2);
+  }
+}
+
+/* Plasma Ball Component Styles */
+.plasma-core {
+  animation: plasmaFloat 4s ease-in-out infinite, plasmaGlow 2s ease-in-out infinite;
+  box-shadow: 
+    0 0 20px rgba(34, 211, 238, 0.6),
+    0 0 40px rgba(59, 130, 246, 0.4),
+    0 0 60px rgba(147, 51, 234, 0.2);
+}
+
+.plasma-ring-1 {
+  animation: plasmaSpin 3s linear infinite;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+.plasma-ring-2 {
+  animation: plasmaSpin 4s linear infinite reverse;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.plasma-ring-3 {
+  animation: plasmaSpin 5s linear infinite;
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.4);
+}
+
+.plasma-particle-1,
+.plasma-particle-2,
+.plasma-particle-3,
+.plasma-particle-4 {
+  animation: plasmaPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.plasma-glow {
+  animation: plasmaGlow 3s ease-in-out infinite;
+}
+
+.plasma-arc-1,
+.plasma-arc-2,
+.plasma-arc-3 {
+  animation: plasmaArc 2s ease-in-out infinite;
+}
+
+/* Enhanced hover effects */
+.plasma-core:hover {
+  animation: plasmaFloat 2s ease-in-out infinite, plasmaGlow 1s ease-in-out infinite;
+  box-shadow: 
+    0 0 30px rgba(34, 211, 238, 0.8),
+    0 0 60px rgba(59, 130, 246, 0.6),
+    0 0 90px rgba(147, 51, 234, 0.4);
+}
+
+
+

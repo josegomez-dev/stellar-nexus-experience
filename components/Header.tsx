@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { appConfig, stellarConfig } from '@/lib/wallet-config'
+import Image from 'next/image'
 
 export const Header = () => {
   const { walletData, isConnected, disconnect } = useGlobalWallet()
@@ -25,13 +26,22 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and App Name */}
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">🚀</div>
-            <div>
-              <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                {/* {appConfig.name} */}
-                POC
-              </h1>
+          <div className="flex items-center space-x-1">
+            <div className="">
+              <Image 
+                src="/images/logo/logoicon.png"
+                alt="STELLAR NEXUS"
+                width={62}
+                height={62}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Image 
+                src="/images/logo/iconletter.png"
+                alt="STELLAR NEXUS"
+                width={80}
+                height={24}
+              />
               <p className="text-xs text-white/60">v{appConfig.version}</p>
             </div>
           </div>

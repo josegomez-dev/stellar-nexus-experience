@@ -1,7 +1,6 @@
 'use client'
 
-import { useGlobalWallet } from '@/contexts/WalletContext'
-import { WalletProvider } from '@/contexts/WalletContext'
+import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext'
 import { stellarConfig } from '@/lib/wallet-config'
 import { useState } from 'react'
 

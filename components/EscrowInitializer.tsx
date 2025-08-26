@@ -100,7 +100,7 @@ export const EscrowInitializer = () => {
   if (!isConnected) {
     return (
       <div className="max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-yellow-800 text-center">
+        <p className="hidden sm:block text-yellow-800 text-center">
           Please connect your wallet to initialize escrow contracts
         </p>
       </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { stellarConfig } from '@/lib/wallet-config'
+import Image from 'next/image'
 
 interface WalletSidebarProps {
   isOpen: boolean
@@ -129,15 +130,30 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
         ${isExpanded ? 'shadow-[-20px_0_60px_rgba(0,0,0,0.8)]' : 'shadow-[-10px_0_30px_rgba(0,0,0,0.6)]'}
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/20">
+        <div className={`flex items-center justify-between border-b border-white/20 transition-all duration-300 ${
+          isExpanded ? 'p-4' : 'p-2'
+        }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white text-sm font-bold">SW</span>
+            <div className={`bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ${
+              isExpanded ? 'w-8 h-8' : 'w-6 h-6'
+            }`}>
+              <Image 
+                src="/images/logo/logoicon.png"
+                alt="STELLAR NEXUS"
+                width={isExpanded ? 32 : 24}
+                height={isExpanded ? 32 : 24}
+                className="w-full h-full"
+              />
             </div>
             {isExpanded && (
-              <div className="animate-fadeIn">
-                <h3 className="text-white font-semibold">Stellar Wallet</h3>
-                <p className="text-xs text-white/60">Trustless Work POC</p>
+              <div className="animate-fadeIn flex items-center space-x-2">
+                <Image 
+                  src="/images/logo/iconletter.png"
+                  alt="STELLAR NEXUS"
+                  width={80}
+                  height={16}
+                />
+                <span className="text-xs text-white/60">Wallet</span>
               </div>
             )}
           </div>
@@ -145,7 +161,9 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110"
+              className={`text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 ${
+                isExpanded ? 'p-2' : 'p-1.5'
+              }`}
               title={isExpanded ? 'Collapse' : 'Expand'}
             >
               <div className={`transform transition-transform duration-300 ${!isExpanded ? 'rotate-180' : 'rotate-0'}`}>
@@ -154,7 +172,9 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
             </button>
             <button
               onClick={onToggle}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 lg:hidden"
+              className={`text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 lg:hidden ${
+                isExpanded ? 'p-2' : 'p-1.5'
+              }`}
               title="Close"
             >
               ✕
@@ -163,24 +183,26 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className={`flex-1 overflow-y-auto transition-all duration-300 ${
+          isExpanded ? 'p-4' : 'p-2'
+        }`}>
           {!isConnected ? (
             // Not Connected State
-            <div className={isExpanded ? "text-center py-8" : "text-center py-4"}>
-              <div className={`${isExpanded ? "w-16 h-16" : "w-12 h-12"} bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-500`}>
-                <span className={isExpanded ? "text-2xl" : "text-xl"}>🔐</span>
+            <div className={isExpanded ? "text-center py-8" : "text-center py-2"}>
+              <div className={`${isExpanded ? "w-16 h-16" : "w-10 h-10"} bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-500`}>
+                <span className={isExpanded ? "text-2xl" : "text-lg"}>🔐</span>
               </div>
               
               {isExpanded && (
                 <div className="animate-fadeIn">
                   <h3 className="font-semibold text-white mb-2">Connect Wallet</h3>
-                  <p className="text-white/70 text-sm mb-6">
+                  <p className="hidden sm:block text-white/70 text-sm mb-6">
                     Connect your Stellar wallet to start using the demos
                   </p>
                 </div>
               )}
               
-              <div className="space-y-3">
+              <div className={`space-y-3 ${!isExpanded ? 'space-y-2' : ''}`}>
                 {/* Freighter Connect Button */}
                 {isFreighterAvailable ? (
                   <button
@@ -196,15 +218,24 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                       }
                     }}
                     disabled={isConnecting}
-                    className={`w-full ${isExpanded ? "px-4 py-3" : "px-3 py-2"} bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+                    className={`w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                      isExpanded ? "px-4 py-3" : "px-2 py-2.5"
+                    }`}
                     title={!isExpanded ? "Connect Freighter" : undefined}
                   >
-                    {isConnecting ? '🔄' : '🔗'} {isExpanded && (isConnecting ? 'Connecting...' : '🔗 Connect Freighter')}
+                    <span className="text-lg">🔗</span>
+                    {isExpanded && (
+                      <span className="ml-2 animate-fadeIn">
+                        {isConnecting ? 'Connecting...' : 'Connect Freighter'}
+                      </span>
+                    )}
                   </button>
                 ) : (
                   <div className={`text-center ${isExpanded ? "py-2" : "py-1"}`}>
                     <p className="text-xs text-white/60">
-                      {isExpanded ? "Freighter not detected. Install the extension or use manual input below." : "⚠️"}
+                      {isExpanded ? (
+                        <span className="hidden sm:inline">Freighter not detected. Install the extension or use manual input below.</span>
+                      ) : "⚠️"}
                     </p>
                   </div>
                 )}
@@ -213,7 +244,7 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                 {isExpanded && (
                   <div className="space-y-2">
                     <div className="text-center">
-                      <p className="text-xs text-white/60 mb-2">Or enter wallet address manually:</p>
+                      <p className="hidden sm:block text-xs text-white/60 mb-2">Or enter wallet address manually:</p>
                     </div>
                     <input
                       type="text"
@@ -243,10 +274,15 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                 
                 <button
                   onClick={openInNewWindow}
-                  className={`w-full ${isExpanded ? "px-4 py-3" : "px-3 py-2"} bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium rounded-lg transition-all duration-300 hover:border-white/40`}
+                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium rounded-lg transition-all duration-300 hover:border-white/40 ${
+                    isExpanded ? "px-4 py-3" : "px-2 py-2.5"
+                  }`}
                   title={!isExpanded ? "Open in New Window" : undefined}
                 >
-                  🪟 {isExpanded && "Open in New Window"}
+                  <span className="text-lg">🪟</span>
+                  {isExpanded && (
+                    <span className="ml-2 animate-fadeIn">Open in New Window</span>
+                  )}
                 </button>
               </div>
 
@@ -265,34 +301,44 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
             </div>
           ) : (
             // Connected State
-            <div className="space-y-4">
+            <div className={`space-y-4 ${!isExpanded ? 'space-y-3' : ''}`}>
               {/* Wallet Info */}
-              <div className="p-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg border border-green-400/30 shadow-lg">
+              <div className={`bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg border border-green-400/30 shadow-lg transition-all duration-300 ${
+                isExpanded ? 'p-4' : 'p-3'
+              }`}>
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
                   {isExpanded && <span className="text-green-300 text-sm font-medium animate-fadeIn">Connected</span>}
                 </div>
                 
-                <div className="space-y-3">
+                <div className={`space-y-3 ${!isExpanded ? 'space-y-2' : ''}`}>
                   <div>
                     {isExpanded && <p className="text-xs text-white/60 mb-1 animate-fadeIn">Wallet Address</p>}
                     <div className="flex items-center space-x-2">
-                      <code className={`text-xs text-green-300 bg-green-900/30 px-2 py-1 rounded flex-1 font-mono ${!isExpanded ? "text-center" : ""} transition-all duration-300 truncate`}>
+                      <code className={`text-green-300 bg-green-900/30 px-2 py-1 rounded flex-1 font-mono transition-all duration-300 truncate ${
+                        isExpanded ? 'text-xs' : 'text-xs text-center'
+                      }`}>
                         {isExpanded 
                           ? `${walletData?.publicKey?.slice(0, 8)}...${walletData?.publicKey?.slice(-8)}`
-                          : `${walletData?.publicKey?.slice(0, 6)}...${walletData?.publicKey?.slice(-4)}`
+                          : `${walletData?.publicKey?.slice(0, 4)}...${walletData?.publicKey?.slice(-4)}`
                         }
                       </code>
-                      <button
-                        id="copy-address-btn"
-                        onClick={copyAddress}
-                        className="flex-shrink-0 p-1.5 text-green-300 hover:text-green-200 hover:bg-green-500/20 rounded transition-all duration-300 hover:scale-110 border border-green-400/30 hover:border-green-400/50"
-                        title="Copy address"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
+                      {isExpanded && (
+                        <button
+                          id="copy-address-btn"
+                          onClick={copyAddress}
+                          className="flex-shrink-0 text-green-300 hover:text-green-200 hover:bg-green-500/20 rounded transition-all duration-300 hover:scale-110 border border-green-400/30 hover:border-green-400/50 p-1.5"
+                          title="Copy address"
+                        >
+                          <Image 
+                            src="/images/icons/copy.svg"
+                            alt="Copy address"
+                            width={12}
+                            height={12}
+                            className="w-full h-full"
+                          />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -309,22 +355,26 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
               </div>
 
               {/* Quick Actions */}
-              <div className="space-y-2">
+              <div className={`space-y-2 ${!isExpanded ? 'space-y-1.5' : ''}`}>
                 <button
                   onClick={openInNewWindow}
-                  className={`w-full ${isExpanded ? "px-3 py-2" : "px-2 py-2"} bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2`}
+                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
+                    isExpanded ? "px-3 py-2" : "px-2 py-2"
+                  }`}
                   title={!isExpanded ? "Open in New Window" : undefined}
                 >
-                  <span>🪟</span>
+                  <span className="text-lg">🪟</span>
                   {isExpanded && <span className="animate-fadeIn">Open in New Window</span>}
                 </button>
                 
                 <button
                   onClick={disconnect}
-                  className={`w-full ${isExpanded ? "px-3 py-2" : "px-2 py-2"} bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 text-sm rounded-lg transition-all duration-300 hover:border-red-400/50 flex items-center justify-center space-x-2`}
+                  className={`w-full bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 text-sm rounded-lg transition-all duration-300 hover:border-red-400/50 flex items-center justify-center space-x-2 ${
+                    isExpanded ? "px-3 py-2" : "px-2 py-2"
+                  }`}
                   title={!isExpanded ? "Disconnect" : undefined}
                 >
-                  <span>🔌</span>
+                  <span className="text-lg">🔌</span>
                   {isExpanded && <span className="animate-fadeIn">Disconnect</span>}
                 </button>
               </div>
@@ -410,7 +460,7 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
             </div>
             
             <div className="container mx-auto px-4 py-4 relative z-10">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse shadow-lg animate-float">
@@ -419,12 +469,12 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2 text-white drop-shadow-sm">Wallet Not Connected</h3>
-                    <p className="text-base text-white/95 leading-relaxed">
+                    <p className="hidden sm:block text-base text-white/95 leading-relaxed">
                       Connect your Stellar wallet to start testing the Trustless Work demos and unlock all features
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <button
                     onClick={async () => {
                       setIsConnecting(true)
@@ -445,13 +495,13 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                       }
                     }}
                     disabled={isConnecting}
-                    className="px-8 py-3 bg-white text-amber-600 font-bold rounded-xl hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full sm:w-auto px-8 py-3 bg-white text-amber-600 font-bold rounded-xl hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
                   </button>
                   <button
                     onClick={onToggle}
-                    className="px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 border-2 border-white/30 hover:border-white/50"
+                    className="hidden sm:block px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-300 border-2 border-white/30 hover:border-white/50"
                   >
                     🪟 Open Wallet
                   </button>

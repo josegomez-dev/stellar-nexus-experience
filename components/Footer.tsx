@@ -1,6 +1,7 @@
 'use client'
 
 import { appConfig, stellarConfig } from '@/lib/wallet-config'
+import Image from 'next/image'
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -12,11 +13,21 @@ export const Footer = () => {
           {/* App Information */}
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="text-2xl">🚀</div>
+              <div className="">
+                <Image 
+                  src="/images/logo/logoicon.png"
+                  alt="STELLAR NEXUS"
+                  width={152}
+                  height={152}
+                />
+              </div>
               <div>
-                <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-                  {appConfig.name}
-                </h3>
+                <Image 
+                  src="/images/logo/iconletter.png"
+                  alt="STELLAR NEXUS"
+                  width={100}
+                  height={24}
+                />
                 <p className="text-sm text-white/60">v{appConfig.version}</p>
               </div>
             </div>

@@ -23,7 +23,7 @@ export const config = {
 
   // App Configuration
   app: {
-    name: process.env.NEXT_PUBLIC_APP_NAME || 'Trustless Work App',
+    name: process.env.NEXT_PUBLIC_APP_NAME || 'Stellar Nexus | Escrow Arsenal DApp',
     version: process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0',
     debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true',
     platformPublicKey: process.env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY || '',

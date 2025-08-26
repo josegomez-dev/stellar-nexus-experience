@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { WalletSidebar } from '@/components/WalletSidebar'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { NexusPrime } from '@/components/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { WalletProvider } from '@/contexts/WalletContext'
 import { useGlobalWallet } from '@/contexts/WalletContext'
@@ -11,8 +12,19 @@ import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo'
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo'
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo'
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo'
+import { OnboardingOverlay } from '@/components/OnboardingOverlay'
+import Image from 'next/image'
 
 // Demo Selection Component
+interface Demo {
+  id: string
+  title: string
+  subtitle: string
+  description: string
+  icon: string
+  color: string
+}
+
 const DemoSelector = ({ activeDemo, setActiveDemo }: { 
   activeDemo: string, 
   setActiveDemo: (demo: string) => void 
@@ -20,49 +32,63 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
   const demos = [
     {
       id: 'hello-milestone',
-      title: '1. Hello Milestone Demo',
-      description: 'Simple escrow flow with automatic milestone completion',
-      icon: '🚀',
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      id: 'milestone-voting',
-      title: '2. Milestone Voting Demo',
-      description: 'Multi-stakeholder approval system',
-      icon: '🗳️',
+      title: '1. Baby Steps to Riches 🍼💰',
+      subtitle: 'Basic Escrow Flow Demo',
+      description: 'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
+      icon: '/images/demos/babysteps.png',
       color: 'from-blue-500 to-cyan-500'
     },
     {
+      id: 'milestone-voting',
+      title: '2. Democracy in Action 🗳️',
+      subtitle: 'Multi-Stakeholder Approval System',
+      description: 'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
+      icon: '/images/demos/democracyinaction.png',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
       id: 'dispute-resolution',
-      title: '3. Dispute Resolution Demo',
-      description: 'Arbitration and conflict resolution flow',
-      icon: '⚖️',
+      title: '3. Drama Queen Escrow 👑🎭',
+      subtitle: 'Dispute Resolution & Arbitration',
+      description: 'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
+      icon: '/images/demos/drama.png',
       color: 'from-orange-500 to-red-500'
     },
     {
       id: 'micro-marketplace',
-      title: '4. Micro-Task Marketplace',
-      description: 'Lightweight gig-board with escrow',
-      icon: '🛒',
+      title: '4. Gig Economy Madness 🛒',
+      subtitle: 'Micro-Task Marketplace',
+      description: 'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
+      icon: '/images/demos/babysteps.png',
       color: 'from-purple-500 to-pink-500'
     }
   ]
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
       {demos.map((demo) => (
         <button
           key={demo.id}
           onClick={() => setActiveDemo(demo.id)}
-          className={`p-6 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+          className={`demo-card p-6 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 min-h-[280px] ${
             activeDemo === demo.id
               ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
-              : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
+              : 'border-white/20 bg-gradient-to-br from-white/5 to-white/10 hover:border-white/30 hover:from-white/10 hover:to-white/15'
           }`}
+          data-demo-id={demo.id}
         >
-          <div className="text-4xl mb-3">{demo.icon}</div>
-          <h3 className="font-semibold text-white mb-2 text-left">{demo.title}</h3>
-          <p className="text-sm text-white/70 text-left">{demo.description}</p>
+          <div className="mb-3 flex justify-center">
+            <Image 
+              src={demo.icon} 
+              alt={demo.title}
+              width={64} 
+              height={64}
+              className="w-16 h-16"
+            />
+          </div>
+          <h3 className="font-bold text-white mb-2 text-left text-lg leading-tight">{demo.title}</h3>
+          <h4 className="font-semibold text-cyan-300 mb-3 text-left text-sm uppercase tracking-wide">{demo.subtitle}</h4>
+          <p className="text-sm text-white/70 text-left leading-relaxed">{demo.description}</p>
         </button>
       ))}
     </div>
@@ -104,12 +130,12 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
             <h3 className="text-lg font-semibold text-red-300 mb-2">
               Wallet Not Connected
             </h3>
-            <p className="text-sm text-red-200 mb-4">
+            <p className="hidden sm:block text-sm text-red-200 mb-4">
               Please connect your Stellar wallet to test the demos
             </p>
             <button
               onClick={onOpenWallet}
-              className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
+              className="wallet-connect-button px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
             >
               🔗 Connect Wallet
             </button>
@@ -140,13 +166,13 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
             <p className="text-sm text-green-200">
               Network: {walletData.network}
             </p>
-            <p className="text-xs text-green-200/80 mt-1">
+            <p className="hidden sm:block text-xs text-green-200/80 mt-1">
               Auto-hiding in {Math.ceil(progress / 20)}s...
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-green-200 mb-1">Your Address:</p>
+          <p className="hidden sm:block text-xs text-green-200 mb-1">Your Address:</p>
           <div className="flex items-center space-x-2">
             <p className="font-mono text-sm text-green-300 bg-green-900/50 px-3 py-2 rounded-lg border border-green-400/30">
               {walletData.publicKey.slice(0, 8)}...{walletData.publicKey.slice(-8)}
@@ -169,9 +195,12 @@ const WalletStatus = ({ onOpenWallet }: { onOpenWallet: () => void }) => {
 }
 
 function DemosPageContent() {
+  const { isConnected } = useGlobalWallet()
   const [activeDemo, setActiveDemo] = useState('hello-milestone')
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false)
   const [walletExpanded, setWalletExpanded] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -227,12 +256,58 @@ function DemosPageContent() {
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-16">
             <div className="text-center">
-              <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-8">
-                🧪 Stellar Technology Demos
-              </h1>
+              <div className="flex flex-col items-center mb-8">
+                <div className="mb-4">
+                  <Image 
+                    src="/images/logo/logoicon.png"
+                    alt="STELLAR NEXUS Icon"
+                    width={60}
+                    height={60}
+                    className="w-15 h-15"
+                  />
+                </div>
+                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                  <div className="flex items-center justify-center space-x-3">
+          <Image 
+            src="/images/logo/logoicon.png" 
+            alt="STELLAR NEXUS" 
+            width={32} 
+            height={32} 
+            className="w-8 h-8"
+          />
+          <span>ESCROW ARSENAL</span>
+        </div>
+                </h1>
+              </div>
               <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
-                Test and explore different aspects of the Trustless Work system on Stellar blockchain
+                Master the art of trustless work with our hilarious demo suite on Stellar blockchain
               </p>
+              
+              {/* Onboarding Trigger */}
+              <div className="mb-8">
+                <button
+                  onClick={() => setShowOnboarding(true)}
+                  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Image
+                      src="/images/logo/logoicon.png"
+                      alt="Tutorial"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
+                    <span>Start Interactive Tutorial</span>
+                  </div>
+                </button>
+                {!hasSeenOnboarding && (
+                  <div className="mt-3 text-center">
+                    <p className="text-cyan-300 text-sm animate-pulse">
+                      💡 New here? Start with the tutorial to learn how everything works!
+                    </p>
+                  </div>
+                )}
+              </div>
               
               {/* Wallet Status */}
               <WalletStatus onOpenWallet={handleOpenWallet} />
@@ -246,7 +321,13 @@ function DemosPageContent() {
               className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
               title="Open Wallet"
             >
-              🔐
+              <Image
+                src="/images/logo/logoicon.png"
+                alt="Wallet"
+                width={16}
+                height={16}
+                className="w-4 h-4"
+              />
             </button>
           </div>
 
@@ -254,7 +335,7 @@ function DemosPageContent() {
           <section className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-8">
-                🎯 Choose Your Demo
+                🎭 Pick Your Adventure
               </h2>
               
               <DemoSelector activeDemo={activeDemo} setActiveDemo={setActiveDemo} />
@@ -267,6 +348,23 @@ function DemosPageContent() {
               {renderActiveDemo()}
             </div>
           </section>
+
+          {/* Floating Help Button */}
+          <div className="fixed bottom-8 right-8 z-40">
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className="p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20"
+              title="Get Help & Tutorial"
+            >
+              <Image
+                src="/images/logo/logoicon.png"
+                alt="Help"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+            </button>
+          </div>
         </main>
 
         {/* Footer */}
@@ -277,6 +375,23 @@ function DemosPageContent() {
       <WalletSidebar 
         isOpen={walletSidebarOpen} 
         onToggle={() => setWalletSidebarOpen(!walletSidebarOpen)} 
+      />
+
+      {/* NEXUS PRIME Character */}
+      <NexusPrime 
+        currentPage="demos"
+        currentDemo={activeDemo}
+        walletConnected={isConnected}
+      />
+
+      {/* Onboarding Overlay */}
+      <OnboardingOverlay
+        isActive={showOnboarding}
+        onComplete={() => {
+          setShowOnboarding(false)
+          setHasSeenOnboarding(true)
+        }}
+        currentDemo={activeDemo}
       />
     </EscrowProvider>
   )

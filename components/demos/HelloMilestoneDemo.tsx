@@ -256,6 +256,12 @@ export const HelloMilestoneDemo = () => {
                         ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
                         : 'bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-green-300 hover:text-green-200'
                     }`}
+                    data-step-id={step.id}
+                    className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                      step.disabled
+                        ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-green-300 hover:text-green-200'
+                    } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
                   >
                     {isInitializing && step.id === 'initialize' ? 'Initializing...' :
                      isFunding && step.id === 'fund' ? 'Funding...' :

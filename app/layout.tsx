@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: config.app.name,
-  description: `Next.js app with Trustless Work React library integration - ${config.app.version}`,
+  description: `Experience the future of decentralized work with the ESCROW ARSENAL on the Stellar blockchain. Master trustless escrow management with our interactive demo suite.`,
 }
 
 export default function RootLayout({
