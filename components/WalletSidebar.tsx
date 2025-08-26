@@ -83,12 +83,16 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
       // Show temporary success message
       const button = document.getElementById('copy-address-btn')
       if (button) {
-        const originalText = button.textContent
-        button.textContent = '✅ Copied!'
-        button.classList.add('bg-green-500/20', 'text-green-300')
+        const originalHTML = button.innerHTML
+        button.innerHTML = `
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        `
+        button.classList.add('bg-green-500/20', 'text-green-200', 'border-green-400/50')
         setTimeout(() => {
-          button.textContent = originalText
-          button.classList.remove('bg-green-500/20', 'text-green-300')
+          button.innerHTML = originalHTML
+          button.classList.remove('bg-green-500/20', 'text-green-200', 'border-green-400/50')
         }, 2000)
       }
     }
@@ -273,19 +277,21 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                   <div>
                     {isExpanded && <p className="text-xs text-white/60 mb-1 animate-fadeIn">Wallet Address</p>}
                     <div className="flex items-center space-x-2">
-                      <code className={`text-xs text-green-300 bg-green-900/30 px-2 py-1 rounded flex-1 font-mono ${!isExpanded ? "text-center" : ""} transition-all duration-300`}>
+                      <code className={`text-xs text-green-300 bg-green-900/30 px-2 py-1 rounded flex-1 font-mono ${!isExpanded ? "text-center" : ""} transition-all duration-300 truncate`}>
                         {isExpanded 
-                          ? walletData?.publicKey 
+                          ? `${walletData?.publicKey?.slice(0, 8)}...${walletData?.publicKey?.slice(-8)}`
                           : `${walletData?.publicKey?.slice(0, 6)}...${walletData?.publicKey?.slice(-4)}`
                         }
                       </code>
                       <button
                         id="copy-address-btn"
                         onClick={copyAddress}
-                        className="p-1 text-green-300 hover:text-green-200 hover:bg-green-500/20 rounded transition-all duration-300 hover:scale-110"
+                        className="flex-shrink-0 p-1.5 text-green-300 hover:text-green-200 hover:bg-green-500/20 rounded transition-all duration-300 hover:scale-110 border border-green-400/30 hover:border-green-400/50"
                         title="Copy address"
                       >
-                        📋
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
                       </button>
                     </div>
                   </div>
