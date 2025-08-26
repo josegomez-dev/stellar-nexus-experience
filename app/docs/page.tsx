@@ -14,10 +14,10 @@ export default function DocsPage() {
   const sections = [
     { id: 'overview', title: 'Project Overview', icon: '🚀' },
     { id: 'technology', title: 'Technology Stack', icon: '⚡' },
+    { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
     { id: 'demos', title: 'Demo Suite', icon: '🧪' },
     { id: 'benefits', title: 'Benefits & Use Cases', icon: '💡' },
-    { id: 'feedback', title: 'Implementation Feedback', icon: '📝' },
-    { id: 'roadmap', title: 'Development Roadmap', icon: '🗺️' }
+    { id: 'feedback', title: 'Implementation Feedback', icon: '📝' }
   ]
 
   return (
@@ -194,13 +194,27 @@ export default function DocsPage() {
                         </ul>
                       </div>
 
-                      {/* System Architecture Diagram */}
+
+                    </div>
+                  )}
+
+                  {/* System Architecture */}
+                  {activeSection === 'architecture' && (
+                    <div className="space-y-8">
+                      <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold text-white mb-4">🏗️ System Architecture</h2>
+                        <p className="text-lg text-white/80">
+                          Comprehensive overview of the Trustless Work system architecture and component relationships
+                        </p>
+                      </div>
+
+                      {/* Architecture Diagram */}
                       <div className="bg-gradient-to-br from-brand-500/10 to-accent-500/10 rounded-xl p-6 border border-brand-400/30">
-                        <h3 className="text-2xl font-bold text-white mb-6 text-center">🏗️ System Architecture</h3>
+                        <h3 className="text-2xl font-bold text-white mb-6 text-center">📊 Interactive Architecture Diagram</h3>
                         <div className="bg-white/5 rounded-lg p-4 border border-white/20 overflow-x-auto">
                           <div className="mermaid-diagram min-w-[800px] text-sm">
                             <div className="text-center text-white/60 mb-4">
-                              <p>📊 Interactive Architecture Diagram</p>
+                              <p>System Component Relationships & Data Flow</p>
                               <p className="text-xs">Hover over components to see relationships</p>
                             </div>
                             
@@ -327,6 +341,31 @@ export default function DocsPage() {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Architecture Description */}
+                      <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/20">
+                        <h3 className="text-2xl font-bold text-white mb-4">🏛️ Architecture Overview</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold text-brand-300 mb-3">System Layers</h4>
+                            <ul className="text-white/80 text-sm space-y-2">
+                              <li>• <strong>User Layer:</strong> External actors interacting with the system</li>
+                              <li>• <strong>Configuration Layer:</strong> Build tools and project setup</li>
+                              <li>• <strong>Core Logic Layer:</strong> Business logic and utilities</li>
+                              <li>• <strong>Frontend Layer:</strong> User interface and state management</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-accent-300 mb-3">Key Relationships</h4>
+                            <ul className="text-white/80 text-sm space-y-2">
+                              <li>• <strong>Frontend → Core Logic:</strong> Uses wallet integration and contract interactions</li>
+                              <li>• <strong>Core Logic → Configuration:</strong> Configured by build and project settings</li>
+                              <li>• <strong>State Management → Core Logic:</strong> Consumes data from utility systems</li>
+                              <li>• <strong>Components → State:</strong> React components consume context state</li>
+                            </ul>
                           </div>
                         </div>
                       </div>
@@ -589,124 +628,7 @@ export default function DocsPage() {
                     </div>
                   )}
 
-                  {/* Development Roadmap */}
-                  {activeSection === 'roadmap' && (
-                    <div className="space-y-8">
-                      <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-white mb-4">Development Roadmap</h2>
-                        <p className="text-lg text-white/80">
-                          Strategic development plan based on developer feedback and project goals
-                        </p>
-                      </div>
 
-                      <div className="space-y-6">
-                        <div className="bg-gradient-to-br from-danger-500/20 to-danger-400/20 rounded-xl p-6 border border-danger-400/30">
-                          <h3 className="text-2xl font-bold text-white mb-4">Week 1: Critical Fixes</h3>
-                          <div className="grid md:grid-cols-3 gap-4">
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">📦</div>
-                              <h4 className="font-semibold text-white mb-2">Publish npm Package</h4>
-                              <p className="text-white/80 text-sm">
-                                Make the library available for developers to install and use
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">📚</div>
-                              <h4 className="font-semibold text-white mb-2">Basic Documentation</h4>
-                              <p className="text-white/80 text-sm">
-                                Installation instructions and simple usage examples
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">🔧</div>
-                              <h4 className="font-semibold text-white mb-2">Working Examples</h4>
-                              <p className="text-white/80 text-sm">
-                                Something developers can actually run and test
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-warning-500/20 to-warning-400/20 rounded-xl p-6 border border-warning-400/30">
-                          <h3 className="text-2xl font-bold text-white mb-4">Week 2-3: Developer Experience</h3>
-                          <div className="grid md:grid-cols-3 gap-4">
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">📖</div>
-                              <h4 className="font-semibold text-white mb-2">Integration Guides</h4>
-                              <p className="text-white/80 text-sm">
-                                Step-by-step tutorials for common use cases
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">⚠️</div>
-                              <h4 className="font-semibold text-white mb-2">Error Handling</h4>
-                              <p className="text-white/80 text-sm">
-                                Clear error messages and solution suggestions
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">🔍</div>
-                              <h4 className="font-semibold text-white mb-2">Troubleshooting</h4>
-                              <p className="text-white/80 text-sm">
-                                Common problems and their solutions
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 rounded-xl p-6 border border-success-400/30">
-                          <h3 className="text-2xl font-bold text-white mb-4">Month 2: Ecosystem Building</h3>
-                          <div className="grid md:grid-cols-3 gap-4">
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">🛠️</div>
-                              <h4 className="font-semibold text-white mb-2">Developer Tools</h4>
-                              <p className="text-white/80 text-sm">
-                                CLI tools, testing utilities, and development helpers
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">💬</div>
-                              <h4 className="font-semibold text-white mb-2">Community Platform</h4>
-                              <p className="text-white/80 text-sm">
-                                Support channels, discussions, and knowledge sharing
-                              </p>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">📚</div>
-                              <h4 className="font-semibold text-white mb-2">Advanced Documentation</h4>
-                              <p className="text-white/80 text-sm">
-                                Complex use cases, optimization, and best practices
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/20">
-                        <h3 className="text-2xl font-bold text-white mb-4">Success Metrics</h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                            <h4 className="font-semibold text-white mb-3">Developer Adoption</h4>
-                            <ul className="text-white/80 text-sm space-y-1">
-                              <li>• npm package downloads and usage</li>
-                              <li>• GitHub repository stars and forks</li>
-                              <li>• Community engagement and feedback</li>
-                              <li>• Third-party integrations built</li>
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-white mb-3">Platform Growth</h4>
-                            <ul className="text-white/80 text-sm space-y-1">
-                              <li>• Total escrow volume processed</li>
-                              <li>• Number of active users and projects</li>
-                              <li>• Transaction success rates</li>
-                              <li>• Dispute resolution efficiency</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
