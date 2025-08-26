@@ -366,13 +366,7 @@ function DemosPageContent() {
               className="p-3 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
               title="Open Wallet"
             >
-              <Image
-                src="/images/logo/logoicon.png"
-                alt="Wallet"
-                width={16}
-                height={16}
-                className="w-4 h-4"
-              />
+              Wallet
             </button>
           </div>
 

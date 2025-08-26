@@ -193,6 +193,143 @@ export default function DocsPage() {
                           <li>• <strong>Interoperability:</strong> Easy integration with existing financial systems</li>
                         </ul>
                       </div>
+
+                      {/* System Architecture Diagram */}
+                      <div className="bg-gradient-to-br from-brand-500/10 to-accent-500/10 rounded-xl p-6 border border-brand-400/30">
+                        <h3 className="text-2xl font-bold text-white mb-6 text-center">🏗️ System Architecture</h3>
+                        <div className="bg-white/5 rounded-lg p-4 border border-white/20 overflow-x-auto">
+                          <div className="mermaid-diagram min-w-[800px] text-sm">
+                            <div className="text-center text-white/60 mb-4">
+                              <p>📊 Interactive Architecture Diagram</p>
+                              <p className="text-xs">Hover over components to see relationships</p>
+                            </div>
+                            
+                            {/* Architecture Diagram using Mermaid-like structure */}
+                            <div className="architecture-diagram space-y-6">
+                              {/* User Layer */}
+                              <div className="text-center">
+                                <div className="inline-block bg-gradient-to-r from-brand-500/30 to-accent-500/30 px-6 py-3 rounded-lg border border-brand-400/50">
+                                  <div className="text-2xl mb-2">👤</div>
+                                  <div className="font-semibold text-white">User (External Actor)</div>
+                                  <div className="text-xs text-white/70">Interacts with the system</div>
+                                </div>
+                              </div>
+
+                              {/* Build and Configuration System */}
+                              <div className="text-center">
+                                <div className="inline-block bg-gradient-to-r from-success-500/30 to-success-400/30 px-6 py-3 rounded-lg border border-success-400/50">
+                                  <div className="text-2xl mb-2">⚙️</div>
+                                  <div className="font-semibold text-white">Build & Configuration System</div>
+                                  <div className="text-xs text-white/70">Various Technologies</div>
+                                </div>
+                                <div className="grid grid-cols-4 gap-3 mt-4 max-w-2xl mx-auto">
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Project Config</div>
+                                    <div className="text-xs text-white/60">NPM/JSON</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Next.js Config</div>
+                                    <div className="text-xs text-white/60">Next.js/TS</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Styling Config</div>
+                                    <div className="text-xs text-white/60">Tailwind/PostCSS</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">TypeScript Config</div>
+                                    <div className="text-xs text-white/60">TypeScript</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Core Logic and Utilities */}
+                              <div className="text-center">
+                                <div className="inline-block bg-gradient-to-r from-accent-500/30 to-accent-400/30 px-6 py-3 rounded-lg border border-accent-400/50">
+                                  <div className="text-2xl mb-2">🔧</div>
+                                  <div className="font-semibold text-white">Core Logic & Utilities System</div>
+                                  <div className="text-xs text-white/70">TypeScript</div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-3 mt-4 max-w-xl mx-auto">
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Stellar Wallet</div>
+                                    <div className="text-xs text-white/60">Stellar SDK</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Mock Data & Contracts</div>
+                                    <div className="text-xs text-white/60">TypeScript</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Type Definitions</div>
+                                    <div className="text-xs text-white/60">TypeScript</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Frontend Application System */}
+                              <div className="text-center">
+                                <div className="inline-block bg-gradient-to-r from-warning-500/30 to-warning-400/30 px-6 py-3 rounded-lg border border-warning-400/50">
+                                  <div className="text-2xl mb-2">🚀</div>
+                                  <div className="font-semibold text-white">Frontend Application System</div>
+                                  <div className="text-xs text-white/70">Next.js</div>
+                                </div>
+                                
+                                {/* Page Routing & State Management */}
+                                <div className="grid grid-cols-2 gap-4 mt-4 max-w-lg mx-auto">
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">Page Routing & Layout</div>
+                                    <div className="text-xs text-white/60">Next.js</div>
+                                  </div>
+                                  <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                    <div className="text-xs text-white/80">State Management</div>
+                                    <div className="text-xs text-white/60">React Context</div>
+                                  </div>
+                                </div>
+
+                                {/* UI Components */}
+                                <div className="mt-4">
+                                  <div className="text-sm text-white/70 mb-3">UI Components (React)</div>
+                                  <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+                                    <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                      <div className="text-xs text-white/80">Wallet Integration</div>
+                                      <div className="text-xs text-white/60">React</div>
+                                    </div>
+                                    <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                      <div className="text-xs text-white/80">Dispute Resolution</div>
+                                      <div className="text-xs text-white/60">React</div>
+                                    </div>
+                                    <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                      <div className="text-xs text-white/80">Escrow Lifecycle</div>
+                                      <div className="text-xs text-white/60">React</div>
+                                    </div>
+                                    <div className="bg-white/10 px-3 py-2 rounded border border-white/20">
+                                      <div className="text-xs text-white/80">Milestone Management</div>
+                                      <div className="text-xs text-white/60">React</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Data Flow Indicators */}
+                              <div className="text-center text-white/60 text-xs">
+                                <div className="flex items-center justify-center space-x-8">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-brand-400 rounded-full"></div>
+                                    <span>Uses</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-success-400 rounded-full"></div>
+                                    <span>Configured by</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-accent-400 rounded-full"></div>
+                                    <span>Consumes state from</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
