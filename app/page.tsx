@@ -165,7 +165,7 @@ function HomeContent() {
                 {/* <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
                 
                 {/* Plasma Ball Effect - Centered and positioned for maximum awesomeness */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-50 animate-float -ml-[25px]">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 animate-float -ml-[60px] mt-[35px]">
                   {/* Core Plasma Ball */}
                   <div className="plasma-core absolute inset-0 rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 animate-pulse"></div>
                   
@@ -173,7 +173,7 @@ function HomeContent() {
                   <div className="plasma-ring-1 absolute inset-0 rounded-full border-2 border-brand-300/60 animate-spin" style={{ animationDuration: '3s' }}></div>
                   <div className="plasma-ring-2 absolute inset-0 rounded-full border border-brand-400/40 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}></div>
                   <div className="plasma-ring-3 absolute inset-0 rounded-full border border-accent-500/50 animate-spin" style={{ animationDuration: '5s' }}></div>
-                  o alufi
+                  
                   {/* Energy Particles */}
                   <div className="plasma-particle-1 absolute top-0 left-1/2 w-2 h-2 bg-brand-300 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
                   <div className="plasma-particle-2 absolute top-1/4 right-0 w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
