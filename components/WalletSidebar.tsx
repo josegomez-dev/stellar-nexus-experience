@@ -414,37 +414,68 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
         </div>
       </div>
 
-      {/* Toggle Button (when sidebar is closed) */}
-      {!isOpen && (
-        <>
-          {/* Mobile toggle button */}
+      {/* Floating Wallet Control Buttons */}
+      <div className="fixed top-20 right-4 z-30 flex flex-col space-y-3">
+        {/* Open Wallet Button */}
+        {!isOpen && (
+          <>
+            {/* Mobile toggle button */}
+            <button
+              onClick={onToggle}
+              className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden"
+              title="Open Wallet"
+            >
+              🔐
+              {!isConnected && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
+              )}
+            </button>
+            
+            {/* Desktop toggle button */}
+            <button
+              onClick={onToggle}
+              className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block"
+              title="Open Wallet"
+            >
+              <div className="flex items-center space-x-2">
+                <span>🔐</span>
+                <span className="text-sm font-medium">Wallet</span>
+              </div>
+              {!isConnected && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
+              )}
+            </button>
+          </>
+        )}
+
+        {/* Open in New Window Button */}
+        {!isOpen && (
           <button
-            onClick={onToggle}
-            className="fixed top-20 right-4 z-30 p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden relative"
-            title="Open Wallet"
-          >
-            🔐
-            {!isConnected && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
-            )}
-          </button>
-          
-          {/* Desktop toggle button */}
-          <button
-            onClick={onToggle}
-            className="fixed top-20 right-4 z-30 p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block relative"
-            title="Open Wallet"
+            onClick={openInNewWindow}
+            className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+            title="Open Wallet in New Window"
           >
             <div className="flex items-center space-x-2">
-              <span>🔐</span>
-              <span className="text-sm font-medium">Wallet</span>
+              <span>🪟</span>
+              <span className="text-sm font-medium hidden lg:block">New Window</span>
             </div>
-            {!isConnected && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
-            )}
           </button>
-        </>
-      )}
+        )}
+
+        {/* Close Wallet Button - Positioned to the left of sidebar when open */}
+        {isOpen && (
+          <button
+            onClick={onToggle}
+            className="fixed top-20 left-4 z-50 p-3 bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+            title="Close Wallet"
+          >
+            <div className="flex items-center space-x-2">
+              <span>✕</span>
+              <span className="text-sm font-medium hidden lg:block">Close</span>
+            </div>
+          </button>
+        )}
+      </div>
 
       {/* Wallet Connection Banner */}
       {!isConnected && !isConnecting && (
