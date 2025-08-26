@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/lib/stellar-wallet-hooks'
+import { useGlobalWallet } from '@/contexts/WalletContext'
 import { appConfig, stellarConfig } from '@/lib/wallet-config'
 
 export const Header = () => {
-  const { walletData, isConnected, disconnect } = useWallet()
+  const { walletData, isConnected, disconnect } = useGlobalWallet()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleDisconnect = () => {
@@ -21,7 +21,7 @@ export const Header = () => {
   }
 
   return (
-    <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+    <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and App Name */}
@@ -38,10 +38,25 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <a href="/" className="text-white/80 hover:text-white transition-colors relative group">
+              🏠 Home
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="/demos" className="text-white/80 hover:text-white transition-colors relative group">
+              🧪 Demos
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </a>
             <a href="https://github.com/josegomez-dev/trustless-poc" target='_blank' className="text-white/80 hover:text-white transition-colors relative group">
               📦 Github Repo
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))}
+              className="text-white/80 hover:text-white transition-colors relative group"
+            >
+              🔐 Wallet
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
+            </button>
           </nav>
 
           {/* Wallet Status and Controls */}

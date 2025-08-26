@@ -1,0 +1,49 @@
+'use client'
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useWallet } from '@/lib/stellar-wallet-hooks'
+
+interface WalletContextType {
+  walletData: any
+  isConnected: boolean
+  isLoading: boolean
+  error: Error | null
+  connect: (walletId?: string) => Promise<void>
+  disconnect: () => Promise<void>
+  isFreighterAvailable: boolean
+}
+
+const WalletContext = createContext<WalletContextType | undefined>(undefined)
+
+export const useGlobalWallet = () => {
+  const context = useContext(WalletContext)
+  if (context === undefined) {
+    throw new Error('useGlobalWallet must be used within a WalletProvider')
+  }
+  return context
+}
+
+interface WalletProviderProps {
+  children: ReactNode
+}
+
+export const WalletProvider = ({ children }: WalletProviderProps) => {
+  const walletHook = useWallet()
+  
+  // Share the wallet state globally
+  const value: WalletContextType = {
+    walletData: walletHook.walletData,
+    isConnected: walletHook.isConnected,
+    isLoading: walletHook.isLoading,
+    error: walletHook.error,
+    connect: walletHook.connect,
+    disconnect: walletHook.disconnect,
+    isFreighterAvailable: walletHook.isFreighterAvailable
+  }
+
+  return (
+    <WalletContext.Provider value={value}>
+      {children}
+    </WalletContext.Provider>
+  )
+}

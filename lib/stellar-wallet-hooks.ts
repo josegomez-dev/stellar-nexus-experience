@@ -17,11 +17,12 @@ export interface UseWalletReturn {
   isConnected: boolean
   isLoading: boolean
   error: Error | null
-  connect: (walletId: string) => Promise<void>
+  connect: (walletId?: string) => Promise<void>
   disconnect: () => Promise<void>
   signTransaction: (xdr: string) => Promise<{ signedTxXdr: string; signerAddress?: string }>
   sendTransaction: (signedXdr: string) => Promise<SendTransactionResponse>
   getAvailableWallets: () => Promise<Array<{id: string, name: string}>>
+  isFreighterAvailable: boolean
 }
 
 export const useWallet = (): UseWalletReturn => {
@@ -29,6 +30,30 @@ export const useWallet = (): UseWalletReturn => {
   const [walletData, setWalletData] = useState<WalletData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [isFreighterAvailable, setIsFreighterAvailable] = useState(false)
+
+  // Check for Freighter wallet
+  useEffect(() => {
+    const checkFreighter = () => {
+      if (typeof window !== 'undefined' && (window as any).stellar) {
+        setIsFreighterAvailable(true)
+        console.log('Freighter wallet detected')
+      } else {
+        setIsFreighterAvailable(false)
+        console.log('Freighter wallet not detected')
+      }
+    }
+    
+    checkFreighter()
+    
+    // Listen for Freighter installation
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'FREIGHTER_EXTENSION_READY') {
+        setIsFreighterAvailable(true)
+        console.log('Freighter wallet ready')
+      }
+    })
+  }, [])
 
   // Initialize the kit
   useEffect(() => {
@@ -124,92 +149,57 @@ export const useWallet = (): UseWalletReturn => {
     initializeKit()
   }, [])
 
-  const connect = useCallback(async (walletId: string) => {
+  const connect = useCallback(async (walletId?: string) => {
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log('Attempting to connect wallet:', walletId)
+      console.log('Attempting to connect wallet...')
       
-      // Try the library approach first
-      if (kit) {
-        console.log('Trying library connection method...')
-        
-        // For Freighter wallet, let's try a direct approach
-        console.log('Attempting to connect to Freighter wallet...')
+      // First, try to connect to Freighter if available
+      if (isFreighterAvailable && (window as any).stellar) {
+        console.log('Connecting to Freighter wallet...')
         
         try {
-          // Try to set the wallet directly with the selected wallet ID
-          console.log('Setting wallet with ID:', walletId)
-          kit.setWallet(walletId)
-          console.log('Successfully set wallet:', walletId)
+          const stellar = (window as any).stellar
+          
+          // Request connection to Freighter
+          const publicKey = await stellar.connect()
+          console.log('Successfully connected to Freighter:', publicKey)
+          
+          // Get network info
+          const network = await stellar.getNetwork()
+          console.log('Freighter network:', network)
+          
+          setWalletData({
+            publicKey,
+            network: network || stellarConfig.network,
+            isConnected: true
+          })
+          
+          console.log('Freighter connection successful!')
+          return
         } catch (err) {
-          console.log('Direct wallet setting failed:', err)
-          
-          // If direct setting fails, try to discover supported wallets
-          console.log('Trying to discover supported wallets...')
-          let supportedWallets: any[] = []
-          
-          try {
-            const result = await kit.getSupportedWallets()
-            supportedWallets = Array.isArray(result) ? result : []
-            console.log('getSupportedWallets result:', result)
-          } catch (discoveryErr) {
-            console.log('getSupportedWallets failed:', discoveryErr)
-            console.log('Library approach failed, switching to fallback...')
-          }
-          
-          // If we have supported wallets, try to use the first one
-          if (supportedWallets.length > 0) {
-            console.log('Found supported wallets:', supportedWallets)
-            
-            // Try to use the first available wallet
-            const firstWallet = supportedWallets[0]
-            // Extract the wallet ID safely
-            let firstWalletId = ''
-            if (typeof firstWallet === 'string') {
-              firstWalletId = firstWallet
-            } else if (firstWallet && typeof firstWallet === 'object') {
-              firstWalletId = (firstWallet as any).id || (firstWallet as any).name || ''
-            }
-            
-            if (!firstWalletId) {
-              console.log('Could not extract wallet ID, switching to fallback...')
-            } else {
-              console.log('Trying to use first available wallet:', firstWalletId)
-              
-              try {
-                kit.setWallet(firstWalletId)
-                console.log('Successfully set wallet:', firstWalletId)
-                // Continue with getting wallet info
-              } catch (firstErr) {
-                console.log('Failed to set first wallet:', firstErr)
-                console.log('Library approach failed, switching to fallback...')
-              }
-            }
-          } else {
-            console.log('No supported wallets found, switching to fallback...')
-          }
+          console.log('Freighter connection failed:', err)
+          // Fall back to manual input if Freighter fails
         }
       }
       
-      // If we get here, the library approach failed or we don't have a kit
-      // Use the fallback approach for external wallets
-      console.log('Using fallback connection method for external wallet...')
+      // If Freighter is not available or connection failed, use manual input
+      if (walletId) {
+        console.log('Using manual wallet address:', walletId)
+        setWalletData({
+          publicKey: walletId,
+          network: stellarConfig.network,
+          isConnected: true
+        })
+        console.log('Manual connection successful!')
+        return
+      }
       
-      // For POC, let's simulate a successful connection to the user's wallet
-      console.log('Simulating connection to user wallet...')
+      // If no wallet ID provided and no Freighter, show error
+      throw new Error('No wallet available. Please install Freighter or provide a wallet address.')
       
-      // Use the wallet address provided by the user
-      const userWalletAddress = walletId
-      setWalletData({
-        publicKey: userWalletAddress,
-        network: stellarConfig.network,
-        isConnected: true
-      })
-      
-      console.log('Fallback connection successful! Connected to wallet:', userWalletAddress)
-      return
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       const error = new Error(`Failed to connect wallet: ${errorMessage}`)
@@ -218,7 +208,7 @@ export const useWallet = (): UseWalletReturn => {
     } finally {
       setIsLoading(false)
     }
-  }, [kit])
+  }, [isFreighterAvailable])
 
   const disconnect = useCallback(async () => {
     if (!kit) return
@@ -333,6 +323,7 @@ export const useWallet = (): UseWalletReturn => {
     disconnect,
     signTransaction,
     sendTransaction,
-    getAvailableWallets
+    getAvailableWallets,
+    isFreighterAvailable
   }
 }
