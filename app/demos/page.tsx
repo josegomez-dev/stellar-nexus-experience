@@ -366,7 +366,7 @@ function DemosPageContent() {
           <section 
             className="container mx-auto px-4 transition-all duration-500 ease-in-out"
             style={{ 
-              marginTop: !showWalletConnected && isConnected ? '-250px' : '0px'
+              marginTop: !showWalletConnected && isConnected ? '-200px' : '0px'
             }}
           >
             <div className="max-w-6xl mx-auto">

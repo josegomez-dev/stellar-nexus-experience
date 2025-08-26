@@ -60,6 +60,7 @@ function HomeContent() {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false)
   const [walletExpanded, setWalletExpanded] = useState(false)
+  const [showPreloader, setShowPreloader] = useState(false)
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -82,6 +83,31 @@ function HomeContent() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Handle preloader redirect
+  useEffect(() => {
+    if (showPreloader) {
+      const timer = setTimeout(() => {
+        window.location.href = '/demos'
+      }, 3000)
+
+      // Update countdown timer
+      const countdown = setInterval(() => {
+        const timerElement = document.getElementById('redirect-timer')
+        if (timerElement) {
+          const currentTime = parseInt(timerElement.textContent || '3')
+          if (currentTime > 1) {
+            timerElement.textContent = (currentTime - 1).toString()
+          }
+        }
+      }, 1000)
+
+      return () => {
+        clearTimeout(timer)
+        clearInterval(countdown)
+      }
+    }
+  }, [showPreloader])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -166,8 +192,8 @@ function HomeContent() {
                   </div>
                 </div>
               </div>
-                            <a
-                href="/demos"
+                            <button
+                onClick={() => setShowPreloader(true)}
                 className="inline-block px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
               >
                 <Image 
@@ -177,8 +203,8 @@ function HomeContent() {
                   height={24} 
                   className="w-6 h-6"
                 />
-                <span>ESCROW <strong style={{ color: 'gold' }}>ARSENAL</strong></span>
-              </a>
+                <span>PLAY ESCROW ARSENAL</span>
+              </button>
 
               <br />
               <br />
@@ -259,6 +285,65 @@ function HomeContent() {
         {/* Footer */}
         <Footer />
       </div>
+
+      {/* Epic Preloader Screen */}
+      {showPreloader && (
+        <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+          {/* Animated Background */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating Energy Orbs */}
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-400/20 rounded-full animate-ping"></div>
+            <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-blue-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-purple-400/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-pink-400/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+            
+            {/* Energy Grid */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(6,182,212,0.1)_0%,_transparent_70%)] animate-pulse"></div>
+          </div>
+
+          {/* Main Content */}
+          <div className="relative z-10 text-center">
+            {/* Logo Animation */}
+            <div className="mb-8 animate-bounce">
+              <Image 
+                src="/images/logo/logoicon.png" 
+                alt="STELLAR NEXUS" 
+                width={120} 
+                height={120} 
+                className="w-30 h-30"
+              />
+            </div>
+
+            {/* Loading Text */}
+            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-6 animate-pulse">
+              INITIALIZING ESCROW ARSENAL
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-xl text-cyan-300 mb-8 animate-pulse">
+              Preparing your trustless work experience...
+            </p>
+
+            {/* Loading Bar */}
+            <div className="w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8">
+              <div className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full animate-loading-bar"></div>
+            </div>
+
+            {/* Loading Steps */}
+            <div className="space-y-2 text-white/80">
+              <p className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>🔐 Connecting to Stellar Network...</p>
+              <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>⚡ Loading Smart Contracts...</p>
+              <p className="animate-fadeInUp" style={{ animationDelay: '1.5s' }}>🎯 Preparing Demo Suite...</p>
+              <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>🚀 Launching ESCROW ARSENAL...</p>
+            </div>
+
+            {/* Redirect Timer */}
+            <div className="mt-8 text-cyan-300 text-lg">
+              Redirecting in <span className="font-bold" id="redirect-timer">3</span> seconds...
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Wallet Sidebar */}
       <WalletSidebar 
