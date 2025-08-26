@@ -78,6 +78,10 @@
   }
 }
 
+body {
+  background-color: black;
+}
+
 .animate-shimmer {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
   background-size: 200% 100%;
@@ -166,10 +170,10 @@
     transform: translateY(-8px) rotate(-1deg);
   }
 }
-
+/* 
 .enhanced-float {
   animation: enhancedFloat 6s ease-in-out infinite;
-}
+} */
 
 /* EPIC LEGENDARY TEXT ANIMATIONS */
 @keyframes epicGlow {

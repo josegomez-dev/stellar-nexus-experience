@@ -125,7 +125,7 @@ function HomeContent() {
         {/* Main Content */}
         <main className={`relative z-10 transition-all duration-500 ease-out ${
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
-        } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}>
+        } ${!walletSidebarOpen ? 'pb-16' : 'pb-8'}`}>
 
           {/* Wallet Sidebar Toggle */}
           <div className="fixed top-20 right-4 z-30 lg:hidden">

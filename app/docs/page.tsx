@@ -35,14 +35,14 @@ export default function DocsPage() {
                 <div className="text-center mb-16">
                   <div className="flex justify-center mb-6">
                     <Image 
-                      src="/images/logo/logoicon.png" 
+                      src="/images/character/nexus-prime-chat.png" 
                       alt="STELLAR NEXUS" 
-                      width={80} 
-                      height={80}
-                      className="w-20 h-20"
+                      width={180} 
+                      height={120}
+                      style={{ zIndex: -1, position: 'relative' }}
                     />
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6">
+                  <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6" style={{ zIndex: 1000, marginTop: '-50px' }}>
                     Trustless Work Documentation
                   </h1>
                   <p className="text-xl text-white/80 max-w-3xl mx-auto">
