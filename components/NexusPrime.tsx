@@ -221,6 +221,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
   return (
     <div className="fixed bottom-6 left-6 z-50 enhanced-float">
+
       {/* Character Avatar */}
       <div className="relative group">
         {/* Character Image/Icon */}
@@ -337,12 +338,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             <div className="mt-3 pt-3 border-t border-white/10">
               {!showTutorial ? (
                 <div className="space-y-2">
-                  <button 
-                    onClick={startTutorial}
-                    className="w-full px-3 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
-                  >
-                    🎓 Start Interactive Tutorial
-                  </button>
                   <button 
                     onClick={() => setIsExpanded(false)}
                     className="w-full px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition-colors border border-white/20 hover:border-white/30"

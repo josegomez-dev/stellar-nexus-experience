@@ -297,24 +297,27 @@ function DemosPageContent() {
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-16">
             <div className="text-center">
-              <div className="flex flex-col items-center mb-8">
-                <div className="mb-4">
+
+
+              {/* Page Header */}
+              <div className="text-center mb-16">
+                <div className="flex justify-center mb-6">
                   <Image 
-                    src="/images/logo/logoicon.png"
-                    alt="STELLAR NEXUS Icon"
-                    width={150}
-                    height={150}
+                    src="/images/character/nexus-prime-chat.png" 
+                    alt="STELLAR NEXUS" 
+                    width={180} 
+                    height={120}
+                    style={{ zIndex: -1, position: 'relative' }}
                   />
                 </div>
-                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600">
-                  <div className="flex items-center justify-center space-x-3">
-          <span>ESCROW ARSENAL</span>
-        </div>
+                <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6" style={{ zIndex: 1000, marginTop: '-50px' }}>
+                  ESCROW ARSENAL
                 </h1>
+
+                <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
+                  Master the art of trustless work with our hilarious demo suite on Stellar blockchain
+                </p>
               </div>
-              <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
-                Master the art of trustless work with our hilarious demo suite on Stellar blockchain
-              </p>
               
               {/* Onboarding Trigger */}
               <div className="mb-8">
@@ -358,17 +361,6 @@ function DemosPageContent() {
           </div>
             </div>
           </section>
-
-          {/* Wallet Sidebar Toggle */}
-          <div className="fixed top-20 right-4 z-30 lg:hidden">
-            <button
-              onClick={() => setWalletSidebarOpen(true)}
-              className="p-3 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
-              title="Open Wallet"
-            >
-              Wallet
-            </button>
-          </div>
 
           {/* Demo Selection */}
           <section 

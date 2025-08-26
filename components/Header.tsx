@@ -27,14 +27,6 @@ export const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo and App Name */}
           <div className="flex items-center space-x-1">
-            <div className="">
-              <Image 
-                src="/images/logo/logoicon.png"
-                alt="STELLAR NEXUS"
-                width={62}
-                height={62}
-              />
-            </div>
             <div className="flex items-center space-x-2">
               <Image 
                 src="/images/logo/iconletter.png"
@@ -64,13 +56,6 @@ export const Header = () => {
               📦 Github Repo
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))}
-              className="text-white/80 hover:text-white transition-colors relative group"
-            >
-              🔐 Wallet
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
-            </button>
           </nav>
 
           {/* Wallet Status and Controls */}
@@ -160,15 +145,6 @@ export const Header = () => {
               >
                 📦 Github Repo
               </a>
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false)
-                  window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
-                }}
-                className="block w-full text-left px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-              >
-                🔐 Wallet
-              </button>
               
               {/* Mobile Wallet Info */}
               {isConnected && walletData && (

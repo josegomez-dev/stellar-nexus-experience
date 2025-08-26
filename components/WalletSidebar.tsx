@@ -133,8 +133,8 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
         <div className={`flex items-center justify-between border-b border-white/20 transition-all duration-300 ${
           isExpanded ? 'p-4' : 'p-2'
         }`}>
-          <div className="flex items-center space-x-3">
-            <div className={`bg-gradient-to-br from-brand-500 to-accent-600 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ${
+          <div className="flex items-center space-x-1">
+            {/* <div className={`bg-gradient-to-br from-brand-500 to-accent-600 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ${
               isExpanded ? 'w-8 h-8' : 'w-6 h-6'
             }`}>
               <Image 
@@ -144,7 +144,7 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
                 height={isExpanded ? 32 : 24}
                 className="w-full h-full"
               />
-            </div>
+            </div> */}
             {isExpanded && (
               <div className="animate-fadeIn flex items-center space-x-2">
                 <Image 
