@@ -113,25 +113,28 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
   // Get appropriate message based on current context
   const getContextMessage = () => {
+    let message = ''
+    
     if (currentPage === 'home') {
       if (walletConnected) {
-        return characterMessages.home.demos
+        message = characterMessages.home.demos
+      } else {
+        message = characterMessages.home.wallet
       }
-      return characterMessages.home.wallet
-    }
-    
-    if (currentPage === 'demos') {
+    } else if (currentPage === 'demos') {
       if (currentDemo) {
-        return characterMessages.demos[currentDemo as keyof typeof characterMessages.demos] || characterMessages.demos.welcome
+        message = characterMessages.demos[currentDemo as keyof typeof characterMessages.demos] || characterMessages.demos.welcome
+      } else {
+        message = characterMessages.demos.welcome
       }
-      return characterMessages.demos.welcome
+    } else if (currentPage === 'wallet') {
+      message = walletConnected ? characterMessages.wallet.connected : characterMessages.wallet.disconnected
+    } else {
+      message = characterMessages.home.welcome
     }
     
-    if (currentPage === 'wallet') {
-      return walletConnected ? characterMessages.wallet.connected : characterMessages.wallet.disconnected
-    }
-    
-    return characterMessages.home.welcome
+    // Ensure message is a string and remove any undefined values
+    return String(message).replace(/undefined/g, '').trim()
   }
 
   // Typewriter effect for messages
@@ -152,7 +155,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       let index = 0
       const typeInterval = setInterval(() => {
         if (index < nextMessage.length) {
-          setCurrentMessage(prev => prev + nextMessage[index])
+          const char = nextMessage[index]
+          // Only add valid characters, skip undefined or null
+          if (char && char !== 'undefined') {
+            setCurrentMessage(prev => prev + char)
+          }
           index++
         } else {
           setIsTyping(false)
@@ -249,7 +256,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               alt="NEXUS PRIME"
               width={48}
               height={48}
-              className="w-12 h-12 rounded-full relative z-10"
+              className="w-12 h-12 rounded-full relative z-10 object-cover"
             />
             {/* Glowing Effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20 animate-pulse"></div>
@@ -275,7 +282,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                       alt="NEXUS PRIME"
                       width={32}
                       height={32}
-                      className="w-full h-full"
+                      className="w-full h-full object-cover"
                     />
                   </div>
               <div>
