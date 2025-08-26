@@ -106,8 +106,8 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
 
   const getNetworkColor = () => {
     return stellarConfig.network === 'TESTNET' 
-      ? 'from-yellow-500 to-amber-500' 
-      : 'from-green-500 to-emerald-500'
+      ? 'from-warning-500 to-warning-400' 
+      : 'from-success-500 to-success-400'
   }
 
   return (
@@ -134,7 +134,7 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
           isExpanded ? 'p-4' : 'p-2'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className={`bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ${
+            <div className={`bg-gradient-to-br from-brand-500 to-accent-600 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 ${
               isExpanded ? 'w-8 h-8' : 'w-6 h-6'
             }`}>
               <Image 

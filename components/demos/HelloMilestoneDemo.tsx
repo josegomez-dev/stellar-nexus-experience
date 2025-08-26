@@ -212,9 +212,9 @@ export const HelloMilestoneDemo = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-brand-500/20 to-brand-400/20 backdrop-blur-sm border border-brand-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-success-400 to-success-300 mb-4">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-300 mb-4">
             🚀 Hello Milestone Demo
           </h2>
           <p className="text-white/80 text-lg">
@@ -254,7 +254,7 @@ export const HelloMilestoneDemo = () => {
                     className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                       step.disabled
                         ? 'bg-neutral-500/20 text-neutral-400 cursor-not-allowed'
-                        : 'bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 text-success-300 hover:text-success-200'
+                        : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
                     } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
                     data-step-id={step.id}
                   >
@@ -278,17 +278,17 @@ export const HelloMilestoneDemo = () => {
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-white/70">Contract ID:</p>
-                <p className="font-mono text-success-300 bg-success-900/30 px-2 py-1 rounded">
+                <p className="font-mono text-brand-300 bg-brand-900/30 px-2 py-1 rounded">
                   {contractId.slice(0, 20)}...
                 </p>
               </div>
               <div>
                 <p className="text-white/70">Status:</p>
-                <p className="text-success-300">{escrowData?.status || 'Active'}</p>
+                <p className="text-brand-300">{escrowData?.status || 'Active'}</p>
               </div>
               <div>
                 <p className="text-white/70">Amount:</p>
-                <p className="text-success-300">10 USDC</p>
+                <p className="text-brand-300">10 USDC</p>
               </div>
               <div>
                 <p className="text-white/70">Milestone Status:</p>

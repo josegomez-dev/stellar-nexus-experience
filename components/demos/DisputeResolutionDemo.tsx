@@ -294,19 +294,19 @@ export const DisputeResolutionDemo = () => {
   const getMilestoneStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-500/20 text-yellow-300'
+        return 'bg-warning-500/20 text-warning-300'
       case 'completed':
-        return 'bg-blue-500/20 text-blue-300'
+        return 'bg-brand-500/20 text-brand-300'
       case 'approved':
-        return 'bg-green-500/20 text-green-300'
+        return 'bg-success-500/20 text-success-300'
       case 'disputed':
-        return 'bg-red-500/20 text-red-300'
+        return 'bg-danger-500/20 text-danger-300'
       case 'released':
-        return 'bg-purple-500/20 text-purple-300'
+        return 'bg-accent-500/20 text-accent-300'
       case 'cancelled':
-        return 'bg-gray-500/20 text-gray-300'
+        return 'bg-neutral-500/20 text-neutral-300'
       default:
-        return 'bg-gray-500/20 text-gray-300'
+        return 'bg-neutral-500/20 text-neutral-300'
     }
   }
 
@@ -316,9 +316,9 @@ export const DisputeResolutionDemo = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-400/30 rounded-xl shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-warning-500/20 to-danger-500/20 backdrop-blur-sm border border-warning-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400 mb-4">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-danger-400 mb-4">
             ⚖️ Dispute Resolution Demo
           </h2>
           <p className="text-white/80 text-lg">

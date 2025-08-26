@@ -134,13 +134,7 @@ function HomeContent() {
               className="p-3 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
               title="Open Wallet"
             >
-              <Image
-                src="/images/logo/logoicon.png"
-                alt="Wallet"
-                width={16}
-                height={16}
-                className="w-6 h-4"
-              />
+              Wallet
             </button>
           </div>
 
@@ -179,7 +173,7 @@ function HomeContent() {
                   <div className="plasma-ring-1 absolute inset-0 rounded-full border-2 border-brand-300/60 animate-spin" style={{ animationDuration: '3s' }}></div>
                   <div className="plasma-ring-2 absolute inset-0 rounded-full border border-brand-400/40 animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }}></div>
                   <div className="plasma-ring-3 absolute inset-0 rounded-full border border-accent-500/50 animate-spin" style={{ animationDuration: '5s' }}></div>
-                  
+                  o alufi
                   {/* Energy Particles */}
                   <div className="plasma-particle-1 absolute top-0 left-1/2 w-2 h-2 bg-brand-300 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
                   <div className="plasma-particle-2 absolute top-1/4 right-0 w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
@@ -205,13 +199,6 @@ function HomeContent() {
                  onClick={() => setShowPreloader(true)}
                  className="w-full px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
                >
-                <Image 
-                  src="/images/logo/logoicon.png" 
-                  alt="STELLAR NEXUS" 
-                  width={24} 
-                  height={24} 
-                  className="w-6 h-6"
-                />
                 <span>PLAY ESCROW ARSENAL</span>
               </button>
 
@@ -278,7 +265,7 @@ function HomeContent() {
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 bg-gradient-to-r from-cyan-500 to-purple-600 text-white p-3 rounded-full shadow-lg hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110 backdrop-blur-sm border border-white/20"
+            className="fixed bottom-8 right-8 z-50 bg-gradient-to-r from-brand-500 to-accent-600 text-white p-3 rounded-full shadow-lg hover:from-brand-600 hover:to-accent-700 transition-all duration-300 transform hover:scale-110 backdrop-blur-sm border border-brand-400/30"
             title="Back to top"
           >
             <Image
@@ -297,17 +284,17 @@ function HomeContent() {
 
       {/* Epic Preloader Screen */}
       {showPreloader && (
-        <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center">
           {/* Animated Background */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating Energy Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-400/20 rounded-full animate-ping"></div>
-            <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-blue-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
-            <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-purple-400/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-pink-400/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping"></div>
+            <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
             
             {/* Energy Grid */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(6,182,212,0.1)_0%,_transparent_70%)] animate-pulse"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse"></div>
           </div>
 
           {/* Main Content */}
@@ -324,18 +311,18 @@ function HomeContent() {
             </div>
 
             {/* Loading Text */}
-            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-6 animate-pulse">
+            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse">
               INITIALIZING ESCROW ARSENAL
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xl text-cyan-300 mb-8 animate-pulse">
+            <p className="text-xl text-brand-300 mb-8 animate-pulse">
               Preparing your trustless work experience...
             </p>
 
             {/* Loading Bar */}
             <div className="w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8">
-              <div className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full animate-loading-bar"></div>
+              <div className="h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full animate-loading-bar"></div>
             </div>
 
             {/* Loading Steps */}
@@ -347,7 +334,7 @@ function HomeContent() {
             </div>
 
             {/* Redirect Timer */}
-            <div className="mt-8 text-cyan-300 text-lg">
+            <div className="mt-8 text-brand-300 text-lg">
               Redirecting in <span className="font-bold" id="redirect-timer">3</span> seconds...
             </div>
           </div>

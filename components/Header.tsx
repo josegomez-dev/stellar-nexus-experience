@@ -56,6 +56,10 @@ export const Header = () => {
               🧪 Demos
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
+            <a href="/docs" className="text-white/80 hover:text-white transition-colors relative group">
+              📚 Documentation
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
+            </a>
             <a href="https://github.com/josegomez-dev/trustless-poc" target='_blank' className="text-white/80 hover:text-white transition-colors relative group">
               📦 Github Repo
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
@@ -128,6 +132,27 @@ export const Header = () => {
           <div className="md:hidden border-t border-white/20 bg-white/5 backdrop-blur-md">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <a
+                href="/"
+                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🏠 Home
+              </a>
+              <a
+                href="/demos"
+                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🧪 Demos
+              </a>
+              <a
+                href="/docs"
+                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                📚 Documentation
+              </a>
+              <a
                 target='_blank'
                 href="https://github.com/josegomez-dev/trustless-poc"
                 className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
@@ -135,6 +160,15 @@ export const Header = () => {
               >
                 📦 Github Repo
               </a>
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false)
+                  window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                }}
+                className="block w-full text-left px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              >
+                🔐 Wallet
+              </button>
               
               {/* Mobile Wallet Info */}
               {isConnected && walletData && (

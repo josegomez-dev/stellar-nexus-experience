@@ -273,9 +273,9 @@ export const MilestoneVotingDemo = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/30 rounded-xl shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-4">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-success-400 to-success-300 mb-4">
             🗳️ Milestone Voting Demo
           </h2>
           <p className="text-white/80 text-lg">
@@ -321,7 +321,7 @@ export const MilestoneVotingDemo = () => {
               <button
                 onClick={handleInitializeEscrow}
                 disabled={!isConnected || isInitializing}
-                className="px-8 py-3 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isInitializing ? 'Initializing...' : 'Initialize Multi-Stakeholder Escrow'}
               </button>
@@ -344,17 +344,17 @@ export const MilestoneVotingDemo = () => {
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-white/70">Contract ID:</p>
-                <p className="font-mono text-blue-300 bg-blue-900/30 px-2 py-1 rounded">
+                <p className="font-mono text-success-300 bg-success-900/30 px-2 py-1 rounded">
                   {contractId.slice(0, 20)}...
                 </p>
               </div>
               <div>
                 <p className="text-white/70">Status:</p>
-                <p className="text-blue-300">{escrowData?.status || 'Active'}</p>
+                <p className="text-success-300">{escrowData?.status || 'Active'}</p>
               </div>
               <div>
                 <p className="text-white/70">Total Amount:</p>
-                <p className="text-blue-300">10 USDC</p>
+                <p className="text-success-300">10 USDC</p>
               </div>
             </div>
             
@@ -363,7 +363,7 @@ export const MilestoneVotingDemo = () => {
                 <button
                   onClick={handleFundEscrow}
                   disabled={isFunding}
-                  className="px-6 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors"
+                  className="px-6 py-2 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors"
                 >
                   {isFunding ? 'Funding...' : 'Fund Escrow'}
                 </button>
@@ -386,9 +386,9 @@ export const MilestoneVotingDemo = () => {
                       <div className="flex items-center space-x-4 text-sm">
                         <span className="text-blue-300">{(parseInt(milestone.amount) / 100000).toFixed(1)} USDC</span>
                         <span className={`px-2 py-1 rounded text-xs ${
-                          milestone.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                          milestone.status === 'approved' ? 'bg-green-500/20 text-green-300' :
-                          'bg-blue-500/20 text-blue-300'
+                                          milestone.status === 'pending' ? 'bg-warning-500/20 text-warning-300' :
+                milestone.status === 'approved' ? 'bg-success-500/20 text-success-300' :
+                'bg-brand-500/20 text-brand-300'
                         }`}>
                           {milestone.status.charAt(0).toUpperCase() + milestone.status.slice(1)}
                         </span>
@@ -398,7 +398,7 @@ export const MilestoneVotingDemo = () => {
                       <button
                         onClick={() => handleCompleteMilestone(milestone.id)}
                         disabled={milestone.status !== 'pending' || isChangingStatus}
-                        className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                        className="px-4 py-2 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2"
                       >
                         {isChangingStatus ? 'Completing...' : 'Mark Complete'}
                       </button>
@@ -406,7 +406,7 @@ export const MilestoneVotingDemo = () => {
                         <button
                           onClick={() => handleReleaseFunds(milestone.id)}
                           disabled={isReleasing}
-                          className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors block w-full"
+                          className="px-4 py-2 bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 rounded-lg text-brand-300 hover:text-brand-200 transition-colors block w-full"
                         >
                           {isReleasing ? 'Releasing...' : 'Release Funds'}
                         </button>
@@ -447,8 +447,8 @@ export const MilestoneVotingDemo = () => {
                                 disabled={stakeholder.hasApproved || isApproving}
                                 className={`px-3 py-1 rounded text-xs transition-colors ${
                                   stakeholder.hasApproved
-                                    ? 'bg-green-500/20 text-green-300 cursor-not-allowed'
-                                    : 'bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 text-blue-300 hover:text-blue-200'
+                                                    ? 'bg-success-500/20 text-success-300 cursor-not-allowed'
+                : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
                                 }`}
                               >
                                 {stakeholder.hasApproved ? '✅ Approved' : 'Approve'}
@@ -482,9 +482,9 @@ export const MilestoneVotingDemo = () => {
         )}
 
         {/* Demo Instructions */}
-        <div className="mt-8 p-6 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-          <h3 className="text-lg font-semibold text-blue-300 mb-3">📚 How This Demo Works</h3>
-          <ul className="text-blue-200 text-sm space-y-2">
+                <div className="mt-8 p-6 bg-success-500/10 border border-success-400/30 rounded-lg">
+          <h3 className="text-lg font-semibold text-success-300 mb-3">📚 How This Demo Works</h3>
+          <ul className="text-success-200 text-sm space-y-2">
             <li>• <strong>Multi-Stakeholder:</strong> 4 different roles must approve milestones</li>
             <li>• <strong>Consensus Required:</strong> Each milestone needs a specific number of approvals</li>
             <li>• <strong>Progressive Release:</strong> Funds are released per milestone upon approval</li>

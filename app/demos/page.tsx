@@ -29,6 +29,20 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
   activeDemo: string, 
   setActiveDemo: (demo: string) => void 
 }) => {
+  const handleDemoSelect = (demoId: string) => {
+    setActiveDemo(demoId)
+    
+    // Smooth scroll to the demo display section
+    setTimeout(() => {
+      const demoSection = document.getElementById('active-demo-display')
+      if (demoSection) {
+        demoSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        })
+      }
+    }, 100)
+  }
   const demos = [
     {
       id: 'hello-milestone',
@@ -69,7 +83,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       {demos.map((demo) => (
         <button
           key={demo.id}
-          onClick={() => setActiveDemo(demo.id)}
+          onClick={() => handleDemoSelect(demo.id)}
           className={`demo-card p-6 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 min-h-[280px] ${
             activeDemo === demo.id
               ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
@@ -269,12 +283,12 @@ function DemosPageContent() {
 
   return (
     <EscrowProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden">
         {/* Header */}
         <Header />
         
         {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-cyan-500/10 via-transparent to-purple-500/10"></div>
+        <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
         
         {/* Main Content */}
         <main className={`relative z-10 transition-all duration-500 ease-out ${
@@ -292,7 +306,7 @@ function DemosPageContent() {
                     height={150}
                   />
                 </div>
-                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600">
                   <div className="flex items-center justify-center space-x-3">
           <span>ESCROW ARSENAL</span>
         </div>
@@ -379,7 +393,7 @@ function DemosPageContent() {
           </section>
 
           {/* Active Demo Display */}
-          <section className="container mx-auto px-4 py-10">
+          <section id="active-demo-display" className="container mx-auto px-4 py-10">
             <div className="max-w-6xl mx-auto">
               {renderActiveDemo()}
             </div>

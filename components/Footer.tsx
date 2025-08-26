@@ -39,8 +39,8 @@ export const Footer = () => {
               <span className="text-xs text-white/60">Network:</span>
               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 stellarConfig.network === 'TESTNET' 
-                  ? 'bg-yellow-500/30 text-yellow-200 border border-yellow-400/30'
-                  : 'bg-green-500/30 text-green-200 border border-green-400/30'
+                  ? 'bg-warning-500/30 text-warning-200 border border-warning-400/30'
+                  : 'bg-success-500/30 text-success-200 border border-success-400/30'
               }`}>
                 {stellarConfig.network}
               </span>

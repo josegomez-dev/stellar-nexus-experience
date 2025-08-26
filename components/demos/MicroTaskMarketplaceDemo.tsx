@@ -287,17 +287,17 @@ export const MicroTaskMarketplaceDemo = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
-        return 'bg-green-500/20 text-green-300'
+        return 'bg-success-500/20 text-success-300'
       case 'in-progress':
-        return 'bg-blue-500/20 text-blue-300'
+        return 'bg-brand-500/20 text-brand-300'
       case 'completed':
-        return 'bg-yellow-500/20 text-yellow-300'
+        return 'bg-warning-500/20 text-warning-300'
       case 'approved':
-        return 'bg-purple-500/20 text-purple-300'
+        return 'bg-accent-500/20 text-accent-300'
       case 'released':
-        return 'bg-gray-500/20 text-gray-300'
+        return 'bg-neutral-500/20 text-neutral-300'
       default:
-        return 'bg-gray-500/20 text-gray-300'
+        return 'bg-neutral-500/20 text-neutral-300'
     }
   }
 
@@ -313,9 +313,9 @@ export const MicroTaskMarketplaceDemo = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-xl shadow-2xl p-8">
+      <div className="bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500 mb-4">
             🛒 Micro-Task Marketplace Demo
           </h2>
           <p className="text-white/80 text-lg">
