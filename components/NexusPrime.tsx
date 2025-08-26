@@ -224,7 +224,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       {/* Character Avatar */}
       <div className="relative group">
         {/* Character Image/Icon */}
-        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-110 hover:border-cyan-300/70 backdrop-blur-sm animate-float relative"
+        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-110 hover:border-cyan-300/70 backdrop-blur-sm relative"
              onClick={() => setIsExpanded(!isExpanded)}>
           
           {/* Voice Toggle Button */}
@@ -248,7 +248,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
           <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden">
             {/* Stellar Network Pattern */}
             <div className="absolute inset-0 opacity-30">
-              <div className="w-full h-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.3)_0%,_transparent_70%)] animate-pulse"></div>
+              <div className="w-full h-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.3)_0%,_transparent_70%)]"></div>
             </div>
             {/* Character Image */}
             <Image
@@ -259,14 +259,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               className="w-12 h-12 rounded-full relative z-10 object-cover"
             />
             {/* Glowing Effect */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20 animate-pulse"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20"></div>
           </div>
         </div>
 
-        {/* Floating Particles */}
-        <div className="absolute -top-2 -right-2 w-3 h-3 bg-cyan-400 rounded-full animate-ping opacity-75"></div>
-        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-purple-400 rounded-full animate-ping opacity-75" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute top-1 -left-2 w-2.5 h-2.5 bg-cyan-300 rounded-full animate-ping opacity-75" style={{ animationDelay: '1s' }}></div>
+
 
                        {/* Speech Bubble */}
                {isExpanded && (
@@ -310,7 +307,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               ) : (
                 <p className="text-white/90 text-sm leading-relaxed">
                   {currentMessage}
-                  {isTyping && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse"></span>}
+                  {isTyping && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1"></span>}
                 </p>
               )}
             </div>
@@ -318,18 +315,18 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             {/* Status Indicators */}
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span className="text-white/60">Online</span>
               </div>
               <div className="flex items-center space-x-2">
                 {isSpeaking ? (
                   <>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     <span className="text-purple-300">Speaking...</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                     <span className="text-white/60">Stellar Network</span>
                   </>
                 )}
@@ -359,7 +356,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                   <div className="text-center mb-2">
                     <div className="w-full bg-white/10 rounded-full h-1 mb-2">
                       <div 
-                        className="bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full"
                         style={{ width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%` }}
                       ></div>
                     </div>
