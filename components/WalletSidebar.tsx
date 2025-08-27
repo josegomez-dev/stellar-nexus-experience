@@ -8,9 +8,10 @@ import Image from 'next/image'
 interface WalletSidebarProps {
   isOpen: boolean
   onToggle: () => void
+  showBanner?: boolean
 }
 
-export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
+export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isNewWindow, setIsNewWindow] = useState(false)
@@ -478,7 +479,7 @@ export const WalletSidebar = ({ isOpen, onToggle }: WalletSidebarProps) => {
       </div>
 
       {/* Wallet Connection Banner */}
-      {!isConnected && !isConnecting && (
+      {showBanner && !isConnected && !isConnecting && (
         <div className="fixed bottom-0 left-0 right-0 z-40 animate-slideInUp">
           <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white shadow-2xl border-t-4 border-amber-400 relative overflow-hidden">
             {/* Animated background pattern */}

@@ -466,6 +466,7 @@ function HomeContent() {
       <WalletSidebar 
         isOpen={walletSidebarOpen} 
         onToggle={() => setWalletSidebarOpen(!walletSidebarOpen)} 
+        showBanner={false}
       />
 
       {/* NEXUS PRIME Character */}

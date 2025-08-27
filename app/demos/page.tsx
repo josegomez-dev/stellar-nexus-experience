@@ -511,6 +511,7 @@ function DemosPageContent() {
       <WalletSidebar 
         isOpen={walletSidebarOpen} 
         onToggle={() => setWalletSidebarOpen(!walletSidebarOpen)} 
+        showBanner={true}
       />
 
       {/* NEXUS PRIME Character */}
