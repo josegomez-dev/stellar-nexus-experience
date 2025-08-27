@@ -60,8 +60,8 @@ export const useInitializeEscrow = (): InitializeEscrowHook => {
     setError(null)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Simulate realistic API call delay with progress
+      await new Promise(resolve => setTimeout(resolve, 1500))
       
       // Generate mock contract ID
       const contractId = `contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -94,6 +94,7 @@ export const useInitializeEscrow = (): InitializeEscrowHook => {
         deadline: payload.deadline,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: 'active',
         releases: [
           {
             id: `release_${Date.now()}_1`,
@@ -136,8 +137,8 @@ export const useFundEscrow = (): FundEscrowHook => {
     setError(null)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Simulate realistic API call delay
+      await new Promise(resolve => setTimeout(resolve, 1200))
       
       // Generate mock contract ID (same as input for funding)
       const contractId = payload.contractId
@@ -174,6 +175,7 @@ export const useFundEscrow = (): FundEscrowHook => {
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: 'funded',
         releases: [
           {
             id: `release_${Date.now()}_1`,
@@ -227,8 +229,8 @@ export const useChangeMilestoneStatus = (): ChangeMilestoneStatusHook => {
     setError(null)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Simulate realistic API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Generate mock contract ID (same as input for status change)
       const contractId = payload.contractId
@@ -265,6 +267,7 @@ export const useChangeMilestoneStatus = (): ChangeMilestoneStatusHook => {
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: 'active',
         releases: [
           {
             id: 'release_1',
@@ -321,8 +324,8 @@ export const useApproveMilestone = (): ApproveMilestoneHook => {
     setError(null)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Simulate realistic API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Generate mock contract ID (same as input for approval)
       const contractId = payload.contractId
@@ -359,6 +362,7 @@ export const useApproveMilestone = (): ApproveMilestoneHook => {
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: 'active',
         releases: [
           {
             id: 'release_1',
@@ -417,8 +421,8 @@ export const useReleaseFunds = (): ReleaseFundsHook => {
     setError(null)
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Simulate realistic API call delay
+      await new Promise(resolve => setTimeout(resolve, 1200))
       
       // Generate mock contract ID (same as input for fund release)
       const contractId = payload.contractId
@@ -455,6 +459,7 @@ export const useReleaseFunds = (): ReleaseFundsHook => {
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: 'completed',
         releases: [
           {
             id: 'release_1',
@@ -480,7 +485,9 @@ export const useReleaseFunds = (): ReleaseFundsHook => {
           category: 'demo',
           funded: true,
           fundedAt: new Date().toISOString(),
-          lastRelease: new Date().toISOString()
+          lastRelease: new Date().toISOString(),
+          completed: true,
+          completedAt: new Date().toISOString()
         }
       }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
+import { useTransactionHistory } from '@/contexts/TransactionContext'
 import { stellarConfig } from '@/lib/wallet-config'
 import Image from 'next/image'
 
@@ -13,10 +14,15 @@ interface WalletSidebarProps {
 
 export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet()
+  const { getRecentTransactions, transactions } = useTransactionHistory()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isNewWindow, setIsNewWindow] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [manualAddress, setManualAddress] = useState('')
+  const [showTransactionHistory, setShowTransactionHistory] = useState(false)
+
+  // Get recent transactions
+  const recentTransactions = getRecentTransactions(5)
 
   // Dispatch custom event to move main content
   useEffect(() => {
@@ -159,6 +165,18 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
             )}
           </div>
           
+          {isOpen && (
+            <button
+              onClick={onToggle}
+              className="bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+              title="Close Wallet"
+            >
+              <div className="flex items-center space-x-2">
+                <span>&nbsp;✕&nbsp;</span>
+              </div>
+            </button>
+          )}
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -397,6 +415,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       <span className="text-white/60">Network active</span>
                       <span className="text-green-400">✅</span>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/60">Transactions: {transactions.length}</span>
+                      <span className="text-green-400">✅</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -463,19 +485,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </button>
         )}
 
-        {/* Close Wallet Button - Positioned to the left of sidebar when open */}
-        {isOpen && (
-          <button
-            onClick={onToggle}
-            className="fixed top-20 left-4 z-50 p-3 bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-            title="Close Wallet"
-          >
-            <div className="flex items-center space-x-2">
-              <span>✕</span>
-              <span className="text-sm font-medium hidden lg:block">Close</span>
-            </div>
-          </button>
-        )}
+
       </div>
 
       {/* Wallet Connection Banner */}

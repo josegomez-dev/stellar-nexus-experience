@@ -63,8 +63,8 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     window.speechSynthesis.cancel()
     
     const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 1.4  // Increased from 0.9 to 1.4 for faster speech
-    utterance.pitch = 1.2  // Slightly higher pitch for more energy
+    utterance.rate = 1.2  // Increased from 0.9 to 1.4 for faster speech
+    utterance.pitch = 1.4  // Slightly higher pitch for more energy
     utterance.volume = 0.9  // Increased volume for better clarity
     
     // Try to use a male voice

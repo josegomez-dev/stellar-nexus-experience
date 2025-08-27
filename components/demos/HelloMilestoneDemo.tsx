@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/lib/stellar-wallet-hooks'
+import { useGlobalWallet } from '@/contexts/WalletContext'
+import { useTransactionHistory } from '@/contexts/TransactionContext'
+import { useToast } from '@/contexts/ToastContext'
 import { 
   useInitializeEscrow, 
   useFundEscrow, 
@@ -18,14 +20,21 @@ interface DemoStep {
   status: 'pending' | 'completed' | 'current'
   action?: () => void
   disabled?: boolean
+  details?: string
 }
 
 export const HelloMilestoneDemo = () => {
-  const { walletData, isConnected } = useWallet()
+  const { walletData, isConnected } = useGlobalWallet()
+  const { addTransaction, updateTransaction, getTransactionsByDemo } = useTransactionHistory()
+  const { addToast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [contractId, setContractId] = useState<string>('')
   const [escrowData, setEscrowData] = useState<any>(null)
   const [milestoneStatus, setMilestoneStatus] = useState<'pending' | 'completed'>('pending')
+  const [demoStarted, setDemoStarted] = useState(false)
+
+  // Get transactions for this demo
+  const transactionHistory = getTransactionsByDemo('hello-milestone')
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -41,7 +50,8 @@ export const HelloMilestoneDemo = () => {
       description: 'Create a new escrow contract with USDC',
       status: currentStep === 0 ? 'current' : currentStep > 0 ? 'completed' : 'pending',
       action: handleInitializeEscrow,
-      disabled: !isConnected || currentStep !== 0
+      disabled: !isConnected || currentStep !== 0, // Require wallet connection
+      details: 'Creates a smart contract on Stellar blockchain that will hold funds in escrow until work is completed and approved.'
     },
     {
       id: 'fund',
@@ -49,7 +59,8 @@ export const HelloMilestoneDemo = () => {
       description: 'Deposit USDC into the escrow contract',
       status: currentStep === 1 ? 'current' : currentStep > 1 ? 'completed' : 'pending',
       action: handleFundEscrow,
-      disabled: !contractId || currentStep !== 1
+      disabled: !contractId || currentStep !== 1,
+      details: 'Locks USDC tokens in the smart contract. Funds are now secured and cannot be accessed until conditions are met.'
     },
     {
       id: 'complete',
@@ -57,7 +68,8 @@ export const HelloMilestoneDemo = () => {
       description: 'Worker signals task completion',
       status: currentStep === 2 ? 'current' : currentStep > 2 ? 'completed' : 'pending',
       action: handleCompleteMilestone,
-      disabled: !contractId || currentStep !== 2
+      disabled: !contractId || currentStep !== 2,
+      details: 'Simulates a worker completing their assigned task. In a real scenario, this would be triggered by the worker.'
     },
     {
       id: 'approve',
@@ -65,7 +77,8 @@ export const HelloMilestoneDemo = () => {
       description: 'Client approves the completed work',
       status: currentStep === 3 ? 'current' : currentStep > 3 ? 'completed' : 'pending',
       action: handleApproveMilestone,
-      disabled: !contractId || currentStep !== 3
+      disabled: !contractId || currentStep !== 3,
+      details: 'Client reviews the completed work and approves it. This is the final step before funds can be released.'
     },
     {
       id: 'release',
@@ -73,7 +86,8 @@ export const HelloMilestoneDemo = () => {
       description: 'Automatically release funds to worker',
       status: currentStep === 4 ? 'current' : currentStep > 4 ? 'completed' : 'pending',
       action: handleReleaseFunds,
-      disabled: !contractId || currentStep !== 4
+      disabled: !contractId || currentStep !== 4,
+      details: 'Smart contract automatically releases funds to the worker once approval is given. No manual intervention needed.'
     }
   ]
 
@@ -81,6 +95,15 @@ export const HelloMilestoneDemo = () => {
     if (!walletData) return
 
     try {
+      // Show starting toast
+      addToast({
+        type: 'info',
+        title: '🚀 Starting Escrow Initialization',
+        message: 'Creating smart contract on Stellar blockchain...',
+        icon: '🔒',
+        duration: 3000
+      })
+
       const payload = {
         escrowType: 'multi-release',
         releaseMode: 'multi-release',
@@ -98,11 +121,55 @@ export const HelloMilestoneDemo = () => {
         }
       }
 
+      const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Initializing escrow contract...',
+        type: 'escrow',
+        demoId: 'hello-milestone',
+        amount: '10 USDC',
+        asset: 'USDC'
+      })
+
       const result = await initializeEscrow(payload)
+      
+      updateTransaction(txHash, 'success', 'Escrow contract created successfully!')
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: '✅ Escrow Contract Created!',
+        message: `Contract ID: ${result.contractId.slice(0, 8)}... | Amount: 10 USDC`,
+        icon: '🔒',
+        duration: 5000
+      })
+      
       setContractId(result.contractId)
       setEscrowData(result.escrow)
       setCurrentStep(1)
+      setDemoStarted(true)
     } catch (error) {
+      const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to initialize escrow: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'escrow',
+        demoId: 'hello-milestone',
+        amount: '10 USDC',
+        asset: 'USDC'
+      })
+      
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: '❌ Escrow Initialization Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        icon: '❌',
+        duration: 6000
+      })
+      
       console.error('Failed to initialize escrow:', error)
     }
   }
@@ -111,16 +178,68 @@ export const HelloMilestoneDemo = () => {
     if (!contractId) return
 
     try {
+      // Show starting toast
+      addToast({
+        type: 'info',
+        title: '💰 Funding Escrow Contract',
+        message: 'Locking USDC tokens in smart contract...',
+        icon: '💰',
+        duration: 3000
+      })
+
       const payload = {
         contractId,
         amount: '1000000',
         releaseMode: 'multi-release'
       }
 
+      const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Funding escrow contract...',
+        type: 'fund',
+        demoId: 'hello-milestone',
+        amount: '10 USDC',
+        asset: 'USDC'
+      })
+
       const result = await fundEscrow(payload)
+      
+      updateTransaction(txHash, 'success', 'Escrow funded successfully!')
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: '✅ Escrow Funded Successfully!',
+        message: '10 USDC locked in smart contract. Funds are now secured!',
+        icon: '💰',
+        duration: 5000
+      })
+      
       setEscrowData(result.escrow)
       setCurrentStep(2)
     } catch (error) {
+      const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to fund escrow: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'fund',
+        demoId: 'hello-milestone',
+        amount: '10 USDC',
+        asset: 'USDC'
+      })
+      
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: '❌ Escrow Funding Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        icon: '❌',
+        duration: 6000
+      })
+      
       console.error('Failed to fund escrow:', error)
     }
   }
@@ -129,6 +248,15 @@ export const HelloMilestoneDemo = () => {
     if (!contractId) return
 
     try {
+      // Show starting toast
+      addToast({
+        type: 'info',
+        title: '📋 Completing Milestone',
+        message: 'Worker signaling task completion...',
+        icon: '📋',
+        duration: 3000
+      })
+
       const payload = {
         contractId,
         milestoneId: 'release_1',
@@ -136,11 +264,54 @@ export const HelloMilestoneDemo = () => {
         releaseMode: 'multi-release'
       }
 
+      const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Completing milestone...',
+        type: 'milestone',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+
       const result = await changeMilestoneStatus(payload)
+      
+      updateTransaction(txHash, 'success', 'Milestone marked as completed!')
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: '✅ Milestone Completed!',
+        message: 'Task marked as completed. Ready for client approval!',
+        icon: '📋',
+        duration: 5000
+      })
+      
       setEscrowData(result.escrow)
       setMilestoneStatus('completed')
       setCurrentStep(3)
     } catch (error) {
+      const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to complete milestone: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'milestone',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+      
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: '❌ Milestone Completion Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        icon: '❌',
+        duration: 6000
+      })
+      
       console.error('Failed to complete milestone:', error)
     }
   }
@@ -149,16 +320,68 @@ export const HelloMilestoneDemo = () => {
     if (!contractId) return
 
     try {
+      // Show starting toast
+      addToast({
+        type: 'info',
+        title: '✅ Approving Milestone',
+        message: 'Client reviewing and approving completed work...',
+        icon: '✅',
+        duration: 3000
+      })
+
       const payload = {
         contractId,
         milestoneId: 'release_1',
         releaseMode: 'multi-release'
       }
 
+      const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Approving milestone...',
+        type: 'approve',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+
       const result = await approveMilestone(payload)
+      
+      updateTransaction(txHash, 'success', 'Milestone approved successfully!')
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: '✅ Milestone Approved!',
+        message: 'Work approved by client. Ready for fund release!',
+        icon: '✅',
+        duration: 5000
+      })
+      
       setEscrowData(result.escrow)
       setCurrentStep(4)
     } catch (error) {
+      const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to approve milestone: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'approve',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+      
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: '❌ Milestone Approval Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        icon: '❌',
+        duration: 6000
+      })
+      
       console.error('Failed to approve milestone:', error)
     }
   }
@@ -167,16 +390,68 @@ export const HelloMilestoneDemo = () => {
     if (!contractId) return
 
     try {
+      // Show starting toast
+      addToast({
+        type: 'info',
+        title: '🎉 Releasing Funds',
+        message: 'Smart contract automatically releasing funds to worker...',
+        icon: '🎉',
+        duration: 3000
+      })
+
       const payload = {
         contractId,
         milestoneId: 'release_1',
         releaseMode: 'multi-release'
       }
 
+      const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Releasing funds...',
+        type: 'release',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+
       const result = await releaseFunds(payload)
+      
+      updateTransaction(txHash, 'success', 'Funds released successfully!')
+      
+      // Show success toast
+      addToast({
+        type: 'success',
+        title: '🎉 Funds Released Successfully!',
+        message: '5 USDC automatically transferred to worker. Demo completed!',
+        icon: '🎉',
+        duration: 7000
+      })
+      
       setEscrowData(result.escrow)
       setCurrentStep(5)
     } catch (error) {
+      const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to release funds: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'release',
+        demoId: 'hello-milestone',
+        amount: '5 USDC',
+        asset: 'USDC'
+      })
+      
+      // Show error toast
+      addToast({
+        type: 'error',
+        title: '❌ Fund Release Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        icon: '❌',
+        duration: 6000
+      })
+      
       console.error('Failed to release funds:', error)
     }
   }
@@ -186,6 +461,16 @@ export const HelloMilestoneDemo = () => {
     setContractId('')
     setEscrowData(null)
     setMilestoneStatus('pending')
+    setDemoStarted(false)
+    
+    // Show reset toast
+    addToast({
+      type: 'warning',
+      title: '🔄 Demo Reset',
+      message: 'Demo has been reset. You can start over from the beginning.',
+      icon: '🔄',
+      duration: 4000
+    })
   }
 
   const getStepIcon = (status: string) => {
@@ -220,13 +505,27 @@ export const HelloMilestoneDemo = () => {
           <p className="text-white/80 text-lg">
             Experience the complete trustless escrow flow from start to finish
           </p>
+          {!isConnected && (
+            <div className="mt-4 p-4 bg-warning-500/20 border border-warning-400/30 rounded-lg">
+              <p className="text-warning-300">
+                ⚠️ <strong>Wallet Required</strong> - Please connect your Stellar wallet to start the demo
+              </p>
+            </div>
+          )}
+          {isConnected && (
+            <div className="mt-4 p-4 bg-success-500/20 border border-success-400/30 rounded-lg">
+              <p className="text-success-300">
+                ✅ <strong>Wallet Connected</strong> - Ready to test! Click "Execute" on the first step to begin
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Demo Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Demo Progress</h3>
-            {currentStep > 0 && (
+            {demoStarted && (
               <button
                 onClick={resetDemo}
                 className="px-4 py-2 bg-danger-500/20 hover:bg-danger-500/30 border border-danger-400/30 rounded-lg text-danger-300 hover:text-danger-200 transition-colors"
@@ -246,6 +545,11 @@ export const HelloMilestoneDemo = () => {
                 <div className="flex-1">
                   <h4 className="font-semibold text-white">{step.title}</h4>
                   <p className="text-sm text-white/70">{step.description}</p>
+                  {step.details && (
+                    <p className="text-xs text-white/50 mt-1">
+                      {step.details}
+                    </p>
+                  )}
                 </div>
                 {step.action && (
                   <button
@@ -300,9 +604,55 @@ export const HelloMilestoneDemo = () => {
           </div>
         )}
 
+        {/* Transaction History */}
+        {transactionHistory.length > 0 && (
+          <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
+            <h3 className="text-xl font-semibold text-white mb-4">Transaction History</h3>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {transactionHistory.map((tx, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg border ${
+                    tx.status === 'success' ? 'border-success-400/30 bg-success-500/10' :
+                    tx.status === 'failed' ? 'border-danger-400/30 bg-danger-500/10' :
+                    'border-warning-400/30 bg-warning-500/10'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium ${
+                        tx.status === 'success' ? 'text-success-300' :
+                        tx.status === 'failed' ? 'text-danger-300' :
+                        'text-warning-300'
+                      }`}>
+                        {tx.message}
+                      </p>
+                      <p className="text-xs text-white/60 mt-1">
+                        {tx.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-xs ${
+                        tx.status === 'success' ? 'text-success-400' :
+                        tx.status === 'failed' ? 'text-danger-400' :
+                        'text-warning-400'
+                      }`}>
+                        {tx.status.toUpperCase()}
+                      </p>
+                      <p className="text-xs text-white/40 font-mono">
+                        {tx.hash.slice(0, 8)}...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
-          <div className="p-4 bg-danger-500/20 border border-danger-400/30 rounded-lg">
+          <div className="mb-8 p-4 bg-danger-500/20 border border-danger-400/30 rounded-lg">
             <h4 className="font-semibold text-danger-300 mb-2">Error Occurred</h4>
             <p className="text-danger-200 text-sm">
               {initError?.message || fundError?.message || statusError?.message || 
@@ -313,13 +663,23 @@ export const HelloMilestoneDemo = () => {
 
         {/* Success Message */}
         {currentStep === 5 && (
-          <div className="p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
+          <div className="mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
             <div className="text-4xl mb-4">🎉</div>
             <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
-            <p className="text-green-200">
+            <p className="text-green-200 mb-4">
               You've successfully completed the entire trustless escrow flow. 
               Funds were automatically released upon milestone approval.
             </p>
+            <div className="bg-success-500/10 p-4 rounded-lg border border-success-400/30">
+              <h4 className="font-semibold text-success-300 mb-2">What You Just Experienced:</h4>
+              <ul className="text-green-200 text-sm space-y-1 text-left">
+                <li>✅ Created a smart contract on Stellar blockchain</li>
+                <li>✅ Secured funds in escrow with USDC</li>
+                <li>✅ Simulated work completion workflow</li>
+                <li>✅ Demonstrated trustless approval system</li>
+                <li>✅ Showed automatic fund release mechanism</li>
+              </ul>
+            </div>
           </div>
         )}
 

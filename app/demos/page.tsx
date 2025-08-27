@@ -7,12 +7,15 @@ import { Footer } from '@/components/Footer'
 import { NexusPrime } from '@/components/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { WalletProvider } from '@/contexts/WalletContext'
+import { TransactionProvider } from '@/contexts/TransactionContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo'
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo'
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo'
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo'
 import { OnboardingOverlay } from '@/components/OnboardingOverlay'
+import { ToastContainer } from '@/components/Toast'
 import Image from 'next/image'
 
 // Demo Selection Component
@@ -46,7 +49,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
   const demos = [
     {
       id: 'hello-milestone',
-      title: '1. Baby Steps to Riches 🍼💰',
+      title: '1. Baby Steps to Riches',
       subtitle: 'Basic Escrow Flow Demo',
       description: 'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
       icon: '/images/demos/babysteps.png',
@@ -54,7 +57,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
     },
     {
       id: 'milestone-voting',
-      title: '2. Democracy in Action 🗳️',
+      title: '2. Democracy in Action',
       subtitle: 'Multi-Stakeholder Approval System',
       description: 'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
       icon: '/images/demos/democracyinaction.png',
@@ -62,7 +65,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
     },
     {
       id: 'dispute-resolution',
-      title: '3. Drama Queen Escrow 👑🎭',
+      title: '3. Drama Queen Escrow',
       subtitle: 'Dispute Resolution & Arbitration',
       description: 'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
       icon: '/images/demos/drama.png',
@@ -70,10 +73,10 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
     },
     {
       id: 'micro-marketplace',
-      title: '4. Gig Economy Madness 🛒',
+      title: '4. Gig Economy Madness',
       subtitle: 'Micro-Task Marketplace',
       description: 'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
-      icon: '/images/demos/babysteps.png',
+      icon: '/images/demos/economy.png',
       color: 'from-accent-500 to-accent-400'
     }
   ]
@@ -485,22 +488,6 @@ function DemosPageContent() {
             </div>
           </section>
 
-          {/* Floating Help Button */}
-          <div className="fixed bottom-8 right-8 z-40">
-            <button
-              onClick={() => setShowOnboarding(true)}
-              className="p-4 bg-gradient-to-br from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20"
-              title="Get Help & Tutorial"
-            >
-              <Image
-                src="/images/logo/logoicon.png"
-                alt="Help"
-                width={20}
-                height={20}
-                className="w-5 h-5"
-              />
-            </button>
-          </div>
         </main>
 
         {/* Footer */}
@@ -537,7 +524,12 @@ function DemosPageContent() {
 export default function DemosPage() {
   return (
     <WalletProvider>
-      <DemosPageContent />
+      <ToastProvider>
+        <TransactionProvider>
+          <DemosPageContent />
+          <ToastContainer />
+        </TransactionProvider>
+      </ToastProvider>
     </WalletProvider>
   )
 }
