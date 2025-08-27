@@ -14,7 +14,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   currentDemo, 
   walletConnected = false 
 }) => {
-  const [isVisible, setIsVisible] = useState(true)
+
   const [isExpanded, setIsExpanded] = useState(false)
   const [currentMessage, setCurrentMessage] = useState('')
   const [messageQueue, setMessageQueue] = useState<string[]>([])
@@ -22,6 +22,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   const [showTutorial, setShowTutorial] = useState(false)
   const [tutorialStep, setTutorialStep] = useState(0)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
 
 
 
@@ -56,20 +57,21 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
   // Text-to-Speech functionality
   const speakMessage = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // Stop any current speech
-      window.speechSynthesis.cancel()
-      
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.rate = 1.4  // Increased from 0.9 to 1.4 for faster speech
-      utterance.pitch = 1.2  // Slightly higher pitch for more energy
-      utterance.volume = 0.9  // Increased volume for better clarity
-      
-      // Try to use a male voice
-      const voices = window.speechSynthesis.getVoices()
-      const maleVoice = voices.find(voice => 
-        voice.name.includes('Alex') || 
-        voice.name.includes('Daniel') ||
+    if (!ttsEnabled || !('speechSynthesis' in window)) return
+    
+    // Stop any current speech
+    window.speechSynthesis.cancel()
+    
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 1.4  // Increased from 0.9 to 1.4 for faster speech
+    utterance.pitch = 1.2  // Slightly higher pitch for more energy
+    utterance.volume = 0.9  // Increased volume for better clarity
+    
+    // Try to use a male voice
+    const voices = window.speechSynthesis.getVoices()
+    const maleVoice = voices.find(voice => 
+      voice.name.includes('Alex') || 
+      voice.name.includes('Daniel') ||
         voice.name.includes('Google') ||
         voice.name.includes('Male') ||
         voice.name.includes('David') ||
@@ -79,16 +81,24 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         voice.name.includes('John') ||
         voice.name.includes('Michael')
       )
-      if (maleVoice) {
-        utterance.voice = maleVoice
-      }
-      
-      utterance.onstart = () => setIsSpeaking(true)
-      utterance.onend = () => setIsSpeaking(false)
-      utterance.onerror = () => setIsSpeaking(false)
-      
-      window.speechSynthesis.speak(utterance)
+    if (maleVoice) {
+      utterance.voice = maleVoice
     }
+    
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+    
+    window.speechSynthesis.speak(utterance)
+  }
+
+  // Toggle TTS on/off
+  const toggleTts = () => {
+    if (ttsEnabled) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+    setTtsEnabled(!ttsEnabled)
   }
 
   // Character messages based on context
@@ -169,24 +179,16 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     }
   }, [messageQueue, isTyping])
 
-  // Auto-hide after 8 seconds
-  useEffect(() => {
-    if (currentMessage && !isTyping) {
-      const timer = setTimeout(() => {
-        setIsVisible(false)
-        setTimeout(() => setIsVisible(true), 2000) // Show again after 2 seconds
-      }, 8000)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [currentMessage, isTyping])
+  // Removed problematic auto-hide mechanism that was causing button to disappear
 
   // Tutorial navigation functions
   const startTutorial = () => {
     setShowTutorial(true)
     setTutorialStep(0)
     const firstStep = tutorialSteps[0]
-    speakMessage(`${firstStep.title}. ${firstStep.message}`)
+    if (ttsEnabled) {
+      speakMessage(`${firstStep.title}. ${firstStep.message}`)
+    }
   }
 
   const nextTutorialStep = () => {
@@ -194,11 +196,15 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       const nextStep = tutorialStep + 1
       setTutorialStep(nextStep)
       const step = tutorialSteps[nextStep]
-      speakMessage(`${step.title}. ${step.message}`)
+      if (ttsEnabled) {
+        speakMessage(`${step.title}. ${step.message}`)
+      }
     } else {
       setShowTutorial(false)
       setTutorialStep(0)
-      speakMessage("Tutorial completed! You're now ready to master the ESCROW ARSENAL!")
+      if (ttsEnabled) {
+        speakMessage("Tutorial completed! You're now ready to master the ESCROW ARSENAL!")
+      }
     }
   }
 
@@ -207,43 +213,46 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       const prevStep = tutorialStep - 1
       setTutorialStep(prevStep)
       const step = tutorialSteps[prevStep]
-      speakMessage(`${step.title}. ${step.message}`)
+      if (ttsEnabled) {
+        speakMessage(`${step.title}. ${step.message}`)
+      }
     }
   }
 
   const skipTutorial = () => {
     setShowTutorial(false)
     setTutorialStep(0)
-    speakMessage("Tutorial skipped. Feel free to ask me anything about the ESCROW ARSENAL!")
+    if (ttsEnabled) {
+      speakMessage("Tutorial skipped. Feel free to ask me anything about the ESCROW ARSENAL!")
+    }
   }
 
-  if (!isVisible) return null
+
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 enhanced-float">
+    <div className="fixed bottom-6 left-6 z-50">
 
       {/* Character Avatar */}
       <div className="relative group">
         {/* Character Image/Icon */}
-        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-110 hover:border-cyan-300/70 backdrop-blur-sm relative"
+        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative"
              onClick={() => setIsExpanded(!isExpanded)}>
           
           {/* Voice Toggle Button */}
           <button
             onClick={(e) => {
               e.stopPropagation()
-              if (isSpeaking) {
-                window.speechSynthesis.cancel()
-                setIsSpeaking(false)
-              } else {
-                speakMessage("Voice enabled! I'm ready to guide you through the ESCROW ARSENAL!")
-              }
+              toggleTts()
             }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full border-2 border-white shadow-lg hover:scale-110 transition-all duration-200 z-20"
-            title={isSpeaking ? "Stop Voice" : "Enable Voice"}
+            className={`absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
+              ttsEnabled 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                : 'bg-gradient-to-r from-red-500 to-pink-600'
+            }`}
+            title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
           >
             <span className="text-xs text-white">
-              {isSpeaking ? "🔇" : "🔊"}
+              {ttsEnabled ? "🔊" : "🔇"}
             </span>
           </button>
           <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden">
@@ -273,20 +282,37 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             <div className="absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45"></div>
             
             {/* Character Header */}
-            <div className="flex items-center space-x-3 mb-3">
-                                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden">
-                    <Image
-                      src="/images/character/nexus-prime-chat.png"
-                      alt="NEXUS PRIME"
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-              <div>
-                <h4 className="text-cyan-300 font-semibold text-sm">NEXUS PRIME</h4>
-                <p className="text-white/60 text-xs">Guardian of STELLAR NEXUS</p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="/images/character/nexus-prime-chat.png"
+                    alt="NEXUS PRIME"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-cyan-300 font-semibold text-sm">NEXUS PRIME</h4>
+                  <p className="text-white/60 text-xs">Guardian of STELLAR NEXUS</p>
+                </div>
               </div>
+              
+              {/* TTS Toggle Button in Chat */}
+              <button
+                onClick={toggleTts}
+                className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                  ttsEnabled 
+                    ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                    : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                }`}
+                title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+              >
+                <span className="text-sm">
+                  {ttsEnabled ? "🔊" : "🔇"}
+                </span>
+              </button>
             </div>
 
             {/* Message */}
@@ -306,10 +332,28 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                   </div>
                 </div>
               ) : (
-                <p className="text-white/90 text-sm leading-relaxed">
-                  {currentMessage}
-                  {isTyping && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1"></span>}
-                </p>
+                <div>
+                  <p className="text-white/90 text-sm leading-relaxed">
+                    {currentMessage}
+                    {isTyping && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1"></span>}
+                  </p>
+                  
+                  {/* TTS Toggle for Regular Chat */}
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-white/60">Voice Assistant:</span>
+                    <button
+                      onClick={toggleTts}
+                      className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
+                        ttsEnabled 
+                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                      }`}
+                      title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+                    >
+                      {ttsEnabled ? "🔊 ON" : "🔇 OFF"}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -347,17 +391,34 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {/* Tutorial Progress */}
-                  <div className="text-center mb-2">
-                    <div className="w-full bg-white/10 rounded-full h-1 mb-2">
-                      <div 
-                        className="bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full"
-                        style={{ width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%` }}
-                      ></div>
+                  {/* Tutorial Progress and TTS Toggle */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex-1 text-center">
+                      <div className="w-full bg-white/10 rounded-full h-1 mb-2">
+                        <div 
+                          className="bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full"
+                          style={{ width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-white/60">
+                        Step {tutorialStep + 1} of {tutorialSteps.length}
+                      </span>
                     </div>
-                    <span className="text-xs text-white/60">
-                      Step {tutorialStep + 1} of {tutorialSteps.length}
-                    </span>
+                    
+                    {/* TTS Toggle for Tutorial */}
+                    <button
+                      onClick={toggleTts}
+                      className={`ml-3 p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        ttsEnabled 
+                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                      }`}
+                      title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+                    >
+                      <span className="text-xs">
+                        {ttsEnabled ? "🔊" : "🔇"}
+                      </span>
+                    </button>
                   </div>
                   
                   {/* Tutorial Navigation */}
@@ -395,7 +456,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
         {/* Simple Hover Tooltip */}
         {!isExpanded && (
-          <div className="absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
             <div className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-xl shadow-2xl p-3 w-48">
               {/* Arrow */}
               <div className="absolute -bottom-2 left-6 w-3 h-3 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45"></div>
@@ -408,6 +469,20 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 <p className="text-cyan-300 text-xs mt-1">
                   Your AI Guardian
                 </p>
+                
+                {/* TTS Status in Tooltip */}
+                <div className="mt-2 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-center space-x-2">
+                    <span className="text-xs text-white/60">Voice:</span>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      ttsEnabled 
+                        ? 'bg-green-500/20 text-green-300 border border-green-400/50' 
+                        : 'bg-red-500/20 text-red-300 border border-red-400/50'
+                    }`}>
+                      {ttsEnabled ? "ON 🔊" : "OFF 🔇"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
