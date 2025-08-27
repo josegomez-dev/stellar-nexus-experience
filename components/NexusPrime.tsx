@@ -299,20 +299,43 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 </div>
               </div>
               
-              {/* TTS Toggle Button in Chat */}
-              <button
-                onClick={toggleTts}
-                className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                  ttsEnabled 
-                    ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
-                    : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                }`}
-                title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
-              >
-                <span className="text-sm">
-                  {ttsEnabled ? "🔊" : "🔇"}
-                </span>
-              </button>
+              {/* TTS Controls in Chat Header */}
+              <div className="flex items-center space-x-2">
+                {/* Play Current Message Button */}
+                <button
+                  onClick={() => {
+                    if (ttsEnabled && currentMessage) {
+                      speakMessage(currentMessage)
+                    }
+                  }}
+                  disabled={!ttsEnabled || !currentMessage || isSpeaking}
+                  className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                    !ttsEnabled || !currentMessage || isSpeaking
+                      ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                  }`}
+                  title={!ttsEnabled ? "Voice is disabled" : !currentMessage ? "No message to play" : isSpeaking ? "Already speaking" : "Play current message with voice"}
+                >
+                  <span className="text-sm">
+                    {isSpeaking ? "⏸️" : "▶️"}
+                  </span>
+                </button>
+                
+                {/* TTS Toggle */}
+                <button
+                  onClick={toggleTts}
+                  className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                    ttsEnabled 
+                      ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                      : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                  }`}
+                  title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+                >
+                  <span className="text-sm">
+                    {ttsEnabled ? "🔊" : "🔇"}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Message */}
@@ -338,20 +361,41 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                     {isTyping && <span className="inline-block w-2 h-4 bg-cyan-400 ml-1"></span>}
                   </p>
                   
-                  {/* TTS Toggle for Regular Chat */}
+                  {/* TTS Controls for Regular Chat */}
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-white/60">Voice Assistant:</span>
-                    <button
-                      onClick={toggleTts}
-                      className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
-                        ttsEnabled 
-                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
-                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                      }`}
-                      title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
-                    >
-                      {ttsEnabled ? "🔊 ON" : "🔇 OFF"}
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      {/* Play Button */}
+                      <button
+                        onClick={() => {
+                          if (ttsEnabled && currentMessage) {
+                            speakMessage(currentMessage)
+                          }
+                        }}
+                        disabled={!ttsEnabled || !currentMessage || isSpeaking}
+                        className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
+                          !ttsEnabled || !currentMessage || isSpeaking
+                            ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                        }`}
+                        title={!ttsEnabled ? "Voice is disabled" : !currentMessage ? "No message to play" : isSpeaking ? "Already speaking" : "Play message with voice"}
+                      >
+                        {isSpeaking ? "⏸️" : "▶️"}
+                      </button>
+                      
+                      {/* TTS Toggle */}
+                      <button
+                        onClick={toggleTts}
+                        className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
+                          ttsEnabled 
+                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                            : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                        }`}
+                        title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+                      >
+                        {ttsEnabled ? "🔊 ON" : "🔇 OFF"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -405,20 +449,44 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                       </span>
                     </div>
                     
-                    {/* TTS Toggle for Tutorial */}
-                    <button
-                      onClick={toggleTts}
-                      className={`ml-3 p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                        ttsEnabled 
-                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
-                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                      }`}
-                      title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
-                    >
-                      <span className="text-xs">
-                        {ttsEnabled ? "🔊" : "🔇"}
-                      </span>
-                    </button>
+                    {/* TTS Controls for Tutorial */}
+                    <div className="flex items-center space-x-2">
+                      {/* Play Tutorial Step Button */}
+                      <button
+                        onClick={() => {
+                          if (ttsEnabled) {
+                            const step = tutorialSteps[tutorialStep]
+                            speakMessage(`${step.title}. ${step.message}`)
+                          }
+                        }}
+                        disabled={!ttsEnabled || isSpeaking}
+                        className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                          !ttsEnabled || isSpeaking
+                            ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                        }`}
+                        title={!ttsEnabled ? "Voice is disabled" : isSpeaking ? "Already speaking" : "Replay tutorial step with voice"}
+                      >
+                        <span className="text-xs">
+                          {isSpeaking ? "⏸️" : "▶️"}
+                        </span>
+                      </button>
+                      
+                      {/* TTS Toggle */}
+                      <button
+                        onClick={toggleTts}
+                        className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                          ttsEnabled 
+                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300' 
+                            : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                        }`}
+                        title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
+                      >
+                        <span className="text-xs">
+                          {ttsEnabled ? "🔊" : "🔇"}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Tutorial Navigation */}
