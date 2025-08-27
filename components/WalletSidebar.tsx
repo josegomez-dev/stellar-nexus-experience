@@ -366,7 +366,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     <div className="animate-fadeIn">
                       <p className="text-xs text-white/60 mb-1">Network</p>
                       <span className={`text-xs px-2 py-1 rounded bg-gradient-to-r ${getNetworkColor()} bg-clip-text text-transparent font-medium`}>
-                        {walletData?.network}
+                        {walletData?.network || stellarConfig.network}
                       </span>
                     </div>
                   )}
@@ -401,25 +401,89 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               {/* Demo Status - Only show when expanded */}
               {isExpanded && (
                 <div className="p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn">
-                  <h4 className="text-white font-medium text-sm mb-2">Demo Status</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Ready to test</span>
-                      <span className="text-green-400">✅</span>
+                  <h4 className="text-white font-medium text-sm mb-3">Demo Status</h4>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center">
+                      <div className="text-green-400 mb-1">✅</div>
+                      <span className="text-white/60">Ready</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Wallet connected</span>
-                      <span className="text-green-400">✅</span>
+                    <div className="text-center">
+                      <div className="text-green-400 mb-1">🛜</div>
+                      <span className="text-white/60">Network</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Network active</span>
-                      <span className="text-green-400">✅</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Transactions: {transactions.length}</span>
-                      <span className="text-green-400">✅</span>
+                    <div className="text-center">
+                      <div className="text-green-400 mb-1">💳ve</div>
+                      <span className="text-white/60">{transactions.length} TX</span>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Transaction History - Only show when expanded */}
+              {isExpanded && transactions.length > 0 && (
+                <div className="p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-medium text-sm">Transaction History</h4>
+                    <button
+                      onClick={() => setShowTransactionHistory(!showTransactionHistory)}
+                      className="text-xs text-white/60 hover:text-white/80 transition-colors"
+                    >
+                      {showTransactionHistory ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  
+                  {showTransactionHistory && (
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {recentTransactions.map((tx, index) => (
+                        <div
+                          key={index}
+                          className={`p-2 rounded-lg border text-xs ${
+                            tx.status === 'success' ? 'border-success-400/30 bg-success-500/10' :
+                            tx.status === 'failed' ? 'border-danger-400/30 bg-danger-500/10' :
+                            'border-warning-400/30 bg-warning-500/10'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <p className={`font-medium truncate flex-1 ${
+                              tx.status === 'success' ? 'text-success-300' :
+                              tx.status === 'failed' ? 'text-danger-300' :
+                              'text-warning-300'
+                            }`}>
+                              {tx.message}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-white/50">
+                              {tx.timestamp.toLocaleTimeString()}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${
+                              tx.status === 'success' ? 'text-success-400 bg-success-500/20' :
+                              tx.status === 'failed' ? 'text-danger-400 bg-danger-500/20' :
+                              'text-warning-400 bg-warning-500/20'
+                            }`}>
+                              {tx.status.toUpperCase()}
+                            </span>
+                          </div>
+                          {tx.demoId && (
+                            <div className="text-xs text-white/40 mt-1">
+                              Demo: {tx.demoId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {!showTransactionHistory && transactions.length > 0 && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => setShowTransactionHistory(true)}
+                        className="text-xs text-white/60 hover:text-white/80 transition-colors underline"
+                      >
+                        View {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

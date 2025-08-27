@@ -1,79 +1,16 @@
 'use client'
 
-import { WalletSidebar } from '@/components/WalletSidebar'
-import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { NexusPrime } from '@/components/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
-import { WalletProvider } from '@/contexts/WalletContext'
-import { useGlobalWallet } from '@/contexts/WalletContext'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
-// Wallet Address Display Component
-const WalletAddressDisplay = () => {
-  const { walletData, isConnected } = useGlobalWallet()
-  
-  if (!isConnected || !walletData) {
-    return null
-  }
-  
-  return (
-    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-brand-500/20 to-accent-500/20 backdrop-blur-sm border border-brand-400/30 rounded-xl shadow-2xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <span className="text-3xl">✅</span>
-          <div>
-            <h3 className="text-lg font-semibold text-brand-300">
-              Wallet Connected
-            </h3>
-            <p className="text-sm text-brand-200">
-              Network: {walletData.network}
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-brand-200 mb-1">Your Address:</p>
-          <div className="flex items-center space-x-2">
-            <p className="font-mono text-sm text-brand-300 bg-brand-900/50 px-3 py-2 rounded-lg border border-brand-400/30">
-              {walletData.publicKey.slice(0, 8)}...{walletData.publicKey.slice(-8)}
-            </p>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(walletData.publicKey);
-                alert('Full wallet address copied to clipboard!');
-              }}
-              className="text-brand-300 hover:text-brand-100 text-lg transition-colors"
-              title="Copy full address"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+
 
 function HomeContent() {
-  const { isConnected } = useGlobalWallet()
   const [showBackToTop, setShowBackToTop] = useState(false)
-  const [walletSidebarOpen, setWalletSidebarOpen] = useState(false)
-  const [walletExpanded, setWalletExpanded] = useState(false)
   const [showPreloader, setShowPreloader] = useState(false)
-
-  // Listen for wallet sidebar state changes
-  useEffect(() => {
-    const handleWalletSidebarToggle = (event: CustomEvent) => {
-      setWalletSidebarOpen(event.detail.isOpen)
-      setWalletExpanded(event.detail.isExpanded)
-    }
-
-    window.addEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener)
-    return () => {
-      window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener)
-    }
-  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -163,16 +100,11 @@ function HomeContent() {
   return (
     <EscrowProvider>
       <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden">
-        {/* Header */}
-        <Header />
-        
         {/* Animated background elements */}
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
         
         {/* Main Content */}
-        <main className={`relative z-10 transition-all duration-500 ease-out ${
-          walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
-        } ${!walletSidebarOpen ? 'pb-16' : 'pb-8'}`}>
+        <main className="relative z-10 pb-16">
 
           {/* Demos Section */}
           <section className="container mx-auto px-4">
@@ -389,13 +321,7 @@ function HomeContent() {
             className="fixed bottom-8 right-8 z-50 bg-gradient-to-r from-brand-500 to-accent-600 text-white p-3 rounded-full shadow-lg hover:from-brand-600 hover:to-accent-700 transition-all duration-300 transform hover:scale-110 backdrop-blur-sm border border-brand-400/30"
             title="Back to top"
           >
-            <Image
-              src="/images/logo/logoicon.png"
-              alt="Back to top"
-              width={20}
-              height={20}
-              className="w-5 h-5"
-            />
+            <span className="text-xl font-bold">↑</span>
           </button>
         )}
 
@@ -462,26 +388,15 @@ function HomeContent() {
         </div>
       )}
 
-      {/* Wallet Sidebar */}
-      <WalletSidebar 
-        isOpen={walletSidebarOpen} 
-        onToggle={() => setWalletSidebarOpen(!walletSidebarOpen)} 
-        showBanner={false}
-      />
-
       {/* NEXUS PRIME Character */}
       <NexusPrime 
         currentPage="home"
-        walletConnected={isConnected}
+        walletConnected={false}
       />
     </EscrowProvider>
   );
 }
 
 export default function Home() {
-  return (
-    <WalletProvider>
-      <HomeContent />
-    </WalletProvider>
-  )
+  return <HomeContent />
 }

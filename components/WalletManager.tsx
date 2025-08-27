@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useWallet } from '@/lib/stellar-wallet-hooks'
+import { validateStellarAddress, sanitizeStellarAddressInput, generateTestStellarAddress } from '@/lib/stellar-address-validation'
 
 export const WalletManager = () => {
   const { 
@@ -19,21 +20,39 @@ export const WalletManager = () => {
   const [selectedWallet, setSelectedWallet] = useState<string>('')
   const [availableWallets, setAvailableWallets] = useState<Array<{id: string, name: string}>>([])
   const [isLoadingWallets, setIsLoadingWallets] = useState(false)
+  const [validationError, setValidationError] = useState<string>('')
+  const [isValidating, setIsValidating] = useState(false)
 
   const handleConnect = async () => {
-    if (selectedWallet) {
-      console.log('Attempting to connect wallet with ID:', selectedWallet)
-      try {
-        await connect(selectedWallet)
-        console.log('✅ Wallet connection successful')
-      } catch (err) {
-        console.error('❌ Failed to connect wallet:', err)
-        // Show user-friendly error message
-        const errorMessage = err instanceof Error ? err.message : 'Unknown connection error'
-        alert(`❌ Connection failed: ${errorMessage}`)
-      }
-    } else {
-      alert('⚠️ Please enter a wallet address first')
+    if (!selectedWallet) {
+      setValidationError('⚠️ Please enter a wallet address first')
+      return
+    }
+
+    // Validate the Stellar address
+    setIsValidating(true)
+    setValidationError('')
+    
+    const validation = validateStellarAddress(selectedWallet)
+    
+    if (!validation.isValid) {
+      setValidationError(validation.error || 'Invalid Stellar address format')
+      setIsValidating(false)
+      return
+    }
+
+    console.log('Attempting to connect wallet with ID:', selectedWallet)
+    try {
+      await connect(selectedWallet)
+      console.log('✅ Wallet connection successful')
+      setValidationError('') // Clear any previous errors
+    } catch (err) {
+      console.error('❌ Failed to connect wallet:', err)
+      // Show user-friendly error message
+      const errorMessage = err instanceof Error ? err.message : 'Unknown connection error'
+      setValidationError(`❌ Connection failed: ${errorMessage}`)
+    } finally {
+      setIsValidating(false)
     }
   }
 
@@ -43,6 +62,20 @@ export const WalletManager = () => {
 
   const handleWalletSelect = (walletType: string) => {
     setSelectedWallet(walletType)
+    
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError('')
+    }
+    
+    // Real-time validation for better UX
+    if (walletType.length > 0) {
+      const sanitized = sanitizeStellarAddressInput(walletType)
+      if (sanitized !== walletType) {
+        // Auto-sanitize the input
+        setSelectedWallet(sanitized)
+      }
+    }
   }
 
   // Load available wallets on component mount
@@ -103,20 +136,51 @@ export const WalletManager = () => {
                           placeholder="G... (your Stellar address)"
                           value={selectedWallet}
                           onChange={(e) => handleWalletSelect(e.target.value)}
-                          className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400 text-white placeholder-white/50"
+                          className={`w-full px-3 py-2 bg-white/20 border rounded-md shadow-sm focus:outline-none focus:ring-cyan-400 focus:border-cyan-400 text-white placeholder-white/50 transition-colors ${
+                            validationError 
+                              ? 'border-red-400 focus:border-red-400' 
+                              : 'border-white/30'
+                          }`}
                           disabled={isLoadingWallets}
+                          maxLength={56}
                         />
                         <p className="text-xs text-white/70 mt-1">
-                          Enter your Stellar wallet address (starts with G)
+                          Enter your Stellar wallet address (starts with G, exactly 56 characters)
                         </p>
+                        <div className="text-xs text-white/50 mt-2 p-2 bg-white/5 rounded border border-white/10">
+                          <p className="font-medium mb-1">📝 Example format:</p>
+                          <p className="font-mono text-xs">GABCDEFGHIJKLMNOPQRSTUVWXYZ234567ABCDEFGHIJKLMNOPQRSTUVWXYZ234567</p>
+                          <p className="text-xs mt-1">• Starts with "G"</p>
+                          <p className="text-xs">• Only letters A-Z and numbers 2-7</p>
+                          <p className="text-xs">• Exactly 56 characters long</p>
+                          <p className="text-xs mt-2 text-amber-300">🔒 Address validation ensures security and prevents errors</p>
+                        </div>
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const testAddress = generateTestStellarAddress()
+                              setSelectedWallet(testAddress)
+                              setValidationError('')
+                            }}
+                            className="text-xs text-cyan-300 hover:text-cyan-100 underline transition-colors"
+                          >
+                            🎲 Generate Test Address (Demo Only)
+                          </button>
+                        </div>
+                        {validationError && (
+                          <div className="text-red-400 text-xs mt-1 p-2 bg-red-500/10 border border-red-400/30 rounded">
+                            ⚠️ {validationError}
+                          </div>
+                        )}
                       </div>
           
                                 <button
                         onClick={handleConnect}
-                        disabled={!selectedWallet}
+                        disabled={!selectedWallet || isValidating}
                         className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg"
                       >
-                        🚀 Connect Wallet
+                        {isValidating ? '🔍 Validating...' : '🚀 Connect Wallet'}
                       </button>
           
                                 <div className="text-xs text-white/70 text-center">

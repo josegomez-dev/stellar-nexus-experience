@@ -75,12 +75,12 @@ export const Header = () => {
             {/* Wallet Connection Status */}
             {isConnected && walletData ? (
               <div className="flex items-center space-x-3">
-                <div className="hidden sm:flex items-center space-x-2">
-                  <span className="text-xs text-white/60">Wallet:</span>
-                  <span className="text-xs text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30">
-                    {walletData.publicKey.slice(0, 6)}...{walletData.publicKey.slice(-4)}
-                  </span>
-                </div>
+                                  <div className="hidden sm:flex items-center space-x-2">
+                    <span className="text-xs text-white/60">Wallet:</span>
+                    <span className="text-xs text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30">
+                      {walletData.publicKey ? `${walletData.publicKey.slice(0, 6)}...${walletData.publicKey.slice(-4)}` : 'Invalid Address'}
+                    </span>
+                  </div>
                 <button
                   onClick={copyWalletAddress}
                   className="text-white/80 hover:text-white transition-colors"
@@ -152,11 +152,11 @@ export const Header = () => {
                   <div className="px-3 py-2">
                     <div className="text-xs text-white/60 mb-2">Connected Wallet:</div>
                     <div className="text-sm text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30 break-all">
-                      {walletData.publicKey}
+                      {walletData.publicKey || 'Invalid Address'}
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-white/60">
-                        Network: {walletData.network}
+                        Network: {walletData.network || stellarConfig.network}
                       </span>
                       <button
                         onClick={handleDisconnect}

@@ -15,7 +15,7 @@ export interface TransactionStatus {
 
 interface TransactionContextType {
   transactions: TransactionStatus[]
-  addTransaction: (transaction: Omit<TransactionStatus, 'timestamp'>) => void
+  addTransaction: (transaction: Omit<TransactionStatus, 'timestamp'>) => TransactionStatus
   updateTransaction: (hash: string, status: 'success' | 'failed', message: string) => void
   clearTransactions: () => void
   getTransactionsByDemo: (demoId: string) => TransactionStatus[]
@@ -39,12 +39,13 @@ interface TransactionProviderProps {
 export const TransactionProvider = ({ children }: TransactionProviderProps) => {
   const [transactions, setTransactions] = useState<TransactionStatus[]>([])
 
-  const addTransaction = (transaction: Omit<TransactionStatus, 'timestamp'>) => {
+  const addTransaction = (transaction: Omit<TransactionStatus, 'timestamp'>): TransactionStatus => {
     const newTransaction: TransactionStatus = {
       ...transaction,
       timestamp: new Date()
     }
     setTransactions(prev => [newTransaction, ...prev])
+    return newTransaction
   }
 
   const updateTransaction = (hash: string, status: 'success' | 'failed', message: string) => {

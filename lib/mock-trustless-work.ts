@@ -729,3 +729,282 @@ export const useResolveDispute = (): ResolveDisputeHook => {
     error
   }
 }
+
+// Direct function exports for use in components
+export const initializeContract = async (payload: any): Promise<EscrowResult> => {
+  // Simulate realistic API call delay with progress
+  await new Promise(resolve => setTimeout(resolve, 1500))
+  
+  // Generate mock contract ID
+  const contractId = `contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+  // Mock transaction object
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    network: 'TESTNET',
+    operations: [
+      {
+        type: 'invoke',
+        contractId: contractId,
+        function: 'initialize_escrow',
+        args: [payload]
+      }
+    ]
+  }
+
+  // Mock escrow object
+  const escrow = {
+    id: contractId,
+    type: 'multi-release',
+    asset: payload.asset,
+    amount: payload.amount,
+    platformFee: payload.platformFee || '0.01',
+    buyer: payload.buyer,
+    seller: payload.seller,
+    arbiter: payload.arbiter,
+    terms: payload.terms,
+    deadline: payload.deadline || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active',
+    funded: false,
+    releases: [
+      {
+        id: `release_${Date.now()}_1`,
+        amount: payload.amount,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    metadata: {
+      description: payload.terms,
+      category: 'milestone-voting'
+    }
+  }
+
+  return {
+    contractId,
+    transaction,
+    escrow
+  }
+}
+
+export const fundEscrow = async (payload: any): Promise<EscrowResult> => {
+  // Simulate realistic API call delay
+  await new Promise(resolve => setTimeout(resolve, 1200))
+  
+  // Mock transaction object
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    network: 'TESTNET',
+    operations: [
+      {
+        type: 'invoke',
+        contractId: payload.contractId,
+        function: 'fund_escrow',
+        args: [payload.amount, payload.asset]
+      }
+    ]
+  }
+
+  // Mock escrow object with funded status
+  const escrow = {
+    id: payload.contractId,
+    type: 'multi-release',
+    asset: payload.asset,
+    amount: payload.amount,
+    platformFee: '0.01',
+    buyer: 'demo_buyer_address',
+    seller: 'demo_seller_address',
+    arbiter: 'demo_arbiter_address',
+    terms: 'Milestone-based escrow with stakeholder approval',
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active',
+    funded: true,
+    releases: [
+      {
+        id: `release_${Date.now()}_1`,
+        amount: payload.amount,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    metadata: {
+      description: 'Milestone-based escrow with stakeholder approval',
+      category: 'milestone-voting'
+    }
+  }
+
+  return {
+    contractId: payload.contractId,
+    transaction,
+    escrow
+  }
+}
+
+export const changeMilestoneStatus = async (payload: any): Promise<EscrowResult> => {
+  // Simulate realistic API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  // Mock transaction object
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    network: 'TESTNET',
+    operations: [
+      {
+        type: 'invoke',
+        contractId: payload.contractId,
+        function: 'change_milestone_status',
+        args: [payload.milestoneId, payload.status]
+      }
+    ]
+  }
+
+  // Mock escrow object
+  const escrow = {
+    id: payload.contractId,
+    type: 'multi-release',
+    asset: 'USDC',
+    amount: '2000000',
+    platformFee: '0.01',
+    buyer: 'demo_buyer_address',
+    seller: 'demo_seller_address',
+    arbiter: 'demo_arbiter_address',
+    terms: 'Milestone-based escrow with stakeholder approval',
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active',
+    funded: true,
+    releases: [
+      {
+        id: `release_${Date.now()}_1`,
+        amount: '2000000',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    metadata: {
+      description: 'Milestone-based escrow with stakeholder approval',
+      category: 'milestone-voting'
+    }
+  }
+
+  return {
+    contractId: payload.contractId,
+    transaction,
+    escrow
+  }
+}
+
+export const approveMilestone = async (payload: any): Promise<EscrowResult> => {
+  // Simulate realistic API call delay
+  await new Promise(resolve => setTimeout(resolve, 800))
+  
+  // Mock transaction object
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    network: 'TESTNET',
+    operations: [
+      {
+        type: 'invoke',
+        contractId: payload.contractId,
+        function: 'approve_milestone',
+        args: [payload.milestoneId]
+      }
+    ]
+  }
+
+  // Mock escrow object
+  const escrow = {
+    id: payload.contractId,
+    type: 'multi-release',
+    asset: 'USDC',
+    amount: '2000000',
+    platformFee: '0.01',
+    buyer: 'demo_buyer_address',
+    seller: 'demo_seller_address',
+    arbiter: 'demo_arbiter_address',
+    terms: 'Milestone-based escrow with stakeholder approval',
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active',
+    funded: true,
+    releases: [
+      {
+        id: `release_${Date.now()}_1`,
+        amount: '2000000',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    metadata: {
+      description: 'Milestone-based escrow with stakeholder approval',
+      category: 'milestone-voting'
+    }
+  }
+
+  return {
+    contractId: payload.contractId,
+    transaction,
+    escrow
+  }
+}
+
+export const releaseFunds = async (payload: any): Promise<EscrowResult> => {
+  // Simulate realistic API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  // Mock transaction object
+  const transaction = {
+    id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    network: 'TESTNET',
+    operations: [
+      {
+        type: 'invoke',
+        contractId: payload.contractId,
+        function: 'release_funds',
+        args: [payload.milestoneId]
+      }
+    ]
+  }
+
+  // Mock escrow object
+  const escrow = {
+    id: payload.contractId,
+    type: 'multi-release',
+    asset: 'USDC',
+    amount: '2000000',
+    platformFee: '0.01',
+    buyer: 'demo_buyer_address',
+    seller: 'demo_seller_address',
+    arbiter: 'demo_arbiter_address',
+    terms: 'Milestone-based escrow with stakeholder approval',
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active',
+    funded: true,
+    releases: [
+      {
+        id: `release_${Date.now()}_1`,
+        amount: '2000000',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ],
+    metadata: {
+      description: 'Milestone-based escrow with stakeholder approval',
+      category: 'milestone-voting'
+    }
+  }
+
+  return {
+    contractId: payload.contractId,
+    transaction,
+    escrow
+  }
+}

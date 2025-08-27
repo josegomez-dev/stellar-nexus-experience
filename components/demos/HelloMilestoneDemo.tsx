@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
-import { useTransactionHistory } from '@/contexts/TransactionContext'
+
 import { useToast } from '@/contexts/ToastContext'
+import { useTransactionHistory } from '@/contexts/TransactionContext'
 import { 
   useInitializeEscrow, 
   useFundEscrow, 
@@ -25,8 +26,9 @@ interface DemoStep {
 
 export const HelloMilestoneDemo = () => {
   const { walletData, isConnected } = useGlobalWallet()
-  const { addTransaction, updateTransaction, getTransactionsByDemo } = useTransactionHistory()
+
   const { addToast } = useToast()
+  const { addTransaction, updateTransaction } = useTransactionHistory()
   const [currentStep, setCurrentStep] = useState(0)
   const [contractId, setContractId] = useState<string>('')
   const [escrowData, setEscrowData] = useState<any>(null)
@@ -34,7 +36,7 @@ export const HelloMilestoneDemo = () => {
   const [demoStarted, setDemoStarted] = useState(false)
 
   // Get transactions for this demo
-  const transactionHistory = getTransactionsByDemo('hello-milestone')
+
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -604,51 +606,7 @@ export const HelloMilestoneDemo = () => {
           </div>
         )}
 
-        {/* Transaction History */}
-        {transactionHistory.length > 0 && (
-          <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
-            <h3 className="text-xl font-semibold text-white mb-4">Transaction History</h3>
-            <div className="space-y-3 max-h-60 overflow-y-auto">
-              {transactionHistory.map((tx, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg border ${
-                    tx.status === 'success' ? 'border-success-400/30 bg-success-500/10' :
-                    tx.status === 'failed' ? 'border-danger-400/30 bg-danger-500/10' :
-                    'border-warning-400/30 bg-warning-500/10'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${
-                        tx.status === 'success' ? 'text-success-300' :
-                        tx.status === 'failed' ? 'text-danger-300' :
-                        'text-warning-300'
-                      }`}>
-                        {tx.message}
-                      </p>
-                      <p className="text-xs text-white/60 mt-1">
-                        {tx.timestamp.toLocaleTimeString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-xs ${
-                        tx.status === 'success' ? 'text-success-400' :
-                        tx.status === 'failed' ? 'text-danger-400' :
-                        'text-warning-400'
-                      }`}>
-                        {tx.status.toUpperCase()}
-                      </p>
-                      <p className="text-xs text-white/40 font-mono">
-                        {tx.hash.slice(0, 8)}...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
@@ -697,6 +655,11 @@ export const HelloMilestoneDemo = () => {
             This demonstrates the core trustless escrow flow where no third party is needed - 
             the smart contract handles everything automatically once conditions are met.
           </p>
+          <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
+            <p className="text-xs text-white/60">
+              💡 <strong>Tip:</strong> View your transaction history in the wallet sidebar (🔐) to track all demo progress!
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer'
 import { NexusPrime } from '@/components/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { WalletProvider } from '@/contexts/WalletContext'
+import { Providers } from '@/components/Providers'
 import { TransactionProvider } from '@/contexts/TransactionContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { useGlobalWallet } from '@/contexts/WalletContext'
@@ -53,7 +54,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Basic Escrow Flow Demo',
       description: 'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
       icon: '/images/demos/babysteps.png',
-      color: 'from-brand-500 to-brand-400'
+      color: 'from-brand-500 to-brand-400',
+      status: 'ready',
+      statusText: 'Ready to Test! 🚀'
     },
     {
       id: 'milestone-voting',
@@ -61,7 +64,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Multi-Stakeholder Approval System',
       description: 'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
       icon: '/images/demos/democracyinaction.png',
-      color: 'from-success-500 to-success-400'
+      color: 'from-success-500 to-success-400',
+      status: 'ready',
+      statusText: 'Ready to Test! 🚀'
     },
     {
       id: 'dispute-resolution',
@@ -69,7 +74,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Dispute Resolution & Arbitration',
       description: 'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
       icon: '/images/demos/drama.png',
-      color: 'from-warning-500 to-warning-400'
+      color: 'from-warning-500 to-warning-400',
+      status: 'coming-soon',
+      statusText: 'Coming Soon! 🔨'
     },
     {
       id: 'micro-marketplace',
@@ -77,7 +84,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Micro-Task Marketplace',
       description: 'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
       icon: '/images/demos/economy.png',
-      color: 'from-accent-500 to-accent-400'
+      color: 'from-accent-500 to-accent-400',
+      status: 'coming-soon',
+      statusText: 'Coming Soon! 🔨'
     }
   ]
 
@@ -94,6 +103,21 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
           }`}
           data-demo-id={demo.id}
         >
+          {/* Status Badge */}
+          <div className={`absolute top-3 right-3 z-20 ${
+            demo.status === 'ready' 
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+              : 'bg-gradient-to-r from-amber-500 to-orange-500'
+          } text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-white/20 animate-pulse`}>
+            {demo.statusText}
+          </div>
+          
+          {/* Featured Badge for Ready Demos */}
+          {demo.status === 'ready' && (
+            <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/20">
+              ⭐ Featured
+            </div>
+          )}
           <div className="mb-3 flex justify-center">
             <Image 
               src={demo.icon} 
@@ -127,6 +151,36 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
           
           <h4 className="font-semibold text-brand-300 mb-3 text-left text-sm uppercase tracking-wide">{demo.subtitle}</h4>
           <p className="text-sm text-white/70 text-left leading-relaxed">{demo.description}</p>
+          
+          {/* Progress Indicator for Coming Soon Demos */}
+          {demo.status === 'coming-soon' && (
+            <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-white/60">Development Progress</span>
+                <span className="text-xs text-amber-400">25%</span>
+              </div>
+              <div className="w-full bg-white/10 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: '25%' }}
+                ></div>
+              </div>
+              <p className="text-xs text-white/50 mt-2 text-center">
+                🔨 Under active development
+              </p>
+            </div>
+          )}
+          
+          {/* Coming Soon Overlay */}
+          {demo.status === 'coming-soon' && (
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl pointer-events-none z-10">
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-2 left-2 w-2 h-2 bg-white/10 rounded-full animate-pulse"></div>
+                <div className="absolute top-4 right-3 w-1.5 h-1.5 bg-white/10 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute bottom-3 left-4 w-1 h-1 bg-white/10 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+              </div>
+            </div>
+          )}
         </button>
       ))}
     </div>
@@ -315,7 +369,7 @@ function DemosPageContent() {
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
         
         {/* Main Content */}
-        <main className={`relative z-10 transition-all duration-500 ease-out ${
+        <main className={`relative z-10 ${
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}>
           {/* Hero Section */}
