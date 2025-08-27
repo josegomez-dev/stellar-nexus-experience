@@ -70,8 +70,24 @@ function WalletPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900">
       {/* Header */}
-      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-4 relative overflow-hidden">
+        {/* Epic Background Effect */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Energy Core */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-500/10 via-accent-500/15 to-brand-400/10"></div>
+          
+          {/* Floating Particles */}
+          <div className="absolute top-2 left-1/4 w-1 h-1 bg-brand-400 rounded-full animate-ping opacity-60"></div>
+          <div className="absolute top-3 right-1/3 w-1.5 h-1.5 bg-accent-400 rounded-full animate-ping opacity-70" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-2 left-1/3 w-1 h-1 bg-brand-300 rounded-full animate-ping opacity-50" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-3 right-1/4 w-1.5 h-1.5 bg-accent-300 rounded-full animate-ping opacity-65" style={{ animationDelay: '1.5s' }}></div>
+          
+          {/* Energy Streams */}
+          <div className="absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-400/30 to-transparent animate-pulse opacity-40"></div>
+          <div className="absolute right-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-400/30 to-transparent animate-pulse opacity-50"></div>
+        </div>
+        
+        <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-accent-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm font-bold">SW</span>

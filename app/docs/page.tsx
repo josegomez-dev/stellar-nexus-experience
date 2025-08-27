@@ -42,9 +42,55 @@ export default function DocsPage() {
                       style={{ zIndex: -1, position: 'relative' }}
                     />
                   </div>
-                  <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6" style={{ zIndex: 1000, marginTop: '-50px' }}>
-                    Trustless Work Documentation
-                  </h1>
+                  
+                  {/* Epic Legendary Background for Title */}
+                  <div className="relative mb-8">
+                    {/* Legendary Energy Background */}
+                    <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+                      {/* Primary Energy Core */}
+                      <div className="relative w-[500px] h-40">
+                        {/* Inner Energy Ring */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/40 via-accent-500/50 to-brand-400/40 blur-lg scale-150"></div>
+                        
+                        {/* Middle Energy Ring */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/30 via-brand-500/40 to-accent-400/30 blur-xl scale-200"></div>
+                        
+                        {/* Outer Energy Ring */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-accent-500/30 to-brand-300/20 blur-2xl scale-250"></div>
+                      </div>
+                      
+                      {/* Floating Energy Particles */}
+                      <div className="absolute inset-0">
+                        <div className="absolute top-6 left-1/4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-80"></div>
+                        <div className="absolute top-12 right-1/3 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-90" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute bottom-8 left-1/3 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-70" style={{ animationDelay: '1s' }}></div>
+                        <div className="absolute bottom-12 right-1/4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85" style={{ animationDelay: '1.5s' }}></div>
+                        <div className="absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-brand-200 rounded-full animate-ping opacity-60" style={{ animationDelay: '2s' }}></div>
+                        <div className="absolute top-1/2 right-1/6 w-2 h-2 bg-accent-200 rounded-full animate-ping opacity-75" style={{ animationDelay: '2.5s' }}></div>
+                      </div>
+                      
+                      {/* Energy Wave Rings */}
+                      <div className="absolute inset-0">
+                        <div className="absolute inset-0 rounded-full border-2 border-brand-400/40 animate-ping scale-150" style={{ animationDuration: '4s' }}></div>
+                        <div className="absolute inset-0 rounded-full border border-accent-400/30 animate-ping scale-200" style={{ animationDuration: '5s' }}></div>
+                        <div className="absolute inset-0 rounded-full border border-brand-300/25 animate-ping scale-250" style={{ animationDuration: '6s' }}></div>
+                      </div>
+                      
+                      {/* Plasma Energy Streams */}
+                      <div className="absolute inset-0">
+                        <div className="absolute left-0 top-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60" style={{ animationDuration: '3s' }}></div>
+                        <div className="absolute right-0 top-1/2 w-1 h-20 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70" style={{ animationDuration: '2.5s' }}></div>
+                        <div className="absolute top-0 left-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-brand-400/50 to-transparent animate-pulse opacity-50" style={{ animationDuration: '3.5s' }}></div>
+                        <div className="absolute bottom-0 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-accent-400/50 to-transparent animate-pulse opacity-65" style={{ animationDuration: '2.8s' }}></div>
+                      </div>
+                    </div>
+                    
+                    {/* Title with Enhanced Styling */}
+                    <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl" style={{ zIndex: 1000, marginTop: '-50px' }}>
+                      Trustless Work Documentation
+                    </h1>
+                  </div>
+                  
                   <p className="text-xl text-white/80 max-w-3xl mx-auto">
                     A comprehensive guide to building decentralized work platforms on the Stellar blockchain
                   </p>

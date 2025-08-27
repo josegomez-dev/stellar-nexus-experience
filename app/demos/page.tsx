@@ -370,9 +370,43 @@ function DemosPageContent() {
             }}
           >
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-8">
-                🎭 Pick Your Adventure
-              </h2>
+              {/* Epic Legendary Background for Title */}
+              <div className="relative mb-12">
+                {/* Legendary Energy Background */}
+                <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+                  {/* Primary Energy Core */}
+                  <div className="relative w-96 h-32">
+                    {/* Inner Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 blur-md scale-150"></div>
+                    
+                    {/* Middle Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/20 via-brand-500/30 to-accent-400/20 blur-lg scale-200"></div>
+                    
+                    {/* Outer Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/10 via-accent-500/20 to-brand-300/10 blur-xl scale-250"></div>
+                  </div>
+                  
+                  {/* Floating Energy Particles */}
+                  <div className="absolute inset-0">
+                    <div className="absolute top-4 left-1/4 w-2 h-2 bg-brand-400 rounded-full animate-ping opacity-70"></div>
+                    <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-accent-400 rounded-full animate-ping opacity-80" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-brand-300 rounded-full animate-ping opacity-60" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-accent-300 rounded-full animate-ping opacity-90" style={{ animationDelay: '1.5s' }}></div>
+                  </div>
+                  
+                  {/* Energy Wave Rings */}
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 rounded-full border border-brand-400/30 animate-ping scale-150" style={{ animationDuration: '3s' }}></div>
+                    <div className="absolute inset-0 rounded-full border border-accent-400/20 animate-ping scale-200" style={{ animationDuration: '4s' }}></div>
+                    <div className="absolute inset-0 rounded-full border border-brand-300/15 animate-ping scale-250" style={{ animationDuration: '5s' }}></div>
+                  </div>
+                </div>
+                
+                {/* Title with Enhanced Styling */}
+                <h2 className="relative z-10 text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-8 drop-shadow-2xl">
+                  🎭 Pick Your Adventure
+                </h2>
+              </div>
               
               <DemoSelector activeDemo={activeDemo} setActiveDemo={setActiveDemo} />
             </div>
