@@ -165,17 +165,14 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
             )}
           </div>
           
-          {isOpen && (
-            <button
-              onClick={onToggle}
-              className="bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-              title="Close Wallet"
-            >
-              <div className="flex items-center space-x-2">
-                <span>&nbsp;✕&nbsp;</span>
-              </div>
-            </button>
-          )}
+          {/* Close Button - Better positioned and styled */}
+          <button
+            onClick={onToggle}
+            className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group"
+            title="Close Wallet"
+          >
+            <span className="text-lg font-bold group-hover:scale-110 transition-transform duration-200">×</span>
+          </button>
 
           <div className="flex items-center space-x-2">
             <button
@@ -188,15 +185,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               <div className={`transform transition-transform duration-300 ${!isExpanded ? 'rotate-180' : 'rotate-0'}`}>
                 ▶
               </div>
-            </button>
-            <button
-              onClick={onToggle}
-              className={`text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 lg:hidden ${
-                isExpanded ? 'p-2' : 'p-1.5'
-              }`}
-              title="Close"
-            >
-              ✕
             </button>
           </div>
         </div>
@@ -259,6 +247,78 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </div>
                 )}
                 
+                {/* Web3 Onboarding Section */}
+                {isExpanded && (
+                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg">
+                    <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+                      🌟 New to Web3? Start Here!
+                    </h4>
+                    
+                    {/* Freighter Recommendation */}
+                    <div className="mb-4 p-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-lg">🔗</span>
+                        <span className="text-sm font-medium text-cyan-200">Recommended: Freighter Wallet</span>
+                      </div>
+                      <p className="text-xs text-cyan-100/80 mb-3">
+                        The most popular Stellar wallet with browser extension support
+                      </p>
+                      <div className="space-y-2">
+                        <a
+                          href="https://www.freighter.app/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
+                        >
+                          🚀 Install Freighter
+                        </a>
+                        <div className="text-xs text-cyan-200/60 text-center">
+                          Free • Secure • Easy to use
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Other Wallet Options */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-blue-200/80 mb-2">Other Stellar Wallets:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href="https://albedo.link/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                        >
+                          🌅 Albedo
+                        </a>
+                        <a
+                          href="https://xbull.app/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                        >
+                          🐂 xBull
+                        </a>
+                        <a
+                          href="https://rabet.io/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                        >
+                          🐰 Rabet
+                        </a>
+                        <a
+                          href="https://stellar.org/ecosystem/wallets"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                        >
+                          📚 More Options
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Manual Address Input */}
                 {isExpanded && (
                   <div className="space-y-2">

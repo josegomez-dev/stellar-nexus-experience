@@ -22,6 +22,7 @@ export const WalletManager = () => {
   const [isLoadingWallets, setIsLoadingWallets] = useState(false)
   const [validationError, setValidationError] = useState<string>('')
   const [isValidating, setIsValidating] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const handleConnect = async () => {
     if (!selectedWallet) {
@@ -121,13 +122,139 @@ export const WalletManager = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl shadow-2xl">
-      <h2 className="text-2xl font-bold text-white mb-6 text-center">
-        🔐 Connect Your Wallet
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white">
+          🔐 Connect Your Wallet
+        </h2>
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-blue-300 hover:text-blue-200 text-sm font-medium px-3 py-1 rounded-lg border border-blue-400/30 hover:bg-blue-500/20 transition-all duration-300"
+          title={showHelp ? 'Hide Help' : 'Show Help'}
+        >
+          {showHelp ? '🙈 Hide Help' : '❓ Need Help?'}
+        </button>
+      </div>
       
-      {!isConnected ? (
+              {/* Help Section */}
+        {showHelp && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/20 rounded-lg animate-fadeIn">
+            <h4 className="text-sm font-semibold text-indigo-300 mb-3 flex items-center">
+              🎯 Quick Start Guide
+            </h4>
+            <div className="space-y-3 text-xs text-indigo-200/80">
+              <div className="flex items-start space-x-2">
+                <span className="text-indigo-300 mt-0.5">1️⃣</span>
+                <div>
+                  <strong>Install a Stellar Wallet:</strong> We recommend Freighter (browser extension)
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-indigo-300 mt-0.5">2️⃣</span>
+                <div>
+                  <strong>Create/Import Account:</strong> Set up your wallet and get your public address
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-indigo-300 mt-0.5">3️⃣</span>
+                <div>
+                  <strong>Copy Address:</strong> Copy your Stellar address (starts with "G")
+                </div>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-indigo-300 mt-0.5">4️⃣</span>
+                <div>
+                  <strong>Paste & Connect:</strong> Paste your address below and click connect
+                </div>
+              </div>
+              <div className="mt-3 p-2 bg-indigo-500/20 rounded border border-indigo-400/30">
+                <p className="text-xs text-indigo-200">
+                  <strong>💡 Pro Tip:</strong> This demo uses Testnet, so you can safely experiment without real funds!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isConnected ? (
         <div className="space-y-4">
-                                <div>
+          {/* Web3 Onboarding Section */}
+          <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg">
+            <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+              🌟 New to Web3? Start Here!
+            </h4>
+            
+            {/* Freighter Recommendation */}
+            <div className="mb-4 p-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🔗</span>
+                <span className="text-sm font-medium text-cyan-200">Recommended: Freighter Wallet</span>
+              </div>
+              <p className="text-xs text-cyan-100/80 mb-3">
+                The most popular Stellar wallet with browser extension support
+              </p>
+              <div className="space-y-2">
+                <a
+                  href="https://www.freighter.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
+                >
+                  🚀 Install Freighter
+                </a>
+                <div className="text-xs text-cyan-200/60 text-center">
+                  Free • Secure • Easy to use
+                </div>
+              </div>
+            </div>
+
+            {/* Other Wallet Options */}
+            <div className="space-y-2">
+              <p className="text-xs text-blue-200/80 mb-2">Other Stellar Wallets:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href="https://albedo.link/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                >
+                  🌅 Albedo
+                </a>
+                <a
+                  href="https://xbull.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                >
+                  🐂 xBull
+                </a>
+                <a
+                  href="https://rabet.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                >
+                  🐰 Rabet
+                </a>
+                <a
+                  href="https://stellar.org/ecosystem/wallets"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                >
+                  📚 More Options
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-4 py-2 rounded-lg">
+              <span className="text-amber-300">💡</span>
+              <span className="text-sm text-amber-200">Already have a wallet? Enter your address below</span>
+            </div>
+          </div>
+
+          <div>
                         <label className="block text-sm font-medium text-white/90 mb-2">
                           Enter Your Stellar Wallet Address
                         </label>
@@ -154,6 +281,14 @@ export const WalletManager = () => {
                           <p className="text-xs">• Only letters A-Z and numbers 2-7</p>
                           <p className="text-xs">• Exactly 56 characters long</p>
                           <p className="text-xs mt-2 text-amber-300">🔒 Address validation ensures security and prevents errors</p>
+                        </div>
+                        
+                        {/* Network Information */}
+                        <div className="text-xs text-emerald-300/70 mt-2 p-2 bg-emerald-500/10 rounded border border-emerald-400/20">
+                          <p className="font-medium mb-1 text-emerald-200">🌐 Network Info:</p>
+                          <p className="text-xs">• This demo uses <strong>Testnet</strong> (safe for testing)</p>
+                          <p className="text-xs">• Testnet addresses work the same as mainnet</p>
+                          <p className="text-xs">• No real funds are at risk</p>
                         </div>
                         <div className="mt-2">
                           <button
