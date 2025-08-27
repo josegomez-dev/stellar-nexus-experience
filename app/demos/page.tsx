@@ -168,7 +168,7 @@ const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: {
     return (
       <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-danger-500/20 to-warning-500/20 backdrop-blur-sm border border-danger-400/30 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
         <div className="flex items-center justify-center space-x-6">
-          <span className="text-3xl">⚠️</span>
+          <span style={{ fontSize: '2rem'}}>⚠️</span>
           <div className="text-center">
             <h3 className="text-lg font-semibold text-danger-300 mb-2">
               Wallet Not Connected
