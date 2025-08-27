@@ -169,7 +169,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           {/* Close Button - Better positioned and styled */}
           <button
             onClick={onToggle}
-            className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group"
+            className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group mr-6rr men -mt-22"
             title="Close Wallet"
           >
             <span className="text-lg font-bold group-hover:scale-110 transition-transform duration-200">×</span>

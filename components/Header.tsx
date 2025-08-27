@@ -9,6 +9,20 @@ export const Header = () => {
   const { walletData, isConnected, disconnect } = useGlobalWallet()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  // CSS keyframes for dropdown animation
+  const dropdownAnimation = `
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `
+
   const handleDisconnect = () => {
     disconnect()
     setIsMenuOpen(false)
@@ -22,8 +36,10 @@ export const Header = () => {
   }
 
   return (
-    <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <style>{dropdownAnimation}</style>
+      <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 transition-all duration-300 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and App Name */}
           <div className="flex items-center space-x-1">
@@ -53,7 +69,7 @@ export const Header = () => {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
             <a href="https://github.com/josegomez-dev/trustless-poc" target='_blank' className="text-white/80 hover:text-white transition-colors relative group">
-              📦 Github Repo
+              📦 Repo
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-accent-400 transition-all duration-300 group-hover:w-full"></span>
             </a>
           </nav>
@@ -114,7 +130,12 @@ export const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-white/20 bg-white/5 backdrop-blur-md">
+          <div 
+            className="md:hidden absolute top-full left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 shadow-xl z-50"
+            style={{
+              animation: 'fadeInDown 0.3s ease-out'
+            }}
+          >
             <div className="px-2 pt-2 pb-3 space-y-1">
               <a
                 href="/"
@@ -143,7 +164,7 @@ export const Header = () => {
                 className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                📦 Github Repo
+                📦 Repo
               </a>
               
               {/* Mobile Wallet Info */}
@@ -173,5 +194,6 @@ export const Header = () => {
         )}
       </div>
     </header>
+    </>
   )
 }

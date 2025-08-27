@@ -2,13 +2,17 @@
 
 import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext'
 import { stellarConfig } from '@/lib/wallet-config'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { validateStellarAddress, sanitizeStellarAddressInput, generateTestStellarAddress } from '@/lib/stellar-address-validation'
 
 function WalletPageContent() {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet()
   const [isConnecting, setIsConnecting] = useState(false)
   const [manualAddress, setManualAddress] = useState('')
   const [showManualInput, setShowManualInput] = useState(false)
+  const [validationError, setValidationError] = useState<string>('')
+  const [isValidating, setIsValidating] = useState(false)
+  const [showWeb3Help, setShowWeb3Help] = useState(true)
 
   const handleConnect = async (walletId?: string) => {
     setIsConnecting(true)
@@ -29,19 +33,32 @@ function WalletPageContent() {
 
   const handleManualConnect = async () => {
     if (!manualAddress.trim()) {
-      alert('Please enter a valid Stellar wallet address')
+      setValidationError('⚠️ Please enter a wallet address')
       return
     }
+
+    // Validate the Stellar address
+    setIsValidating(true)
+    setValidationError('')
     
-    // Basic validation for Stellar address format
-    if (!manualAddress.startsWith('G') || manualAddress.length !== 56) {
-      alert('Please enter a valid Stellar wallet address (should start with G and be 56 characters long)')
+    const validation = validateStellarAddress(manualAddress)
+    
+    if (!validation.isValid) {
+      setValidationError(validation.error || 'Invalid Stellar address format')
+      setIsValidating(false)
       return
     }
-    
-    await handleConnect(manualAddress.trim())
-    setManualAddress('')
-    setShowManualInput(false)
+
+    try {
+      await handleConnect(manualAddress.trim())
+      setManualAddress('')
+      setShowManualInput(false)
+      setValidationError('')
+    } catch (err) {
+      setValidationError('❌ Connection failed. Please try again.')
+    } finally {
+      setIsValidating(false)
+    }
   }
 
   const copyAddress = () => {
@@ -122,6 +139,85 @@ function WalletPageContent() {
               Connect your Stellar wallet to start using the Trustless Work demos
             </p>
             
+            {/* Web3 Onboarding Section */}
+            {showWeb3Help && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg relative">
+                <button
+                  onClick={() => setShowWeb3Help(false)}
+                  className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold hover:scale-110 transition-all duration-200"
+                  title="Close Web3 help"
+                >
+                  ×
+                </button>
+                <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center pr-8">
+                  🌟 New to Web3? Start Here!
+                </h4>
+                
+                {/* Freighter Recommendation */}
+                <div className="mb-4 p-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">🔗</span>
+                    <span className="text-sm font-medium text-cyan-200">Recommended: Freighter Wallet</span>
+                  </div>
+                  <p className="text-xs text-cyan-100/80 mb-3">
+                    The most popular Stellar wallet with browser extension support
+                  </p>
+                  <div className="space-y-2">
+                    <a
+                      href="https://www.freighter.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
+                    >
+                      🚀 Install Freighter
+                    </a>
+                    <div className="text-xs text-cyan-200/60 text-center">
+                      Free • Secure • Easy to use
+                    </div>
+                  </div>
+                </div>
+
+                {/* Other Wallet Options */}
+                <div className="space-y-2">
+                  <p className="text-xs text-blue-200/80 mb-2">Other Stellar Wallets:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href="https://albedo.link/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                    >
+                      🌅 Albedo
+                    </a>
+                    <a
+                      href="https://xbull.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                    >
+                      🐂 xBull
+                    </a>
+                    <a
+                      href="https://rabet.io/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                    >
+                      🐰 Rabet
+                    </a>
+                    <a
+                      href="https://stellar.org/ecosystem/wallets"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
+                    >
+                      📚 More Options
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Connection Options */}
             <div className="space-y-4">
               {/* Freighter Connect Button */}
@@ -149,10 +245,52 @@ function WalletPageContent() {
                     <input
                       type="text"
                       value={manualAddress}
-                      onChange={(e) => setManualAddress(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setManualAddress(value)
+                        
+                        // Clear validation error when user starts typing
+                        if (validationError) {
+                          setValidationError('')
+                        }
+                        
+                        // Real-time validation and sanitization
+                        if (value.length > 0) {
+                          const sanitized = sanitizeStellarAddressInput(value)
+                          if (sanitized !== value) {
+                            setManualAddress(sanitized)
+                          }
+                        }
+                      }}
                       placeholder="G... (56 characters)"
-                      className="w-full px-4 py-3 bg-white/10 border border-accent-400/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400"
+                      maxLength={56}
+                      className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 transition-colors ${
+                        validationError 
+                          ? 'border-red-400 focus:border-red-400' 
+                          : 'border-accent-400/30'
+                      }`}
                     />
+                    {validationError && (
+                      <div className="text-red-400 text-xs p-2 bg-red-500/10 border border-red-400/30 rounded">
+                        ⚠️ {validationError}
+                      </div>
+                    )}
+                    
+                    {/* Generate Test Address Button */}
+                    <div className="text-center mb-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const testAddress = generateTestStellarAddress()
+                          setManualAddress(testAddress)
+                          setValidationError('')
+                        }}
+                        className="text-xs text-cyan-300 hover:text-cyan-100 underline transition-colors"
+                      >
+                        🎲 Generate Test Address (Demo Only)
+                      </button>
+                    </div>
+                    
                     <div className="flex space-x-3">
                       <button
                         onClick={handleManualConnect}
@@ -236,23 +374,26 @@ function WalletPageContent() {
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-3 h-3 bg-success-400 rounded-full animate-pulse"></div>
                 <span className="text-success-300 font-medium">Active Connection</span>
+                <span className="text-xs text-success-200/80 bg-success-500/30 px-2 py-1 rounded-full">
+                  Real-time Sync
+                </span>
               </div>
                 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-white/60 text-sm mb-2">Network</p>
-                    <span className={`text-sm font-medium bg-gradient-to-r ${getNetworkColor()} bg-clip-text text-transparent`}>
-                      {walletData?.network}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-white/60 text-sm mb-2">Connection Time</p>
-                    <span className="text-white text-sm">
-                      {new Date().toLocaleTimeString()}
-                    </span>
-                  </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-white/60 text-sm mb-2">Network</p>
+                  <span className={`text-sm font-medium bg-gradient-to-r ${getNetworkColor()} bg-clip-text text-transparent`}>
+                    {walletData?.network}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-white/60 text-sm mb-2">Connection Time</p>
+                  <span className="text-white text-sm">
+                    {new Date().toLocaleTimeString()}
+                  </span>
                 </div>
               </div>
+            </div>
 
               {/* Wallet Address */}
               <div className="p-6 bg-white/5 rounded-lg border border-white/20">
@@ -272,6 +413,18 @@ function WalletPageContent() {
                 </div>
                 <p className="text-white/60 text-xs mt-2">
                   This is your public wallet address. Keep it safe and share it when needed.
+                </p>
+              </div>
+
+              {/* Real-time Sync Info */}
+              <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-blue-400/20">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-blue-300">🔄</span>
+                  <span className="text-blue-200 text-sm font-medium">Real-time Data Sync</span>
+                </div>
+                <p className="text-xs text-blue-200/80">
+                  This window shares real-time wallet data with the main application. 
+                  Any changes made here will be reflected immediately in the main app and vice versa.
                 </p>
               </div>
 
