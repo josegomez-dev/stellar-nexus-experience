@@ -20,6 +20,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
   const [isConnecting, setIsConnecting] = useState(false)
   const [manualAddress, setManualAddress] = useState('')
   const [showTransactionHistory, setShowTransactionHistory] = useState(false)
+  const [showWeb3Help, setShowWeb3Help] = useState(true)
 
   // Get recent transactions
   const recentTransactions = getRecentTransactions(5)
@@ -192,7 +193,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
         {/* Content */}
         <div className={`flex-1 overflow-y-auto transition-all duration-300 ${
           isExpanded ? 'p-4' : 'p-2'
-        }`}>
+        }`} style={{ minHeight: '400px' }}>
           {!isConnected ? (
             // Not Connected State
             <div className={isExpanded ? "text-center py-8" : "text-center py-2"}>
@@ -244,13 +245,35 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         <span className="hidden sm:inline">Freighter not detected. Install the extension or use manual input below.</span>
                       ) : "⚠️"}
                     </p>
+                    {isExpanded && (
+                      <button
+                        onClick={() => {
+                          console.log('🔍 Debug: Checking Freighter detection...')
+                          console.log('Window object:', typeof window !== 'undefined' ? 'Available' : 'Not available')
+                          console.log('window.stellar:', !!(window as any).stellar)
+                          console.log('window.freighter:', !!(window as any).freighter)
+                          console.log('User Agent:', (window as any).navigator?.userAgent)
+                          console.log('Current isFreighterAvailable state:', isFreighterAvailable)
+                        }}
+                        className="mt-2 text-xs text-amber-300 hover:text-amber-200 underline"
+                      >
+                        🔍 Debug Freighter Detection
+                      </button>
+                    )}
                   </div>
                 )}
                 
                 {/* Web3 Onboarding Section */}
-                {isExpanded && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg">
-                    <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+                {isExpanded && showWeb3Help && (
+                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg relative">
+                    <button
+                      onClick={() => setShowWeb3Help(false)}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold hover:scale-110 transition-all duration-200"
+                      title="Close Web3 help"
+                    >
+                      ×
+                    </button>
+                    <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center pr-8">
                       🌟 New to Web3? Start Here!
                     </h4>
                     

@@ -23,6 +23,7 @@ export const WalletManager = () => {
   const [validationError, setValidationError] = useState<string>('')
   const [isValidating, setIsValidating] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showWeb3Help, setShowWeb3Help] = useState(true)
 
   const handleConnect = async () => {
     if (!selectedWallet) {
@@ -178,8 +179,16 @@ export const WalletManager = () => {
         {!isConnected ? (
         <div className="space-y-4">
           {/* Web3 Onboarding Section */}
-          <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg">
-            <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center">
+          {showWeb3Help && (
+          <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg relative">
+            <button
+              onClick={() => setShowWeb3Help(false)}
+              className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold hover:scale-110 transition-all duration-200"
+              title="Close Web3 help"
+            >
+              ×
+            </button>
+            <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center pr-8">
               🌟 New to Web3? Start Here!
             </h4>
             
@@ -246,6 +255,7 @@ export const WalletManager = () => {
               </div>
             </div>
           </div>
+          )}
 
           <div className="text-center">
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 px-4 py-2 rounded-lg">

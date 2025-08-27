@@ -34,29 +34,65 @@ export const useWallet = (): UseWalletReturn => {
   // Check for Freighter wallet (but don't use Stellar Wallets Kit)
   useEffect(() => {
     const checkFreighter = () => {
-      if (typeof window !== 'undefined' && (window as any).stellar) {
+      // Check multiple possible Freighter detection methods
+      const freighterDetected = (
+        // Method 1: Check for window.stellar (common Freighter pattern)
+        (typeof window !== 'undefined' && (window as any).stellar) ||
+        // Method 2: Check for window.freighter
+        (typeof window !== 'undefined' && (window as any).freighter) ||
+        // Method 3: Check for document.querySelector('[data-freighter]')
+        (typeof document !== 'undefined' && document.querySelector('[data-freighter]')) ||
+        // Method 4: Check for specific Freighter extension ID patterns
+        (typeof window !== 'undefined' && 
+         (window as any).navigator?.userAgent?.includes('Freighter') ||
+         (window as any).navigator?.userAgent?.includes('freighter'))
+      )
+      
+      if (freighterDetected) {
         setIsFreighterAvailable(true)
-        console.log('Freighter wallet detected (POC mode)')
+        console.log('✅ Freighter wallet detected (POC mode)')
+        console.log('Freighter detection details:', {
+          hasStellar: !!(window as any).stellar,
+          hasFreighter: !!(window as any).freighter,
+          hasDataFreighter: !!document.querySelector('[data-freighter]'),
+          userAgent: (window as any).navigator?.userAgent
+        })
       } else {
         setIsFreighterAvailable(false)
-        console.log('Freighter wallet not detected (POC mode)')
+        console.log('❌ Freighter wallet not detected (POC mode)')
+        console.log('Detection attempt details:', {
+          hasStellar: !!(window as any).stellar,
+          hasFreighter: !!(window as any).freighter,
+          hasDataFreighter: !!document.querySelector('[data-freighter]'),
+          userAgent: (window as any).navigator?.userAgent
+        })
       }
     }
     
+    // Check immediately
     checkFreighter()
+    
+    // Check again after a short delay (in case extension loads after page)
+    const delayedCheck = setTimeout(checkFreighter, 1000)
     
     // Listen for Freighter installation
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'FREIGHTER_EXTENSION_READY') {
         setIsFreighterAvailable(true)
-        console.log('Freighter wallet ready (POC mode)')
+        console.log('✅ Freighter wallet ready (POC mode)')
       }
     }
     
+    // Listen for extension installation
     window.addEventListener('message', handleMessage)
+    
+    // Also check periodically for newly installed extensions
+    const intervalCheck = setInterval(checkFreighter, 5000)
     
     return () => {
       window.removeEventListener('message', handleMessage)
+      clearTimeout(delayedCheck)
+      clearInterval(intervalCheck)
     }
   }, [])
 
