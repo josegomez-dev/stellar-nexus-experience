@@ -166,14 +166,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
             )}
           </div>
           
-          {/* Close Button - Better positioned and styled */}
-          <button
-            onClick={onToggle}
-            className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group mr-6rr men -mt-22"
-            title="Close Wallet"
-          >
-            <span className="text-lg font-bold group-hover:scale-110 transition-transform duration-200">×</span>
-          </button>
+
 
           <div className="flex items-center space-x-2">
             <button
@@ -194,6 +187,16 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
         <div className={`flex-1 overflow-y-auto transition-all duration-300 ${
           isExpanded ? 'p-4' : 'p-2'
         }`} style={{ minHeight: '400px' }}>
+
+          {/* Close Button - Positioned in bottom right corner */}
+          <button
+            onClick={onToggle}
+            className="absolute bottom-8 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group z-10"
+            title="Close Wallet"
+          >
+            <span className="text-lg font-bold group-hover:scale-110 transition-transform duration-200">×</span>
+          </button>
+
           {!isConnected ? (
             // Not Connected State
             <div className={isExpanded ? "text-center py-8" : "text-center py-2"}>
@@ -242,23 +245,20 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   <div className={`text-center ${isExpanded ? "py-2" : "py-1"}`}>
                     <p className="text-xs text-white/60">
                       {isExpanded ? (
-                        <span className="hidden sm:inline">Freighter not detected. Install the extension or use manual input below.</span>
+                        <span className="hidden sm:inline">Use manual address input below or install Freighter extension</span>
                       ) : "⚠️"}
                     </p>
                     {isExpanded && (
-                      <button
-                        onClick={() => {
-                          console.log('🔍 Debug: Checking Freighter detection...')
-                          console.log('Window object:', typeof window !== 'undefined' ? 'Available' : 'Not available')
-                          console.log('window.stellar:', !!(window as any).stellar)
-                          console.log('window.freighter:', !!(window as any).freighter)
-                          console.log('User Agent:', (window as any).navigator?.userAgent)
-                          console.log('Current isFreighterAvailable state:', isFreighterAvailable)
-                        }}
-                        className="mt-2 text-xs text-amber-300 hover:text-amber-200 underline"
-                      >
-                        🔍 Debug Freighter Detection
-                      </button>
+                      <div className="mt-2 text-xs text-amber-300/80">
+                        💡 <a 
+                          href="https://www.freighter.app/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="underline hover:text-amber-200 transition-colors"
+                        >
+                          Install Freighter
+                        </a> for best experience
+                      </div>
                     )}
                   </div>
                 )}
