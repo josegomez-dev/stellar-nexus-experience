@@ -241,12 +241,11 @@ const MiniGameStore = () => {
             <Image
               src="/images/logo/logoicon.png"
               alt="Trustless Work"
-              width={48}
-              height={48}
-              className="w-12 h-12 drop-shadow-lg"
+              width={200}
+              height={200}
             />
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400">
-              Mini Game Store
+            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 drop-shadow-2xl">
+              MINI GAMES STORE
             </h1>
           </div>
           <p className="text-lg text-white/70 max-w-2xl mx-auto">
@@ -318,10 +317,15 @@ const MiniGameStore = () => {
           {filteredGames.map(game => (
             <div
               key={game.id}
-              className={`bg-white/5 border border-white/20 rounded-xl p-6 hover:bg-white/10 hover:border-white/30 transition-all duration-300 transform hover:scale-105 group relative overflow-hidden ${
-                game.status !== 'available' ? 'opacity-80' : ''
-              }`}
+              className="relative"
             >
+              {/* Game Card with Opacity/Blur Effects */}
+              <div className={`bg-white/5 border border-white/20 rounded-xl p-6 hover:bg-white/10 hover:border-white/30 transition-all duration-300 transform hover:scale-105 group relative overflow-hidden ${
+                game.status === 'available' ? 'opacity-100' :
+                game.status === 'beta' ? 'opacity-90 blur-[0.5px]' :
+                game.status === 'in-development' ? 'opacity-75 blur-[1px]' :
+                'opacity-60 blur-[1.5px]'
+              }`}>
               {/* Status Badge */}
               <div className="absolute top-4 right-4 z-10">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(game.status)}`}>
@@ -342,11 +346,6 @@ const MiniGameStore = () => {
               {/* Game Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="text-4xl">{game.icon}</div>
-                <div className="flex flex-col items-end space-y-2">
-                  <span className={`px-2 py-1 rounded text-xs border ${getDifficultyColor(game.difficulty)}`}>
-                    {game.difficulty.charAt(0).toUpperCase() + game.difficulty.slice(1)}
-                  </span>
-                </div>
               </div>
 
               {/* Game Info */}
@@ -397,52 +396,32 @@ const MiniGameStore = () => {
                 </div>
               )}
 
-              {/* Donation Section for Non-Available Games */}
+                              {/* Play Button - Show for available and beta games */}
+                {(game.status === 'available' || game.status === 'beta') && (
+                  <button
+                    onClick={() => handlePlayGame(game)}
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+                      game.status === 'available'
+                        ? 'bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    {game.status === 'available' ? '🎮 Play Now' : '🧪 Try Beta'}
+                  </button>
+                )}
+              </div>
+
+              {/* Donate Button - Outside the Blur/Opacity Effects */}
               {game.status !== 'available' && game.donationGoal > 0 && (
-                <div className="mb-4 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
-                  <div className="text-center mb-3">
-                    <p className="text-xs text-purple-300 mb-1">🚀 Speed Up Development</p>
-                    <div className="flex items-center justify-between text-xs text-white/80 mb-2">
-                      <span>Current: ${game.currentDonations}</span>
-                      <span>Goal: ${game.donationGoal}</span>
-                    </div>
-                    <div className="w-full bg-white/10 rounded-full h-2 mb-2">
-                      <div 
-                        className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
-                        style={{ width: `${Math.min((game.currentDonations / game.donationGoal) * 100, 100)}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-purple-300">
-                      {Math.round((game.currentDonations / game.donationGoal) * 100)}% funded
-                    </p>
-                  </div>
+                <div className="mt-4">
                   <button
                     onClick={() => handleDonate(game)}
-                    className="w-full py-2 px-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-medium rounded-lg transition-all duration-300 hover:scale-105"
+                    className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl border border-purple-400/50"
                   >
-                    💝 Donate to Speed Up
+                    💝 Donate to Speed Up Development
                   </button>
                 </div>
               )}
-
-              {/* Play Button */}
-              <button
-                onClick={() => handlePlayGame(game)}
-                disabled={game.status === 'coming-soon'}
-                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  game.status === 'available'
-                    ? 'bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white shadow-lg hover:shadow-xl'
-                    : game.status === 'beta'
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl'
-                    : game.status === 'in-development'
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white/70 cursor-not-allowed'
-                }`}
-              >
-                {game.status === 'available' ? '🎮 Play Now' :
-                 game.status === 'beta' ? '🧪 Try Beta' : 
-                 game.status === 'in-development' ? '🚧 In Development' : '⏳ Coming Soon'}
-              </button>
             </div>
           ))}
         </div>
@@ -469,17 +448,51 @@ const MiniGameStore = () => {
         </div>
       </div>
 
-      {/* Donation Modal */}
+      {/* Enhanced Donation Modal with Game Info */}
       {showDonationModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/20 shadow-2xl max-w-md w-full p-6">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/20 shadow-2xl max-w-lg w-full p-6">
             <div className="text-center mb-6">
-              <div className="text-4xl mb-4">💝</div>
-              <h3 className="text-xl font-bold text-white mb-2">Support Game Development</h3>
+              <div className="text-4xl mb-4">🚀</div>
+              <h3 className="text-xl font-bold text-white mb-2">Speed Up Game Development</h3>
               <p className="text-white/70 text-sm">
-                Help speed up development of your favorite game!
+                Help us reach our funding goal faster!
               </p>
             </div>
+
+            {/* Game Info Section */}
+            {(() => {
+              const game = miniGames.find(g => g.id === showDonationModal)
+              if (!game) return null
+              return (
+                <div className="mb-6 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
+                  <div className="text-center mb-4">
+                    <div className="text-2xl mb-2">{game.icon}</div>
+                    <h4 className="text-lg font-semibold text-white mb-2">{game.title}</h4>
+                    
+                    <div className="flex items-center justify-between text-sm text-white/80 mb-3">
+                      <span>💰 Current: ${game.currentDonations}</span>
+                      <span>🎯 Goal: ${game.donationGoal}</span>
+                    </div>
+                    
+                    <div className="w-full bg-white/10 rounded-full h-3 mb-3">
+                      <div 
+                        className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 shadow-lg"
+                        style={{ width: `${Math.min((game.currentDonations / game.donationGoal) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                    
+                    <p className="text-sm text-purple-200 font-medium mb-2">
+                      {Math.round((game.currentDonations / game.donationGoal) * 100)}% funded
+                    </p>
+                    
+                    <p className="text-xs text-white/60">
+                      Est. Release: {game.estimatedRelease}
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-white/80 mb-2">
@@ -505,7 +518,7 @@ const MiniGameStore = () => {
                 onClick={() => confirmDonation(miniGames.find(g => g.id === showDonationModal)!)}
                 className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105"
               >
-                Donate ${donationAmount}
+                💝 Donate ${donationAmount}
               </button>
             </div>
           </div>

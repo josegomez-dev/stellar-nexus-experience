@@ -67,16 +67,16 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     }
   }, [isOpen, onToggle])
 
-  // Open wallet in new window
-  const openInNewWindow = () => {
-    const width = 400
-    const height = 600
+  // Open mini games store in new window
+  const openMiniGameStore = () => {
+    const width = 1200
+    const height = 800
     const left = (window.screen.width - width) / 2
     const top = (window.screen.height - height) / 2
     
     const newWindow = window.open(
-      '/wallet',
-      'StellarWallet',
+      '/mini-games',
+      'MiniGameStore',
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     )
     
@@ -375,15 +375,15 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                 )}
                 
                 <button
-                  onClick={openInNewWindow}
+                  onClick={openMiniGameStore}
                   className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium rounded-lg transition-all duration-300 hover:border-white/40 ${
                     isExpanded ? "px-4 py-3" : "px-2 py-2.5"
                   }`}
-                  title={!isExpanded ? "Open in New Window" : undefined}
+                  title={!isExpanded ? "Mini Games Store" : undefined}
                 >
-                  <span className="text-lg">🪟</span>
+                  <span className="text-lg">🎮</span>
                   {isExpanded && (
-                    <span className="ml-2 animate-fadeIn">Open in New Window</span>
+                    <span className="ml-2 animate-fadeIn">Mini Games Store</span>
                   )}
                 </button>
               </div>
@@ -459,14 +459,14 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               {/* Quick Actions */}
               <div className={`space-y-2 ${!isExpanded ? 'space-y-1.5' : ''}`}>
                 <button
-                  onClick={openInNewWindow}
+                  onClick={openMiniGameStore}
                   className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
                     isExpanded ? "px-3 py-2" : "px-2 py-2"
                   }`}
-                  title={!isExpanded ? "Open in New Window" : undefined}
+                  title={!isExpanded ? "Mini Games Store" : undefined}
                 >
-                  <span className="text-lg">🪟</span>
-                  {isExpanded && <span className="animate-fadeIn">Open in New Window</span>}
+                  <span className="text-lg">🎮</span>
+                  {isExpanded && <span className="animate-fadeIn">Mini Games Store</span>}
                 </button>
                 
                 <button
@@ -618,16 +618,16 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </>
         )}
 
-        {/* Open in New Window Button */}
+        {/* Mini Games Store Button */}
         {!isOpen && (
           <button
-            onClick={openInNewWindow}
+            onClick={openMiniGameStore}
             className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-            title="Open Wallet in New Window"
+            title="Open Mini Games Store"
           >
             <div className="flex items-center space-x-2">
-              <span>🪟</span>
-              <span className="text-sm font-medium hidden lg:block">New Window</span>
+              <span>🎮</span>
+              <span className="text-sm font-medium hidden lg:block">Store</span>
             </div>
           </button>
         )}
