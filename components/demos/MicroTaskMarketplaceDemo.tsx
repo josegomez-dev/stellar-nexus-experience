@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/lib/stellar-wallet-hooks'
+import { useGlobalWallet } from '@/contexts/WalletContext'
+import { useToast } from '@/contexts/ToastContext'
+import { useTransactionHistory } from '@/contexts/TransactionContext'
 import { 
   useInitializeEscrow, 
   useFundEscrow, 
-  useChangeMilestoneStatus, 
+  useChangeMilestoneStatus,
   useApproveMilestone, 
   useReleaseFunds 
 } from '@/lib/mock-trustless-work'
@@ -34,7 +36,9 @@ interface TaskCategory {
 }
 
 export const MicroTaskMarketplaceDemo = () => {
-  const { walletData, isConnected } = useWallet()
+  const { walletData, isConnected } = useGlobalWallet()
+  const { addToast } = useToast()
+  const { addTransaction } = useTransactionHistory()
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [newTask, setNewTask] = useState({
@@ -46,6 +50,10 @@ export const MicroTaskMarketplaceDemo = () => {
   })
   const [deliverable, setDeliverable] = useState('')
   const [selectedTask, setSelectedTask] = useState<MicroTask | null>(null)
+  
+  // Progress tracking for demo completion
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set())
+  const [postedTasks, setPostedTasks] = useState<Set<string>>(new Set())
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -62,6 +70,17 @@ export const MicroTaskMarketplaceDemo = () => {
     { id: 'marketing', icon: '📢', name: 'Marketing', color: 'from-purple-500 to-violet-500' },
     { id: 'research', name: 'Research', icon: '🔍', color: 'from-orange-500 to-amber-500' }
   ])
+
+  // Helper functions for demo completion
+  const canCompleteDemo = () => {
+    return postedTasks.size >= 1 && completedTasks.size >= 3
+  }
+
+  const getDemoProgress = () => {
+    const totalSteps = 4 // Post 1 task + Complete 3 tasks
+    const completedSteps = postedTasks.size + completedTasks.size
+    return Math.min((completedSteps / totalSteps) * 100, 100)
+  }
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
@@ -129,6 +148,26 @@ export const MicroTaskMarketplaceDemo = () => {
 
       setTasks([...tasks, task])
       
+      // Track posted task for demo completion
+      setPostedTasks(prev => new Set(Array.from(prev).concat(task.id)))
+      
+      addTransaction({
+        hash: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Task "${task.title}" posted successfully`,
+        type: 'milestone',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '✅ Task Posted!',
+        message: `"${task.title}" has been posted to the marketplace`,
+        duration: 5000
+      })
+      
       // Reset form
       setNewTask({
         title: '',
@@ -141,6 +180,12 @@ export const MicroTaskMarketplaceDemo = () => {
       setActiveTab('browse')
     } catch (error) {
       console.error('Failed to post task:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Task Posting Failed',
+        message: error instanceof Error ? error.message : 'Failed to post task',
+        duration: 5000
+      })
     }
   }
 
@@ -179,10 +224,33 @@ export const MicroTaskMarketplaceDemo = () => {
       )
       setTasks(updatedTasks)
       
+      addTransaction({
+        hash: `accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Task "${task.title}" accepted and escrow created`,
+        type: 'escrow',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '✅ Task Accepted!',
+        message: `"${task.title}" has been accepted and escrow created`,
+        duration: 5000
+      })
+      
       // Fund the escrow
       await handleFundEscrow(result.contractId, task.budget)
     } catch (error) {
       console.error('Failed to accept task:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Task Acceptance Failed',
+        message: error instanceof Error ? error.message : 'Failed to accept task',
+        duration: 5000
+      })
     }
   }
 
@@ -213,6 +281,23 @@ export const MicroTaskMarketplaceDemo = () => {
       )
       setTasks(updatedTasks)
       
+      addTransaction({
+        hash: `submit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Deliverable submitted for "${task.title}"`,
+        type: 'milestone',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '✅ Deliverable Submitted!',
+        message: `Work has been submitted for "${task.title}"`,
+        duration: 5000
+      })
+      
       // Mark milestone as completed
       const payload = {
         contractId: task.escrowId,
@@ -225,6 +310,12 @@ export const MicroTaskMarketplaceDemo = () => {
       setDeliverable('')
     } catch (error) {
       console.error('Failed to submit deliverable:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Submission Failed',
+        message: error instanceof Error ? error.message : 'Failed to submit deliverable',
+        duration: 5000
+      })
     }
   }
 
@@ -242,13 +333,39 @@ export const MicroTaskMarketplaceDemo = () => {
 
       await approveMilestone(payload)
       
+      addTransaction({
+        hash: `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Task "${task.title}" approved successfully`,
+        type: 'approve',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '✅ Task Approved!',
+        message: `"${task.title}" has been approved`,
+        duration: 5000
+      })
+      
       // Update task status
       const updatedTasks = tasks.map(t => 
         t.id === taskId ? { ...t, status: 'approved' as const } : t
       )
       setTasks(updatedTasks)
+      
+      // Track completed task for demo completion
+      setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)))
     } catch (error) {
       console.error('Failed to approve task:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Approval Failed',
+        message: error instanceof Error ? error.message : 'Failed to approve task',
+        duration: 5000
+      })
     }
   }
 
@@ -266,6 +383,23 @@ export const MicroTaskMarketplaceDemo = () => {
 
       await releaseFunds(payload)
       
+      addTransaction({
+        hash: `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Funds released for "${task.title}"`,
+        type: 'release',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '💰 Funds Released!',
+        message: `Funds have been released for "${task.title}"`,
+        duration: 5000
+      })
+      
       // Update task status
       const updatedTasks = tasks.map(t => 
         t.id === taskId ? { ...t, status: 'released' as const } : t
@@ -273,6 +407,12 @@ export const MicroTaskMarketplaceDemo = () => {
       setTasks(updatedTasks)
     } catch (error) {
       console.error('Failed to release funds:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Release Failed',
+        message: error instanceof Error ? error.message : 'Failed to release funds',
+        duration: 5000
+      })
     }
   }
 
@@ -311,13 +451,51 @@ export const MicroTaskMarketplaceDemo = () => {
     return category?.color || 'from-gray-500 to-gray-600'
   }
 
+  function resetDemo() {
+    setActiveTab('browse')
+    setSelectedCategory('all')
+    setNewTask({
+      title: '',
+      description: '',
+      category: '',
+      budget: '',
+      deadline: ''
+    })
+    setDeliverable('')
+    setSelectedTask(null)
+    
+    // Reset all tasks to open status
+    const resetTasks = tasks.map(t => ({ ...t, status: 'open' as const, worker: undefined, escrowId: undefined, deliverables: undefined }))
+    setTasks(resetTasks)
+    
+    // Reset progress tracking
+    setCompletedTasks(new Set())
+    setPostedTasks(new Set())
+    
+    addToast({
+      type: 'warning',
+      title: '🔄 Demo Reset',
+      message: 'Demo has been reset. You can start over from the beginning.',
+      duration: 4000
+    })
+  }
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500 mb-4">
-            🛒 Micro-Task Marketplace Demo
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <div></div>
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500">
+              🛒 Micro-Task Marketplace Demo
+            </h2>
+            <button
+              onClick={resetDemo}
+              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors"
+            >
+              🔄 Reset Demo
+            </button>
+          </div>
           <p className="text-white/80 text-lg">
             Lightweight gig-board with escrow functionality for micro-tasks
           </p>
@@ -343,6 +521,58 @@ export const MicroTaskMarketplaceDemo = () => {
             ))}
           </div>
         </div>
+
+        {/* Demo Progress Indicator */}
+        <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
+          <h3 className="text-lg font-semibold text-white mb-4">📊 Demo Progress</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-white/70">Overall Progress</span>
+              <span className="text-accent-300 font-semibold">{Math.round(getDemoProgress())}%</span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-3">
+              <div 
+                className="bg-gradient-to-r from-accent-400 to-accent-500 h-3 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${getDemoProgress()}%` }}
+              ></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Tasks Posted:</span>
+                <span className={`font-semibold ${postedTasks.size >= 1 ? 'text-green-400' : 'text-white/40'}`}>
+                  {postedTasks.size}/1 ✅
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Tasks Completed:</span>
+                <span className={`font-semibold ${completedTasks.size >= 3 ? 'text-green-400' : 'text-white/40'}`}>
+                  {completedTasks.size}/3 ✅
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Demo Completion Success Box */}
+        {canCompleteDemo() && (
+          <div className="mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg">
+            <div className="text-center">
+              <div className="text-4xl mb-4">🎉</div>
+              <h3 className="text-xl font-bold text-green-300 mb-2">Demo Successfully Completed!</h3>
+              <p className="text-green-200 mb-4">
+                Congratulations! You've successfully demonstrated the micro-task marketplace workflow:
+              </p>
+              <ul className="text-green-200 text-sm space-y-1 mb-4">
+                <li>✅ Posted at least 1 new task</li>
+                <li>✅ Completed and approved 3 tasks</li>
+                <li>✅ Experienced the full escrow workflow</li>
+              </ul>
+              <p className="text-green-200 text-sm">
+                You've mastered the micro-task marketplace! Try different roles or reset the demo to explore more scenarios.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Browse Tasks Tab */}
         {activeTab === 'browse' && (

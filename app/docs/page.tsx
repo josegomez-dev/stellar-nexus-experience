@@ -35,10 +35,10 @@ export default function DocsPage() {
                 <div className="text-center mb-16">
                   <div className="flex justify-center mb-6">
                     <Image 
-                      src="/images/character/nexus-prime-chat.png" 
+                      src="/images/logo/logoicon.png" 
                       alt="STELLAR NEXUS" 
-                      width={180} 
-                      height={120}
+                      width={300} 
+                      height={300}
                       style={{ zIndex: -1, position: 'relative' }}
                     />
                   </div>
@@ -86,10 +86,13 @@ export default function DocsPage() {
                     </div>
                     
                     {/* Title with Enhanced Styling */}
-                    <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl" style={{ zIndex: 1000, marginTop: '-50px' }}>
+                    <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl" style={{ zIndex: 1000, marginTop: '-200px' }}>
                       Trustless Work Documentation
                     </h1>
                   </div>
+
+                  <br />
+                  <br />
                   
                   <p className="text-xl text-white/80 max-w-3xl mx-auto">
                     A comprehensive guide to building decentralized work platforms on the Stellar blockchain

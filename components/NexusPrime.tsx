@@ -235,7 +235,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       {/* Character Avatar */}
       <div className="relative group">
         {/* Character Image/Icon */}
-        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative"
+        <div className="w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative"
              onClick={() => setIsExpanded(!isExpanded)}>
           
           {/* Voice Toggle Button */}
@@ -244,14 +244,14 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               e.stopPropagation()
               toggleTts()
             }}
-            className={`absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
+            className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
               ttsEnabled 
                 ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
                 : 'bg-gradient-to-r from-red-500 to-pink-600'
             }`}
             title={ttsEnabled ? "Disable Voice" : "Enable Voice"}
           >
-            <span className="text-xs text-white">
+            <span className="text-sm text-white">
               {ttsEnabled ? "🔊" : "🔇"}
             </span>
           </button>
@@ -264,9 +264,9 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             <Image
               src="/images/character/nexus-prime-chat.png"
               alt="NEXUS PRIME"
-              width={48}
-              height={48}
-              className="w-12 h-12 rounded-full relative z-10 object-cover"
+              width={80}
+              height={80}
+              className="w-16 h-16 rounded-full relative z-10 object-cover"
             />
             {/* Glowing Effect */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20"></div>
