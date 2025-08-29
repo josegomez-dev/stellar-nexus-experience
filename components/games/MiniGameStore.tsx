@@ -22,7 +22,7 @@ export default function MiniGameStore() {
       title: "🚀 WEB3 LEARNING REVOLUTION",
       subtitle: "Learn blockchain while earning rewards",
       description: "Master smart contracts, earn crypto, and build the future",
-      image: "/images/demos/babysteps.png",
+      image: "/images/banner/web3-learning.png",
       gradient: "from-purple-600 via-pink-600 to-orange-600",
       cta: "Start Learning Now",
       badge: "🔥 HOT",
@@ -33,7 +33,7 @@ export default function MiniGameStore() {
       title: "🏆 DAILY CONTESTS & PRIZES",
       subtitle: "Compete with developers worldwide",
       description: "Win XLM, NFTs, and exclusive web3 opportunities",
-      image: "/images/demos/democracyinaction.png",
+      image: "/images/banner/daily-contest.png",
       gradient: "from-blue-600 via-cyan-600 to-teal-600",
       cta: "Join Contest",
       badge: "⚡ LIVE",
@@ -44,7 +44,7 @@ export default function MiniGameStore() {
       title: "🎯 SECRET MISSIONS UNLOCKED",
       subtitle: "Hidden challenges await",
       description: "Discover secret quests and earn legendary rewards",
-      image: "/images/demos/drama.png",
+      image: "/images/banner/secret-missions.png",
       gradient: "from-green-600 via-emerald-600 to-teal-600",
       cta: "Explore Missions",
       badge: "🌟 NEW",
@@ -76,7 +76,7 @@ export default function MiniGameStore() {
       rewards: '50 XLM + NFT Badge',
       currentPlayers: 1247,
       rating: 4.8,
-      thumbnail: '/images/demos/babysteps.png',
+      thumbnail: '/images/games/web3-basics-adventure.png',
       progress: 100,
       estimatedRelease: 'Available Now',
       donationGoal: 0,
@@ -97,7 +97,7 @@ export default function MiniGameStore() {
       rewards: '100 XLM + Expert Badge',
       currentPlayers: 892,
       rating: 4.9,
-      thumbnail: '/images/demos/democracyinaction.png',
+      thumbnail: '/images/games/escrow-puzzle-master.png',
       progress: 100,
       estimatedRelease: 'Available Now',
       donationGoal: 0,
@@ -118,7 +118,7 @@ export default function MiniGameStore() {
       rewards: '200 XLM + Trading Trophy',
       currentPlayers: 567,
       rating: 4.7,
-      thumbnail: '/images/demos/economy.png',
+      thumbnail: '/images/games/defi-trading-arena.png',
       progress: 85,
       estimatedRelease: 'Beta Testing',
       donationGoal: 5000,
@@ -139,7 +139,7 @@ export default function MiniGameStore() {
       rewards: '75 XLM + Creator Badge',
       currentPlayers: 423,
       rating: 4.6,
-      thumbnail: '/images/demos/drama.png',
+      thumbnail: '/images/games/blank.png',
       progress: 75,
       estimatedRelease: 'Beta Testing',
       donationGoal: 3000,
@@ -160,7 +160,7 @@ export default function MiniGameStore() {
       rewards: '150 XLM + Governance Badge',
       currentPlayers: 0,
       rating: 0,
-      thumbnail: '/images/demos/democracyinaction.png',
+      thumbnail: '/images/games/blank.png',
       progress: 45,
       estimatedRelease: 'Q2 2024',
       donationGoal: 8000,
@@ -181,7 +181,7 @@ export default function MiniGameStore() {
       rewards: '300 XLM + Bridge Master Badge',
       currentPlayers: 0,
       rating: 0,
-      thumbnail: '/images/demos/babysteps.png',
+      thumbnail: '/images/games/blank.png',
       progress: 30,
       estimatedRelease: 'Q3 2024',
       donationGoal: 12000,
@@ -202,7 +202,7 @@ export default function MiniGameStore() {
       rewards: '500 XLM + Metaverse Creator Badge',
       currentPlayers: 0,
       rating: 0,
-      thumbnail: '/images/demos/economy.png',
+      thumbnail: '/images/games/blank.png',
       progress: 15,
       estimatedRelease: 'Q4 2024',
       donationGoal: 20000,
@@ -223,7 +223,7 @@ export default function MiniGameStore() {
       rewards: '400 XLM + AI Pioneer Badge',
       currentPlayers: 0,
       rating: 0,
-      thumbnail: '/images/demos/drama.png',
+      thumbnail: '/images/games/blank.png',
       progress: 5,
       estimatedRelease: 'Q1 2025',
       donationGoal: 25000,
@@ -386,11 +386,6 @@ export default function MiniGameStore() {
                         <div className="relative z-10 h-full flex items-center justify-center text-center p-8">
                           <div className="max-w-4xl">
                             {/* Badge */}
-                            <div className="mb-4">
-                              <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-bold text-sm rounded-full border border-white/30 animate-pulse">
-                                {banner.badge}
-                              </span>
-                            </div>
                             
                             <h3 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
                               {banner.title}
@@ -407,9 +402,9 @@ export default function MiniGameStore() {
                               👥 {banner.players}
                             </div>
                             
-                            <button className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl backdrop-blur-sm">
+                            {/* <button className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl backdrop-blur-sm">
                               {banner.cta} →
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       </div>
@@ -494,7 +489,7 @@ export default function MiniGameStore() {
                       <div className="relative">
                         <div className="relative h-80 rounded-2xl overflow-hidden">
                           <Image
-                            src="/images/demos/babysteps.png"
+                            src="/images/games/web3-basics-adventure.png"
                             alt="Web3 Basics Adventure"
                             fill
                             className="object-cover"
@@ -730,35 +725,6 @@ export default function MiniGameStore() {
                   </div>
                 )}
 
-                {/* Epic Footer */}
-                <div className="text-center mt-20 pt-12 border-t border-white/20">
-                  <div className="bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-8 border border-white/20">
-                    <h3 className="text-3xl font-bold text-white mb-6">
-                      🚀 Ready to Start Your Web3 Journey?
-                    </h3>
-                    <p className="text-white/80 text-lg mb-8 max-w-3xl mx-auto">
-                      Join thousands of developers learning blockchain technology through epic gaming experiences. 
-                      Complete quests, earn rewards, and build the future of decentralized applications!
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25">
-                        🎮 Start Playing Now
-                      </button>
-                      <button className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm">
-                        📚 View Documentation
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 text-white/60">
-                    <p className="text-sm mb-2">
-                      🌟 More epic games coming soon! Join our community for early access and exclusive rewards.
-                    </p>
-                    <p className="text-purple-300 text-sm">
-                      💝 Support development by donating to your favorite games and unlocking secret content!
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </main>

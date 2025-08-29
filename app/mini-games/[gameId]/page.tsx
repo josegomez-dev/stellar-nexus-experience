@@ -263,20 +263,6 @@ export default function GamePage() {
                   </button>
                 </div>
                 
-                {/* Arcade Machine Header */}
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center space-x-4 mb-6">
-                    <div className="text-6xl">🕹️</div>
-                    <div>
-                      <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
-                        ARCADE CONSOLE
-                      </h1>
-                      <p className="text-xl text-white/80">Futuristic Gaming Experience</p>
-                    </div>
-                    <div className="text-6xl">🎮</div>
-                  </div>
-                </div>
-
                 {/* Game Selector Modal */}
                 {showGameSelector && (
                   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

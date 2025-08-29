@@ -622,11 +622,11 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
         {!isOpen && (
           <button
             onClick={openMiniGameStore}
-            className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+            className="p-3 bg-gradient-to-br from-yellow-500 to-red-600 hover:from-purple-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
             title="Open Mini Games Store"
           >
             <div className="flex items-center space-x-2">
-              <span>🎮</span>
+              <span>🎪</span>
               <span className="text-sm font-medium hidden lg:block">Store</span>
             </div>
           </button>

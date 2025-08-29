@@ -15,10 +15,10 @@ export const Footer = () => {
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="">
                 <Image 
-                  src="/images/logo/logoicon.png"
+                  src="/images/logo/trustless.png"
                   alt="STELLAR NEXUS"
-                  width={152}
-                  height={152}
+                  width={100}
+                  height={100}
                 />
               </div>
               <div>
