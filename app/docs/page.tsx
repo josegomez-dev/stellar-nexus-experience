@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { NexusPrime } from '@/components/NexusPrime'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { NexusPrime } from '@/components/layout/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { WalletProvider } from '@/contexts/WalletContext'
 import Image from 'next/image'
@@ -16,6 +16,7 @@ export default function DocsPage() {
     { id: 'technology', title: 'Technology Stack', icon: '⚡' },
     { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
     { id: 'benefits', title: 'Benefits & Use Cases', icon: '💡' },
+    { id: 'repository', title: 'Repository & Code', icon: '📦' },
     { id: 'feedback', title: 'Implementation Feedback', icon: '📝' },
     { id: 'tasks', title: 'Task List & Updates', icon: '📋' }
   ]
@@ -506,6 +507,288 @@ export default function DocsPage() {
                               Professional services, research, and advisory work with structured outcomes
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Repository & Code */}
+                  {activeSection === 'repository' && (
+                    <div className="space-y-8">
+                      <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold text-white mb-4">📦 Repository & Code</h2>
+                        <p className="text-lg text-white/80">
+                          Access the source code, contribute to development, and explore the project structure
+                        </p>
+                      </div>
+
+                      {/* Repository Overview */}
+                      <div className="bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-xl p-6 border border-brand-400/30">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-2xl font-bold text-white">🚀 STELLAR NEXUS | ESCROW ARSENAL</h3>
+                          <a 
+                            href="https://github.com/josegomez-dev/trustless-poc" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+                          >
+                            <span>📦</span>
+                            <span>View on GitHub</span>
+                          </a>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold text-brand-300 mb-3">Repository Details</h4>
+                            <ul className="text-white/80 text-sm space-y-2">
+                              <li>• <strong>Name:</strong> trustless-poc</li>
+                              <li>• <strong>Type:</strong> Proof of Concept</li>
+                              <li>• <strong>Platform:</strong> Stellar Blockchain</li>
+                              <li>• <strong>Language:</strong> TypeScript/React</li>
+                              <li>• <strong>License:</strong> MIT</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-accent-300 mb-3">Quick Stats</h4>
+                            <ul className="text-white/80 text-sm space-y-2">
+                              <li>• <strong>Framework:</strong> Next.js 14</li>
+                              <li>• <strong>Styling:</strong> Tailwind CSS</li>
+                              <li>• <strong>State:</strong> React Context</li>
+                              <li>• <strong>Wallet:</strong> Stellar SDK</li>
+                              <li>• <strong>Deployment:</strong> Vercel</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Project Structure */}
+                      <div className="bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-xl p-6 border border-accent-400/30">
+                        <h3 className="text-2xl font-bold text-white mb-6">🏗️ Project Structure</h3>
+                        <div className="bg-white/5 rounded-lg p-4 border border-white/20 overflow-x-auto">
+                          <div className="text-sm font-mono text-white/80 min-w-[600px]">
+                            <div className="grid grid-cols-1 gap-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">trustless-poc/</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">app/</span>
+                                <span className="text-white/60"># Next.js app router</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📄</span>
+                                <span className="text-white">page.tsx</span>
+                                <span className="text-white/60"># Home page</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📄</span>
+                                <span className="text-white">demos/page.tsx</span>
+                                <span className="text-white/60"># Demo suite</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📄</span>
+                                <span className="text-white">developer-portal/page.tsx</span>
+                                <span className="text-white/60"># Developer portal</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📄</span>
+                                <span className="text-white">admin/page.tsx</span>
+                                <span className="text-white/60"># Admin dashboard</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">components/</span>
+                                <span className="text-white/60"># React components</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">demos/</span>
+                                <span className="text-white/60"># Demo components</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">developer/</span>
+                                <span className="text-white/60"># Developer portal</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">admin/</span>
+                                <span className="text-white/60"># Admin components</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">layout/</span>
+                                <span className="text-white/60"># Layout components</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-8">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">ui/</span>
+                                <span className="text-white/60"># UI components</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">contexts/</span>
+                                <span className="text-white/60"># React contexts</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">lib/</span>
+                                <span className="text-white/60"># Utility functions</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">types/</span>
+                                <span className="text-white/60"># TypeScript types</span>
+                              </div>
+                              <div className="flex items-center space-x-2 ml-4">
+                                <span className="text-accent-400">📁</span>
+                                <span className="text-white">public/</span>
+                                <span className="text-white/60"># Static assets</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* README Content */}
+                      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 rounded-xl p-6 border border-success-400/30">
+                        <h3 className="text-2xl font-bold text-white mb-6">📖 README.md</h3>
+                        <div className="bg-white/5 rounded-lg p-4 border border-white/20 max-h-96 overflow-y-auto">
+                          <div className="prose prose-invert max-w-none">
+                            <div className="text-white/90 text-sm leading-relaxed space-y-4">
+                              <h4 className="text-xl font-bold text-white mb-3">🚀 STELLAR NEXUS | ESCROW ARSENAL</h4>
+                              <p>
+                                A <strong>revolutionary proof-of-concept</strong> application demonstrating the future of Trustless Work escrow management on the Stellar blockchain. This POC features a comprehensive demo suite, real Freighter wallet integration, interactive AI tutorials, and a modern, responsive interface with global state management.
+                              </p>
+                              
+                              <h5 className="text-lg font-semibold text-white mb-2">🌟 What This POC Demonstrates</h5>
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                <li><strong>🔐 Real Wallet Integration:</strong> Connect Freighter wallet or enter any Stellar wallet address</li>
+                                <li><strong>🧪 Interactive Demo Suite:</strong> 4 comprehensive demos showcasing different escrow scenarios</li>
+                                <li><strong>🤖 AI Guardian Tutorial:</strong> NEXUS PRIME AI assistant with voice-guided tutorials</li>
+                                <li><strong>⭐ Stellar Integration:</strong> Built on the Stellar blockchain for fast, low-cost transactions</li>
+                                <li><strong>🌐 Global State Management:</strong> Shared wallet state across all components</li>
+                                <li><strong>🎨 Modern UI:</strong> Beautiful gradient design with glassmorphism effects and smooth animations</li>
+                                <li><strong>📱 Responsive Design:</strong> Works seamlessly on desktop and mobile devices</li>
+                                <li><strong>⚡ Real-Time Updates:</strong> Live wallet state synchronization across the entire application</li>
+                                <li><strong>🎭 Epic Visual Effects:</strong> Legendary animations and professional branding</li>
+                              </ul>
+
+                              <h5 className="text-lg font-semibold text-white mb-2">🎯 Use Cases</h5>
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                <li><strong>Developers:</strong> Test Stellar wallet integration and blockchain functionality</li>
+                                <li><strong>Users:</strong> Experience Trustless Work escrow management concepts through interactive demos</li>
+                                <li><strong>Businesses:</strong> Explore decentralized work and payment solutions</li>
+                                <li><strong>Educators:</strong> Demonstrate blockchain technology in action with hands-on examples</li>
+                                <li><strong>Researchers:</strong> Study different escrow models and consensus mechanisms</li>
+                              </ul>
+
+                              <h5 className="text-lg font-semibold text-white mb-2">🚀 Key Features</h5>
+                              <h6 className="text-md font-semibold text-white mb-1">🤖 AI Guardian - NEXUS PRIME</h6>
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                <li><strong>Interactive Tutorials:</strong> Step-by-step guidance through the ESCROW ARSENAL</li>
+                                <li><strong>Voice Navigation:</strong> AI voice reads tutorial content with male voice</li>
+                                <li><strong>Smart Assistance:</strong> Context-aware help based on current demo and wallet status</li>
+                                <li><strong>Floating Magic Button:</strong> Always-accessible AI guardian with epic animations</li>
+                              </ul>
+
+                              <h6 className="text-md font-semibold text-white mb-1">🎭 Epic Visual Experience</h6>
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                <li><strong>Legendary Animations:</strong> Professional-grade animations and transitions</li>
+                                <li><strong>Gradient Mastery:</strong> Beautiful color schemes and glassmorphism effects</li>
+                                <li><strong>Responsive Design:</strong> Seamless experience across all devices</li>
+                                <li><strong>Professional Branding:</strong> STELLAR NEXUS logo integration throughout</li>
+                              </ul>
+
+                              <h6 className="text-md font-semibold text-white mb-1">🔐 Advanced Wallet Management</h6>
+                              <ul className="list-disc list-inside space-y-1 ml-4">
+                                <li><strong>Freighter Integration:</strong> Native support for popular Stellar wallet</li>
+                                <li><strong>Manual Address Input:</strong> Support for any Stellar wallet address</li>
+                                <li><strong>Real-time Status:</strong> Live wallet connection status with smooth transitions</li>
+                                <li><strong>Network Detection:</strong> Automatic Stellar network detection and switching</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Getting Started */}
+                      <div className="bg-gradient-to-br from-warning-500/20 to-warning-400/20 rounded-xl p-6 border border-warning-400/30">
+                        <h3 className="text-2xl font-bold text-white mb-6">🚀 Getting Started</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-semibold text-warning-300 mb-3">For Developers</h4>
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                              <pre className="text-white/80 text-sm overflow-x-auto">
+{`# Clone the repository
+git clone https://github.com/josegomez-dev/trustless-poc.git
+cd trustless-poc
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build`}
+                              </pre>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-warning-300 mb-3">For Users</h4>
+                            <div className="space-y-3">
+                              <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                                <h5 className="font-semibold text-white mb-2">1. Connect Wallet</h5>
+                                <p className="text-white/80 text-sm">Use Freighter wallet or enter any Stellar address</p>
+                              </div>
+                              <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                                <h5 className="font-semibold text-white mb-2">2. Explore Demos</h5>
+                                <p className="text-white/80 text-sm">Try the interactive escrow demos to learn</p>
+                              </div>
+                              <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                                <h5 className="font-semibold text-white mb-2">3. Use AI Assistant</h5>
+                                <p className="text-white/80 text-sm">Get help from NEXUS PRIME AI guardian</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Contributing */}
+                      <div className="bg-gradient-to-br from-info-500/20 to-info-400/20 rounded-xl p-6 border border-info-400/30">
+                        <h3 className="text-2xl font-bold text-white mb-6">🤝 Contributing</h3>
+                        <p className="text-white/80 mb-4">
+                          We welcome contributions from the community! Whether you're a developer, designer, or blockchain enthusiast, 
+                          there are many ways to help improve Trustless Work.
+                        </p>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-3xl mb-3">🐛</div>
+                            <h4 className="font-semibold text-white mb-2">Report Issues</h4>
+                            <p className="text-white/80 text-sm">Help us identify bugs and improve the platform</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-4xl mb-3">💡</div>
+                            <h4 className="font-semibold text-white mb-2">Suggest Features</h4>
+                            <p className="text-white/80 text-sm">Share your ideas for new functionality</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl mb-3">🔧</div>
+                            <h4 className="font-semibold text-white mb-2">Submit Code</h4>
+                            <p className="text-white/80 text-sm">Contribute improvements and new features</p>
+                          </div>
+                        </div>
+                        <div className="text-center mt-6">
+                          <a 
+                            href="https://github.com/josegomez-dev/trustless-poc/issues" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-info-500 to-info-600 hover:from-info-600 hover:to-info-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            📋 View Issues on GitHub
+                          </a>
                         </div>
                       </div>
                     </div>

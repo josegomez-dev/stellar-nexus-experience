@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { WalletSidebar } from '@/components/WalletSidebar'
-import { Header } from '@/components/Header'
-import { Footer } from '@/components/Footer'
-import { NexusPrime } from '@/components/NexusPrime'
+import { WalletSidebar } from '@/components/ui/WalletSidebar'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { NexusPrime } from '@/components/layout/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { WalletProvider } from '@/contexts/WalletContext'
 import { Providers } from '@/components/Providers'
@@ -16,7 +16,7 @@ import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo'
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo'
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo'
 import { OnboardingOverlay } from '@/components/OnboardingOverlay'
-import { ToastContainer } from '@/components/Toast'
+import { ToastContainer } from '@/components/ui/Toast'
 import Image from 'next/image'
 
 // Demo Selection Component

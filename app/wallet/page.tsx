@@ -1,9 +1,13 @@
 'use client'
 
-import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { NexusPrime } from '@/components/layout/NexusPrime'
+import { WalletManager } from '@/components/ui/WalletManager'
 import { stellarConfig } from '@/lib/wallet-config'
 import { useState, useEffect } from 'react'
 import { validateStellarAddress, sanitizeStellarAddressInput, generateTestStellarAddress } from '@/lib/stellar-address-validation'
+import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext'
 
 function WalletPageContent() {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet()

@@ -1,7 +1,8 @@
 'use client'
 
-import { Footer } from '@/components/Footer'
-import { NexusPrime } from '@/components/NexusPrime'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
+import { NexusPrime } from '@/components/layout/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
