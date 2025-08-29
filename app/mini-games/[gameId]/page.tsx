@@ -199,7 +199,7 @@ export default function GamePage() {
   }
 
   // Prepare games data for sidebar
-  const sidebarGames = Object.values(gameLibrary).map(game => ({
+  const sidebarGames = Object.values(gameLibrary || {}).map(game => ({
     id: game.id,
     title: game.title,
     subtitle: game.subtitle,
@@ -273,7 +273,7 @@ export default function GamePage() {
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Object.values(gameLibrary).map((gameOption) => (
+                        {Object.values(gameLibrary || {}).map((gameOption) => (
                           <div
                             key={gameOption.id}
                             onClick={() => handleGameSelect(gameOption.id)}

@@ -150,32 +150,34 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   // Typewriter effect for messages
   useEffect(() => {
     const message = getContextMessage()
-    if (message !== currentMessage) {
-      setMessageQueue(prev => [...prev, message])
+    if (message && message !== currentMessage) {
+      setMessageQueue(prev => [...(prev || []), message])
     }
   }, [currentPage, currentDemo, walletConnected])
 
   useEffect(() => {
-    if (messageQueue.length > 0 && !isTyping) {
+    if (messageQueue && messageQueue.length > 0 && !isTyping) {
       const nextMessage = messageQueue[0]
-      setMessageQueue(prev => prev.slice(1))
-      setCurrentMessage('')
-      setIsTyping(true)
-      
-      let index = 0
-      const typeInterval = setInterval(() => {
-        if (index < nextMessage.length) {
-          const char = nextMessage[index]
-          // Only add valid characters, skip undefined or null
-          if (char && char !== 'undefined') {
-            setCurrentMessage(prev => prev + char)
+      if (nextMessage) {
+        setMessageQueue(prev => prev.slice(1))
+        setCurrentMessage('')
+        setIsTyping(true)
+        
+        let index = 0
+        const typeInterval = setInterval(() => {
+          if (index < nextMessage.length) {
+            const char = nextMessage[index]
+            // Only add valid characters, skip undefined or null
+            if (char && char !== 'undefined') {
+              setCurrentMessage(prev => prev + char)
+            }
+            index++
+          } else {
+            setIsTyping(false)
+            clearInterval(typeInterval)
           }
-          index++
-        } else {
-          setIsTyping(false)
-          clearInterval(typeInterval)
-        }
-      }, 50)
+        }, 50)
+      }
     }
   }, [messageQueue, isTyping])
 
@@ -185,18 +187,20 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   const startTutorial = () => {
     setShowTutorial(true)
     setTutorialStep(0)
-    const firstStep = tutorialSteps[0]
-    if (ttsEnabled) {
-      speakMessage(`${firstStep.title}. ${firstStep.message}`)
+    if (tutorialSteps && tutorialSteps.length > 0) {
+      const firstStep = tutorialSteps[0]
+      if (ttsEnabled) {
+        speakMessage(`${firstStep.title}. ${firstStep.message}`)
+      }
     }
   }
 
   const nextTutorialStep = () => {
-    if (tutorialStep < tutorialSteps.length - 1) {
+    if (tutorialSteps && tutorialStep < tutorialSteps.length - 1) {
       const nextStep = tutorialStep + 1
       setTutorialStep(nextStep)
       const step = tutorialSteps[nextStep]
-      if (ttsEnabled) {
+      if (ttsEnabled && step) {
         speakMessage(`${step.title}. ${step.message}`)
       }
     } else {
@@ -209,11 +213,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   }
 
   const previousTutorialStep = () => {
-    if (tutorialStep > 0) {
+    if (tutorialSteps && tutorialStep > 0) {
       const prevStep = tutorialStep - 1
       setTutorialStep(prevStep)
       const step = tutorialSteps[prevStep]
-      if (ttsEnabled) {
+      if (ttsEnabled && step) {
         speakMessage(`${step.title}. ${step.message}`)
       }
     }

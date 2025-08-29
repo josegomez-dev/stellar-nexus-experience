@@ -107,13 +107,8 @@ export default function RetroArcadeSidebar({
             
             {/* Arcade Controls */}
             <div className={`text-center transition-all duration-300 ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
-              <div className="text-white/60 text-xs mb-3">ARCADE CONTROLS</div>
-              <div className="flex justify-center space-x-4 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-full border-2 border-red-400 shadow-lg"></div>
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full border-2 border-blue-400 shadow-lg"></div>
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full border-2 border-green-400 shadow-lg"></div>
-              </div>
-              
+              <br />
+              <br />
               {/* Full Screen Button */}
               <button
                 onClick={onFullscreenToggle}
