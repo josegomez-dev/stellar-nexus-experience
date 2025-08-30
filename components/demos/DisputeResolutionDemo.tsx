@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useWallet } from '@/lib/stellar-wallet-hooks'
+import { useGlobalWallet } from '@/contexts/WalletContext'
 import { 
   useInitializeEscrow, 
   useFundEscrow, 
@@ -37,7 +37,7 @@ interface Milestone {
 }
 
 export const DisputeResolutionDemo = () => {
-  const { walletData, isConnected } = useWallet()
+  const { walletData, isConnected } = useGlobalWallet()
   const [contractId, setContractId] = useState<string>('')
   const [escrowData, setEscrowData] = useState<any>(null)
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client')
@@ -54,8 +54,8 @@ export const DisputeResolutionDemo = () => {
   const { startDispute, isLoading: isStartingDispute, error: disputeError } = useStartDispute()
   const { resolveDispute, isLoading: isResolvingDispute, error: resolveError } = useResolveDispute()
 
-  // Mock milestones
-  const [milestones] = useState<Milestone[]>([
+  // Mock milestones - make mutable so we can update statuses
+  const [milestones, setMilestones] = useState<Milestone[]>([
     {
       id: 'milestone_1',
       title: 'Website Design',
@@ -141,6 +141,7 @@ export const DisputeResolutionDemo = () => {
       const updatedMilestones = milestones.map(m => 
         m.id === milestoneId ? { ...m, status: 'completed' as const } : m
       )
+      setMilestones(updatedMilestones)
     } catch (error) {
       console.error('Failed to complete milestone:', error)
     }
@@ -163,6 +164,7 @@ export const DisputeResolutionDemo = () => {
       const updatedMilestones = milestones.map(m => 
         m.id === milestoneId ? { ...m, status: 'approved' as const } : m
       )
+      setMilestones(updatedMilestones)
     } catch (error) {
       console.error('Failed to approve milestone:', error)
     }
@@ -199,6 +201,7 @@ export const DisputeResolutionDemo = () => {
       const updatedMilestones = milestones.map(m => 
         m.id === milestoneId ? { ...m, status: 'disputed' as const } : m
       )
+      setMilestones(updatedMilestones)
     } catch (error) {
       console.error('Failed to start dispute:', error)
     }
@@ -248,6 +251,7 @@ export const DisputeResolutionDemo = () => {
         }
         return m
       })
+      setMilestones(updatedMilestones)
       
       setResolutionReason('')
     } catch (error) {
@@ -272,6 +276,7 @@ export const DisputeResolutionDemo = () => {
       const updatedMilestones = milestones.map(m => 
         m.id === milestoneId ? { ...m, status: 'released' as const } : m
       )
+      setMilestones(updatedMilestones)
     } catch (error) {
       console.error('Failed to release funds:', error)
     }
@@ -286,9 +291,8 @@ export const DisputeResolutionDemo = () => {
     setResolutionReason('')
     
     // Reset milestone statuses
-    milestones.forEach(m => {
-      m.status = 'pending'
-    })
+    const resetMilestones = milestones.map(m => ({ ...m, status: 'pending' as const }))
+    setMilestones(resetMilestones)
   }
 
   const getMilestoneStatusColor = (status: string) => {
@@ -355,6 +359,29 @@ export const DisputeResolutionDemo = () => {
         {!contractId && (
           <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
             <h3 className="text-xl font-semibold text-white mb-4">🚀 Setup Demo</h3>
+            
+            {/* Wallet Connection Required Message */}
+            {!isConnected && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-lg text-center">
+                <div className="flex items-center justify-center space-x-2 mb-3">
+                  <span className="text-2xl">🔐</span>
+                  <h4 className="text-lg font-semibold text-cyan-300">Wallet Connection Required</h4>
+                </div>
+                <p className="text-white/80 text-sm mb-4">
+                  You need to connect your Stellar wallet to initialize the escrow contract and use this demo.
+                </p>
+                <button
+                  onClick={() => {
+                    // Dispatch custom event to open wallet sidebar
+                    window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                  }}
+                  className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
+                >
+                  🔗 Connect Wallet
+                </button>
+              </div>
+            )}
+            
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-semibold text-orange-300 mb-3">Milestones</h4>

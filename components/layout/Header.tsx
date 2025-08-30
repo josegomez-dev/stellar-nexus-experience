@@ -184,8 +184,17 @@ export const Header = () => {
                 </button>
               </div>
             ) : (
-              <div className="text-sm text-white/60">
-                Wallet not connected
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-white/60">Wallet not connected</span>
+                <button
+                  onClick={() => {
+                    // Dispatch custom event to open wallet sidebar
+                    window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                  }}
+                  className="px-3 py-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
+                >
+                  🔗 Connect
+                </button>
               </div>
             )}
 

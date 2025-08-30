@@ -340,6 +340,41 @@ function DemosPageContent() {
         <main className={`relative z-10 ${
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}>
+          
+          {/* Wallet Connection Banner */}
+          {!isConnected && (
+            <section className="container mx-auto px-4 py-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm border border-cyan-400/30 rounded-xl shadow-2xl p-6 text-center">
+                  <div className="flex items-center justify-center space-x-3 mb-4">
+                    <span className="text-3xl">🔐</span>
+                    <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                      Connect Your Wallet
+                    </h3>
+                  </div>
+                  <p className="text-white/80 text-lg mb-6 max-w-2xl mx-auto">
+                    To use the interactive demos and experience the power of trustless work on Stellar, 
+                    you need to connect your wallet first. Choose from Freighter extension or manual address input.
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <button
+                      onClick={() => {
+                        setWalletSidebarOpen(true)
+                        setWalletExpanded(true)
+                      }}
+                      className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
+                    >
+                      🔗 Open Wallet Sidebar
+                    </button>
+                    <div className="text-sm text-white/60">
+                      Or use the <span className="text-cyan-300">🔗 Connect</span> button in the header
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+          
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-16">
             <div className="text-center">

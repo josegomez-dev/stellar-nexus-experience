@@ -499,6 +499,28 @@ export const MicroTaskMarketplaceDemo = () => {
           <p className="text-white/80 text-lg">
             Lightweight gig-board with escrow functionality for micro-tasks
           </p>
+          
+          {/* Wallet Connection Required Message */}
+          {!isConnected && (
+            <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-lg text-center">
+              <div className="flex items-center justify-center space-x-2 mb-3">
+                <span className="text-2xl">🔐</span>
+                <h4 className="text-lg font-semibold text-cyan-300">Wallet Connection Required</h4>
+              </div>
+              <p className="text-white/80 text-sm mb-4">
+                You need to connect your Stellar wallet to post tasks, accept work, and manage escrow contracts.
+              </p>
+              <button
+                onClick={() => {
+                  // Dispatch custom event to open wallet sidebar
+                  window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
+              >
+                🔗 Connect Wallet
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Navigation Tabs */}
