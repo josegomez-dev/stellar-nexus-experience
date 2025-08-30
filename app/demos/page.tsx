@@ -286,113 +286,6 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
   )
 }
 
-// Wallet Status Component
-const WalletStatus = ({ onOpenWallet, onShowConnectedChange }: { 
-  onOpenWallet: () => void
-  onShowConnectedChange: (show: boolean) => void 
-}) => {
-  const { walletData, isConnected } = useGlobalWallet()
-  const [showConnected, setShowConnected] = useState(true)
-  const [progress, setProgress] = useState(100)
-  
-  // Auto-hide connected message after 10 seconds
-  useEffect(() => {
-    if (isConnected && walletData) {
-      setShowConnected(true)
-      setProgress(100)
-      
-      const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev <= 0) {
-            setShowConnected(false)
-            onShowConnectedChange(false) // Notify parent component
-            return 0
-          }
-          return prev - 1 // Decrease by 1% every 100ms (10 seconds total)
-        })
-      }, 100)
-      
-      return () => clearInterval(interval)
-    } else {
-      // Reset states when wallet disconnects
-      setShowConnected(false)
-      setProgress(0)
-    }
-  }, [isConnected, walletData])
-  
-  if (!isConnected || !walletData) {
-    return (
-      <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-danger-500/20 to-warning-500/20 backdrop-blur-sm border border-danger-400/30 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
-        <div className="flex items-center justify-center space-x-6">
-          <span style={{ fontSize: '2rem'}}>⚠️</span>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-danger-300 mb-2">
-              Wallet Not Connected
-            </h3>
-            <p className="hidden sm:block text-sm text-danger-200 mb-4">
-              Please connect your Stellar wallet to test the demos
-            </p>
-            <button
-              onClick={onOpenWallet}
-              className="wallet-connect-button px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
-            >
-              🔗 Connect Wallet
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  
-  if (!showConnected) {
-    return null // Completely remove from DOM to eliminate blank space
-  }
-  
-  return (
-    <div className="max-w-4xl mx-auto mb-8 p-6 bg-gradient-to-r from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl relative overflow-hidden transition-all duration-500 ease-in-out">
-      {/* Progress Bar */}
-      <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-success-400 to-success-300 transition-all duration-100 ease-linear" 
-           style={{ width: `${progress}%` }}>
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <span className="text-3xl">✅</span>
-          <div>
-            <h3 className="text-lg font-semibold text-success-300">
-              Wallet Connected
-            </h3>
-            <p className="text-sm text-success-200">
-              Network: {walletData.network}
-            </p>
-            <p className="hidden sm:block text-xs text-success-200/80 mt-1">
-              Auto-hiding in {Math.ceil(progress / 10)}s...
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="hidden sm:block text-xs text-success-200 mb-1">Your Address:</p>
-          <div className="flex items-center space-x-2">
-            <p className="font-mono text-sm text-success-300 bg-success-900/50 px-3 py-2 rounded-lg border border-success-400/30">
-              {walletData.publicKey.slice(0, 8)}...{walletData.publicKey.slice(-8)}
-            </p>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(walletData.publicKey);
-                alert('Full wallet address copied to clipboard!');
-              }}
-              className="text-success-300 hover:text-success-100 text-lg transition-colors"
-              title="Copy full address"
-            >
-              📋
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function DemosPageContent() {
   const { isConnected } = useGlobalWallet()
   const [activeDemo, setActiveDemo] = useState('hello-milestone')
@@ -400,11 +293,6 @@ function DemosPageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
-  
-  // Prevent layout shifts by maintaining consistent spacing
-  const walletNotificationRef = useRef<HTMLDivElement>(null)
-  const [walletNotificationHeight, setWalletNotificationHeight] = useState(0)
-  const [showWalletConnected, setShowWalletConnected] = useState(true)
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -423,31 +311,6 @@ function DemosPageContent() {
       window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener)
     }
   }, [])
-  
-  // Measure wallet notification height to prevent layout shifts
-  useEffect(() => {
-    if (walletNotificationRef.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setWalletNotificationHeight(entry.contentRect.height)
-        }
-      })
-      
-      resizeObserver.observe(walletNotificationRef.current)
-      return () => resizeObserver.disconnect()
-    }
-  }, [isConnected])
-
-  const handleOpenWallet = () => {
-    setWalletSidebarOpen(true)
-    setWalletExpanded(true) // Always open expanded
-    // Dispatch event to expand the wallet sidebar
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('walletSidebarToggle', {
-        detail: { isOpen: true, isExpanded: true }
-      }))
-    }, 100)
-  }
 
   const renderActiveDemo = () => {
     switch (activeDemo) {
@@ -560,20 +423,6 @@ function DemosPageContent() {
                 <br />
                 <br />
               
-                        {/* Wallet Status - Stable Container */}
-          <div 
-            ref={walletNotificationRef}
-            style={{ 
-              minHeight: walletNotificationHeight > 0 && isConnected ? walletNotificationHeight : '0px',
-              overflow: 'hidden'
-            }}
-            className="transition-all duration-500 ease-in-out"
-          >
-            <WalletStatus 
-              onOpenWallet={handleOpenWallet} 
-              onShowConnectedChange={setShowWalletConnected}
-            />
-          </div>
             </div>
           </section>
 
@@ -724,9 +573,6 @@ function DemosPageContent() {
           {/* Demo Selection */}
           <section 
             className="container mx-auto px-4 transition-all duration-500 ease-in-out"
-            style={{ 
-              marginTop: !showWalletConnected && isConnected ? '-200px' : '0px'
-            }}
           >
             <div className="max-w-6xl mx-auto">
               {/* Epic Legendary Background for Title */}

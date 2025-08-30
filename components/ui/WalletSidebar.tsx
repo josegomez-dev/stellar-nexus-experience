@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { useTransactionHistory } from '@/contexts/TransactionContext'
+import { useToast } from '@/contexts/ToastContext'
 import { stellarConfig } from '@/lib/wallet-config'
 import Image from 'next/image'
 
@@ -15,12 +16,20 @@ interface WalletSidebarProps {
 export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet()
   const { getRecentTransactions, transactions } = useTransactionHistory()
+  const { addToast } = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isNewWindow, setIsNewWindow] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [manualAddress, setManualAddress] = useState('')
   const [showTransactionHistory, setShowTransactionHistory] = useState(false)
   const [showWeb3Help, setShowWeb3Help] = useState(true)
+
+  // Stellar address validation function
+  const isValidStellarAddress = (address: string): boolean => {
+    // Stellar addresses start with 'G' and are 56 characters long
+    const stellarAddressRegex = /^G[A-Z2-7]{55}$/
+    return stellarAddressRegex.test(address.trim())
+  }
 
   // Get recent transactions
   const recentTransactions = getRecentTransactions(5)
@@ -352,16 +361,93 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       type="text"
                       value={manualAddress}
                       onChange={(e) => setManualAddress(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (!manualAddress.trim()) {
+                            addToast({
+                              type: 'warning',
+                              title: 'Empty Address',
+                              message: 'Please enter a Stellar wallet address',
+                              duration: 4000
+                            })
+                            return
+                          }
+                          
+                          if (!isValidStellarAddress(manualAddress)) {
+                            addToast({
+                              type: 'error',
+                              title: 'Invalid Stellar Address',
+                              message: 'Please enter a valid Stellar address starting with "G" and 56 characters long',
+                              duration: 6000
+                            })
+                            return
+                          }
+                          
+                          // Trigger the connect button click
+                          const target = e.target as HTMLInputElement
+                          const connectButton = target.parentElement?.querySelector('button')
+                          if (connectButton) {
+                            connectButton.click()
+                          }
+                        }
+                      }}
                       placeholder="G... (Stellar address)"
-                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
+                      className={`w-full px-3 py-2 bg-white/10 border rounded-lg text-white placeholder-white/40 text-sm focus:outline-none transition-colors ${
+                        manualAddress.trim() && !isValidStellarAddress(manualAddress)
+                          ? 'border-red-400 focus:border-red-400'
+                          : 'border-white/20 focus:border-cyan-400'
+                      }`}
                     />
+                    {manualAddress.trim() && !isValidStellarAddress(manualAddress) && (
+                      <p className="text-xs text-red-400 animate-fadeIn">
+                        ⚠️ Invalid Stellar address format
+                      </p>
+                    )}
+                    {manualAddress.trim() && isValidStellarAddress(manualAddress) && (
+                      <p className="text-xs text-green-400 animate-fadeIn">
+                        ✅ Valid Stellar address format
+                      </p>
+                    )}
                     <button
                       onClick={async () => {
-                        if (!manualAddress.trim()) return
+                        if (!manualAddress.trim()) {
+                          addToast({
+                            type: 'warning',
+                            title: 'Empty Address',
+                            message: 'Please enter a Stellar wallet address',
+                            duration: 4000
+                          })
+                          return
+                        }
+                        
+                        if (!isValidStellarAddress(manualAddress)) {
+                          addToast({
+                            type: 'error',
+                            title: 'Invalid Stellar Address',
+                            message: 'Please enter a valid Stellar address starting with "G" and 56 characters long',
+                            duration: 6000
+                          })
+                          return
+                        }
+                        
                         setIsConnecting(true)
                         try {
                           await connect(manualAddress.trim())
                           setManualAddress('')
+                          addToast({
+                            type: 'success',
+                            title: 'Wallet Connected',
+                            message: 'Successfully connected to Stellar wallet',
+                            duration: 4000
+                          })
+                        } catch (error) {
+                          addToast({
+                            type: 'error',
+                            title: 'Connection Failed',
+                            message: 'Failed to connect to the provided wallet address',
+                            duration: 6000
+                          })
                         } finally {
                           setIsConnecting(false)
                         }
