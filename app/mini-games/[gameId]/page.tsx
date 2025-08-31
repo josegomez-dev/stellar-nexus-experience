@@ -466,6 +466,170 @@ export default function GamePage() {
                         Get ready for an epic learning adventure! Use full-screen mode for the ultimate arcade experience!
                       </p>
                     </div>
+
+                    {/* Nexus Starters Section */}
+                    <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8">
+                      <div className="text-center mb-8">
+                        <h3 className="text-3xl font-bold text-white mb-4">👨🏻‍💻 Nexus Starters</h3>
+                        <p className="text-lg text-white/80 max-w-2xl mx-auto">
+                          Build on Stellar with Trustless Work — comprehensive starter kits for innovative apps using advanced escrow mechanics and enhanced Stellar integrations.
+                        </p>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {/* DeFi Starter */}
+                        <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 rounded-2xl p-6 hover:border-cyan-400/50 transition-all duration-300 group relative">
+                          {/* Recommended Badge */}
+                          {(game.category === 'defi' || game.features.some(f => f.toLowerCase().includes('defi') || f.toLowerCase().includes('trading') || f.toLowerCase().includes('yield'))) && (
+                            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                              ⭐ RECOMMENDED
+                            </div>
+                          )}
+                          
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">💎</div>
+                            <h4 className="text-xl font-bold text-white mb-2">DeFi Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Create decentralized financial apps with escrow contracts and yield optimization.
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Yield farming protocols</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Liquidity provision</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-chain bridges</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Risk management tools</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            💎 Explore DeFi Starter
+                          </a>
+                        </div>
+
+                        {/* Gaming Starter */}
+                        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 hover:border-purple-400/50 transition-all duration-300 group relative">
+                          {/* Recommended Badge */}
+                          {(game.category === 'gaming' || game.category === 'learning' || game.features.some(f => f.toLowerCase().includes('game') || f.toLowerCase().includes('play') || f.toLowerCase().includes('tournament') || f.toLowerCase().includes('reward'))) && (
+                            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                              ⭐ RECOMMENDED
+                            </div>
+                          )}
+                          
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🎮</div>
+                            <h4 className="text-xl font-bold text-white mb-2">Gaming Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Build play-to-earn games with secure escrow for tournaments, rewards, and trading.
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Tournament prize pools</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>NFT marketplace integration</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-game asset transfers</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Automated reward distribution</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            🎮 Explore Gaming Starter
+                          </a>
+                        </div>
+
+                        {/* Unicorn Starter */}
+                        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-6 hover:border-green-400/50 transition-all duration-300 group relative">
+                          {/* Recommended Badge */}
+                          {(game.category === 'blockchain' || game.difficulty === 'Advanced' || game.features.some(f => f.toLowerCase().includes('ai') || f.toLowerCase().includes('advanced') || f.toLowerCase().includes('cross-chain') || f.toLowerCase().includes('interoperability'))) && (
+                            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                              ⭐ RECOMMENDED
+                            </div>
+                          )}
+                          
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🦄</div>
+                            <h4 className="text-xl font-bold text-white mb-2">Unicorn Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Build "unicorn" apps with cutting-edge features and disruptive tech.
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>AI-powered features</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-chain interoperability</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Advanced tokenomics</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Revolutionary UX/UI</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            🦄 Explore Unicorn Starter
+                          </a>
+                        </div>
+                      </div>
+
+
+
+                      <div className="text-center mt-6">
+                        <a
+                          href="https://nexus-starter.vercel.app/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                        >
+                          🚀 Visit Nexus Starter
+                          <span className="ml-2">→</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

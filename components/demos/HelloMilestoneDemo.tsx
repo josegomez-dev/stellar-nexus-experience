@@ -510,7 +510,7 @@ export const HelloMilestoneDemo = () => {
           {!isConnected && (
             <div className="mt-4 p-4 bg-warning-500/20 border border-warning-400/30 rounded-lg">
               <p className="text-warning-300">
-                ⚠️ <strong>Wallet Required</strong> - Please connect your Stellar wallet to start the demo
+                ⚠️ <strong>Wallet Required</strong> - Please asdasd your Stellar wallet to start the demo
               </p>
             </div>
           )}

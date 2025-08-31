@@ -6,6 +6,7 @@ import { useTransactionHistory } from '@/contexts/TransactionContext'
 import { useToast } from '@/contexts/ToastContext'
 import { stellarConfig } from '@/lib/wallet-config'
 import Image from 'next/image'
+import { Web3OnboardingModal } from './Web3OnboardingModal'
 
 interface WalletSidebarProps {
   isOpen: boolean
@@ -23,6 +24,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
   const [manualAddress, setManualAddress] = useState('')
   const [showTransactionHistory, setShowTransactionHistory] = useState(false)
   const [showWeb3Help, setShowWeb3Help] = useState(true)
+  const [showWeb3Modal, setShowWeb3Modal] = useState(false)
+  const [hasShownWeb3Modal, setHasShownWeb3Modal] = useState(false)
 
   // Stellar address validation function
   const isValidStellarAddress = (address: string): boolean => {
@@ -75,6 +78,18 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       window.removeEventListener('toggleWalletSidebar', handleToggleWallet)
     }
   }, [isOpen, onToggle])
+
+  // Auto-show Web3 modal when sidebar opens for the first time
+  useEffect(() => {
+    if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable) {
+      const timer = setTimeout(() => {
+        setShowWeb3Modal(true)
+        setHasShownWeb3Modal(true)
+      }, 500) // Small delay to let sidebar animation complete
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable])
 
   // Open mini games store in new window
   const openMiniGameStore = () => {
@@ -251,104 +266,20 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     )}
                   </button>
                 ) : (
-                  <div className={`text-center ${isExpanded ? "py-2" : "py-1"}`}>
-                    <p className="text-xs text-white/60">
-                      {isExpanded ? (
-                        <span className="hidden sm:inline">Use manual address input below or install Freighter extension</span>
-                      ) : "⚠️"}
-                    </p>
-                    {isExpanded && (
-                      <div className="mt-2 text-xs text-amber-300/80">
-                        💡 <a 
-                          href="https://www.freighter.app/" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="underline hover:text-amber-200 transition-colors"
-                        >
-                          Install Freighter
-                        </a> for best experience
-                      </div>
-                    )}
-                  </div>
+                  null 
                 )}
                 
-                {/* Web3 Onboarding Section */}
-                {isExpanded && showWeb3Help && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-lg relative">
-                    <button
-                      onClick={() => setShowWeb3Help(false)}
-                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold hover:scale-110 transition-all duration-200"
-                      title="Close Web3 help"
-                    >
-                      ×
-                    </button>
-                    <h4 className="text-sm font-semibold text-blue-300 mb-3 flex items-center pr-8">
-                      🌟 New to Web3? Start Here!
-                    </h4>
-                    
-                    {/* Freighter Recommendation */}
-                    <div className="mb-4 p-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-lg">🔗</span>
-                        <span className="text-sm font-medium text-cyan-200">Recommended: Freighter Wallet</span>
-                      </div>
-                      <p className="text-xs text-cyan-100/80 mb-3">
-                        The most popular Stellar wallet with browser extension support
-                      </p>
-                      <div className="space-y-2">
-                        <a
-                          href="https://www.freighter.app/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
-                        >
-                          🚀 Install Freighter
-                        </a>
-                        <div className="text-xs text-cyan-200/60 text-center">
-                          Free • Secure • Easy to use
-                        </div>
-                      </div>
+                {/* Web3 Help Button */}
+                {isExpanded && !isFreighterAvailable && (
+                  <button
+                    onClick={() => setShowWeb3Modal(true)}
+                    className="w-full mt-4 p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50"
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <span className="text-lg">🌟</span>
+                      <span className="text-sm font-medium">New to Web3? Start Here!</span>
                     </div>
-
-                    {/* Other Wallet Options */}
-                    <div className="space-y-2">
-                      <p className="text-xs text-blue-200/80 mb-2">Other Stellar Wallets:</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <a
-                          href="https://albedo.link/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
-                        >
-                          🌅 Albedo
-                        </a>
-                        <a
-                          href="https://xbull.app/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
-                        >
-                          🐂 xBull
-                        </a>
-                        <a
-                          href="https://rabet.io/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
-                        >
-                          🐰 Rabet
-                        </a>
-                        <a
-                          href="https://stellar.org/ecosystem/wallets"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center"
-                        >
-                          📚 More Options
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                  </button>
                 )}
 
                 {/* Manual Address Input */}
@@ -460,18 +391,55 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </div>
                 )}
                 
-                <button
-                  onClick={openMiniGameStore}
-                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium rounded-lg transition-all duration-300 hover:border-white/40 ${
-                    isExpanded ? "px-4 py-3" : "px-2 py-2.5"
+                {/* Navigation Links */}
+                <div
+                  className={`${
+                    isExpanded 
+                      ? 'grid grid-cols-4 gap-2' 
+                      : 'flex flex-col space-y-1.5'
                   }`}
-                  title={!isExpanded ? "Mini Games Store" : undefined}
                 >
-                  <span className="text-lg">🎮</span>
-                  {isExpanded && (
-                    <span className="ml-2 animate-fadeIn">Mini Games Store</span>
-                  )}
-                </button>
+                  <a
+                    href="/demos"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Demos" : undefined}
+                  >
+                    <span className="text-lg">🧪</span>
+                  </a>
+
+                  <a
+                    href="/mini-games"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Store" : undefined}
+                  >
+                    <span className="text-lg">🎪</span>
+                  </a>
+
+                  <a
+                    href="/mini-games/web3-basics-adventure"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Console" : undefined}
+                  >
+                    <span className="text-lg">🕹️</span>
+                  </a>
+
+                  <a
+                    href="/docs"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Docs" : undefined}
+                  >
+                    <span className="text-lg">📚</span>
+                  </a>
+                </div>
+
               </div>
 
               {/* Network Info - Only show when expanded */}
@@ -554,6 +522,55 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   <span className="text-lg">🎮</span>
                   {isExpanded && <span className="animate-fadeIn">Mini Games Store</span>}
                 </button>
+
+                {/* Navigation Links */}
+                <div
+                  className={`${
+                    isExpanded 
+                      ? 'grid grid-cols-4 gap-2' 
+                      : 'flex flex-col space-y-1.5'
+                  }`}
+                >
+                  <a
+                    href="/demos"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Demos" : undefined}
+                  >
+                    <span className="text-lg">🧪</span>
+                  </a>
+
+                  <a
+                    href="/mini-games"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Store" : undefined}
+                  >
+                    <span className="text-lg">🎪</span>
+                  </a>
+
+                  <a
+                    href="/mini-games/web3-basics-adventure"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Console" : undefined}
+                  >
+                    <span className="text-lg">🕹️</span>
+                  </a>
+
+                  <a
+                    href="/docs"
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                      isExpanded ? "px-3 py-2" : "px-2 py-2"
+                    }`}
+                    title={!isExpanded ? "Docs" : undefined}
+                  >
+                    <span className="text-lg">📚</span>
+                  </a>
+                </div>
                 
                 <button
                   onClick={disconnect}
@@ -664,7 +681,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           <div className="flex items-center justify-between text-xs text-white/40">
             <span>v1.0.0</span>
             {isExpanded && (
-              <span className="text-cyan-400">Stellar POC</span>
+              <span className="text-cyan-400">Trustless Work POC</span>
             )}
           </div>
         </div>
@@ -704,18 +721,57 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </>
         )}
 
-        {/* Mini Games Store Button */}
+        {/* Navigation Buttons - Matching Main Menu */}
         {!isOpen && (
-          <button
-            onClick={openMiniGameStore}
-            className="p-3 bg-gradient-to-br from-yellow-500 to-red-600 hover:from-purple-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-            title="Open Mini Games Store"
-          >
-            <div className="flex items-center space-x-2">
-              <span>🎪</span>
-              <span className="text-sm font-medium hidden lg:block">Store</span>
-            </div>
-          </button>
+          <>
+            {/* Demos Button */}
+            <a
+              href="/demos"
+              className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group"
+              title="Demos"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-lg group-hover:animate-bounce">🧪</span>
+                <span className="text-sm font-medium hidden lg:block">Demos</span>
+              </div>
+            </a>
+
+            {/* Store Button */}
+            <a
+              href="/mini-games"
+              className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group"
+              title="Store"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-lg group-hover:animate-bounce">🎪</span>
+                <span className="text-sm font-medium hidden lg:block">Store</span>
+              </div>
+            </a>
+
+            {/* Console Button */}
+            <a
+              href="/mini-games/web3-basics-adventure"
+              className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group"
+              title="Console"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-lg group-hover:animate-bounce">🎮</span>
+                <span className="text-sm font-medium hidden lg:block">Console</span>
+              </div>
+            </a>
+
+            {/* Docs Button */}
+            <a
+              href="/docs"
+              className="p-3 bg-gradient-to-br from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group"
+              title="Docs"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-lg group-hover:animate-bounce">📚</span>
+                <span className="text-sm font-medium hidden lg:block">Docs</span>
+              </div>
+            </a>
+          </>
         )}
 
 
@@ -786,6 +842,12 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </div>
         </div>
       )}
+
+      {/* Web3 Onboarding Modal */}
+      <Web3OnboardingModal 
+        isOpen={showWeb3Modal}
+        onClose={() => setShowWeb3Modal(false)}
+      />
     </>
   )
 }

@@ -112,14 +112,29 @@ function HomeContent() {
             <div className="max-w-4xl mx-auto text-center">
 
               {/* add logo letter here */}
-              <div className="flex justify-center -mt-[50px]">
+              <div className="flex justify-center ">
                 <Image src="/images/logo/iconletter.png" alt="STELLAR NEXUS" width={300} height={100} />
               </div>
 
-              <p className="text-white/80 mb-8 -mt-[100px]">
-                Explore the ESCROW ARSENAL and see how it works in action.
-              </p>
+              <div className="max-w-4xl mx-auto p-6 relative">
+                {/* Floating Particles */}
+                <div className="epic-particle"></div>
+                <div className="epic-particle"></div>
+                <div className="epic-particle"></div>
+                <div className="epic-particle"></div>
+                <div className="epic-particle"></div>
+                
+                <p className="epic-text text-2xl md:text-3xl text-center leading-relaxed">
+                  Experience the future of decentralized work with the ESCROW ARSENAL on the Stellar blockchain
+                </p>
+                
+                {/* Epic Subtitle */}
+                <p className="text-brand-300 text-lg text-center mt-4 font-medium animate-pulse">
+                  ✨ Where Trust Meets Innovation ✨
+                </p>
+              </div>
 
+  
               <div className="flex justify-center -mb-10 relative group">
                 {/* Super Powerful Fire Plasma Energy Background Effect */}
                 <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
@@ -256,60 +271,15 @@ function HomeContent() {
                   </p>
                 </div>
 
+              {/* add logo letter here */}
+              <div className="flex justify-center ">
+                <Image src="/images/logo/logoicon.png" alt="STELLAR NEXUS" width={300} height={100} />
+              </div>
+
               <br />
               <br />
 
-              <div className="epic-container max-w-4xl mx-auto p-6 relative">
-                {/* Floating Particles */}
-                <div className="epic-particle"></div>
-                <div className="epic-particle"></div>
-                <div className="epic-particle"></div>
-                <div className="epic-particle"></div>
-                <div className="epic-particle"></div>
-                
-                <p className="epic-text text-2xl md:text-3xl text-center leading-relaxed">
-                  Experience the future of decentralized work with the ESCROW ARSENAL on the Stellar blockchain
-                </p>
-                
-                {/* Epic Subtitle */}
-                <p className="text-brand-300 text-lg text-center mt-4 font-medium animate-pulse">
-                  ✨ Where Trust Meets Innovation ✨
-                </p>
-              </div>
 
-            </div>
-          </section>
-
-          {/* Features Section */}
-          <section id="features" className="container mx-auto px-4 -mb-[50px]">
-            <div className="max-w-4xl mx-auto">
-              <br />
-              <br />
-              <div className="text-center mb-12">
-                                <div className="flex justify-center items-center space-x-3 mb-4">
-                  <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400">
-                    About STELLAR
-                  </h2>
-                </div>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-6 text-white/90">
-                <div className="text-center p-6 bg-gradient-to-br from-brand-500/20 to-accent-500/20 rounded-lg border border-white/20 hover:border-white/40 transition-all duration-300">
-                  <div className="text-4xl mb-4">🌐</div>
-                  <h4 className="font-semibold mb-3 text-lg">Decentralized Network</h4>
-                  <p className="text-sm">Open-source, decentralized protocol for digital currency to fiat money transfers</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-success-500/20 to-brand-500/20 rounded-lg border border-white/20 hover:border-white/40 transition-all duration-300">
-                  <div className="text-4xl mb-4">⚡</div>
-                  <h4 className="font-semibold mb-3 text-lg">Fast & Low-Cost</h4>
-                  <p className="text-sm">3-5 second settlement times with minimal transaction fees</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-br from-accent-500/20 to-warning-500/20 rounded-lg border border-white/20 hover:border-white/40 transition-all duration-300">
-                  <div className="text-4xl mb-4">🔒</div>
-                  <h4 className="font-semibold mb-3 text-lg">Secure & Reliable</h4>
-                  <p className="text-sm">Built on proven cryptographic principles with 99.9% uptime</p>
-                </div>
-              </div>
             </div>
           </section>
 
@@ -326,8 +296,6 @@ function HomeContent() {
           </button>
         )}
 
-        {/* Footer */}
-        <Footer />
       </div>
 
       {/* Epic Preloader Screen */}

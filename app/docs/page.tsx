@@ -85,7 +85,7 @@ export default function DocsPage() {
                     
                     {/* Title with Enhanced Styling */}
                     <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl" style={{ zIndex: 1000, marginTop: '-200px' }}>
-                      NEXUS Documentation
+                      DOCS
                     </h1>
                   </div>
 
