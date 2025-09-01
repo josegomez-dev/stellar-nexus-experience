@@ -7,12 +7,22 @@ export interface NewsArticle {
   type: 'youtube' | 'medium'
   category: string
   demo: string
+  demoId: string // Add demoId for better matching
+  demoColor: string // Add demo color for badge styling
   date: string
   readTime: string
   tags: string[]
 }
 
-export const nexusNews: NewsArticle[] = [
+// Demo color mapping for consistent styling
+export const demoColors = {
+  'hello-milestone': 'from-brand-500 to-brand-400',
+  'milestone-voting': 'from-success-500 to-success-400',
+  'dispute-resolution': 'from-warning-500 to-warning-400',
+  'micro-marketplace': 'from-accent-500 to-accent-400'
+}
+
+export const nexusCodex: NewsArticle[] = [
   {
     id: '1',
     title: 'Revolutionizing Escrow: How Trustless Work is Changing the Game',
@@ -21,7 +31,9 @@ export const nexusNews: NewsArticle[] = [
     link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     type: 'youtube',
     category: 'Technology',
-    demo: 'Hello Milestone Demo',
+    demo: 'Baby Steps to Riches',
+    demoId: 'hello-milestone',
+    demoColor: 'from-brand-500 to-brand-400',
     date: '2024-01-15',
     readTime: '8 min',
     tags: ['Escrow', 'Smart Contracts', 'Trustless Work', 'Stellar']
@@ -34,7 +46,9 @@ export const nexusNews: NewsArticle[] = [
     link: 'https://medium.com/@stellar/dispute-resolution-future',
     type: 'medium',
     category: 'Innovation',
-    demo: 'Dispute Resolution Demo',
+    demo: 'Drama Queen Escrow',
+    demoId: 'dispute-resolution',
+    demoColor: 'from-warning-500 to-warning-400',
     date: '2024-01-12',
     readTime: '12 min',
     tags: ['Dispute Resolution', 'AI', 'Arbitration', 'Automation']
@@ -47,7 +61,9 @@ export const nexusNews: NewsArticle[] = [
     link: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
     type: 'youtube',
     category: 'Governance',
-    demo: 'Milestone Voting Demo',
+    demo: 'Democracy in Action',
+    demoId: 'milestone-voting',
+    demoColor: 'from-success-500 to-success-400',
     date: '2024-01-10',
     readTime: '10 min',
     tags: ['Governance', 'Voting', 'Democracy', 'Stakeholders']
@@ -60,14 +76,13 @@ export const nexusNews: NewsArticle[] = [
     link: 'https://medium.com/@stellar/gig-economy-2-0',
     type: 'medium',
     category: 'Economy',
-    demo: 'Micro Task Marketplace Demo',
+    demo: 'Gig Economy Madness',
+    demoId: 'micro-marketplace',
+    demoColor: 'from-accent-500 to-accent-400',
     date: '2024-01-08',
     readTime: '15 min',
     tags: ['Gig Economy', 'Micro Tasks', 'Marketplace', 'Decentralized']
-  }
-]
-
-export const nexusBlog: NewsArticle[] = [
+  },
   {
     id: '5',
     title: 'Building Trustless Escrow Systems: A Developer\'s Guide',
@@ -76,7 +91,9 @@ export const nexusBlog: NewsArticle[] = [
     link: 'https://medium.com/@stellar/developer-guide-escrow',
     type: 'medium',
     category: 'Development',
-    demo: 'Hello Milestone Demo',
+    demo: 'Baby Steps to Riches',
+    demoId: 'hello-milestone',
+    demoColor: 'from-brand-500 to-brand-400',
     date: '2024-01-14',
     readTime: '20 min',
     tags: ['Development', 'Tutorial', 'Smart Contracts', 'Code']
@@ -89,7 +106,9 @@ export const nexusBlog: NewsArticle[] = [
     link: 'https://www.youtube.com/watch?v=3JluqTojuME',
     type: 'youtube',
     category: 'Technology',
-    demo: 'Dispute Resolution Demo',
+    demo: 'Drama Queen Escrow',
+    demoId: 'dispute-resolution',
+    demoColor: 'from-warning-500 to-warning-400',
     date: '2024-01-11',
     readTime: '25 min',
     tags: ['Smart Contracts', 'Legal Tech', 'Automation', 'Law']
@@ -102,7 +121,9 @@ export const nexusBlog: NewsArticle[] = [
     link: 'https://medium.com/@stellar/democratizing-governance',
     type: 'medium',
     category: 'Governance',
-    demo: 'Milestone Voting Demo',
+    demo: 'Democracy in Action',
+    demoId: 'milestone-voting',
+    demoColor: 'from-success-500 to-success-400',
     date: '2024-01-09',
     readTime: '18 min',
     tags: ['Governance', 'Blockchain', 'Democracy', 'Transparency']
@@ -115,19 +136,29 @@ export const nexusBlog: NewsArticle[] = [
     link: 'https://www.youtube.com/watch?v=2Z4m4lnjxkY',
     type: 'youtube',
     category: 'Future of Work',
-    demo: 'Micro Task Marketplace Demo',
+    demo: 'Gig Economy Madness',
+    demoId: 'micro-marketplace',
+    demoColor: 'from-accent-500 to-accent-400',
     date: '2024-01-07',
     readTime: '22 min',
     tags: ['Freelancing', 'Decentralized', 'Future of Work', 'Platforms']
   }
 ]
 
+// Legacy exports for backward compatibility
+export const nexusNews = nexusCodex.filter(article => article.category !== 'Development')
+export const nexusBlog = nexusCodex.filter(article => article.category === 'Development')
+
 export function getNewsByDemo(demoName: string): NewsArticle[] {
-  return [...nexusNews, ...nexusBlog].filter(article => article.demo === demoName)
+  return nexusCodex.filter(article => article.demo === demoName)
+}
+
+export function getNewsByDemoId(demoId: string): NewsArticle[] {
+  return nexusCodex.filter(article => article.demoId === demoId)
 }
 
 export function getLatestNews(count: number = 4): NewsArticle[] {
-  return [...nexusNews, ...nexusBlog]
+  return nexusCodex
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, count)
 }

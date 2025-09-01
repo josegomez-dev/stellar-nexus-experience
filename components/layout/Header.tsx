@@ -52,7 +52,13 @@ export const Header = () => {
                     className="group relative px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <div className="relative flex items-center space-x-3">
-                      <span className="text-2xl">🧪</span>
+                      <Image 
+                        src="/images/icons/demos.png"
+                        alt="Demos"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6"
+                      />
                       <span className="text-white font-semibold group-hover:text-cyan-300 transition-colors duration-300">Demos</span>
                     </div>
                   </a>
@@ -63,7 +69,13 @@ export const Header = () => {
                     className="group relative px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <div className="relative flex items-center space-x-3">
-                      <span className="text-2xl">🎪</span>
+                      <Image 
+                        src="/images/icons/store.png"
+                        alt="Store"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6"
+                      />
                       <span className="text-white font-semibold group-hover:text-purple-300 transition-colors duration-300">Store</span>
                     </div>
                   </a>
@@ -74,7 +86,13 @@ export const Header = () => {
                     className="group relative px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <div className="relative flex items-center space-x-3">
-                      <span className="text-2xl">🎮</span>
+                      <Image 
+                        src="/images/icons/console.png"
+                        alt="Console"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6"
+                      />
                       <span className="text-white font-semibold group-hover:text-green-300 transition-colors duration-300">Console</span>
                     </div>
                   </a>
@@ -85,7 +103,13 @@ export const Header = () => {
                     className="group relative px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
                   >
                     <div className="relative flex items-center space-x-3">
-                      <span className="text-2xl">📚</span>
+                      <Image 
+                        src="/images/icons/docs.png"
+                        alt="Docs"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6"
+                      />
                       <span className="text-white font-semibold group-hover:text-orange-300 transition-colors duration-300">Docs</span>
                     </div>
                   </a>
@@ -175,21 +199,48 @@ export const Header = () => {
               className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              🧪 Demos
+              <div className="flex items-center space-x-2">
+                <Image 
+                  src="/images/icons/demos.png"
+                  alt="Demos"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span>Demos</span>
+              </div>
             </a>
             <a
               href="/mini-games"
               className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              🎪 Store
+              <div className="flex items-center space-x-2">
+                <Image 
+                  src="/images/icons/store.png"
+                  alt="Store"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span>Store</span>
+              </div>
             </a>
             <a
               href="/mini-games/web3-basics-adventure"
               className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              🎮 Console
+              <div className="flex items-center space-x-2">
+                <Image 
+                  src="/images/icons/console.png"
+                  alt="Console"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span>Console</span>
+              </div>
             </a>
 
             <a
@@ -197,7 +248,16 @@ export const Header = () => {
               className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              📚 Docs
+              <div className="flex items-center space-x-2">
+                <Image 
+                  src="/images/icons/docs.png"
+                  alt="Docs"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span>Docs</span>
+              </div>
             </a>
             
             {/* Mobile Wallet Status */}

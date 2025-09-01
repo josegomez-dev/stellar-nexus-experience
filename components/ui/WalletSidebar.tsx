@@ -412,7 +412,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Demos" : undefined}
                   >
-                    <span className="text-lg">🧪</span>
+                    <Image 
+                      src="/images/icons/demos.png"
+                      alt="Demos"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -422,7 +428,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Store" : undefined}
                   >
-                    <span className="text-lg">🎪</span>
+                    <Image 
+                      src="/images/icons/store.png"
+                      alt="Store"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -432,7 +444,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Console" : undefined}
                   >
-                    <span className="text-lg">🕹️</span>
+                    <Image 
+                      src="/images/icons/console.png"
+                      alt="Console"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -442,7 +460,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Docs" : undefined}
                   >
-                    <span className="text-lg">📚</span>
+                    <Image 
+                      src="/images/icons/docs.png"
+                      alt="Docs"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
                 </div>
 
@@ -544,7 +568,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Demos" : undefined}
                   >
-                    <span className="text-lg">🧪</span>
+                    <Image 
+                      src="/images/icons/demos.png"
+                      alt="Demos"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -554,7 +584,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Store" : undefined}
                   >
-                    <span className="text-lg">🎪</span>
+                    <Image 
+                      src="/images/icons/store.png"
+                      alt="Store"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -564,7 +600,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Console" : undefined}
                   >
-                    <span className="text-lg">🕹️</span>
+                    <Image 
+                      src="/images/icons/console.png"
+                      alt="Console"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
 
                   <a
@@ -574,7 +616,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }`}
                     title={!isExpanded ? "Docs" : undefined}
                   >
-                    <span className="text-lg">📚</span>
+                    <Image 
+                      src="/images/icons/docs.png"
+                      alt="Docs"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </a>
                 </div>
                 
@@ -753,7 +801,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               title="Demos"
             >
               <div className="flex items-center space-x-2">
-                <span className="text-lg group-hover:animate-bounce">🧪</span>
+                <Image 
+                  src="/images/icons/demos.png"
+                  alt="Demos"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 group-hover:animate-bounce"
+                />
                 <span className="text-sm font-medium hidden lg:block">Demos</span>
               </div>
             </a>
@@ -765,7 +819,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               title="Store"
             >
               <div className="flex items-center space-x-2">
-                <span className="text-lg group-hover:animate-bounce">🎪</span>
+                <Image 
+                  src="/images/icons/store.png"
+                  alt="Store"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 group-hover:animate-bounce"
+                />
                 <span className="text-sm font-medium hidden lg:block">Store</span>
               </div>
             </a>
@@ -777,7 +837,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               title="Console"
             >
               <div className="flex items-center space-x-2">
-                <span className="text-lg group-hover:animate-bounce">🎮</span>
+                <Image 
+                  src="/images/icons/console.png"
+                  alt="Console"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 group-hover:animate-bounce"
+                />
                 <span className="text-sm font-medium hidden lg:block">Console</span>
               </div>
             </a>
@@ -789,7 +855,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               title="Docs"
             >
               <div className="flex items-center space-x-2">
-                <span className="text-lg group-hover:animate-bounce">📚</span>
+                <Image 
+                  src="/images/icons/docs.png"
+                  alt="Docs"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 group-hover:animate-bounce"
+                />
                 <span className="text-sm font-medium hidden lg:block">Docs</span>
               </div>
             </a>
