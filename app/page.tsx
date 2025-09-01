@@ -144,41 +144,10 @@ function HomeContent() {
                     <div className="absolute inset-0 rounded-full border border-yellow-400/30 animate-ping scale-150" style={{ animationDuration: '3.5s' }}></div>
                   </div>
                   
-                  {/* Plasma Energy Streams */}
-                  <div className="absolute inset-0">
-                    {/* Stream 1 - Left */}
-                    <div className="absolute left-0 top-1/2 w-1 h-20 bg-gradient-to-b from-transparent via-orange-400 to-transparent animate-pulse opacity-70" style={{ animationDuration: '1.8s' }}></div>
-                    {/* Stream 2 - Right */}
-                    <div className="absolute right-0 top-1/2 w-1 h-16 bg-gradient-to-b from-transparent via-red-400 to-transparent animate-pulse opacity-80" style={{ animationDuration: '2.2s' }}></div>
-                    {/* Stream 3 - Top */}
-                    <div className="absolute top-0 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent animate-pulse opacity-60" style={{ animationDuration: '1.6s' }}></div>
-                    {/* Stream 4 - Bottom */}
-                    <div className="absolute bottom-0 left-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-pulse opacity-75" style={{ animationDuration: '2.4s' }}></div>
-                  </div>
-                  
-                  {/* Electric Arc Effects */}
-                  <div className="absolute inset-0">
-                    {/* Arc 1 */}
-                    <div className="absolute top-1/4 left-1/4 w-8 h-8 border border-orange-400/60 rounded-full animate-spin" style={{ animationDuration: '4s' }}></div>
-                    {/* Arc 2 */}
-                    <div className="absolute top-1/3 right-1/3 w-6 h-6 border border-red-400/50 rounded-full animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }}></div>
-                    {/* Arc 3 */}
-                    <div className="absolute bottom-1/4 right-1/4 w-10 h-10 border border-yellow-400/40 rounded-full animate-spin" style={{ animationDuration: '5s' }}></div>
-                  </div>
                 </div>
                 
-                <Image src="/images/character/character.png" alt="Nexus Prime" width={350} height={200} className="relative z-10 transition-all duration-500 ease-out group-hover:scale-110" />
+                <Image src="/images/character/character.png" alt="Nexus Prime" width={350} height={200} className="relative z-10 transition-all duration-500 ease-out" />
                 
-                {/* Alternative Plasma Ball Positions - Uncomment one to try different looks */}
-                {/* Position 1: Perfect Center (Current) */}
-                {/* Position 2: Slightly above center */}
-                {/* <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
-                {/* Position 3: Floating above character */}
-                {/* <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
-                {/* Position 4: Dynamic floating position */}
-                {/* <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float"> */}
-                
-                {/* Plasma Ball Effect - Mouse Following Interactive */}
                 <div 
                   id="plasma-ball"
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float -ml-[115px] transition-all duration-300 ease-out pointer-events-none z-10"
@@ -199,7 +168,6 @@ function HomeContent() {
                         style={{
                           filter: 'drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4))',
                           animation: 'logoRotate 8s linear infinite, logoFlicker 2s ease-in-out infinite',
-                          transform: 'translate(-90px, 55px)' // Position over the existing plasma ball
                         }}
                       />
                     </div>
@@ -219,19 +187,9 @@ function HomeContent() {
                   {/* Glow Effect */}
                   <div className="plasma-glow absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-brand-500/20 to-accent-600/20 blur-xl animate-pulse group-hover:from-brand-300/40 group-hover:via-brand-400/40 group-hover:to-accent-500/40 group-hover:blur-2xl transition-all duration-500"></div>
                   
-                  {/* Electric Arcs */}
-                  <div className="plasma-arc-1 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1.5 h-12 bg-gradient-to-b from-brand-300 to-transparent animate-pulse group-hover:w-2 group-hover:h-14 group-hover:from-brand-200 transition-all duration-500" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                  <div className="plasma-arc-2 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1.5 h-10 bg-gradient-to-b from-brand-400 to-transparent animate-pulse group-hover:w-2 group-hover:h-12 group-hover:from-brand-300 transition-all duration-500" style={{ animationDelay: '0.7s' }}></div>
-                  </div>
-                  <div className="plasma-arc-3 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1.5 h-14 bg-gradient-to-b from-accent-500 to-transparent animate-pulse group-hover:w-2 group-hover:h-16 group-hover:from-accent-400 transition-all duration-500" style={{ animationDelay: '1.2s' }}></div>
-                  </div>
                 </div>
               </div>
-                                           <button
+              <button
                  onClick={() => window.location.href = '/demos'}
                  className="w-full px-12 py-6 bg-gradient-to-r from-brand-500 via-accent-600 to-brand-700 hover:from-brand-600 hover:via-accent-700 hover:to-brand-800 text-white font-bold rounded-2xl transition-all duration-700 ease-out transform hover:scale-105 shadow-2xl hover:shadow-[0_0_50px_rgba(14,165,233,0.6)] flex items-center justify-center space-x-4 relative z-50 overflow-hidden group/button border-2 border-brand-400/50 hover:border-brand-300/80"
                                 >
@@ -247,24 +205,10 @@ function HomeContent() {
                   {/* Subtle Inner Glow */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1500 ease-out delay-200"></div>
                   
-                  {/* Floating Energy Particles */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-2 left-4 w-2 h-2 bg-yellow-300 rounded-full animate-bounce opacity-80" style={{ animationDelay: '0s' }}></div>
-                    <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-accent-300 rounded-full animate-bounce opacity-70" style={{ animationDelay: '0.5s' }}></div>
-                    <div className="absolute bottom-3 left-6 w-1 h-1 bg-brand-300 rounded-full animate-bounce opacity-60" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute bottom-2 right-4 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-bounce opacity-90" style={{ animationDelay: '1.5s' }}></div>
-                  </div>
-                  
-                  {/* Electric Arc Effects */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-1/2 left-2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-300 to-transparent animate-pulse opacity-70" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="absolute top-1/2 right-2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-300 to-transparent animate-pulse opacity-80" style={{ animationDelay: '0.7s' }}></div>
-                  </div>
-                  
                   {/* Button Content with Epic START Animation */}
                   <span className="relative z-10 text-center">
                     <span className='text-3xl md:text-4xl font-black text-yellow-300 group-hover/button:text-yellow-100 group-hover/button:scale-110 transition-all duration-500 ease-out inline-block drop-shadow-[0_0_10px_rgba(251,191,36,0.8)] animate-pulse'>
-                      ⚡ START ⚡
+                      START
                     </span>
                     <br/> 
                     <span className="text-xl md:text-2xl font-bold text-white group-hover/button:text-brand-200 transition-all duration-500 ease-out drop-shadow-[0_0_8px_rgba(14,165,233,0.6)] animate-pulse group-hover/button:animate-bounce">
@@ -283,11 +227,12 @@ function HomeContent() {
             </div>
           </section>
 
+
           {/* Nexus Codex Section */}
-          <NewsSection 
+          {/* <NewsSection 
             title="📚 Nexus Codex" 
             articles={[...nexusNews.slice(0, 2), ...nexusBlog.slice(0, 2)]}
-          />
+          /> */}
 
         </main>
 
