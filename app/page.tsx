@@ -6,12 +6,13 @@ import { NexusPrime } from '@/components/layout/NexusPrime'
 import { EscrowProvider } from '@/contexts/EscrowContext'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import NewsSection from '@/components/ui/NewsSection'
+import { nexusNews, nexusBlog } from '@/lib/newsData'
 
 
 
 function HomeContent() {
   const [showBackToTop, setShowBackToTop] = useState(false)
-  const [showPreloader, setShowPreloader] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,31 +22,6 @@ function HomeContent() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  // Handle preloader redirect
-  useEffect(() => {
-    if (showPreloader) {
-      const timer = setTimeout(() => {
-        window.location.href = '/demos'
-      }, 3000)
-
-      // Update countdown timer
-      const countdown = setInterval(() => {
-        const timerElement = document.getElementById('redirect-timer')
-        if (timerElement) {
-          const currentTime = parseInt(timerElement.textContent || '3')
-          if (currentTime > 1) {
-            timerElement.textContent = (currentTime - 1).toString()
-          }
-        }
-      }, 1000)
-
-      return () => {
-        clearTimeout(timer)
-        clearInterval(countdown)
-      }
-    }
-  }, [showPreloader])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -111,10 +87,6 @@ function HomeContent() {
           <section className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
 
-              {/* add logo letter here */}
-              <div className="flex justify-center ">
-                <Image src="/images/logo/iconletter.png" alt="STELLAR NEXUS" width={300} height={100} />
-              </div>
 
               <div className="max-w-4xl mx-auto p-6 relative">
                 {/* Floating Particles */}
@@ -209,13 +181,29 @@ function HomeContent() {
                 {/* Plasma Ball Effect - Mouse Following Interactive */}
                 <div 
                   id="plasma-ball"
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 animate-float -ml-[90px] mt-[55px] transition-all duration-300 ease-out pointer-events-none z-10"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 animate-float -ml-[115px] transition-all duration-300 ease-out pointer-events-none z-10"
                   style={{
-                    filter: 'drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4))'
+                    filter: 'drop-shadow(0 0 30px rgba(14, 165, 233, 0.7)) drop-shadow(0 0 60px rgba(59, 130, 246, 0.5))'
                   }}
                 >
                   {/* Core Plasma Ball */}
                   <div className="plasma-core absolute inset-0 rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 animate-pulse"></div>
+                  <div className="flex justify-center mb-8">
+                    <div className="relative">
+                      <Image 
+                        src="/images/logo/logoicon.png" 
+                        alt="STELLAR NEXUS" 
+                        width={300} 
+                        height={100} 
+                        className="animate-logo-rotate hover:animate-logo-flicker transition-all duration-500 ease-out hover:scale-110 hover:drop-shadow-[0_0_30px_rgba(14,165,233,0.8)] relative z-20"
+                        style={{
+                          filter: 'drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4))',
+                          animation: 'logoRotate 8s linear infinite, logoFlicker 2s ease-in-out infinite',
+                          transform: 'translate(-90px, 55px)' // Position over the existing plasma ball
+                        }}
+                      />
+                    </div>
+                  </div>
                   
                   {/* Energy Rings */}
                   <div className="plasma-ring-1 absolute inset-0 rounded-full border-2 border-brand-300/60 animate-spin" style={{ animationDuration: '3s' }}></div>
@@ -223,44 +211,65 @@ function HomeContent() {
                   <div className="plasma-ring-3 absolute inset-0 rounded-full border border-accent-500/50 animate-spin group-hover:border-accent-400/80 group-hover:border-2 transition-all duration-500" style={{ animationDuration: '5s' }}></div>
                   
                   {/* Energy Particles */}
-                  <div className="plasma-particle-1 absolute top-0 left-1/2 w-2 h-2 bg-brand-300 rounded-full animate-bounce group-hover:w-3 group-hover:h-3 group-hover:bg-brand-200 transition-all duration-500" style={{ animationDelay: '0s' }}></div>
-                  <div className="plasma-particle-2 absolute top-1/4 right-0 w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce group-hover:w-2.5 group-hover:h-2.5 group-hover:bg-brand-300 transition-all duration-500" style={{ animationDelay: '0.5s' }}></div>
-                  <div className="plasma-particle-3 absolute bottom-1/4 left-0 w-1 h-1 bg-accent-400 rounded-full animate-bounce group-hover:w-2 group-hover:h-2 group-hover:bg-accent-300 transition-all duration-500" style={{ animationDelay: '1s' }}></div>
-                  <div className="plasma-particle-4 absolute bottom-0 right-1/4 w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce group-hover:w-2.5 group-hover:h-2.5 group-hover:bg-brand-300 transition-all duration-500" style={{ animationDelay: '1.5s' }}></div>
+                  <div className="plasma-particle-1 absolute top-0 left-1/2 w-3 h-3 bg-brand-300 rounded-full animate-bounce group-hover:w-4 group-hover:h-4 group-hover:bg-brand-200 transition-all duration-500" style={{ animationDelay: '0s' }}></div>
+                  <div className="plasma-particle-2 absolute top-1/4 right-0 w-2.5 h-2.5 bg-brand-400 rounded-full animate-bounce group-hover:w-3.5 group-hover:h-3.5 group-hover:bg-brand-300 transition-all duration-500" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="plasma-particle-3 absolute bottom-1/4 left-0 w-2 h-2 bg-accent-400 rounded-full animate-bounce group-hover:w-3 group-hover:h-3 group-hover:bg-accent-300 transition-all duration-500" style={{ animationDelay: '1s' }}></div>
+                  <div className="plasma-particle-4 absolute bottom-0 right-1/4 w-2.5 h-2.5 bg-brand-400 rounded-full animate-bounce group-hover:w-3.5 group-hover:h-3.5 group-hover:bg-brand-300 transition-all duration-500" style={{ animationDelay: '1.5s' }}></div>
                   
                   {/* Glow Effect */}
                   <div className="plasma-glow absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-brand-500/20 to-accent-600/20 blur-xl animate-pulse group-hover:from-brand-300/40 group-hover:via-brand-400/40 group-hover:to-accent-500/40 group-hover:blur-2xl transition-all duration-500"></div>
                   
                   {/* Electric Arcs */}
                   <div className="plasma-arc-1 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1 h-8 bg-gradient-to-b from-brand-300 to-transparent animate-pulse group-hover:w-1.5 group-hover:h-10 group-hover:from-brand-200 transition-all duration-500" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-1.5 h-12 bg-gradient-to-b from-brand-300 to-transparent animate-pulse group-hover:w-2 group-hover:h-14 group-hover:from-brand-200 transition-all duration-500" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                   <div className="plasma-arc-2 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1 h-6 bg-gradient-to-b from-brand-400 to-transparent animate-pulse group-hover:w-1.5 group-hover:h-8 group-hover:from-brand-300 transition-all duration-500" style={{ animationDelay: '0.7s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-1.5 h-10 bg-gradient-to-b from-brand-400 to-transparent animate-pulse group-hover:w-2 group-hover:h-12 group-hover:from-brand-300 transition-all duration-500" style={{ animationDelay: '0.7s' }}></div>
                   </div>
                   <div className="plasma-arc-3 absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 w-1 h-10 bg-gradient-to-b from-accent-500 to-transparent animate-pulse group-hover:w-1.5 group-hover:h-12 group-hover:from-accent-400 transition-all duration-500" style={{ animationDelay: '1.2s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-1.5 h-14 bg-gradient-to-b from-accent-500 to-transparent animate-pulse group-hover:w-2 group-hover:h-16 group-hover:from-accent-400 transition-all duration-500" style={{ animationDelay: '1.2s' }}></div>
                   </div>
                 </div>
               </div>
-                             <button
-                 onClick={() => setShowPreloader(true)}
-                 className="w-full px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-500 ease-out transform hover:scale-110 shadow-lg flex items-center justify-center space-x-3 relative z-50 overflow-hidden group/button"
+                                           <button
+                 onClick={() => window.location.href = '/demos'}
+                 className="w-full px-12 py-6 bg-gradient-to-r from-brand-500 via-accent-600 to-brand-700 hover:from-brand-600 hover:via-accent-700 hover:to-brand-800 text-white font-bold rounded-2xl transition-all duration-700 ease-out transform hover:scale-105 shadow-2xl hover:shadow-[0_0_50px_rgba(14,165,233,0.6)] flex items-center justify-center space-x-4 relative z-50 overflow-hidden group/button border-2 border-brand-400/50 hover:border-brand-300/80"
                                 >
+                  {/* Epic Plasma Background Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-brand-500/20 via-accent-600/30 to-brand-700/20 animate-pulse"></div>
+                  
                   {/* Shiny Glass Reflection Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000 ease-out"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1200 ease-out"></div>
                   
                   {/* Additional Shine Layer */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-full group-hover/button:-translate-x-full transition-transform duration-800 ease-out delay-200"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 translate-x-full group-hover/button:-translate-x-full transition-transform duration-1000 ease-out delay-300"></div>
                   
                   {/* Subtle Inner Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1200 ease-out delay-100"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1500 ease-out delay-200"></div>
                   
-                  {/* Button Content with Special START Animation */}
-                  <span className="relative z-10">
-                    <span className='text-2xl font-bold text-yellow-300 group-hover/button:text-yellow-100 group-hover/button:scale-110 transition-all duration-300 ease-out inline-block drop-shadow-lg'>START</span>
+                  {/* Floating Energy Particles */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-2 left-4 w-2 h-2 bg-yellow-300 rounded-full animate-bounce opacity-80" style={{ animationDelay: '0s' }}></div>
+                    <div className="absolute top-4 right-6 w-1.5 h-1.5 bg-accent-300 rounded-full animate-bounce opacity-70" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute bottom-3 left-6 w-1 h-1 bg-brand-300 rounded-full animate-bounce opacity-60" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute bottom-2 right-4 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-bounce opacity-90" style={{ animationDelay: '1.5s' }}></div>
+                  </div>
+                  
+                  {/* Electric Arc Effects */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-300 to-transparent animate-pulse opacity-70" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="absolute top-1/2 right-2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-300 to-transparent animate-pulse opacity-80" style={{ animationDelay: '0.7s' }}></div>
+                  </div>
+                  
+                  {/* Button Content with Epic START Animation */}
+                  <span className="relative z-10 text-center">
+                    <span className='text-3xl md:text-4xl font-black text-yellow-300 group-hover/button:text-yellow-100 group-hover/button:scale-110 transition-all duration-500 ease-out inline-block drop-shadow-[0_0_10px_rgba(251,191,36,0.8)] animate-pulse'>
+                      ⚡ START ⚡
+                    </span>
                     <br/> 
-                    <span className="animate-pulse group-hover/button:animate-bounce">ESCROW ARSENAL</span>
+                    <span className="text-xl md:text-2xl font-bold text-white group-hover/button:text-brand-200 transition-all duration-500 ease-out drop-shadow-[0_0_8px_rgba(14,165,233,0.6)] animate-pulse group-hover/button:animate-bounce">
+                    ESCROW ARSENAL
+                    </span>
                   </span>
                 </button>
 
@@ -271,17 +280,14 @@ function HomeContent() {
                   </p>
                 </div>
 
-              {/* add logo letter here */}
-              <div className="flex justify-center ">
-                <Image src="/images/logo/logoicon.png" alt="STELLAR NEXUS" width={300} height={100} />
-              </div>
-
-              <br />
-              <br />
-
-
             </div>
           </section>
+
+          {/* Nexus Codex Section */}
+          <NewsSection 
+            title="📚 Nexus Codex" 
+            articles={[...nexusNews.slice(0, 2), ...nexusBlog.slice(0, 2)]}
+          />
 
         </main>
 
@@ -298,64 +304,7 @@ function HomeContent() {
 
       </div>
 
-      {/* Epic Preloader Screen */}
-      {showPreloader && (
-        <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center">
-          {/* Animated Background */}
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Floating Energy Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping"></div>
-            <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
-            <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
-            
-            {/* Energy Grid */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse"></div>
-          </div>
 
-          {/* Main Content */}
-          <div className="relative z-10 text-center">
-            {/* Logo Animation */}
-            <div className="mb-8 animate-bounce">
-              <Image 
-                src="/images/logo/logoicon.png" 
-                alt="STELLAR NEXUS" 
-                width={120} 
-                height={120} 
-                className="w-30 h-30"
-              />
-            </div>
-
-            {/* Loading Text */}
-            <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse">
-              INITIALIZING ESCROW ARSENAL
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xl text-brand-300 mb-8 animate-pulse">
-              Preparing your trustless work experience...
-            </p>
-
-            {/* Loading Bar */}
-            <div className="w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8">
-              <div className="h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full animate-loading-bar"></div>
-            </div>
-
-            {/* Loading Steps */}
-            <div className="space-y-2 text-white/80">
-              <p className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>🔐 Connecting to Stellar Network...</p>
-              <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>⚡ Loading Smart Contracts...</p>
-              <p className="animate-fadeInUp" style={{ animationDelay: '1.5s' }}>🎯 Preparing Demo Suite...</p>
-              <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>🚀 Launching ESCROW ARSENAL...</p>
-            </div>
-
-            {/* Redirect Timer */}
-            <div className="mt-8 text-brand-300 text-lg">
-              Redirecting in <span className="font-bold" id="redirect-timer">3</span> seconds...
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* NEXUS PRIME Character */}
       <NexusPrime 

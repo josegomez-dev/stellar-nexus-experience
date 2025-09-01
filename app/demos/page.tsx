@@ -293,6 +293,34 @@ function DemosPageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+
+  // Preloader effect
+  useEffect(() => {
+    const loadingSteps = [
+      { progress: 20, message: 'Initializing Demo Suite...' },
+      { progress: 40, message: 'Loading Smart Contracts...' },
+      { progress: 60, message: 'Preparing Interactive Demos...' },
+      { progress: 80, message: 'Setting up Wallet Integration...' },
+      { progress: 100, message: 'Ready to Launch!' }
+    ]
+
+    let currentStep = 0
+    const interval = setInterval(() => {
+      if (currentStep < loadingSteps.length) {
+        setLoadingProgress(loadingSteps[currentStep].progress)
+        currentStep++
+      } else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsLoading(false)
+        }, 500)
+      }
+    }, 800)
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -335,6 +363,68 @@ function DemosPageContent() {
         
         {/* Animated background elements */}
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
+        
+        {/* Preloader Screen */}
+        {isLoading && (
+          <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center">
+            {/* Animated Background */}
+            <div className="absolute inset-0 overflow-hidden">
+              {/* Floating Energy Orbs */}
+              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping"></div>
+              <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+              
+              {/* Energy Grid */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse"></div>
+            </div>
+
+            {/* Main Content */}
+            <div className="relative z-10 text-center">
+              {/* Logo Animation */}
+              <div className="mb-8 animate-bounce">
+                <Image 
+                  src="/images/logo/logoicon.png" 
+                  alt="STELLAR NEXUS" 
+                  width={120} 
+                  height={120} 
+                  className="w-30 h-30"
+                />
+              </div>
+
+              {/* Loading Text */}
+              <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse">
+                INITIALIZING ESCROW ARSENAL
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-xl text-brand-300 mb-8 animate-pulse">
+                Preparing your trustless work experience...
+              </p>
+
+              {/* Loading Bar */}
+              <div className="w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8">
+                <div 
+                  className="h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${loadingProgress}%` }}
+                ></div>
+              </div>
+
+              {/* Loading Steps */}
+              <div className="space-y-2 text-white/80">
+                <p className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>🔐 Connecting to Stellar Network...</p>
+                <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>⚡ Loading Smart Contracts...</p>
+                <p className="animate-fadeInUp" style={{ animationDelay: '1.5s' }}>🎯 Preparing Demo Suite...</p>
+                <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>🚀 Launching ESCROW ARSENAL...</p>
+              </div>
+
+              {/* Progress Percentage */}
+              <div className="mt-8 text-brand-300 text-lg">
+                <span className="font-bold">{loadingProgress}%</span> Complete
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Main Content */}
         <main className={`relative z-10 pt-20 ${

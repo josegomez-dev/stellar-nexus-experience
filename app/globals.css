@@ -727,5 +727,48 @@ body {
   animation: shimmer 2s ease-in-out infinite;
 }
 
+/* Logo Animation Keyframes */
+@keyframes logoRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
+@keyframes logoFlicker {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1) drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4));
+  }
+  25% {
+    opacity: 0.8;
+    filter: brightness(1.2) drop-shadow(0 0 25px rgba(14, 165, 233, 0.8)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.6));
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1) drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4));
+  }
+  75% {
+    opacity: 0.9;
+    filter: brightness(1.1) drop-shadow(0 0 22px rgba(14, 165, 233, 0.7)) drop-shadow(0 0 45px rgba(59, 130, 246, 0.5));
+  }
+}
 
+.animate-logo-rotate {
+  animation: logoRotate 8s linear infinite;
+}
+
+.animate-logo-flicker {
+  animation: logoFlicker 2s ease-in-out infinite;
+}
+
+/* Enhanced hover effects for logo */
+.group:hover .animate-logo-rotate {
+  animation-duration: 4s;
+}
+
+.group:hover .animate-logo-flicker {
+  animation-duration: 1s;
+}

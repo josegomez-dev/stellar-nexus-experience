@@ -216,7 +216,7 @@ Copy `env.example` to `.env.local` and customize as needed:
 - `NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE`: Platform fee percentage (0-100)
 
 ### Optional Environment Variables
-- `NEXT_PUBLIC_APP_NAME`: Application name (defaults to "Trustless Work App")
+- `NEXT_PUBLIC_APP_NAME`: Application name (defaults to "Stellar Nexus")
 - `NEXT_PUBLIC_APP_VERSION`: Application version
 - `NEXT_PUBLIC_DEBUG_MODE`: Enable debug logging (`true`/`false`)
 - `NEXT_PUBLIC_PLATFORM_PUBLIC_KEY`: Platform wallet for receiving fees
