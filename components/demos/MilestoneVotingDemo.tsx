@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { useTransactionHistory } from '@/contexts/TransactionContext'
+import ConfettiAnimation from '@/components/ui/ConfettiAnimation'
+import Image from 'next/image'
 import { useToast } from '@/contexts/ToastContext'
 import { 
   initializeContract, 
@@ -43,6 +45,9 @@ export const MilestoneVotingDemo = () => {
   // Per-milestone loading states to fix button text confusion
   const [milestoneLoadingStates, setMilestoneLoadingStates] = useState<Record<string, boolean>>({})
   const [isReleasing, setIsReleasing] = useState(false)
+  
+  // Confetti animation state
+  const [showConfetti, setShowConfetti] = useState(false)
   
   // Error states
   const [initError, setInitError] = useState<Error | null>(null)
@@ -87,6 +92,24 @@ export const MilestoneVotingDemo = () => {
       approvals: []
     }
   ])
+
+  // Trigger confetti when demo is completed
+  useEffect(() => {
+    const allReleased = milestones.every(m => m.status === 'released')
+    console.log('🎉 Milestone Voting Demo - All milestones released:', allReleased)
+    console.log('🎉 Milestone statuses:', milestones.map(m => ({ id: m.id, status: m.status })))
+    
+    if (allReleased) {
+      console.log('🎉 Triggering confetti for Milestone Voting Demo!')
+      setShowConfetti(true)
+      // Hide confetti after animation
+      const timer = setTimeout(() => {
+        console.log('🎉 Hiding confetti for Milestone Voting Demo')
+        setShowConfetti(false)
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [milestones])
 
   async function handleInitializeContract() {
     if (!isConnected) {
@@ -825,7 +848,15 @@ export const MilestoneVotingDemo = () => {
         {/* Success Message - Demo Completion */}
         {milestones.every(m => m.status === 'released') && (
           <div className="mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
-            <div className="text-4xl mb-4">🎉</div>
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/images/logo/logoicon.png"
+                alt="Stellar Nexus Logo"
+                width={80}
+                height={80}
+                className="animate-bounce"
+              />
+            </div>
             <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
             <p className="text-green-200 mb-4">
               You've successfully completed the entire multi-stakeholder milestone voting flow. 
@@ -844,6 +875,9 @@ export const MilestoneVotingDemo = () => {
             </div>
           </div>
         )}
+
+        {/* Confetti Animation */}
+        <ConfettiAnimation isActive={showConfetti} />
 
         {/* Demo Instructions */}
         <div className="mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg">

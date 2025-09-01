@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { 
   useInitializeEscrow, 
@@ -13,6 +13,8 @@ import {
 } from '@/lib/mock-trustless-work'
 import { assetConfig } from '@/lib/wallet-config'
 import { useToast } from '@/contexts/ToastContext'
+import ConfettiAnimation from '@/components/ui/ConfettiAnimation'
+import Image from 'next/image'
 
 interface Dispute {
   id: string
@@ -47,8 +49,15 @@ export const DisputeResolutionDemo = () => {
   const [newDisputeReason, setNewDisputeReason] = useState('')
   const [resolutionReason, setResolutionReason] = useState('')
   
+  // Individual dispute input states
+  const [disputeReasons, setDisputeReasons] = useState<Record<string, string>>({})
+  const [resolutionReasons, setResolutionReasons] = useState<Record<string, string>>({})
+  
   // Individual loading states for each milestone
   const [milestoneLoadingStates, setMilestoneLoadingStates] = useState<Record<string, boolean>>({})
+  
+  // Confetti animation state
+  const [showConfetti, setShowConfetti] = useState(false)
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -80,6 +89,24 @@ export const DisputeResolutionDemo = () => {
       client: 'client_wallet_address'
     }
   ])
+
+  // Trigger confetti when demo is completed
+  useEffect(() => {
+    const allReleased = milestones.every(m => m.status === 'released')
+    console.log('🎉 Dispute Resolution Demo - All milestones released:', allReleased)
+    console.log('🎉 Milestone statuses:', milestones.map(m => ({ id: m.id, status: m.status })))
+    
+    if (allReleased) {
+      console.log('🎉 Triggering confetti for Dispute Resolution Demo!')
+      setShowConfetti(true)
+      // Hide confetti after animation
+      const timer = setTimeout(() => {
+        console.log('🎉 Hiding confetti for Dispute Resolution Demo')
+        setShowConfetti(false)
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [milestones])
 
   async function handleInitializeEscrow() {
     if (!walletData) return
@@ -240,7 +267,8 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleStartDispute(milestoneId: string) {
-    if (!contractId || !newDisputeReason.trim()) return
+    const disputeReason = disputeReasons[milestoneId] || ''
+    if (!contractId || !disputeReason.trim()) return
 
     try {
       // Set loading state for this specific milestone
@@ -250,7 +278,7 @@ export const DisputeResolutionDemo = () => {
         contractId,
         milestoneId,
         releaseMode: 'multi-release',
-        reason: newDisputeReason
+        reason: disputeReason
       }
 
       const result = await startDispute(payload)
@@ -261,13 +289,15 @@ export const DisputeResolutionDemo = () => {
         id: `dispute_${Date.now()}`,
         milestoneId,
         raisedBy: currentRole,
-        reason: newDisputeReason,
+        reason: disputeReason,
         status: 'open',
         raisedAt: new Date().toISOString()
       }
       
       setDisputes([...disputes, newDispute])
-      setNewDisputeReason('')
+      
+      // Clear the specific dispute reason
+      setDisputeReasons(prev => ({ ...prev, [milestoneId]: '' }))
       
       // Update milestone status
       const updatedMilestones = milestones.map(m => 
@@ -303,12 +333,14 @@ export const DisputeResolutionDemo = () => {
       const dispute = disputes.find(d => d.id === disputeId)
       if (!dispute) return
 
+      const resolutionReason = resolutionReasons[disputeId] || `Resolved by arbitrator: ${resolution}`
+
       const payload = {
         contractId,
         milestoneId: dispute.milestoneId,
         releaseMode: 'multi-release',
         resolution,
-        reason: resolutionReason || `Resolved by arbitrator: ${resolution}`
+        reason: resolutionReason
       }
 
       const result = await resolveDispute(payload)
@@ -350,7 +382,8 @@ export const DisputeResolutionDemo = () => {
         duration: 5000
       })
       
-      setResolutionReason('')
+      // Clear the specific resolution reason
+      setResolutionReasons(prev => ({ ...prev, [disputeId]: '' }))
     } catch (error) {
       console.error('Failed to resolve dispute:', error)
       addToast({
@@ -419,6 +452,10 @@ export const DisputeResolutionDemo = () => {
     
     // Clear all loading states
     setMilestoneLoadingStates({})
+    
+    // Clear individual dispute input states
+    setDisputeReasons({})
+    setResolutionReasons({})
     
     addToast({
       type: 'info',
@@ -637,7 +674,7 @@ export const DisputeResolutionDemo = () => {
                           </button>
                           <button
                             onClick={() => handleStartDispute(milestone.id)}
-                            disabled={milestoneLoadingStates[milestone.id] || !newDisputeReason.trim()}
+                            disabled={milestoneLoadingStates[milestone.id] || !(disputeReasons[milestone.id] || '').trim()}
                             className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors block w-full"
                           >
                             {milestoneLoadingStates[milestone.id] ? 'Starting...' : 'Dispute'}
@@ -665,8 +702,8 @@ export const DisputeResolutionDemo = () => {
                       <div className="flex space-x-2">
                         <input
                           type="text"
-                          value={newDisputeReason}
-                          onChange={(e) => setNewDisputeReason(e.target.value)}
+                          value={disputeReasons[milestone.id] || ''}
+                          onChange={(e) => setDisputeReasons(prev => ({ ...prev, [milestone.id]: e.target.value }))}
                           placeholder="Enter dispute reason..."
                           className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-400/50"
                         />
@@ -707,8 +744,8 @@ export const DisputeResolutionDemo = () => {
                         <div className="mb-3">
                           <input
                             type="text"
-                            value={resolutionReason}
-                            onChange={(e) => setResolutionReason(e.target.value)}
+                            value={resolutionReasons[dispute.id] || ''}
+                            onChange={(e) => setResolutionReasons(prev => ({ ...prev, [dispute.id]: e.target.value }))}
                             placeholder="Enter resolution reason..."
                             className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-400/50"
                           />
@@ -767,7 +804,15 @@ export const DisputeResolutionDemo = () => {
         {/* Success Message - Demo Completion */}
         {milestones.every(m => m.status === 'released') && (
           <div className="mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
-            <div className="text-4xl mb-4">🎉</div>
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/images/logo/logoicon.png"
+                alt="Stellar Nexus Logo"
+                width={80}
+                height={80}
+                className="animate-bounce"
+              />
+            </div>
             <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
             <p className="text-green-200 mb-4">
               You've successfully completed the entire dispute resolution and arbitration flow. 
@@ -787,6 +832,9 @@ export const DisputeResolutionDemo = () => {
             </div>
           </div>
         )}
+
+        {/* Confetti Animation */}
+        <ConfettiAnimation isActive={showConfetti} />
 
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError || disputeError || resolveError) && (

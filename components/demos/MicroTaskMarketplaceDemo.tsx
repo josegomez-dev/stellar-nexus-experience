@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGlobalWallet } from '@/contexts/WalletContext'
 import { useToast } from '@/contexts/ToastContext'
 import { useTransactionHistory } from '@/contexts/TransactionContext'
+import ConfettiAnimation from '@/components/ui/ConfettiAnimation'
+import Image from 'next/image'
 import { 
   useInitializeEscrow, 
   useFundEscrow, 
@@ -57,6 +59,9 @@ export const MicroTaskMarketplaceDemo = () => {
   
   // Individual loading states for each task
   const [taskLoadingStates, setTaskLoadingStates] = useState<Record<string, boolean>>({})
+  
+  // Confetti animation state
+  const [showConfetti, setShowConfetti] = useState(false)
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -84,6 +89,24 @@ export const MicroTaskMarketplaceDemo = () => {
     const completedSteps = postedTasks.size + completedTasks.size
     return Math.min((completedSteps / totalSteps) * 100, 100)
   }
+
+  // Trigger confetti when demo is completed
+  useEffect(() => {
+    const demoCompleted = canCompleteDemo()
+    console.log('🎉 Micro Task Marketplace Demo - Demo completed:', demoCompleted)
+    console.log('🎉 Posted tasks:', postedTasks.size, 'Completed tasks:', completedTasks.size)
+    
+    if (demoCompleted) {
+      console.log('🎉 Triggering confetti for Micro Task Marketplace Demo!')
+      setShowConfetti(true)
+      // Hide confetti after animation
+      const timer = setTimeout(() => {
+        console.log('🎉 Hiding confetti for Micro Task Marketplace Demo')
+        setShowConfetti(false)
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [completedTasks, postedTasks])
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
@@ -641,7 +664,15 @@ export const MicroTaskMarketplaceDemo = () => {
         {canCompleteDemo() && (
           <div className="mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg">
             <div className="text-center">
-              <div className="text-4xl mb-4">🎉</div>
+              <div className="flex justify-center mb-4">
+                <Image
+                  src="/images/logo/logoicon.png"
+                  alt="Stellar Nexus Logo"
+                  width={80}
+                  height={80}
+                  className="animate-bounce"
+                />
+              </div>
               <h3 className="text-xl font-bold text-green-300 mb-2">Demo Successfully Completed!</h3>
               <p className="text-green-200 mb-4">
                 Congratulations! You've successfully demonstrated the micro-task marketplace workflow:
@@ -657,6 +688,9 @@ export const MicroTaskMarketplaceDemo = () => {
             </div>
           </div>
         )}
+
+        {/* Confetti Animation */}
+        <ConfettiAnimation isActive={showConfetti} />
 
         {/* Browse Tasks Tab */}
         {activeTab === 'browse' && (
