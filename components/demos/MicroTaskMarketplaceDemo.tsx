@@ -90,6 +90,8 @@ export const MicroTaskMarketplaceDemo = () => {
     return Math.min((completedSteps / totalSteps) * 100, 100)
   }
 
+  // Removed template task distinction - all tasks count toward completion
+
   // Trigger confetti when demo is completed
   useEffect(() => {
     const demoCompleted = canCompleteDemo()
@@ -157,7 +159,16 @@ export const MicroTaskMarketplaceDemo = () => {
   ])
 
   async function handlePostTask() {
-    if (!walletData || !newTask.title || !newTask.description || !newTask.category || !newTask.budget || !newTask.deadline) return
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to post tasks',
+        duration: 5000
+      })
+      return
+    }
+    if (!newTask.title || !newTask.description || !newTask.category || !newTask.budget || !newTask.deadline) return
 
     try {
       const task: MicroTask = {
@@ -216,7 +227,15 @@ export const MicroTaskMarketplaceDemo = () => {
   }
 
   async function handleAcceptTask(taskId: string) {
-    if (!walletData) return
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to accept tasks',
+        duration: 5000
+      })
+      return
+    }
 
     try {
       // Set loading state for this specific task
@@ -270,6 +289,9 @@ export const MicroTaskMarketplaceDemo = () => {
         duration: 5000
       })
       
+      // Track completed task for demo completion
+      setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)))
+      
       // Fund the escrow
       await handleFundEscrow(result.contractId, task.budget)
     } catch (error) {
@@ -301,6 +323,15 @@ export const MicroTaskMarketplaceDemo = () => {
   }
 
   async function handleSubmitDeliverable(taskId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to submit deliverables',
+        duration: 5000
+      })
+      return
+    }
     if (!deliverable.trim()) return
 
     try {
@@ -352,6 +383,15 @@ export const MicroTaskMarketplaceDemo = () => {
   }
 
   async function handleApproveTask(taskId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to approve tasks',
+        duration: 5000
+      })
+      return
+    }
     try {
       const task = tasks.find(t => t.id === taskId)
       if (!task || !task.escrowId) return
@@ -402,6 +442,15 @@ export const MicroTaskMarketplaceDemo = () => {
   }
 
   async function handleReleaseFunds(taskId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to release funds',
+        duration: 5000
+      })
+      return
+    }
     try {
       // Set loading state for this specific task
       setTaskLoadingStates(prev => ({ ...prev, [taskId]: true }))
@@ -678,7 +727,7 @@ export const MicroTaskMarketplaceDemo = () => {
                 Congratulations! You've successfully demonstrated the micro-task marketplace workflow:
               </p>
               <ul className="text-green-200 text-sm space-y-1 mb-4">
-                <li>✅ Posted at least 1 new task</li>
+                <li>✅ Posted at least 1 task</li>
                 <li>✅ Completed and approved 3 tasks</li>
                 <li>✅ Experienced the full escrow workflow</li>
               </ul>
@@ -982,6 +1031,14 @@ export const MicroTaskMarketplaceDemo = () => {
             This demonstrates how a marketplace can integrate with Stellar escrow functionality, 
             providing trustless payment processing for micro-tasks and gig work.
           </p>
+          <div className="mt-4 p-3 bg-purple-500/20 rounded-lg">
+            <p className="text-purple-200 text-sm font-medium mb-2">🎯 Demo Completion Requirements:</p>
+            <ul className="text-purple-200 text-xs space-y-1">
+              <li>• Post at least 1 task (any task counts)</li>
+              <li>• Complete and approve 3 tasks (any tasks count)</li>
+              <li>• All tasks, including template tasks, count toward completion</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
