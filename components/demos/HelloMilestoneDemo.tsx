@@ -115,7 +115,15 @@ export const HelloMilestoneDemo = () => {
   }, [currentStep])
 
   async function handleInitializeEscrow() {
-    if (!walletData) return
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to initialize escrow contracts',
+        duration: 5000
+      })
+      return
+    }
 
     try {
       // Show starting toast
@@ -198,6 +206,15 @@ export const HelloMilestoneDemo = () => {
   }
 
   async function handleFundEscrow() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to fund escrow contracts',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -268,6 +285,15 @@ export const HelloMilestoneDemo = () => {
   }
 
   async function handleCompleteMilestone() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to complete milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -340,6 +366,15 @@ export const HelloMilestoneDemo = () => {
   }
 
   async function handleApproveMilestone() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to approve milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -410,6 +445,15 @@ export const HelloMilestoneDemo = () => {
   }
 
   async function handleReleaseFunds() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to release funds',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {

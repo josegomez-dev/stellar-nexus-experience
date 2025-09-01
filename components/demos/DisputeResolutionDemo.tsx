@@ -109,7 +109,15 @@ export const DisputeResolutionDemo = () => {
   }, [milestones])
 
   async function handleInitializeEscrow() {
-    if (!walletData) return
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to initialize dispute resolution escrow',
+        duration: 5000
+      })
+      return
+    }
 
     try {
       const payload = {
@@ -151,6 +159,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleFundEscrow() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to fund escrow contracts',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -180,6 +197,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleCompleteMilestone(milestoneId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to complete milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -224,6 +250,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleApproveMilestone(milestoneId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to approve milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -267,6 +302,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleStartDispute(milestoneId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to start disputes',
+        duration: 5000
+      })
+      return
+    }
     const disputeReason = disputeReasons[milestoneId] || ''
     if (!contractId || !disputeReason.trim()) return
 
@@ -327,6 +371,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleResolveDispute(disputeId: string, resolution: 'approve' | 'reject' | 'modify') {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to resolve disputes',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -396,6 +449,15 @@ export const DisputeResolutionDemo = () => {
   }
 
   async function handleReleaseFunds(milestoneId: string) {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to release funds',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {

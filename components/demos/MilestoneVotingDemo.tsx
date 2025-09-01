@@ -113,7 +113,12 @@ export const MilestoneVotingDemo = () => {
 
   async function handleInitializeContract() {
     if (!isConnected) {
-      console.error('Please connect your wallet first')
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to initialize voting contracts',
+        duration: 5000
+      })
       return
     }
 
@@ -185,6 +190,15 @@ export const MilestoneVotingDemo = () => {
   }
 
   async function handleFundEscrow() {
+    if (!isConnected) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to fund escrow contracts',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -251,6 +265,15 @@ export const MilestoneVotingDemo = () => {
   }
 
   async function handleCompleteMilestone(milestoneId: string) {
+    if (!isConnected) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to complete milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -333,6 +356,15 @@ export const MilestoneVotingDemo = () => {
   }
 
   async function handleApproveMilestone(milestoneId: string, stakeholderId: string) {
+    if (!isConnected) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to approve milestones',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
@@ -447,6 +479,15 @@ export const MilestoneVotingDemo = () => {
   }
 
   async function handleReleaseFunds(milestoneId: string) {
+    if (!isConnected) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to release funds',
+        duration: 5000
+      })
+      return
+    }
     if (!contractId) return
 
     try {
