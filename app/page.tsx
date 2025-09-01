@@ -90,7 +90,7 @@ function HomeContent() {
                 <div className="epic-particle"></div>
                 
                 <p className="epic-text text-2xl md:text-3xl text-center leading-relaxed">
-                  Experience the future of decentralized work with the ESCROW ARSENAL on the Stellar blockchain
+                  Experience the future of decentralized work with the Stellar Nexus Experience on the Stellar blockchain
                 </p>
                 
                 {/* Epic Subtitle */}
@@ -205,7 +205,7 @@ function HomeContent() {
                     </span>
                     <br/> 
                     <span className="text-xl md:text-2xl font-bold text-white group-hover/button:text-brand-200 transition-all duration-500 ease-out drop-shadow-[0_0_8px_rgba(14,165,233,0.6)] animate-pulse group-hover/button:animate-bounce">
-                    ESCROW ARSENAL
+                    STELLAR NEXUS EXPERIENCE
                     </span>
                   </span>
                 </button>

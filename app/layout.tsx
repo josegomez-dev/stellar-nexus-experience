@@ -8,8 +8,8 @@ import { config, validateConfig } from '@/lib/config'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Stellar Nexus',
-  description: `Experience the future of decentralized work with the ESCROW ARSENAL on the Stellar blockchain. Master trustless escrow management with our interactive demo suite.`,
+  title: 'Stellar Nexus Experience',
+  description: `Experience the future of decentralized work with the Stellar Nexus Experience on the Stellar blockchain. Master trustless escrow management with our interactive demo suite.`,
   icons: {
     icon: '/favicon.ico',
   },

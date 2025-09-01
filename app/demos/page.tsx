@@ -430,7 +430,7 @@ function DemosPageContent() {
 
               {/* Loading Text */}
               <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse">
-                INITIALIZING ESCROW ARSENAL
+                INITIALIZING STELLAR NEXUS EXPERIENCE
               </h1>
 
               {/* Subtitle */}
@@ -451,7 +451,7 @@ function DemosPageContent() {
                 <p className="animate-fadeInUp" style={{ animationDelay: '0.5s' }}>Connecting to Stellar Network...</p>
                 <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>Loading Smart Contracts...</p>
                 <p className="animate-fadeInUp" style={{ animationDelay: '1.5s' }}>Preparing Demo Suite...</p>
-                <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>Launching ESCROW ARSENAL...</p>
+                <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>Launching STELLAR NEXUS EXPERIENCE...</p>
               </div>
 
               {/* Progress Percentage */}
@@ -529,7 +529,7 @@ function DemosPageContent() {
                   
                   {/* Title with Enhanced Styling */}
                   <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl" style={{ zIndex: 1000, marginTop: '-200px' }}>
-                    ESCROW ARSENAL
+                    STELLAR NEXUS EXPERIENCE
                   </h1>
                 </div>
 
