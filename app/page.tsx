@@ -250,12 +250,6 @@ function HomeContent() {
       </div>
 
 
-
-      {/* NEXUS PRIME Character */}
-      <NexusPrime 
-        currentPage="home"
-        walletConnected={false}
-      />
     </EscrowProvider>
   );
 }
