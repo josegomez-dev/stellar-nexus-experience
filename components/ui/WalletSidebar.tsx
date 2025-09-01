@@ -98,15 +98,15 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
   }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable])
 
   // Open mini games store in new window
-  const openMiniGameStore = () => {
+  const redirectToNexusStartersLiveApp = () => {
     const width = 1200
     const height = 800
     const left = (window.screen.width - width) / 2
     const top = (window.screen.height - height) / 2
     
     const newWindow = window.open(
-      '/mini-games',
-      'MiniGameStore',
+      'https://nexus-starter.vercel.app/',
+      'Nexus Starters',
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     )
     
@@ -519,7 +519,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               {/* Quick Actions */}
               <div className={`space-y-2 ${!isExpanded ? 'space-y-1.5' : ''}`}>
                 <button
-                  onClick={openMiniGameStore}
+                  onClick={redirectToNexusStartersLiveApp}
                   className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
                     isExpanded ? "px-3 py-2" : "px-2 py-2"
                   }`}

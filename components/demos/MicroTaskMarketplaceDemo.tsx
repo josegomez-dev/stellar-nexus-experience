@@ -54,6 +54,9 @@ export const MicroTaskMarketplaceDemo = () => {
   // Progress tracking for demo completion
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set())
   const [postedTasks, setPostedTasks] = useState<Set<string>>(new Set())
+  
+  // Individual loading states for each task
+  const [taskLoadingStates, setTaskLoadingStates] = useState<Record<string, boolean>>({})
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow()
@@ -193,6 +196,9 @@ export const MicroTaskMarketplaceDemo = () => {
     if (!walletData) return
 
     try {
+      // Set loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: true }))
+      
       // Initialize escrow for the task
       const task = tasks.find(t => t.id === taskId)
       if (!task) return
@@ -251,6 +257,9 @@ export const MicroTaskMarketplaceDemo = () => {
         message: error instanceof Error ? error.message : 'Failed to accept task',
         duration: 5000
       })
+    } finally {
+      // Clear loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: false }))
     }
   }
 
@@ -371,6 +380,9 @@ export const MicroTaskMarketplaceDemo = () => {
 
   async function handleReleaseFunds(taskId: string) {
     try {
+      // Set loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: true }))
+      
       const task = tasks.find(t => t.id === taskId)
       if (!task || !task.escrowId) return
 
@@ -413,6 +425,56 @@ export const MicroTaskMarketplaceDemo = () => {
         message: error instanceof Error ? error.message : 'Failed to release funds',
         duration: 5000
       })
+    } finally {
+      // Clear loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: false }))
+    }
+  }
+
+  async function handleCompleteTask(taskId: string) {
+    try {
+      // Set loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: true }))
+      
+      const task = tasks.find(t => t.id === taskId)
+      if (!task) return
+
+      // Update task status to completed
+      const updatedTasks = tasks.map(t => 
+        t.id === taskId ? { ...t, status: 'completed' as const } : t
+      )
+      setTasks(updatedTasks)
+      
+      addTransaction({
+        hash: `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: `Task "${task.title}" completed successfully`,
+        type: 'milestone',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC'
+      })
+      
+      addToast({
+        type: 'success',
+        title: '✅ Task Completed!',
+        message: `"${task.title}" has been completed successfully`,
+        duration: 5000
+      })
+      
+      // Track completed task for demo completion
+      setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)))
+    } catch (error) {
+      console.error('Failed to complete task:', error)
+      addToast({
+        type: 'error',
+        title: '❌ Completion Failed',
+        message: error instanceof Error ? error.message : 'Failed to complete task',
+        duration: 5000
+      })
+    } finally {
+      // Clear loading state for this specific task
+      setTaskLoadingStates(prev => ({ ...prev, [taskId]: false }))
     }
   }
 
@@ -655,13 +717,13 @@ export const MicroTaskMarketplaceDemo = () => {
                   {/* Task Actions */}
                   <div className="space-y-2">
                     {task.status === 'open' && (
-                      <button
-                        onClick={() => handleAcceptTask(task.id)}
-                        disabled={!isConnected || isInitializing}
-                        className="w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-lg text-purple-300 hover:text-purple-200 transition-colors"
-                      >
-                        {isInitializing ? 'Accepting...' : 'Accept Task'}
-                      </button>
+                                              <button
+                          onClick={() => handleAcceptTask(task.id)}
+                          disabled={!isConnected || taskLoadingStates[task.id]}
+                          className="w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-lg text-purple-300 hover:text-purple-200 transition-colors"
+                        >
+                          {taskLoadingStates[task.id] ? 'Accepting...' : 'Accept Task'}
+                        </button>
                     )}
                     
                     {task.status === 'in-progress' && task.worker === walletData?.publicKey && (
@@ -675,10 +737,10 @@ export const MicroTaskMarketplaceDemo = () => {
                         />
                         <button
                           onClick={() => handleSubmitDeliverable(task.id)}
-                          disabled={!deliverable.trim() || isChangingStatus}
+                          disabled={!deliverable.trim() || taskLoadingStates[task.id]}
                           className="w-full px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors"
                         >
-                          {isChangingStatus ? 'Submitting...' : 'Submit Deliverable'}
+                          {taskLoadingStates[task.id] ? 'Submitting...' : 'Submit Deliverable'}
                         </button>
                       </div>
                     )}
@@ -692,17 +754,17 @@ export const MicroTaskMarketplaceDemo = () => {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => handleApproveTask(task.id)}
-                            disabled={isApproving}
+                            disabled={taskLoadingStates[task.id]}
                             className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm"
                           >
-                            {isApproving ? 'Approving...' : 'Approve'}
+                            {taskLoadingStates[task.id] ? 'Approving...' : 'Approve'}
                           </button>
                           <button
                             onClick={() => handleReleaseFunds(task.id)}
-                            disabled={isReleasing}
+                            disabled={taskLoadingStates[task.id]}
                             className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors text-sm"
                           >
-                            {isReleasing ? 'Releasing...' : 'Release Funds'}
+                            {taskLoadingStates[task.id] ? 'Releasing...' : 'Release Funds'}
                           </button>
                         </div>
                       </div>
@@ -741,6 +803,38 @@ export const MicroTaskMarketplaceDemo = () => {
                           </span>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Task Actions for My Tasks */}
+                    <div className="mt-4 space-y-2">
+                      {task.status === 'in-progress' && task.worker === walletData?.publicKey && (
+                        <button
+                          onClick={() => handleCompleteTask(task.id)}
+                          disabled={taskLoadingStates[task.id]}
+                          className="w-full px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors"
+                        >
+                          {taskLoadingStates[task.id] ? 'Completing...' : 'Complete Task'}
+                        </button>
+                      )}
+                      
+                      {task.status === 'completed' && task.client === walletData?.publicKey && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => handleApproveTask(task.id)}
+                            disabled={taskLoadingStates[task.id]}
+                            className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm"
+                          >
+                            {taskLoadingStates[task.id] ? 'Approving...' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => handleReleaseFunds(task.id)}
+                            disabled={taskLoadingStates[task.id]}
+                            className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors text-sm"
+                          >
+                            {taskLoadingStates[task.id] ? 'Releasing...' : 'Release Funds'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
