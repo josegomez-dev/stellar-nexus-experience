@@ -490,7 +490,7 @@ The app provides comprehensive logging:
 - **Environment**: ✅ Configured for Vercel
 
 ### 🌐 Live Demo
-- **Production URL**: [Coming soon after Vercel deployment]
+- **Production URL**: https://stellar-nexus-experience.vercel.app
 - **Testnet**: Fully functional with Stellar testnet
 - **Mainnet**: Ready for mainnet deployment
 
