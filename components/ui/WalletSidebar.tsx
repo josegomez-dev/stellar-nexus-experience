@@ -525,8 +525,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   }`}
                   title={!isExpanded ? "Mini Games Store" : undefined}
                 >
-                  <span className="text-lg">🎮</span>
-                  {isExpanded && <span className="animate-fadeIn">Mini Games Store</span>}
+                  <span className="text-lg">👨🏻‍💻</span>
+                  {isExpanded && <span className="animate-fadeIn">Explore Nexus Starters</span>}
                 </button>
 
                 {/* Navigation Links */}
@@ -687,7 +687,11 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           <div className="flex items-center justify-between text-xs text-white/40">
             <span>v1.0.0</span>
             {isExpanded && (
-              <span className="text-cyan-400">Trustless Work POC</span>
+              <div className="mt-4">
+                <p className="text-brand-300/70 text-sm font-medium animate-pulse">
+                  Powered by <span className="text-brand-200 font-semibold">Trustless Work</span>
+                </p>
+              </div>
             )}
           </div>
         </div>
