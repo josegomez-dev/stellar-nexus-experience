@@ -53,7 +53,7 @@ export const Header = () => {
   return (
     <>
       <style>{animations}</style>
-      <header className="bg-white/10 backdrop-blur-md  sticky top-0 z-50 transition-all duration-300 relative">
+      <header className="bg-white/10 backdrop-blur-md fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and App Name */}
@@ -162,40 +162,48 @@ export const Header = () => {
             {/* Wallet Connection Status */}
             {isConnected && walletData ? (
               <div className="flex items-center space-x-3">
-                                  <div className="hidden sm:flex items-center space-x-2">
+                                                    <div className="hidden sm:flex items-center space-x-2">
                     <span className="text-xs text-white/60">Wallet:</span>
-                    <span className="text-xs text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30">
+                    <span className="text-xs text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30 backdrop-blur-sm">
                       {walletData.publicKey ? `${walletData.publicKey.slice(0, 6)}...${walletData.publicKey.slice(-4)}` : 'Invalid Address'}
                     </span>
                   </div>
-                <button
-                  onClick={copyWalletAddress}
-                  className="text-white/80 hover:text-white transition-colors"
-                  title="Copy wallet address"
-                >
-                  📋
-                </button>
-                <button
-                  onClick={handleDisconnect}
-                  className="text-white/80 hover:text-red-400 transition-colors"
-                  title="Disconnect wallet"
-                >
-                  🔌
-                </button>
+                  <button
+                    onClick={copyWalletAddress}
+                    className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded"
+                    title="Copy wallet address"
+                  >
+                    📋
+                  </button>
+                  <button
+                    onClick={handleDisconnect}
+                    className="text-white/80 hover:text-red-400 transition-colors p-1 hover:bg-white/10 rounded"
+                    title="Disconnect wallet"
+                  >
+                    🔌
+                  </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-white/60">Wallet not connected</span>
-                <button
-                  onClick={() => {
-                    // Dispatch custom event to open wallet sidebar
-                    window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
-                  }}
-                  className="px-3 py-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
-                >
-                  🔗 Connect
-                </button>
-              </div>
+                              <div className="flex items-center space-x-2">
+                  <span className="text-sm text-white/60 hidden sm:inline">Wallet not connected</span>
+                  <button
+                    onClick={() => {
+                      // Dispatch custom event to open wallet sidebar
+                      window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                      // Also dispatch an event to expand the sidebar
+                      setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('expandWalletSidebar'))
+                      }, 100)
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40 cursor-pointer group relative"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">🔗</span>
+                      <span>Connect</span>
+                      <span className="text-xs opacity-70 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </div>
+                  </button>
+                </div>
             )}
 
             {/* Mobile Menu Button */}
@@ -207,72 +215,74 @@ export const Header = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div 
-            className="md:hidden absolute top-full left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 shadow-xl z-50"
-            style={{
-              animation: 'fadeInDown 0.3s ease-out'
-            }}
-          >
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a
-                href="/demos"
-                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                🧪 Demos
-              </a>
-              <a
-                href="/mini-games"
-                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                🎪 Store
-              </a>
-              <a
-                href="/mini-games/web3-basics-adventure"
-                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                🎮 Console
-              </a>
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div 
+          className="md:hidden absolute top-full left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 shadow-xl z-50"
+          style={{
+            animation: 'fadeInDown 0.3s ease-out'
+          }}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            <a
+              href="/demos"
+              className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              🧪 Demos
+            </a>
+            <a
+              href="/mini-games"
+              className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              🎪 Store
+            </a>
+            <a
+              href="/mini-games/web3-basics-adventure"
+              className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              🎮 Console
+            </a>
 
-              <a
-                href="/docs"
-                className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                📚 Docs
-              </a>
-              
-              {/* Mobile Wallet Info */}
-              {isConnected && walletData && (
-                <div className="border-t border-white/20 pt-3 mt-3">
-                  <div className="px-3 py-2">
-                    <div className="text-xs text-white/60 mb-2">Connected Wallet:</div>
-                    <div className="text-sm text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30 break-all">
-                      {walletData.publicKey || 'Invalid Address'}
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-white/60">
-                        Network: {walletData.network || stellarConfig.network}
-                      </span>
-                      <button
-                        onClick={handleDisconnect}
-                        className="text-red-400 hover:text-red-300 text-sm transition-colors"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
+            <a
+              href="/docs"
+              className="block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              📚 Docs
+            </a>
+            
+            {/* Mobile Wallet Status */}
+            <div className="border-t border-white/20 pt-2 mt-2">
+              {isConnected && walletData ? (
+                <div className="px-3 py-2">
+                  <div className="text-xs text-white/60 mb-1">Connected Wallet:</div>
+                  <div className="text-xs text-white/90 font-mono bg-white/20 px-2 py-1 rounded border border-white/30">
+                    {walletData.publicKey ? `${walletData.publicKey.slice(0, 6)}...${walletData.publicKey.slice(-4)}` : 'Invalid Address'}
                   </div>
                 </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
+                    setTimeout(() => {
+                      window.dispatchEvent(new CustomEvent('expandWalletSidebar'))
+                    }, 100)
+                    setIsMenuOpen(false)
+                  }}
+                  className="w-full text-left px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                >
+                  🔗 Connect Wallet
+                </button>
               )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </header>
     </>
   )

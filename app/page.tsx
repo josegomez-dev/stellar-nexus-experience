@@ -105,7 +105,7 @@ function HomeContent() {
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
         
         {/* Main Content */}
-        <main className="relative z-10 pb-16">
+        <main className="relative z-10 pb-16 pt-20">
 
           {/* Demos Section */}
           <section className="container mx-auto px-4">

@@ -69,13 +69,19 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     const handleToggleWallet = () => {
       onToggle()
     }
+
+    const handleExpandWallet = () => {
+      setIsExpanded(true)
+    }
     
     document.addEventListener('keydown', handleEscape)
     window.addEventListener('toggleWalletSidebar', handleToggleWallet)
+    window.addEventListener('expandWalletSidebar', handleExpandWallet)
     
     return () => {
       document.removeEventListener('keydown', handleEscape)
       window.removeEventListener('toggleWalletSidebar', handleToggleWallet)
+      window.removeEventListener('expandWalletSidebar', handleExpandWallet)
     }
   }, [isOpen, onToggle])
 
@@ -694,29 +700,41 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           <>
             {/* Mobile toggle button */}
             <button
-              onClick={onToggle}
-              className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden"
+              onClick={() => {
+                onToggle()
+                // Auto-expand the sidebar when opening
+                setTimeout(() => setIsExpanded(true), 100)
+              }}
+              className="p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden cursor-pointer relative group"
               title="Open Wallet"
             >
-              🔐
+              <span className="text-xl">🔐</span>
               {!isConnected && (
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
               )}
+              {/* Hover indicator */}
+              <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
             
             {/* Desktop toggle button */}
             <button
-              onClick={onToggle}
-              className="p-3 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block"
+              onClick={() => {
+                onToggle()
+                // Auto-expand the sidebar when opening
+                setTimeout(() => setIsExpanded(true), 100)
+              }}
+              className="p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block cursor-pointer relative group"
               title="Open Wallet"
             >
-              <div className="flex items-center space-x-2">
-                <span>🔐</span>
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">🔐</span>
                 <span className="text-sm font-medium">Wallet</span>
               </div>
               {!isConnected && (
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"></div>
               )}
+              {/* Hover indicator */}
+              <div className="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
           </>
         )}

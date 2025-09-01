@@ -337,7 +337,7 @@ function DemosPageContent() {
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10"></div>
         
         {/* Main Content */}
-        <main className={`relative z-10 ${
+        <main className={`relative z-10 pt-20 ${
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}>
          
