@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { NexusPrime } from '@/components/layout/NexusPrime'
@@ -10,12 +10,53 @@ import Image from 'next/image'
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState('overview')
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if this is the first time loading the page
+    if (typeof window !== 'undefined') {
+      const hasLoadedBefore = localStorage.getItem('docsPageLoaded')
+      return !hasLoadedBefore
+    }
+    return true
+  })
+  const [loadingProgress, setLoadingProgress] = useState(0)
+
+  // Loading effect - only on first load
+  useEffect(() => {
+    if (!isLoading) return // Skip if already loaded
+
+    const loadingSteps = [
+      { progress: 20, message: 'Loading Documentation...' },
+      { progress: 40, message: 'Initializing Tech Stack...' },
+      { progress: 60, message: 'Preparing Code Examples...' },
+      { progress: 80, message: 'Setting up API References...' },
+      { progress: 100, message: 'Documentation Ready!' }
+    ]
+
+    let currentStep = 0
+    const interval = setInterval(() => {
+      if (currentStep < loadingSteps.length) {
+        setLoadingProgress(loadingSteps[currentStep].progress)
+        currentStep++
+      } else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsLoading(false)
+          // Mark that the page has been loaded
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('docsPageLoaded', 'true')
+          }
+        }, 500)
+      }
+    }, 800)
+
+    return () => clearInterval(interval)
+  }, [isLoading])
 
   const sections = [
     { id: 'overview', title: 'Technology Overview', icon: '🚀' },
     { id: 'stellar', title: 'Stellar Implementation', icon: '⭐' },
     { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
-    { id: 'feedback', title: 'Implementation Feedback', icon: '📝' }
+    { id: 'starters', title: 'Nexus Starters', icon: '👨🏻‍💻' },
   ]
 
   return (
@@ -24,8 +65,71 @@ export default function DocsPage() {
         <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900">
           <Header />
           
+          {/* Loading Screen */}
+          {isLoading && (
+            <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center">
+              {/* Animated Background */}
+              <div className="absolute inset-0 overflow-hidden">
+                {/* Floating Energy Orbs */}
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping"></div>
+                <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+                
+                {/* Energy Grid */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse"></div>
+              </div>
+
+              {/* Main Content */}
+              <div className="relative z-10 text-center">
+                {/* Logo Animation */}
+                <div className="mb-8 animate-bounce">
+                  <Image 
+                    src="/images/logo/logoicon.png" 
+                    alt="STELLAR NEXUS" 
+                    width={120} 
+                    height={120} 
+                    className="w-30 h-30"
+                  />
+                </div>
+
+                {/* Loading Text */}
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-4">
+                    Loading Documentation
+                  </h2>
+                  <p className="text-white/70 text-lg animate-pulse">
+                    Preparing comprehensive technical guides...
+                  </p>
+                </div>
+
+                {/* Loading Bar */}
+                <div className="w-80 bg-white/10 rounded-full h-3 overflow-hidden mb-6">
+                  <div 
+                    className="bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${loadingProgress}%` }}
+                  ></div>
+                </div>
+
+                {/* Loading Steps */}
+                <div className="space-y-2">
+                  <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>Loading Documentation...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>Initializing Tech Stack...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '3s' }}>Preparing Code Examples...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '4s' }}>Setting up API References...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '5s' }}>Documentation Ready!</p>
+                </div>
+
+                {/* Progress Percentage */}
+                <div className="mt-6 text-white/60">
+                  <span className="font-bold">{loadingProgress}%</span> Complete
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Main Content */}
-          <main className="relative z-10 pt-20 pb-32">
+          <main className="relative z-10 pt-20 ">
             <div className="container mx-auto px-4">
               <div className="max-w-6xl mx-auto">
                 
@@ -494,98 +598,157 @@ const EscrowComponent = () => {
                     </div>
                   )}
 
-                  {/* Implementation Feedback */}
-                  {activeSection === 'feedback' && (
+                  {/* Nexus Starters */}
+                  {activeSection === 'starters' && (
                     <div className="space-y-8">
                       <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-white mb-4">Implementation Feedback</h2>
-                        <p className="text-lg text-white/80">
-                          Real developer feedback from building with Trustless Work technology
+                        <h2 className="text-3xl font-bold text-white mb-4">👨🏻‍💻 Nexus Starters</h2>
+                        <p className="text-lg text-white/80 max-w-2xl mx-auto">
+                          Build on Stellar with Trustless Work — comprehensive starter kits for innovative apps using advanced escrow mechanics and enhanced Stellar integrations.
                         </p>
                       </div>
 
-                      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 rounded-xl p-6 border border-success-400/30">
-                        <h3 className="text-2xl font-bold text-white mb-4">🌟 What's Working Really Well</h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                            <h4 className="font-semibold text-white mb-3">Core Technology</h4>
-                            <ul className="text-white/80 text-sm space-y-2">
-                              <li>• Multi-release escrow system is genuinely innovative</li>
-                              <li>• Stellar integration choice is smart and developer-friendly</li>
-                              <li>• React hooks approach matches modern developer expectations</li>
-                              <li>• TypeScript support makes development smoother</li>
-                            </ul>
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {/* DeFi Starter */}
+                        <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 rounded-2xl p-6 hover:border-cyan-400/50 transition-all duration-300 group relative">
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">💎</div>
+                            <h4 className="text-xl font-bold text-white mb-2">DeFi Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Create decentralized financial apps with escrow contracts and yield optimization.
+                            </p>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-white mb-3">Business Logic</h4>
-                            <ul className="text-white/80 text-sm space-y-2">
-                              <li>• Milestone-based releases match real work patterns</li>
-                              <li>• Built-in dispute resolution is crucial for trust</li>
-                              <li>• Multi-party support enables team collaboration</li>
-                              <li>• Asset flexibility supports various payment methods</li>
-                            </ul>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Yield farming protocols</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Liquidity provision</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-chain bridges</span>
+                            </div>
+                            <div className="flex items-center text-sm text-cyan-300">
+                              <span className="mr-2">•</span>
+                              <span>Risk management tools</span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      <div className="bg-gradient-to-br from-warning-500/20 to-warning-400/20 rounded-xl p-6 border border-warning-400/30">
-                        <h3 className="text-2xl font-bold text-white mb-4">🚨 Critical Issues That Need Attention</h3>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-white mb-2">Package Availability</h4>
-                            <p className="text-white/80 text-sm mb-3">
-                              The npm package `@trustless-work/react@^1.0.0` doesn't exist in the registry, 
-                              making it impossible for developers to install and use the library.
-                            </p>
-                            <p className="text-white/70 text-xs">
-                              <strong>Impact:</strong> Developers cannot build real applications with the technology
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-white mb-2">Documentation Gap</h4>
-                            <p className="text-white/80 text-sm mb-3">
-                              Limited documentation on how to actually use the library, with missing examples, 
-                              integration guides, and troubleshooting information.
-                            </p>
-                            <p className="text-white/70 text-xs">
-                              <strong>Impact:</strong> Developers spend more time guessing than building
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            💎 Explore DeFi Starter
+                          </a>
+                        </div>
+
+                        {/* Gaming Starter */}
+                        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 hover:border-purple-400/50 transition-all duration-300 group relative">
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🎮</div>
+                            <h4 className="text-xl font-bold text-white mb-2">Gaming Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Build play-to-earn games with secure escrow for tournaments, rewards, and trading.
                             </p>
                           </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Tournament prize pools</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>NFT marketplace integration</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-game asset transfers</span>
+                            </div>
+                            <div className="flex items-center text-sm text-purple-300">
+                              <span className="mr-2">•</span>
+                              <span>Automated reward distribution</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            🎮 Explore Gaming Starter
+                          </a>
+                        </div>
+
+                        {/* Unicorn Starter */}
+                        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-6 hover:border-green-400/50 transition-all duration-300 group relative">
+                          <div className="text-center mb-4">
+                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🦄</div>
+                            <h4 className="text-xl font-bold text-white mb-2">Unicorn Starter</h4>
+                            <p className="text-white/70 text-sm mb-4">
+                              Build "unicorn" apps with cutting-edge features and disruptive tech.
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>AI-powered features</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Cross-chain interoperability</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Advanced tokenomics</span>
+                            </div>
+                            <div className="flex items-center text-sm text-green-300">
+                              <span className="mr-2">•</span>
+                              <span>Revolutionary UX/UI</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href="https://nexus-starter.vercel.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 text-center"
+                          >
+                            🦄 Explore Unicorn Starter
+                          </a>
                         </div>
                       </div>
 
                       <div className="bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-xl p-6 border border-brand-400/30">
-                        <h3 className="text-2xl font-bold text-white mb-4">💡 Improvement Suggestions</h3>
+                        <h3 className="text-2xl font-bold text-white mb-4">🚀 Getting Started</h3>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="font-semibold text-white mb-3">Developer Onboarding</h4>
+                            <h4 className="font-semibold text-brand-300 mb-3">Quick Start</h4>
                             <ul className="text-white/80 text-sm space-y-2">
-                              <li>• Create comprehensive "Getting Started" guide</li>
-                              <li>• Provide working examples with real code</li>
-                              <li>• Consider "Quick Start" template projects</li>
-                              <li>• Step-by-step integration instructions</li>
+                              <li>• Clone the starter repository</li>
+                              <li>• Install dependencies with npm</li>
+                              <li>• Configure your Stellar wallet</li>
+                              <li>• Deploy to your preferred platform</li>
                             </ul>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-white mb-3">Error Handling</h4>
+                            <h4 className="font-semibold text-accent-300 mb-3">Features Included</h4>
                             <ul className="text-white/80 text-sm space-y-2">
-                              <li>• Specific error codes with clear meanings</li>
-                              <li>• Suggested solutions for common problems</li>
-                              <li>• Debug mode with detailed logging</li>
-                              <li>• Fallback options when methods fail</li>
+                              <li>• Pre-configured Trustless Work integration</li>
+                              <li>• Stellar wallet connection setup</li>
+                              <li>• Example escrow contracts</li>
+                              <li>• TypeScript support and documentation</li>
                             </ul>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="text-center">
-                        <a 
-                          href="/TRUSTLESS_WORK_FEEDBACK.md" 
-                          target="_blank"
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
-                        >
-                          📖 Read Full Feedback Document
-                        </a>
                       </div>
                     </div>
                   )}

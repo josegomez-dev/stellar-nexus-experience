@@ -23,7 +23,7 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
   const [currentStep, setCurrentStep] = useState(0)
   const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null)
   const [activeTab, setActiveTab] = useState('hello-milestone')
-  const [ttsEnabled, setIsTtsEnabled] = useState(true)
+  const [ttsEnabled, setIsTtsEnabled] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
 
   // Text-to-Speech functionality
@@ -438,9 +438,9 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
     setCurrentStep(0)
-    // Speak the new demo description
+    // Speak the new demo description (only if TTS is enabled)
     const newSteps = getOnboardingSteps(tabId)
-    if (newSteps.length > 0) {
+    if (newSteps.length > 0 && ttsEnabled) {
       speakMessage(`Welcome to ${newSteps[0].title}. ${newSteps[0].description}`)
     }
   }
@@ -451,7 +451,9 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
       const nextStepIndex = currentStep + 1
       setCurrentStep(nextStepIndex)
       const step = steps[nextStepIndex]
-      speakMessage(`${step.title}. ${step.description}`)
+      if (ttsEnabled) {
+        speakMessage(`${step.title}. ${step.description}`)
+      }
     } else {
       onComplete()
     }
@@ -462,17 +464,19 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
       const prevStepIndex = currentStep - 1
       setCurrentStep(prevStepIndex)
       const step = steps[prevStepIndex]
-      speakMessage(`${step.title}. ${step.description}`)
+      if (ttsEnabled) {
+        speakMessage(`${step.title}. ${step.description}`)
+      }
     }
   }
 
-  // Auto-speak current step
+  // Auto-speak current step (only if TTS is enabled)
   useEffect(() => {
-    if (isActive && steps.length > 0) {
+    if (isActive && steps.length > 0 && ttsEnabled) {
       const step = steps[currentStep]
       speakMessage(`${step.title}. ${step.description}`)
     }
-  }, [currentStep, activeTab, isActive])
+  }, [currentStep, activeTab, isActive, ttsEnabled])
 
   // Cleanup TTS on unmount
   useEffect(() => {
@@ -494,13 +498,15 @@ export const OnboardingOverlay = ({ isActive, onComplete, currentDemo }: Onboard
         <div className="bg-gradient-to-r from-brand-500/20 to-accent-500/20 p-6 border-b border-white/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Image
-                src="/images/logo/logoicon.png"
-                alt="Trustless Work"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-              />
+              <div className="bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full">
+                <Image
+                  src="/images/character/nexus-prime-chat.png"
+                  alt="Trustless Work"
+                  width={50}
+                  height={32}
+                  className='rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'
+                />
+              </div>
               <h2 className="text-2xl font-bold text-white">Interactive Tutorial</h2>
             </div>
             

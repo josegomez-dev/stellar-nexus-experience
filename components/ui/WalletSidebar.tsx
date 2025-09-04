@@ -5,6 +5,7 @@ import { useGlobalWallet } from '@/contexts/WalletContext'
 import { useTransactionHistory } from '@/contexts/TransactionContext'
 import { useToast } from '@/contexts/ToastContext'
 import { stellarConfig } from '@/lib/wallet-config'
+import { Tooltip } from './Tooltip'
 import Image from 'next/image'
 import { Web3OnboardingModal } from './Web3OnboardingModal'
 
@@ -214,7 +215,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
         </div>
 
         {/* Content */}
-        <div className={`flex-1 overflow-y-auto transition-all duration-300 ${
+        <div className={`flex-1 transition-all duration-300 ${
           isExpanded ? 'p-4' : 'p-2'
         }`} style={{ minHeight: '400px' }}>
 
@@ -282,7 +283,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     className="w-full mt-4 p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50"
                   >
                     <div className="flex items-center justify-center space-x-2">
-                      <span className="text-lg">🌟</span>
+                      <div className="bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20">
+                        <img src="/images/character/nexus-prime-chat.png" className='rounded-full ' alt="STELLAR NEXUS" width={50} height={50} />
+                      </div>
                       <span className="text-sm font-medium">New to Web3? Start Here!</span>
                     </div>
                   </button>
@@ -401,73 +404,66 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                 <div
                   className={`${
                     isExpanded 
-                      ? 'grid grid-cols-4 gap-2' 
+                      ? 'grid grid-cols-2 gap-2' 
                       : 'flex flex-col space-y-1.5'
                   }`}
                 >
-                  <a
-                    href="/demos"
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? "px-3 py-2" : "px-2 py-2"
-                    }`}
-                    title={!isExpanded ? "Demos" : undefined}
+                  <Tooltip
+                    content={
+                      <div>
+                        <p className="text-white/90 text-sm font-medium">
+                          Interactive Demo Suite
+                        </p>
+                        <p className="text-cyan-300 text-xs mt-1">
+                          Experience trustless escrow workflows
+                        </p>
+                      </div>
+                    }
+                    position="bottom"
                   >
-                    <Image 
-                      src="/images/icons/demos.png"
-                      alt="Demos"
-                      width={20}
-                      height={20}
-                      className="w-5 h-5"
-                    />
-                  </a>
+                    <a
+                      href="/demos"
+                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                        isExpanded ? "px-3 py-2" : "px-2 py-2"
+                      }`}
+                    >
+                      <Image 
+                        src="/images/icons/demos.png"
+                        alt="Demos"
+                        width={50}
+                        height={20}
+                      />
+                    </a>
+                  </Tooltip>
 
-                  <a
-                    href="/mini-games"
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? "px-3 py-2" : "px-2 py-2"
-                    }`}
-                    title={!isExpanded ? "Store" : undefined}
+                  <Tooltip
+                    content={
+                      <div>
+                        <p className="text-white/90 text-sm font-medium">
+                          Mini-Games Collection
+                        </p>
+                        <p className="text-purple-300 text-xs mt-1">
+                          Learn Web3 through interactive games
+                        </p>
+                      </div>
+                    }
+                    position="bottom"
                   >
-                    <Image 
-                      src="/images/icons/store.png"
-                      alt="Store"
-                      width={20}
-                      height={20}
-                      className="w-5 h-5"
-                    />
-                  </a>
+                    <a
+                      href="/mini-games"
+                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                        isExpanded ? "px-3 py-2" : "px-2 py-2"
+                      }`}
+                    >
+                      <Image 
+                        src="/images/icons/console.png"
+                        alt="Store"
+                        width={50}
+                        height={20}
+                      />
+                    </a>
+                  </Tooltip>
 
-                  <a
-                    href="/mini-games/web3-basics-adventure"
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? "px-3 py-2" : "px-2 py-2"
-                    }`}
-                    title={!isExpanded ? "Console" : undefined}
-                  >
-                    <Image 
-                      src="/images/icons/console.png"
-                      alt="Console"
-                      width={20}
-                      height={20}
-                      className="w-5 h-5"
-                    />
-                  </a>
-
-                  <a
-                    href="/docs"
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? "px-3 py-2" : "px-2 py-2"
-                    }`}
-                    title={!isExpanded ? "Docs" : undefined}
-                  >
-                    <Image 
-                      src="/images/icons/docs.png"
-                      alt="Docs"
-                      width={20}
-                      height={20}
-                      className="w-5 h-5"
-                    />
-                  </a>
                 </div>
 
               </div>
@@ -820,31 +816,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
             >
               <div className="flex items-center space-x-2">
                 <Image 
-                  src="/images/icons/store.png"
+                  src="/images/icons/console.png"
                   alt="Store"
                   width={20}
                   height={20}
                   className="w-5 h-5 group-hover:animate-bounce"
                 />
                 <span className="text-sm font-medium hidden lg:block">Store</span>
-              </div>
-            </a>
-
-            {/* Console Button */}
-            <a
-              href="/mini-games/web3-basics-adventure"
-              className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group"
-              title="Console"
-            >
-              <div className="flex items-center space-x-2">
-                <Image 
-                  src="/images/icons/console.png"
-                  alt="Console"
-                  width={20}
-                  height={20}
-                  className="w-5 h-5 group-hover:animate-bounce"
-                />
-                <span className="text-sm font-medium hidden lg:block">Console</span>
               </div>
             </a>
 

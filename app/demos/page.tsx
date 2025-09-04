@@ -16,6 +16,8 @@ import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo'
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo'
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo'
 import { OnboardingOverlay } from '@/components/OnboardingOverlay'
+import { ImmersiveDemoModal } from '@/components/ui/ImmersiveDemoModal'
+import { TechTreeModal } from '@/components/ui/TechTreeModal'
 import { ToastContainer } from '@/components/ui/Toast'
 import Image from 'next/image'
 import { nexusCodex } from '@/lib/newsData'
@@ -30,9 +32,10 @@ interface Demo {
   color: string
 }
 
-const DemoSelector = ({ activeDemo, setActiveDemo }: { 
+const DemoSelector = ({ activeDemo, setActiveDemo, setShowImmersiveDemo }: { 
   activeDemo: string, 
-  setActiveDemo: (demo: string) => void 
+  setActiveDemo: (demo: string) => void,
+  setShowImmersiveDemo: (show: boolean) => void
 }) => {
   // Clap system with localStorage persistence
   const [demoClaps, setDemoClaps] = useState<Record<string, number>>(() => {
@@ -117,20 +120,7 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
     }
   }
 
-  const handleDemoSelect = (demoId: string) => {
-    setActiveDemo(demoId)
-    
-    // Smooth scroll to the demo display section
-    setTimeout(() => {
-      const demoSection = document.getElementById('active-demo-display')
-      if (demoSection) {
-        demoSection.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        })
-      }
-    }, 100)
-  }
+
 
   const handleArticleClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer')
@@ -143,7 +133,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Basic Escrow Flow Demo',
       description: 'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
       icon: '/images/demos/babysteps.png',
-      color: 'from-brand-500 to-brand-400'
+      color: 'from-brand-500 to-brand-400',
+      isReady: true,
+      multiStakeholderRequired: false
     },
     {
       id: 'milestone-voting',
@@ -151,7 +143,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Multi-Stakeholder Approval System',
       description: 'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
       icon: '/images/demos/democracyinaction.png',
-      color: 'from-success-500 to-success-400'
+      color: 'from-success-500 to-success-400',
+      isReady: false,
+      multiStakeholderRequired: true
     },
     {
       id: 'dispute-resolution',
@@ -159,7 +153,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Dispute Resolution & Arbitration',
       description: 'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
       icon: '/images/demos/drama.png',
-      color: 'from-warning-500 to-warning-400'
+      color: 'from-warning-500 to-warning-400',
+      isReady: false,
+      multiStakeholderRequired: false
     },
     {
       id: 'micro-marketplace',
@@ -167,7 +163,9 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
       subtitle: 'Micro-Task Marketplace',
       description: 'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
       icon: '/images/demos/economy.png',
-      color: 'from-accent-500 to-accent-400'
+      color: 'from-accent-500 to-accent-400',
+      isReady: false,
+      multiStakeholderRequired: false
     }
   ]
 
@@ -175,25 +173,42 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
     <div className="space-y-8">
       {/* Demo Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-2">
-        {demos.map((demo) => {
-          const demoArticles = nexusCodex.filter(article => article.demo === demo.title.split('. ')[1] || article.demo === demo.title)
-          const relevantArticles = demoArticles.slice(0, 2) // Get 2 most relevant articles
-          
+        {demos.map((demo) => {          
           return (
-            <button
+            <div
               key={demo.id}
-              onClick={() => handleDemoSelect(demo.id)}
               className={`demo-card p-6 rounded-xl border-2 transition-all duration-500 ease-out transform hover:scale-105 min-h-[420px] relative overflow-hidden group ${
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : 'border-white/20 bg-gradient-to-br from-white/5 to-white/10 hover:border-white/30 hover:from-white/10 hover:to-white/15'
-              }`}
+              } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
             >
+              {/* Coming Soon Badge for non-ready demos */}
+              {!demo.isReady && (
+                <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
+                  <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
+                    🚧 Coming Soon
+                  </div>
+                  {demo.multiStakeholderRequired && (
+                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+                      🔒 Requires Multi-Stakeholders
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Blur Overlay for non-ready demos */}
+              {!demo.isReady && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10"></div>
+              )}
+
+              {/* Content with reduced opacity for non-ready demos */}
+              <div className={`relative ${!demo.isReady ? 'z-20 opacity-30' : 'z-10'}`}>
 
 
               {/* Clap Statistics Box - Above start button */}
-              <div className="mb-3">
+              <div className={`mb-3 ${!demo.isReady ? 'blur-sm' : ''}`}>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                   {(() => {
                     const stats = getClapStats(demo.id)
@@ -261,60 +276,75 @@ const DemoSelector = ({ activeDemo, setActiveDemo }: {
               </div>
               
               <h4 className="font-semibold text-brand-300 mb-3 text-left text-sm uppercase tracking-wide">{demo.subtitle}</h4>
-              <p className="text-sm text-white/70 text-left leading-relaxed mb-4">{demo.description}</p>
+              <p className={`text-sm text-white/70 text-left leading-relaxed mb-4 ${!demo.isReady ? 'blur-sm' : ''}`}>{demo.description}</p>
               
-              {/* Small Codex Section */}
-              {relevantArticles.length > 0 && (
-                <div className="mb-4">
-                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-                    <div className="flex items-center mb-2">
-                      <span className="text-xs font-semibold text-brand-300 uppercase tracking-wide">Related Codex</span>
-                    </div>
-                    <div className="space-y-2">
-                      {relevantArticles.map((article, index) => (
-                        <div 
-                          key={article.id}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleArticleClick(article.link)
-                          }}
-                          className="group cursor-pointer p-2 rounded-md hover:bg-white/10 transition-all duration-200"
-                        >
-                          <div className="flex items-start space-x-2">
-                            <div className="flex-shrink-0 w-2 h-2 bg-brand-400 rounded-full mt-2"></div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-white/80 group-hover:text-brand-300 transition-colors duration-200 line-clamp-2 font-medium">
-                                {article.title}
-                              </p>
-                              <p className="text-xs text-white/60 mt-1">
-                                {article.readTime} • {article.type === 'youtube' ? '🎥' : '📝'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+
               
               {/* Start Demo Button */}
               <div className="flex flex-col items-center space-y-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDemoSelect(demo.id)
-                  }}
-                  className={`px-6 py-3 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 ${
-                    activeDemo === demo.id
-                      ? 'bg-gradient-to-r from-gray-800 to-black hover:from-gray-700 hover:to-gray-800 text-white border-white/50 shadow-2xl'
-                      : `bg-gradient-to-r ${demo.color} hover:brightness-110 text-white border-white/20 hover:border-white/40`
-                  }`}
-                >
-                  {activeDemo === demo.id ? 'Active Demo' : 'Start Demo'}
-                </button>
+                {demo.isReady ? (
+                  <div className="relative group">
+                    {/* Epic Background Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse"></div>
+                    
+                    {/* Floating Particles */}
+                    <div className="absolute inset-0 overflow-hidden rounded-xl">
+                      <div className="absolute top-2 left-1/4 w-1 h-1 bg-brand-400 rounded-full animate-ping opacity-70"></div>
+                      <div className="absolute top-4 right-1/3 w-1 h-1 bg-accent-400 rounded-full animate-ping opacity-80" style={{ animationDelay: '0.5s' }}></div>
+                      <div className="absolute bottom-2 left-1/3 w-1 h-1 bg-brand-300 rounded-full animate-ping opacity-60" style={{ animationDelay: '1s' }}></div>
+                      <div className="absolute bottom-4 right-1/4 w-1 h-1 bg-accent-300 rounded-full animate-ping opacity-90" style={{ animationDelay: '1.5s' }}></div>
+                    </div>
+                    
+                    {/* Energy Streams */}
+                    <div className="absolute inset-0 overflow-hidden rounded-xl">
+                      <div className="absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60"></div>
+                      <div className="absolute right-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70"></div>
+                    </div>
+                    <br />
+
+                    {/* Main Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowImmersiveDemo(true)
+                      }}
+                      className="relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform hover:scale-110 hover:rotate-1 shadow-2xl hover:shadow-brand-500/50 border-2 bg-gradient-to-r from-brand-500 via-accent-500 to-brand-400 hover:from-brand-600 hover:via-accent-600 hover:to-brand-500 text-white border-white/30 hover:border-white/60 text-lg"
+                    >
+                      {/* Button Content */}
+                      <div className="flex items-center">
+                        <div className="flex flex-col">
+                          <span className="text-lg font-bold">LAUNCH DEMO</span>
+                          <span className="text-xs opacity-80">Prepare for AWESOMENESS!</span>
+                        </div>
+                      </div>
+                      
+                      {/* Hover Effects */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </button>
+                    
+                    {/* Rotating Nexus Logo */}
+                    <div className="absolute -right-20 bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <Image 
+                        src="/images/logo/logoicon.png"
+                        alt="Nexus Logo"
+                        width={100}
+                        height={100}
+                        className="animate-spin"
+                        style={{ animationDuration: '2s' }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    disabled={true}
+                    className="px-6 py-3 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 bg-white/10 border border-white/20 text-white/40 cursor-not-allowed"
+                  >
+                    Coming Soon
+                  </button>
+                )}
               </div>
-            </button>
+              </div>
+            </div>
           )
         })}
       </div>
@@ -329,11 +359,22 @@ function DemosPageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if this is the first time loading the page
+    if (typeof window !== 'undefined') {
+      const hasLoadedBefore = localStorage.getItem('demosPageLoaded')
+      return !hasLoadedBefore
+    }
+    return true
+  })
   const [loadingProgress, setLoadingProgress] = useState(0)
+  const [showImmersiveDemo, setShowImmersiveDemo] = useState(false)
+  const [showTechTree, setShowTechTree] = useState(false)
 
-  // Preloader effect
+  // Preloader effect - only on first load
   useEffect(() => {
+    if (!isLoading) return // Skip if already loaded
+
     const loadingSteps = [
       { progress: 20, message: 'Initializing Demo Suite...' },
       { progress: 40, message: 'Loading Smart Contracts...' },
@@ -351,12 +392,16 @@ function DemosPageContent() {
         clearInterval(interval)
         setTimeout(() => {
           setIsLoading(false)
+          // Mark that the page has been loaded
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('demosPageLoaded', 'true')
+          }
         }, 500)
       }
     }, 800)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isLoading])
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -376,20 +421,7 @@ function DemosPageContent() {
     }
   }, [])
 
-  const renderActiveDemo = () => {
-    switch (activeDemo) {
-      case 'hello-milestone':
-        return <HelloMilestoneDemo />
-      case 'milestone-voting':
-        return <MilestoneVotingDemo />
-      case 'dispute-resolution':
-        return <DisputeResolutionDemo />
-      case 'micro-marketplace':
-        return <MicroTaskMarketplaceDemo />
-      default:
-        return <HelloMilestoneDemo />
-    }
-  }
+
 
   return (
     <EscrowProvider>
@@ -518,13 +550,6 @@ function DemosPageContent() {
                       <div className="absolute inset-0 rounded-full border border-brand-300/25 animate-ping scale-250" style={{ animationDuration: '6s' }}></div>
                     </div>
                     
-                    {/* Plasma Energy Streams */}
-                    <div className="absolute inset-0">
-                      <div className="absolute left-0 top-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60" style={{ animationDuration: '3s' }}></div>
-                      <div className="absolute right-0 top-1/2 w-1 h-20 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70" style={{ animationDuration: '2.5s' }}></div>
-                      <div className="absolute top-0 left-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-brand-400/50 to-transparent animate-pulse opacity-50" style={{ animationDuration: '3.5s' }}></div>
-                      <div className="absolute bottom-0 left-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-accent-400/50 to-transparent animate-pulse opacity-65" style={{ animationDuration: '2.8s' }}></div>
-                    </div>
                   </div>
                   
                   {/* Title with Enhanced Styling */}
@@ -536,9 +561,37 @@ function DemosPageContent() {
                 <br />
                 <br />
                 
-                <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                <p className="text-xl text-white/80 max-w-3xl mx-auto mb-6">
                   Master the art of trustless work with our hilarious demo suite on Stellar blockchain
                 </p>
+                
+                {/* Tutorial Buttons */}
+                <div className="flex justify-center gap-6 mb-8">
+                  <button
+                    onClick={() => {
+                      const tutorialSection = document.getElementById('interactive-tutorial')
+                      if (tutorialSection) {
+                        tutorialSection.scrollIntoView({ 
+                          behavior: 'smooth', 
+                          block: 'start' 
+                        })
+                      }
+                    }}
+                    className="px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x3"
+                  >
+                    <span className="text-xl">👨‍🏫&nbsp;</span>
+                    <span>Tutorial</span>
+                    <span className="text-xl">&nbsp;→</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowTechTree(true)}
+                    className="px-8 py-4 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3"
+                  >
+                    <span>Tech Tree Explorer</span>
+                    <span className="text-xl">🌳</span>
+                  </button>
+                </div>
               </div>
               
 
@@ -553,37 +606,59 @@ function DemosPageContent() {
           </section>
 
 
-          {/* Nexus Codex Section */}
-          <section className="container mx-auto px-4">
+           {/* Nexus Codex Section */}
+            <section className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {nexusCodex.slice(0, 4).map((article: any, index: number) => {
-                  // Determine if content is ready based on index (0,1 are ready, 2,3 are WIP)
-                  const isReady = index < 2;
+                  // Only demo 1 (index 0) is ready, demos 2, 3, 4 (index 1, 2, 3) are disabled
+                  const isReady = index === 0;
                   
                   return (
                     <article
                       key={article.id}
-                      className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-brand-400/50 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20"
+                      className={`group bg-white/5 border border-white/10 rounded-xl overflow-hidden transition-all duration-300 transform hover:shadow-2xl hover:shadow-brand-500/20 ${
+                        isReady 
+                          ? 'hover:border-brand-400/50 hover:bg-white/10 hover:scale-105' 
+                          : 'relative'
+                      }`}
                     >
+                      {/* Coming Soon Badge for disabled articles */}
+                      {!isReady && (
+                        <div className="absolute top-4 right-4 z-50 flex flex-col gap-1">
+                          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-pulse">
+                            🚧 Coming Soon
+                          </div>
+                          {index === 1 && (
+                            <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
+                              🔒 Multi-Stakeholders
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Blur Overlay for disabled articles */}
+                      {!isReady && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10"></div>
+                      )}
+
+                      {/* Content with reduced opacity for disabled articles */}
+                      <div className={`relative ${!isReady ? 'z-20 opacity-30 pointer-events-none' : 'z-10'}`}>
                       {/* Article Image */}
                       <div className="relative h-32 overflow-hidden">
-                        <Image 
-                          src={`/images/demos/demo${index + 1}.png`}
+                        <Image
+                          src={
+                            index === 0
+                              ? `/images/demos/demo${index + 1}.png`
+                              : `/images/demos/placeholder.png`
+                          }
                           alt={article.title}
                           width={400}
                           height={128}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/40 group-hover:from-black/10 group-hover:to-black/30 transition-all duration-300"></div>
                         
-                        {/* Read Time */}
-                        <div className="absolute top-2 right-2">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-black/60 text-white backdrop-blur-sm">
-                            {article.readTime}
-                          </span>
-                        </div>
 
                         {/* Demo Badge with Demo Color */}
                         <div className="absolute bottom-2 left-2">
@@ -596,7 +671,7 @@ function DemosPageContent() {
                       {/* Article Content */}
                       <div className="p-4">
                         {/* Date */}
-                        <p className="text-white/60 text-xs mb-2">
+                        <p className={`text-white/60 text-xs mb-2 ${!isReady ? 'blur-sm' : ''}`}>
                           {new Date(article.date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
@@ -605,17 +680,17 @@ function DemosPageContent() {
                         </p>
 
                         {/* Title */}
-                        <h3 className="text-sm font-semibold text-white mb-2 group-hover:text-brand-300 transition-colors duration-300 line-clamp-2">
+                        <h3 className={`text-sm font-semibold text-white mb-2 group-hover:text-brand-300 transition-colors duration-300 line-clamp-2 ${!isReady ? 'blur-sm' : ''}`}>
                           {article.title}
                         </h3>
 
                         {/* Description */}
-                        <p className="text-white/70 text-xs mb-3 line-clamp-2">
+                        <p className={`text-white/70 text-xs mb-3 line-clamp-2 ${!isReady ? 'blur-sm' : ''}`}>
                           {article.description}
                         </p>
 
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-1 mb-3">
+                        <div className={`flex flex-wrap gap-1 mb-3 ${!isReady ? 'blur-sm' : ''}`}>
                           {article.tags.slice(0, 2).map((tag: string, tagIndex: number) => (
                             <span
                               key={tagIndex}
@@ -627,55 +702,80 @@ function DemosPageContent() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          {/* Watch Video Button */}
+                        <div className="flex flex-col gap-2">
+                          {/* Go To Demo Button */}
                           <button 
-                            className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                            className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
                               isReady 
-                                ? 'bg-gradient-to-r from-brand-500/20 to-accent-600/20 hover:from-brand-500/30 hover:to-accent-600/30 border border-brand-400/30 hover:border-brand-400/50 text-brand-300 hover:text-brand-200 group-hover:scale-105'
+                                ? 'bg-gradient-to-r from-emerald-500/20 to-green-600/20 hover:from-emerald-500/30 hover:to-green-600/30 border border-emerald-400/30 hover:border-emerald-400/50 text-emerald-300 hover:text-emerald-200 group-hover:scale-105'
                                 : 'bg-white/5 border border-white/20 text-white/40 cursor-not-allowed'
                             }`}
                             onClick={(e) => {
                               e.stopPropagation()
                               if (isReady) {
-                                const videoLinks = [
-                                  'https://www.youtube.com/watch?v=FuXQtLgDDBE',
-                                  'https://www.youtube.com/watch?v=BvmHc9PDIfc',
-                                  '#',
-                                  '#'
-                                ];
-                                window.open(videoLinks[index], '_blank', 'noopener,noreferrer')
+                                // Scroll to the demo cards section
+                                const demoSection = document.querySelector('.demo-card')
+                                if (demoSection) {
+                                  demoSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                }
                               }
                             }}
                             disabled={!isReady}
                           >
-                            {isReady ? 'Watch Video' : 'Coming Soon'}
+                            {isReady ? '🚀 Go To Demo' : 'Coming Soon'}
                           </button>
                           
-                          {/* Read Article Button */}
-                          <button 
-                            className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
-                              isReady 
-                                ? 'bg-gradient-to-r from-brand-500/20 to-accent-600/20 hover:from-brand-500/30 hover:to-accent-600/30 border border-brand-400/30 hover:border-brand-400/50 text-brand-300 hover:text-brand-200 group-hover:scale-105'
-                                : 'bg-white/5 border border-white/20 text-white/40 cursor-not-allowed'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (isReady) {
-                                const articleLinks = [
-                                  'https://josegomezdev.medium.com/building-trustless-escrow-systems-on-stellar-a-developers-guide-770e402751f9',
-                                  'https://josegomezdev.medium.com/democracy-in-action-multi-stakeholder-escrow-on-stellar-173fe02e5ffa',
-                                  '#',
-                                  '#'
-                                ];
-                                window.open(articleLinks[index], '_blank', 'noopener,noreferrer')
-                              }
-                            }}
-                            disabled={!isReady}
-                          >
-                            {isReady ? 'Read Article' : 'Coming Soon'}
-                          </button>
+                          <div className="flex gap-2">
+                            {/* Watch Video Button */}
+                            <button 
+                              className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                                isReady 
+                                  ? 'bg-gradient-to-r from-brand-500/20 to-accent-600/20 hover:from-brand-500/30 hover:to-accent-600/30 border border-brand-400/30 hover:border-brand-400/50 text-brand-300 hover:text-brand-200 group-hover:scale-105'
+                                  : 'bg-white/5 border border-white/20 text-white/40 cursor-not-allowed'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (isReady) {
+                                  const videoLinks = [
+                                    'https://www.youtube.com/watch?v=FuXQtLgDDBE',
+                                    'https://www.youtube.com/watch?v=BvmHc9PDIfc',
+                                    '#',
+                                    '#'
+                                  ];
+                                  window.open(videoLinks[index], '_blank', 'noopener,noreferrer')
+                                }
+                              }}
+                              disabled={!isReady}
+                            >
+                              {isReady ? 'Watch Video' : 'Coming Soon'}
+                            </button>
+                            
+                            {/* Read Article Button */}
+                            <button 
+                              className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                                isReady 
+                                  ? 'bg-gradient-to-r from-brand-500/20 to-accent-600/20 hover:from-brand-500/30 hover:to-accent-600/30 border border-brand-400/30 hover:border-brand-400/50 text-brand-300 hover:text-brand-200 group-hover:scale-105'
+                                  : 'bg-white/5 border border-white/20 text-white/40 cursor-not-allowed'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (isReady) {
+                                  const articleLinks = [
+                                    'https://josegomezdev.medium.com/building-trustless-escrow-systems-on-stellar-a-developers-guide-770e402751f9',
+                                    'https://josegomezdev.medium.com/democracy-in-action-multi-stakeholder-escrow-on-stellar-173fe02e5ffa',
+                                    '#',
+                                    '#'
+                                  ];
+                                  window.open(articleLinks[index], '_blank', 'noopener,noreferrer')
+                                }
+                              }}
+                              disabled={!isReady}
+                            >
+                              {isReady ? 'Read Article' : 'Coming Soon'}
+                            </button>
+                          </div>
                         </div>
+                      </div>
                       </div>
                     </article>
                   )
@@ -684,8 +784,78 @@ function DemosPageContent() {
             </div>
           </section>
 
+    
+          {/* Demo Selection */}
+          <section 
+            className="container mx-auto px-4 transition-all duration-500 ease-in-out mt-20 mb-20"
+          >
+            <div className="max-w-6xl mx-auto">
+              {/* Epic Legendary Background for Title */}
+              <div className="relative mb-12">
+                {/* Legendary Energy Background */}
+                <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+                  {/* Primary Energy Core */}
+                  <div className="relative w-96 h-32">
+                    {/* Inner Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 blur-md scale-150"></div>
+                    
+                    {/* Middle Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/20 via-brand-500/30 to-accent-400/20 blur-lg scale-200"></div>
+                    
+                    {/* Outer Energy Ring */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/10 via-accent-500/20 to-brand-300/10 blur-xl scale-250"></div>
+                  </div>
+                  
+                  {/* Floating Energy Particles */}
+                  <div className="absolute inset-0">
+                    <div className="absolute top-4 left-1/4 w-2 h-2 bg-brand-400 rounded-full animate-ping opacity-70"></div>
+                    <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-accent-400 rounded-full animate-ping opacity-80" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-brand-300 rounded-full animate-ping opacity-60" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-accent-300 rounded-full animate-ping opacity-90" style={{ animationDelay: '1.5s' }}></div>
+                  </div>
+                  
+                  {/* Energy Wave Rings */}
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 rounded-full border border-brand-400/30 animate-ping scale-150" style={{ animationDuration: '3s' }}></div>
+                    <div className="absolute inset-0 rounded-full border border-accent-400/20 animate-ping scale-200" style={{ animationDuration: '4s' }}></div>
+                    <div className="absolute inset-0 rounded-full border border-brand-300/15 animate-ping scale-250" style={{ animationDuration: '5s' }}></div>
+                  </div>
+                </div>
+                
+                {/* Title with Enhanced Styling */}
+                <h2 className="relative z-10 text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-4 drop-shadow-2xl">
+                  Pick Your Adventure
+                  <div className="relative">
+                    <span className="text-xl animate-pulse">🚀</span>
+                    <span className="absolute -top-1 -right-1 text-xs animate-ping">✨</span>
+                  </div>
+                </h2>
+                <p className="relative z-10 text-lg text-center text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+                  Choose from our collection of interactive demos to experience the power of trustless work on the Stellar blockchain. 
+                  Each demo showcases different aspects of escrow contracts, from basic workflows to complex dispute resolution. 
+                  Rate your experience and help us improve!
+                </p>
+              </div>
+              
+
+            </div>
+          </section>
+
+          <section className=" mx-auto px-4">
+            <div className=" mx-auto">
+            
+              
+              <DemoSelector 
+                activeDemo={activeDemo} 
+                setActiveDemo={setActiveDemo} 
+                setShowImmersiveDemo={setShowImmersiveDemo}
+              />
+              
+            </div>
+          </section>
+
           {/* Interactive Tutorial Section - Full Width with Irregular Shape */}
-          <section className="relative w-full py-20 overflow-hidden">
+          <section id="interactive-tutorial" className="relative w-full py-16 overflow-hidden -mb-20 mt-20">
             {/* Irregular Background Shape - Full Width */}
             <div className="absolute inset-0">
               {/* Main irregular shape using clip-path */}
@@ -823,68 +993,6 @@ function DemosPageContent() {
             </div>
           </section>
 
-          <br />
-          <br />
-
-        
-          {/* Demo Selection */}
-          <section 
-            className="container mx-auto px-4 transition-all duration-500 ease-in-out"
-          >
-            <div className="max-w-6xl mx-auto">
-              {/* Epic Legendary Background for Title */}
-              <div className="relative mb-12">
-                {/* Legendary Energy Background */}
-                <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
-                  {/* Primary Energy Core */}
-                  <div className="relative w-96 h-32">
-                    {/* Inner Energy Ring */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 blur-md scale-150"></div>
-                    
-                    {/* Middle Energy Ring */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/20 via-brand-500/30 to-accent-400/20 blur-lg scale-200"></div>
-                    
-                    {/* Outer Energy Ring */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/10 via-accent-500/20 to-brand-300/10 blur-xl scale-250"></div>
-                  </div>
-                  
-                  {/* Floating Energy Particles */}
-                  <div className="absolute inset-0">
-                    <div className="absolute top-4 left-1/4 w-2 h-2 bg-brand-400 rounded-full animate-ping opacity-70"></div>
-                    <div className="absolute top-8 right-1/3 w-1.5 h-1.5 bg-accent-400 rounded-full animate-ping opacity-80" style={{ animationDelay: '0.5s' }}></div>
-                    <div className="absolute bottom-6 left-1/3 w-2 h-2 bg-brand-300 rounded-full animate-ping opacity-60" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-accent-300 rounded-full animate-ping opacity-90" style={{ animationDelay: '1.5s' }}></div>
-                  </div>
-                  
-                  {/* Energy Wave Rings */}
-                  <div className="absolute inset-0">
-                    <div className="absolute inset-0 rounded-full border border-brand-400/30 animate-ping scale-150" style={{ animationDuration: '3s' }}></div>
-                    <div className="absolute inset-0 rounded-full border border-accent-400/20 animate-ping scale-200" style={{ animationDuration: '4s' }}></div>
-                    <div className="absolute inset-0 rounded-full border border-brand-300/15 animate-ping scale-250" style={{ animationDuration: '5s' }}></div>
-                  </div>
-                </div>
-                
-                {/* Title with Enhanced Styling */}
-                <h2 className="relative z-10 text-3xl md:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-4 drop-shadow-2xl">
-                  Pick Your Adventure
-                </h2>
-                <p className="relative z-10 text-lg text-center text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-                  Choose from our collection of interactive demos to experience the power of trustless work on the Stellar blockchain. 
-                  Each demo showcases different aspects of escrow contracts, from basic workflows to complex dispute resolution. 
-                  Rate your experience and help us improve!
-                </p>
-              </div>
-              
-              <DemoSelector activeDemo={activeDemo} setActiveDemo={setActiveDemo} />
-            </div>
-          </section>
-
-          {/* Active Demo Display */}
-          <section id="active-demo-display" className="container mx-auto px-4 py-10">
-            <div className="max-w-6xl mx-auto">
-              {renderActiveDemo()}
-            </div>
-          </section>
 
         </main>
 
@@ -921,6 +1029,26 @@ function DemosPageContent() {
           setHasSeenOnboarding(true)
         }}
         currentDemo={activeDemo}
+      />
+
+      {/* Immersive Demo Modal */}
+      {showImmersiveDemo && (
+        <ImmersiveDemoModal
+          isOpen={showImmersiveDemo}
+          onClose={() => setShowImmersiveDemo(false)}
+          demoId="hello-milestone"
+          demoTitle="1. Baby Steps to Riches"
+          demoDescription="Basic Escrow Flow Demo"
+          estimatedTime={8}
+        >
+          <HelloMilestoneDemo />
+        </ImmersiveDemoModal>
+      )}
+
+      {/* Tech Tree Modal */}
+      <TechTreeModal
+        isOpen={showTechTree}
+        onClose={() => setShowTechTree(false)}
       />
     </EscrowProvider>
   )

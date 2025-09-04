@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Tooltip } from './Tooltip'
 
 interface GameOption {
   id: string
@@ -76,15 +77,37 @@ export default function RetroArcadeSidebar({
             {/* Game List */}
             <div className={`space-y-3 mb-6 transition-all duration-300 ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
               {games.map((gameOption) => (
-                <div
+                <Tooltip
                   key={gameOption.id}
-                  onClick={() => onGameSelect(gameOption.id)}
-                  className={`p-3 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                    gameOption.id === selectedGame
-                      ? 'border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-400/25'
-                      : 'border-white/20 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/5'
-                  }`}
+                  content={
+                    <div>
+                      <p className="text-white/90 text-sm font-medium">
+                        {gameOption.title}
+                      </p>
+                      <p className="text-cyan-300 text-xs mt-1">
+                        {gameOption.subtitle}
+                      </p>
+                      <div className="mt-2 pt-2 border-t border-white/10">
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          gameOption.status === 'available' ? 'bg-green-500/20 text-green-300 border border-green-400/50' :
+                          gameOption.status === 'beta' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/50' :
+                          'bg-yellow-500/20 text-yellow-300 border border-yellow-400/50'
+                        }`}>
+                          {gameOption.status}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                  position="bottom"
                 >
+                  <div
+                    onClick={() => onGameSelect(gameOption.id)}
+                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                      gameOption.id === selectedGame
+                        ? 'border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-400/25'
+                        : 'border-white/20 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-400/5'
+                    }`}
+                  >
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">{gameOption.icon}</div>
                     <div className="flex-1">
@@ -102,21 +125,10 @@ export default function RetroArcadeSidebar({
                     </div>
                   </div>
                 </div>
+                </Tooltip>
               ))}
             </div>
             
-            {/* Arcade Controls */}
-            <div className={`text-center transition-all duration-300 ${isCollapsed ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
-              <br />
-              <br />
-              {/* Full Screen Button */}
-              <button
-                onClick={onFullscreenToggle}
-                className="w-full py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold text-sm rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                🖥️ {isCollapsed ? '' : (isFullscreen ? 'Exit Fullscreen' : 'Full Screen')}
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -551,16 +551,38 @@ export const DisputeResolutionDemo = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-gradient-to-br from-warning-500/20 to-danger-500/20 backdrop-blur-sm border border-warning-400/30 rounded-xl shadow-2xl p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-danger-400 mb-4">
-            ⚖️ Dispute Resolution Demo
-          </h2>
-          <p className="text-white/80 text-lg">
-            Arbitration and conflict resolution system for handling escrow disputes
-          </p>
+    <div className="max-w-6xl mx-auto relative">
+      {/* Coming Soon Badge */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
+          🚧 Coming Soon
         </div>
+      </div>
+
+      {/* Blurred Content Overlay */}
+      <div className="bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8 relative">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10"></div>
+        
+        {/* Content with reduced opacity */}
+        <div className="relative z-20 opacity-30 pointer-events-none">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500 mb-4">
+              ⚖️ Dispute Resolution Demo
+            </h2>
+            <p className="text-white/80 text-lg">
+              Arbitration and conflict resolution system for handling escrow disputes
+            </p>
+          </div>
+
+          {/* Coming Soon Message */}
+          <div className="text-center py-20">
+            <div className="text-6xl mb-6">🚧</div>
+            <h3 className="text-2xl font-bold text-white mb-4">Coming Soon!</h3>
+            <p className="text-white/70 text-lg max-w-md mx-auto">
+              The Dispute Resolution Demo is currently under development. 
+              This feature will provide arbitration and conflict resolution for escrow disputes.
+            </p>
+          </div>
 
         {/* Role Selection */}
         <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
@@ -923,6 +945,7 @@ export const DisputeResolutionDemo = () => {
             This demonstrates how complex dispute resolution workflows can be automated on Stellar, 
             providing transparency and reducing the need for traditional legal intervention.
           </p>
+        </div>
         </div>
       </div>
     </div>

@@ -14,6 +14,16 @@ export default function MiniGameStore() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showDonationModal, setShowDonationModal] = useState<string | null>(null)
   const [hoveredGame, setHoveredGame] = useState<string | null>(null)
+  const [gamesPerPage, setGamesPerPage] = useState(4)
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if this is the first time loading the page
+    if (typeof window !== 'undefined') {
+      const hasLoadedBefore = localStorage.getItem('miniGamesPageLoaded')
+      return !hasLoadedBefore
+    }
+    return true
+  })
+  const [loadingProgress, setLoadingProgress] = useState(0)
 
   // Epic promotional banners
   const promotionalBanners = [
@@ -49,6 +59,17 @@ export default function MiniGameStore() {
       cta: "Explore Missions",
       badge: "🌟 NEW",
       players: "567 Mission Hunters"
+    },
+    {
+      id: 4,
+      title: "🌟 FEATURED GAME OF THE WEEK 🌟",
+      subtitle: "Web3 Basics Adventure",
+      description: "Master blockchain fundamentals through interactive gameplay. Join 1,247+ learners and earn crypto rewards!",
+      image: "/images/games/web3-basics-adventure.png",
+      gradient: "from-yellow-500 via-orange-500 to-red-500",
+      cta: "Play Now",
+      badge: "⭐ FEATURED",
+      players: "1,247 Active Players"
     }
   ]
 
@@ -61,6 +82,38 @@ export default function MiniGameStore() {
     { id: 'coming-soon', name: '⏳ Coming Soon', count: 1 }
   ]
 
+  // Loading effect - only on first load
+  useEffect(() => {
+    if (!isLoading) return // Skip if already loaded
+
+    const loadingSteps = [
+      { progress: 20, message: 'Loading Game Engine...' },
+      { progress: 40, message: 'Initializing Web3 Games...' },
+      { progress: 60, message: 'Preparing Rewards System...' },
+      { progress: 80, message: 'Setting up Leaderboards...' },
+      { progress: 100, message: 'Games Ready to Play!' }
+    ]
+
+    let currentStep = 0
+    const interval = setInterval(() => {
+      if (currentStep < loadingSteps.length) {
+        setLoadingProgress(loadingSteps[currentStep].progress)
+        currentStep++
+      } else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsLoading(false)
+          // Mark that the page has been loaded
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('miniGamesPageLoaded', 'true')
+          }
+        }, 500)
+      }
+    }, 800)
+
+    return () => clearInterval(interval)
+  }, [isLoading])
+
   // Enhanced mini games with epic descriptions and thumbnails
   const miniGames = [
     {
@@ -69,7 +122,7 @@ export default function MiniGameStore() {
       description: 'Embark on an epic journey through blockchain fundamentals. Learn smart contracts, wallets, and DeFi while earning crypto rewards!',
       shortDescription: 'Master blockchain basics through interactive gameplay',
       icon: '🌐',
-      status: 'available',
+      status: 'beta', // available
       category: 'learning',
       difficulty: 'Beginner',
       estimatedTime: '2-3 hours',
@@ -77,7 +130,7 @@ export default function MiniGameStore() {
       currentPlayers: 1247,
       rating: 4.8,
       thumbnail: '/images/games/web3-basics-adventure.png',
-      progress: 100,
+      progress: 20,
       estimatedRelease: 'Available Now',
       donationGoal: 0,
       currentDonations: 0,
@@ -90,7 +143,7 @@ export default function MiniGameStore() {
       description: 'Solve complex escrow puzzles while learning Stellar blockchain fundamentals. Complete challenges, unlock achievements, and become a DeFi expert!',
       shortDescription: 'Master the Art of Trustless Transactions',
       icon: '⭐',
-      status: 'beta',
+      status: 'development',
       category: 'blockchain',
       difficulty: 'Intermediate',
       estimatedTime: '4-5 hours',
@@ -98,7 +151,7 @@ export default function MiniGameStore() {
       currentPlayers: 892,
       rating: 4.9,
       thumbnail: '/images/games/escrow-puzzle-master.png',
-      progress: 50,
+      progress: 0,
       estimatedRelease: 'Available Now',
       donationGoal: 0,
       currentDonations: 0,
@@ -119,7 +172,7 @@ export default function MiniGameStore() {
       currentPlayers: 567,
       rating: 4.7,
       thumbnail: '/images/games/defi-trading-arena.png',
-      progress: 25,
+      progress: 0,
       estimatedRelease: 'Beta Testing',
       donationGoal: 5000,
       currentDonations: 3200,
@@ -140,97 +193,97 @@ export default function MiniGameStore() {
       currentPlayers: 423,
       rating: 4.6,
       thumbnail: '/images/games/blank.png',
-      progress: 15,
+      progress: 0,
       estimatedRelease: 'Beta Testing',
       donationGoal: 3000,
       currentDonations: 1800,
       features: ['NFT Design Tools', 'Minting Process', 'Marketplace Trading', 'Royalty Systems'],
       achievements: ['Creative Genius', 'NFT Pioneer', 'Market Master', 'Digital Artist']
     },
-    {
-      id: 'dao-governance',
-      title: 'DAO Governance Simulator',
-      description: 'Experience the future of decentralized governance! Participate in DAO voting, proposal creation, and community decision-making.',
-      shortDescription: 'Learn DAO governance and voting systems',
-      icon: '🗳️',
-      status: 'development',
-      category: 'governance',
-      difficulty: 'Intermediate',
-      estimatedTime: '5-6 hours',
-      rewards: '150 XLM + Governance Badge',
-      currentPlayers: 0,
-      rating: 0,
-      thumbnail: '/images/games/blank.png',
-      progress: 45,
-      estimatedRelease: 'Q2 2024',
-      donationGoal: 8000,
-      currentDonations: 4500,
-      features: ['Voting Mechanisms', 'Proposal Creation', 'Treasury Management', 'Community Building'],
-      achievements: ['Governance Expert', 'Proposal Master', 'Community Leader', 'DAO Architect']
-    },
-    {
-      id: 'cross-chain-bridge',
-      title: 'Cross-Chain Bridge Explorer',
-      description: 'Master the art of cross-chain interoperability! Learn bridge protocols, asset transfers, and multi-chain DeFi strategies.',
-      shortDescription: 'Explore cross-chain bridge technologies',
-      icon: '🌉',
-      status: 'development',
-      category: 'interoperability',
-      difficulty: 'Advanced',
-      estimatedTime: '7-9 hours',
-      rewards: '300 XLM + Bridge Master Badge',
-      currentPlayers: 0,
-      rating: 0,
-      thumbnail: '/images/games/blank.png',
-      progress: 30,
-      estimatedRelease: 'Q3 2024',
-      donationGoal: 12000,
-      currentDonations: 2800,
-      features: ['Bridge Protocols', 'Asset Transfers', 'Security Audits', 'Multi-Chain DeFi'],
-      achievements: ['Bridge Master', 'Interoperability Expert', 'Security Guardian', 'Chain Hopper']
-    },
-    {
-      id: 'metaverse-builder',
-      title: 'Metaverse Builder World',
-      description: 'Build your own metaverse! Create 3D worlds, virtual assets, and immersive experiences using web3 technology.',
-      shortDescription: 'Build immersive 3D metaverse worlds',
-      icon: '🌍',
-      status: 'coming-soon',
-      category: 'metaverse',
-      difficulty: 'Expert',
-      estimatedTime: '10-12 hours',
-      rewards: '500 XLM + Metaverse Creator Badge',
-      currentPlayers: 0,
-      rating: 0,
-      thumbnail: '/images/games/blank.png',
-      progress: 15,
-      estimatedRelease: 'Q4 2024',
-      donationGoal: 20000,
-      currentDonations: 1200,
-      features: ['3D World Building', 'Virtual Asset Creation', 'VR Integration', 'Social Interactions'],
-      achievements: ['World Builder', 'Asset Creator', 'VR Pioneer', 'Metaverse Legend']
-    },
-    {
-      id: 'ai-web3-fusion',
-      title: 'AI + Web3 Fusion Lab',
-      description: 'Explore the cutting edge of AI and blockchain integration! Learn how AI enhances smart contracts, DeFi, and decentralized applications.',
-      shortDescription: 'Fuse AI with blockchain technology',
-      icon: '🤖',
-      status: 'coming-soon',
-      category: 'ai',
-      difficulty: 'Expert',
-      estimatedTime: '8-10 hours',
-      rewards: '400 XLM + AI Pioneer Badge',
-      currentPlayers: 0,
-      rating: 0,
-      thumbnail: '/images/games/blank.png',
-      progress: 5,
-      estimatedRelease: 'Q1 2025',
-      donationGoal: 25000,
-      currentDonations: 800,
-      features: ['AI-Enhanced Smart Contracts', 'Predictive DeFi', 'Decentralized AI', 'Automated Trading'],
-      achievements: ['AI Pioneer', 'Smart Contract Master', 'DeFi Innovator', 'Future Builder']
-    }
+    // {
+    //   id: 'dao-governance',
+    //   title: 'DAO Governance Simulator',
+    //   description: 'Experience the future of decentralized governance! Participate in DAO voting, proposal creation, and community decision-making.',
+    //   shortDescription: 'Learn DAO governance and voting systems',
+    //   icon: '🗳️',
+    //   status: 'development',
+    //   category: 'governance',
+    //   difficulty: 'Intermediate',
+    //   estimatedTime: '5-6 hours',
+    //   rewards: '150 XLM + Governance Badge',
+    //   currentPlayers: 0,
+    //   rating: 0,
+    //   thumbnail: '/images/games/blank.png',
+    //   progress: 45,
+    //   estimatedRelease: 'Q2 2024',
+    //   donationGoal: 8000,
+    //   currentDonations: 4500,
+    //   features: ['Voting Mechanisms', 'Proposal Creation', 'Treasury Management', 'Community Building'],
+    //   achievements: ['Governance Expert', 'Proposal Master', 'Community Leader', 'DAO Architect']
+    // },
+    // {
+    //   id: 'cross-chain-bridge',
+    //   title: 'Cross-Chain Bridge Explorer',
+    //   description: 'Master the art of cross-chain interoperability! Learn bridge protocols, asset transfers, and multi-chain DeFi strategies.',
+    //   shortDescription: 'Explore cross-chain bridge technologies',
+    //   icon: '🌉',
+    //   status: 'development',
+    //   category: 'interoperability',
+    //   difficulty: 'Advanced',
+    //   estimatedTime: '7-9 hours',
+    //   rewards: '300 XLM + Bridge Master Badge',
+    //   currentPlayers: 0,
+    //   rating: 0,
+    //   thumbnail: '/images/games/blank.png',
+    //   progress: 30,
+    //   estimatedRelease: 'Q3 2024',
+    //   donationGoal: 12000,
+    //   currentDonations: 2800,
+    //   features: ['Bridge Protocols', 'Asset Transfers', 'Security Audits', 'Multi-Chain DeFi'],
+    //   achievements: ['Bridge Master', 'Interoperability Expert', 'Security Guardian', 'Chain Hopper']
+    // },
+    // {
+    //   id: 'metaverse-builder',
+    //   title: 'Metaverse Builder World',
+    //   description: 'Build your own metaverse! Create 3D worlds, virtual assets, and immersive experiences using web3 technology.',
+    //   shortDescription: 'Build immersive 3D metaverse worlds',
+    //   icon: '🌍',
+    //   status: 'coming-soon',
+    //   category: 'metaverse',
+    //   difficulty: 'Expert',
+    //   estimatedTime: '10-12 hours',
+    //   rewards: '500 XLM + Metaverse Creator Badge',
+    //   currentPlayers: 0,
+    //   rating: 0,
+    //   thumbnail: '/images/games/blank.png',
+    //   progress: 15,
+    //   estimatedRelease: 'Q4 2024',
+    //   donationGoal: 20000,
+    //   currentDonations: 1200,
+    //   features: ['3D World Building', 'Virtual Asset Creation', 'VR Integration', 'Social Interactions'],
+    //   achievements: ['World Builder', 'Asset Creator', 'VR Pioneer', 'Metaverse Legend']
+    // },
+    // {
+    //   id: 'ai-web3-fusion',
+    //   title: 'AI + Web3 Fusion Lab',
+    //   description: 'Explore the cutting edge of AI and blockchain integration! Learn how AI enhances smart contracts, DeFi, and decentralized applications.',
+    //   shortDescription: 'Fuse AI with blockchain technology',
+    //   icon: '🤖',
+    //   status: 'coming-soon',
+    //   category: 'ai',
+    //   difficulty: 'Expert',
+    //   estimatedTime: '8-10 hours',
+    //   rewards: '400 XLM + AI Pioneer Badge',
+    //   currentPlayers: 0,
+    //   rating: 0,
+    //   thumbnail: '/images/games/blank.png',
+    //   progress: 5,
+    //   estimatedRelease: 'Q1 2025',
+    //   donationGoal: 25000,
+    //   currentDonations: 800,
+    //   features: ['AI-Enhanced Smart Contracts', 'Predictive DeFi', 'Decentralized AI', 'Automated Trading'],
+    //   achievements: ['AI Pioneer', 'Smart Contract Master', 'DeFi Innovator', 'Future Builder']
+    // }
   ]
 
   // Auto-rotate promotional banners
@@ -260,6 +313,20 @@ export default function MiniGameStore() {
     const matchesCategory = selectedCategory === 'all' || game.status === selectedCategory
     return matchesSearch && matchesCategory
   })
+
+  // Pagination logic
+  const totalGames = filteredGames.length
+  const currentGames = filteredGames.slice(0, gamesPerPage)
+  const hasMoreGames = gamesPerPage < totalGames
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setGamesPerPage(4)
+  }, [selectedCategory, searchQuery])
+
+  const loadMoreGames = () => {
+    setGamesPerPage(prev => prev + 4)
+  }
 
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return 'from-green-500 to-emerald-500'
@@ -302,8 +369,71 @@ export default function MiniGameStore() {
 
           <Header />
           
+          {/* Loading Screen */}
+          {isLoading && (
+            <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+              {/* Animated Background */}
+              <div className="absolute inset-0 overflow-hidden">
+                {/* Floating Energy Orbs */}
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-400/20 rounded-full animate-ping"></div>
+                <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-purple-400/20 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute bottom-1/3 left-1/3 w-28 h-28 bg-pink-400/20 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-blue-400/20 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+                
+                {/* Energy Grid */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(139,92,246,0.1)_0%,_transparent_70%)] animate-pulse"></div>
+              </div>
+
+              {/* Main Content */}
+              <div className="relative z-10 text-center">
+                {/* Logo Animation */}
+                <div className="mb-8 animate-bounce">
+                  <Image 
+                    src="/images/logo/logoicon.png" 
+                    alt="STELLAR NEXUS" 
+                    width={120} 
+                    height={120} 
+                    className="w-30 h-30"
+                  />
+                </div>
+
+                {/* Loading Text */}
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4">
+                    Loading Gaming Store
+                  </h2>
+                  <p className="text-white/70 text-lg animate-pulse">
+                    Preparing epic web3 gaming experience...
+                  </p>
+                </div>
+
+                {/* Loading Bar */}
+                <div className="w-80 bg-white/10 rounded-full h-3 overflow-hidden mb-6">
+                  <div 
+                    className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${loadingProgress}%` }}
+                  ></div>
+                </div>
+
+                {/* Loading Steps */}
+                <div className="space-y-2">
+                  <p className="animate-fadeInUp" style={{ animationDelay: '1s' }}>Loading Game Engine...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '2s' }}>Initializing Web3 Games...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '3s' }}>Preparing Rewards System...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '4s' }}>Setting up Leaderboards...</p>
+                  <p className="animate-fadeInUp" style={{ animationDelay: '5s' }}>Games Ready to Play!</p>
+                </div>
+
+                {/* Progress Percentage */}
+                <div className="mt-6 text-white/60">
+                  <span className="font-bold">{loadingProgress}%</span> Complete
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Main Content */}
-          <main className="relative z-10 pt-20 pb-32">
+          <main className="relative z-10 pt-20 ">
             <div className="container mx-auto px-4">
               <div className="max-w-7xl mx-auto">
                 
@@ -353,124 +483,45 @@ export default function MiniGameStore() {
                     🚀 <span className="text-cyan-400 font-bold">LEARN</span> • 🎮 <span className="text-purple-400 font-bold">PLAY</span> • 🏆 <span className="text-pink-400 font-bold">EARN</span> • 🌟 <span className="text-yellow-400 font-bold">BUILD</span>
                   </p>
                   
-                  <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                  <p className="text-lg text-white/80 max-w-3xl mx-auto mb-8">
                     Master blockchain technology through epic gaming adventures. Complete quests, earn crypto rewards, 
                     and unlock secret missions while building the future of web3!
                   </p>
-                </div>
-
-                {/* Epic Promotional Banner Carousel */}
-                <div className="mb-16 relative">
-                  <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl">
-                    {promotionalBanners.map((banner, index) => (
-                      <div
-                        key={banner.id}
-                        className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                          index === activePromo ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                        }`}
-                      >
-                        <div className={`absolute inset-0 bg-gradient-to-r ${banner.gradient} opacity-90`}></div>
-                        <div className="absolute inset-0 bg-black/20"></div>
-                        
-                        {/* Background Image */}
-                        <div className="absolute inset-0">
-                          <Image
-                            src={banner.image}
-                            alt={banner.title}
-                            fill
-                            className="object-cover opacity-30"
-                          />
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="relative z-10 h-full flex items-center justify-center text-center p-8">
-                          <div className="max-w-4xl">
-                            {/* Badge */}
-                            
-                            <h3 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
-                              {banner.title}
-                            </h3>
-                            <h4 className="text-2xl md:text-3xl font-semibold text-white/90 mb-4 drop-shadow-xl">
-                              {banner.subtitle}
-                            </h4>
-                            <p className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto drop-shadow-lg">
-                              {banner.description}
-                            </p>
-                            
-                            {/* Player Count */}
-                            <div className="mb-6 text-white/80 text-sm">
-                              👥 {banner.players}
-                            </div>
-                            
-                            {/* <button className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl backdrop-blur-sm">
-                              {banner.cta} →
-                            </button> */}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-center gap-6 mb-12">
+                    <button
+                      onClick={() => {
+                        const bannerSection = document.getElementById('news-banner-carousel')
+                        if (bannerSection) {
+                          bannerSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                          })
+                        }
+                      }}
+                      className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25 border-2 border-white/20 hover:border-white/40 flex items-center space-x-3"
+                    >
+                      <span className="text-2xl">📰</span>
+                      <span>Go To News Banner</span>
+                      <span className="text-xl">↓</span>
+                    </button>
                     
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-                      {promotionalBanners.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setActivePromo(index)}
-                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                            index === activePromo 
-                              ? 'bg-white scale-125' 
-                              : 'bg-white/50 hover:bg-white/75'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Epic Search and Filter Section */}
-                <div className="mb-12">
-                  <div className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-                    {/* Search Bar */}
-                    <div className="mb-8">
-                      <div className="relative max-w-2xl mx-auto">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <div className="text-2xl">🔍</div>
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Search for epic games, quests, or challenges..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-16 pr-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 text-lg"
-                        />
-                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                          <div className="text-white/60 text-sm">
-                            {filteredGames.length} games found
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Category Filters */}
-                    <div className="flex flex-wrap justify-center gap-3">
-                      {categories.map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() => setSelectedCategory(category.id)}
-                          className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                            selectedCategory === category.id
-                              ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-cyan-500/25'
-                              : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white border border-white/20'
-                          }`}
-                        >
-                          <span className="mr-2">{category.name.split(' ')[0]}</span>
-                          {category.name.split(' ').slice(1).join(' ')}
-                          <span className="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">
-                            {category.count}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      onClick={() => {
+                        const filterSection = document.getElementById('filter-games-section')
+                        if (filterSection) {
+                          filterSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                          })
+                        }
+                      }}
+                      className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 border-2 border-white/20 hover:border-white/40 flex items-center space-x-3"
+                    >
+                      <span>Explore Games</span>
+                      <span className="text-xl">🔍</span>
+                    </button>
                   </div>
                 </div>
 
@@ -556,6 +607,53 @@ export default function MiniGameStore() {
                           🚀 PLAY NOW - START YOUR JOURNEY!
                         </button>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Epic Search and Filter Section */}
+                <div id="filter-games-section" className="mb-12">
+                  <div className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+                    {/* Search Bar */}
+                    <div className="mb-8">
+                      <div className="relative max-w-2xl mx-auto">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <div className="text-2xl">🔍</div>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Search for epic games, quests, or challenges..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-16 pr-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 text-lg"
+                        />
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                          <div className="text-white/60 text-sm">
+                            {filteredGames.length} games found
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Category Filters */}
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {categories.map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setSelectedCategory(category.id)}
+                          className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                            selectedCategory === category.id
+                              ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg shadow-cyan-500/25'
+                              : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white border border-white/20'
+                          }`}
+                        >
+                          <span className="mr-2">{category.name.split(' ')[0]}</span>
+                          {category.name.split(' ').slice(1).join(' ')}
+                          <span className="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">
+                            {category.count}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -714,6 +812,35 @@ export default function MiniGameStore() {
                   ))}
                 </div>
 
+                {/* Pagination Controls */}
+                {hasMoreGames && (
+                  <div className="flex flex-col items-center space-y-4 mb-16">
+                    {/* Games Count */}
+                    <div className="text-white/70 text-sm">
+                      Showing {gamesPerPage} of {totalGames} games
+                    </div>
+                    
+                    {/* Load More Button */}
+                    <button
+                      onClick={loadMoreGames}
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25 border-2 border-white/20 hover:border-white/40"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <span>📄</span>
+                        <span>Load 4 More Games</span>
+                      </span>
+                    </button>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full max-w-md bg-white/10 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${(gamesPerPage / totalGames) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
                 {/* No Results */}
                 {filteredGames.length === 0 && (
                   <div className="text-center py-16">
@@ -726,6 +853,88 @@ export default function MiniGameStore() {
                 )}
 
               </div>
+
+
+                {/* Epic Promotional Banner Carousel */}
+                <div id="news-banner-carousel" className="mb-16 relative">
+                  <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl">
+                    {promotionalBanners.map((banner, index) => (
+                      <div
+                        key={banner.id}
+                        className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                          index === activePromo ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                        }`}
+                      >
+                        <div className={`absolute inset-0 bg-gradient-to-r ${banner.gradient} opacity-90`}></div>
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        
+                        {/* Background Image */}
+                        <div className="absolute inset-0">
+                          <Image
+                            src={banner.image}
+                            alt={banner.title}
+                            fill
+                            className="object-cover opacity-30"
+                          />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10 h-full flex items-center justify-center text-center p-8">
+                          <div className="max-w-4xl">
+                            {/* Badge */}
+                            {banner.badge && (
+                              <div className="mb-4">
+                                <span className={`px-6 py-3 rounded-full font-bold text-lg shadow-lg ${
+                                  banner.id === 4 
+                                    ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black animate-pulse' 
+                                    : 'bg-white/20 text-white backdrop-blur-sm'
+                                }`}>
+                                  {banner.badge}
+                                </span>
+                              </div>
+                            )}
+                            
+                            <h3 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
+                              {banner.title}
+                            </h3>
+                            <h4 className="text-2xl md:text-3xl font-semibold text-white/90 mb-4 drop-shadow-xl">
+                              {banner.subtitle}
+                            </h4>
+                            <p className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto drop-shadow-lg">
+                              {banner.description}
+                            </p>
+                            
+                            {/* Player Count */}
+                            <div className="mb-6 text-white/80 text-sm">
+                              👥 {banner.players}
+                            </div>
+                            
+                            {/* <button className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl backdrop-blur-sm">
+                              {banner.cta} →
+                            </button> */}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Navigation Dots */}
+                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                      {promotionalBanners.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setActivePromo(index)}
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            index === activePromo 
+                              ? 'bg-white scale-125' 
+                              : 'bg-white/50 hover:bg-white/75'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+
             </div>
           </main>
 

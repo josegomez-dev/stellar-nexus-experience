@@ -655,289 +655,299 @@ export const MilestoneVotingDemo = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-gradient-to-br from-success-500/20 to-success-400/20 backdrop-blur-sm border border-success-400/30 rounded-xl shadow-2xl p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-success-400 to-success-300 mb-4">
-            🗳️ Milestone Voting Demo
-          </h2>
-          <p className="text-white/80 text-lg">
-            Multi-stakeholder approval system requiring consensus before fund release
-          </p>
-          
-          {/* Wallet Connection Required Message */}
-          {!isConnected && (
-            <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-lg text-center">
-              <div className="flex items-center justify-center space-x-2 mb-3">
-                <span className="text-2xl">🔐</span>
-                <h4 className="text-lg font-semibold text-cyan-300">Wallet Connection Required</h4>
-              </div>
-              <p className="text-white/80 text-sm mb-4">
-                You need to connect your Stellar wallet to initialize the multi-stakeholder escrow contract.
-              </p>
-              <button
-                onClick={() => {
-                  // Dispatch custom event to open wallet sidebar
-                  window.dispatchEvent(new CustomEvent('toggleWalletSidebar'))
-                }}
-                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40"
-              >
-                🔗 Connect Wallet
-              </button>
-            </div>
-          )}
+    <div className="max-w-6xl mx-auto relative">
+      {/* Coming Soon Badge */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
+          🚧 Coming Soon
         </div>
+      </div>
 
-        {/* Demo Setup */}
-        {!contractId && (
-          <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
-            <h3 className="text-xl font-semibold text-white mb-4">🚀 Setup Demo</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold text-blue-300 mb-3">Stakeholders</h4>
-                <div className="space-y-2">
-                  {stakeholders.map(stakeholder => (
-                    <div key={stakeholder.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <div>
-                        <p className="font-medium text-white">{stakeholder.name}</p>
-                        <p className="text-sm text-white/70">{stakeholder.role}</p>
-                      </div>
-                      <span className="text-xs text-white/50">Wallet</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-blue-300 mb-3">Milestones</h4>
-                <div className="space-y-2">
-                  {milestones.map(milestone => (
-                    <div key={milestone.id} className="p-3 bg-white/5 rounded-lg">
-                      <p className="font-medium text-white">{milestone.title}</p>
-                      <p className="text-sm text-white/70">{milestone.description}</p>
-                      <p className="text-xs text-blue-300 mt-1">
-                        {milestone.requiredApprovals} approvals required • {(parseInt(milestone.amount) / 100000).toFixed(1)} USDC
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 text-center">
-              <button
-                onClick={handleInitializeContract}
-                disabled={!isConnected}
-                className="px-8 py-3 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isConnected ? 'Initialize Multi-Stakeholder Escrow' : 'Connect Wallet'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Contract Information */}
-        {contractId && (
-          <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
+      {/* Blurred Content Overlay */}
+      <div className="bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8 relative">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10"></div>
+        
+        {/* Content with reduced opacity */}
+        <div className="relative z-20 opacity-30 pointer-events-none">
+          <div className="text-center mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">Contract Information</h3>
+              <div></div>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500">
+                🗳️ Milestone Voting Demo
+              </h2>
               <button
-                onClick={resetDemo}
                 className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors"
               >
                 🔄 Reset Demo
               </button>
             </div>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-white/70">Contract ID:</p>
-                <p className="font-mono text-success-300 bg-success-900/30 px-2 py-1 rounded">
-                  {contractId.slice(0, 20)}...
-                </p>
-              </div>
-              <div>
-                <p className="text-white/70">Status:</p>
-                <p className="text-success-300">{escrowData?.status || 'Active'}</p>
-              </div>
-              <div>
-                <p className="text-white/70">Total Amount:</p>
-                <p className="text-success-300">10 USDC</p>
-              </div>
-            </div>
-            
-            {!escrowData?.funded && (
-              <div className="mt-4 text-center">
-                <button
-                  onClick={handleFundEscrow}
-                  disabled={false}
-                  className="px-6 py-2 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors"
-                >
-                  {'Fund Escrow'}
-                </button>
-              </div>
-            )}
+            <p className="text-white/80 text-lg">
+              Multi-stakeholder milestone approval system with voting mechanisms
+            </p>
           </div>
-        )}
 
-        {/* Milestones Management */}
-        {contractId && escrowData?.funded && (
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold text-white mb-6">📋 Milestones Management</h3>
-            <div className="space-y-6">
-              {milestones.map(milestone => (
-                <div key={milestone.id} className="p-6 bg-white/5 rounded-lg border border-white/20">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-white mb-2">{milestone.title}</h4>
-                      <p className="text-white/70 mb-3">{milestone.description}</p>
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span className="text-blue-300">{(parseInt(milestone.amount) / 100000).toFixed(1)} USDC</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                                          milestone.status === 'pending' ? 'bg-warning-500/20 text-warning-300' :
-                milestone.status === 'approved' ? 'bg-success-500/20 text-success-300' :
-                'bg-brand-500/20 text-brand-300'
-                        }`}>
-                          {milestone.status.charAt(0).toUpperCase() + milestone.status.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <button
-                        onClick={() => handleCompleteMilestone(milestone.id)}
-                        disabled={milestone.status !== 'pending' || milestoneLoadingStates[milestone.id]}
-                        className={getMilestoneButtonClass(milestone)}
-                      >
-                        {getMilestoneButtonText(milestone)}
-                      </button>
-                      {canReleaseMilestone(milestone) && (
-                        <button
-                          onClick={() => handleReleaseFunds(milestone.id)}
-                          disabled={isReleasing}
-                          className="px-4 py-2 bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 rounded-lg text-brand-300 hover:text-brand-200 transition-colors block w-full"
-                        >
-                          {isReleasing ? 'Releasing...' : 'Release Funds'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
+          {/* Coming Soon Message */}
+          <div className="text-center py-20">
+            <div className="text-6xl mb-6">🚧</div>
+            <h3 className="text-2xl font-bold text-white mb-4">Coming Soon!</h3>
+            <p className="text-white/70 text-lg max-w-md mx-auto">
+              The Milestone Voting Demo is currently under development. 
+              This feature will allow multiple stakeholders to vote on milestone approvals.
+            </p>
+          </div>
 
-                  {/* Approval Progress */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-white/70">Approval Progress</span>
-                      <span className="text-sm text-blue-300">
-                        {milestone.approvals.length} / {milestone.requiredApprovals} approved
-                      </span>
-                    </div>
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${getApprovalProgress(milestone).percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Stakeholder Approvals */}
-                  <div>
-                    <h5 className="text-sm font-medium text-white/80 mb-3">Stakeholder Approvals</h5>
-                    <div className="grid md:grid-cols-2 gap-3">
-                      {stakeholders.map(stakeholder => (
-                        <div key={stakeholder.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <div>
-                            <p className="font-medium text-white text-sm">{stakeholder.name}</p>
-                            <p className="text-xs text-white/50">{stakeholder.role}</p>
-                          </div>
-                          <div className="text-right">
-                            {milestone.status === 'pending' && (
-                              <button
-                                onClick={() => handleApproveMilestone(milestone.id, stakeholder.id)}
-                                disabled={stakeholder.approvedMilestones.includes(milestone.id)}
-                                className={`px-3 py-1 rounded text-xs transition-colors ${
-                                  stakeholder.approvedMilestones.includes(milestone.id)
-                                                    ? 'bg-success-500/20 text-success-300 cursor-not-allowed'
-                : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
-                                }`}
-                              >
-                                {stakeholder.approvedMilestones.includes(milestone.id) ? '✅ Approved' : 'Approve'}
-                              </button>
-                            )}
-                            {stakeholder.approvedMilestones.includes(milestone.id) && (
-                              <div className="text-xs text-green-300">
-                                Approved {stakeholder.approvalTime ? new Date(stakeholder.approvalTime).toLocaleTimeString() : ''}
-                              </div>
-                            )}
-                          </div>
+          {/* Rest of the existing content (blurred) */}
+          {/* Demo Setup */}
+          {!contractId && (
+            <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
+              <h3 className="text-xl font-semibold text-white mb-4">🚀 Setup Demo</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-blue-300 mb-3">Stakeholders</h4>
+                  <div className="space-y-2">
+                    {stakeholders.map(stakeholder => (
+                      <div key={stakeholder.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                        <div>
+                          <p className="font-medium text-white">{stakeholder.name}</p>
+                          <p className="text-sm text-white/70">{stakeholder.role}</p>
                         </div>
-                      ))}
-                    </div>
+                        <span className="text-xs text-white/50">Wallet</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+                <div>
+                  <h4 className="font-semibold text-blue-300 mb-3">Milestones</h4>
+                  <div className="space-y-2">
+                    {milestones.map(milestone => (
+                      <div key={milestone.id} className="p-3 bg-white/5 rounded-lg">
+                        <p className="font-medium text-white">{milestone.title}</p>
+                        <p className="text-sm text-white/70">{milestone.description}</p>
+                        <p className="text-xs text-blue-300 mt-1">
+                          {milestone.requiredApprovals} approvals required • {(parseInt(milestone.amount) / 100000).toFixed(1)} USDC
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 text-center">
+                <button
+                  onClick={handleInitializeContract}
+                  disabled={!isConnected}
+                  className="px-8 py-3 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isConnected ? 'Initialize Multi-Stakeholder Escrow' : 'Connect Wallet'}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Error Display */}
-        {(initError || fundError || statusError || approveError || releaseError) && (
-          <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-lg">
-            <h4 className="font-semibold text-red-300 mb-2">Error Occurred</h4>
-            <p className="text-red-200 text-sm">
-              {initError?.message || fundError?.message || statusError?.message || 
-               approveError?.message || releaseError?.message}
-            </p>
-          </div>
-        )}
-
-        {/* Success Message - Demo Completion */}
-        {milestones.every(m => m.status === 'released') && (
-          <div className="mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
-            <div className="flex justify-center mb-4">
-              <Image
-                src="/images/logo/logoicon.png"
-                alt="Stellar Nexus Logo"
-                width={80}
-                height={80}
-                className="animate-bounce"
-              />
+          {/* Contract Information */}
+          {contractId && (
+            <div className="mb-8 p-6 bg-white/5 rounded-lg border border-white/20">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-white">Contract Information</h3>
+                <button
+                  onClick={resetDemo}
+                  className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors"
+                >
+                  🔄 Reset Demo
+                </button>
+              </div>
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-white/70">Contract ID:</p>
+                  <p className="font-mono text-success-300 bg-success-900/30 px-2 py-1 rounded">
+                    {contractId.slice(0, 20)}...
+                  </p>
+                </div>
+                <div>
+                  <p className="text-white/70">Status:</p>
+                  <p className="text-success-300">{escrowData?.status || 'Active'}</p>
+                </div>
+                <div>
+                  <p className="text-white/70">Total Amount:</p>
+                  <p className="text-success-300">10 USDC</p>
+                </div>
+              </div>
+              
+              {!escrowData?.funded && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={handleFundEscrow}
+                    disabled={false}
+                    className="px-6 py-2 bg-success-500/20 hover:bg-success-500/30 border border-success-400/30 rounded-lg text-success-300 hover:text-success-200 transition-colors"
+                  >
+                    {'Fund Escrow'}
+                  </button>
+                </div>
+              )}
             </div>
-            <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
-            <p className="text-green-200 mb-4">
-              You've successfully completed the entire multi-stakeholder milestone voting flow. 
-              All milestones were approved and funds were automatically released.
-            </p>
-            <div className="bg-success-500/10 p-4 rounded-lg border border-success-400/30">
-              <h4 className="font-semibold text-success-300 mb-2">What You Just Experienced:</h4>
-              <ul className="text-green-200 text-sm space-y-1 text-left">
-                <li>✅ Created a multi-stakeholder escrow contract on Stellar blockchain</li>
-                <li>✅ Secured funds in escrow with USDC</li>
-                <li>✅ Demonstrated milestone-based work completion workflow</li>
-                <li>✅ Showed multi-stakeholder approval consensus system</li>
-                <li>✅ Experienced automatic fund release per milestone approval</li>
-                <li>✅ Proved trustless governance with smart contract automation</li>
-              </ul>
+          )}
+
+          {/* Milestones Management */}
+          {contractId && escrowData?.funded && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-white mb-6">📋 Milestones Management</h3>
+              <div className="space-y-6">
+                {milestones.map(milestone => (
+                  <div key={milestone.id} className="p-6 bg-white/5 rounded-lg border border-white/20">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-white mb-2">{milestone.title}</h4>
+                        <p className="text-white/70 mb-3">{milestone.description}</p>
+                        <div className="flex items-center space-x-4 text-sm">
+                          <span className="text-blue-300">{(parseInt(milestone.amount) / 100000).toFixed(1)} USDC</span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                                            milestone.status === 'pending' ? 'bg-warning-500/20 text-warning-300' :
+                  milestone.status === 'approved' ? 'bg-success-500/20 text-success-300' :
+                  'bg-brand-500/20 text-brand-300'
+                          }`}>
+                            {milestone.status.charAt(0).toUpperCase() + milestone.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <button
+                          onClick={() => handleCompleteMilestone(milestone.id)}
+                          disabled={milestone.status !== 'pending' || milestoneLoadingStates[milestone.id]}
+                          className={getMilestoneButtonClass(milestone)}
+                        >
+                          {getMilestoneButtonText(milestone)}
+                        </button>
+                        {canReleaseMilestone(milestone) && (
+                          <button
+                            onClick={() => handleReleaseFunds(milestone.id)}
+                            disabled={isReleasing}
+                            className="px-4 py-2 bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 rounded-lg text-brand-300 hover:text-brand-200 transition-colors block w-full"
+                          >
+                            {isReleasing ? 'Releasing...' : 'Release Funds'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Approval Progress */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-white/70">Approval Progress</span>
+                        <span className="text-sm text-blue-300">
+                          {milestone.approvals.length} / {milestone.requiredApprovals} approved
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${getApprovalProgress(milestone).percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Stakeholder Approvals */}
+                    <div>
+                      <h5 className="text-sm font-medium text-white/80 mb-3">Stakeholder Approvals</h5>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {stakeholders.map(stakeholder => (
+                          <div key={stakeholder.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div>
+                              <p className="font-medium text-white text-sm">{stakeholder.name}</p>
+                              <p className="text-xs text-white/50">{stakeholder.role}</p>
+                            </div>
+                            <div className="text-right">
+                              {milestone.status === 'pending' && (
+                                <button
+                                  onClick={() => handleApproveMilestone(milestone.id, stakeholder.id)}
+                                  disabled={stakeholder.approvedMilestones.includes(milestone.id)}
+                                  className={`px-3 py-1 rounded text-xs transition-colors ${
+                                    stakeholder.approvedMilestones.includes(milestone.id)
+                                                      ? 'bg-success-500/20 text-success-300 cursor-not-allowed'
+                  : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
+                                  }`}
+                                >
+                                  {stakeholder.approvedMilestones.includes(milestone.id) ? '✅ Approved' : 'Approve'}
+                                </button>
+                              )}
+                              {stakeholder.approvedMilestones.includes(milestone.id) && (
+                                <div className="text-xs text-green-300">
+                                  Approved {stakeholder.approvalTime ? new Date(stakeholder.approvalTime).toLocaleTimeString() : ''}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Confetti Animation */}
-        <ConfettiAnimation isActive={showConfetti} />
+          {/* Error Display */}
+          {(initError || fundError || statusError || approveError || releaseError) && (
+            <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-lg">
+              <h4 className="font-semibold text-red-300 mb-2">Error Occurred</h4>
+              <p className="text-red-200 text-sm">
+                {initError?.message || fundError?.message || statusError?.message || 
+                 approveError?.message || releaseError?.message}
+              </p>
+            </div>
+          )}
 
-        {/* Demo Instructions */}
-        <div className="mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg">
-          <h3 className="text-lg font-semibold text-brand-300 mb-3">📚 How This Demo Works</h3>
-          <ul className="text-brand-200 text-sm space-y-2">
-            <li>• <strong>Multi-Stakeholder:</strong> 4 different roles must approve milestones</li>
-            <li>• <strong>Consensus Required:</strong> Each milestone needs a specific number of approvals</li>
-            <li>• <strong>Progressive Release:</strong> Funds are released per milestone upon approval</li>
-            <li>• <strong>Trustless Governance:</strong> Smart contract enforces approval rules automatically</li>
-            <li>• <strong>Transparent Process:</strong> All approvals and progress are visible on-chain</li>
-          </ul>
-          <p className="text-brand-200 text-sm mt-3">
-            This demonstrates how complex approval workflows can be automated on Stellar, 
-            ensuring transparency and reducing the need for manual intervention.
-          </p>
-          <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-xs text-white/60">
-              💡 <strong>Tip:</strong> View your transaction history in the wallet sidebar (🔐) to track all demo progress!
+          {/* Success Message - Demo Completion */}
+          {milestones.every(m => m.status === 'released') && (
+            <div className="mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center">
+              <div className="flex justify-center mb-4">
+                <Image
+                  src="/images/logo/logoicon.png"
+                  alt="Stellar Nexus Logo"
+                  width={80}
+                  height={80}
+                  className="animate-bounce"
+                />
+              </div>
+              <h3 className="text-2xl font-bold text-success-300 mb-2">Demo Completed Successfully!</h3>
+              <p className="text-green-200 mb-4">
+                You've successfully completed the entire multi-stakeholder milestone voting flow. 
+                All milestones were approved and funds were automatically released.
+              </p>
+              <div className="bg-success-500/10 p-4 rounded-lg border border-success-400/30">
+                <h4 className="font-semibold text-success-300 mb-2">What You Just Experienced:</h4>
+                <ul className="text-green-200 text-sm space-y-1 text-left">
+                  <li>✅ Created a multi-stakeholder escrow contract on Stellar blockchain</li>
+                  <li>✅ Secured funds in escrow with USDC</li>
+                  <li>✅ Demonstrated milestone-based work completion workflow</li>
+                  <li>✅ Showed multi-stakeholder approval consensus system</li>
+                  <li>✅ Experienced automatic fund release per milestone approval</li>
+                  <li>✅ Proved trustless governance with smart contract automation</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Confetti Animation */}
+          <ConfettiAnimation isActive={showConfetti} />
+
+          {/* Demo Instructions */}
+          <div className="mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg">
+            <h3 className="text-lg font-semibold text-brand-300 mb-3">📚 How This Demo Works</h3>
+            <ul className="text-brand-200 text-sm space-y-2">
+              <li>• <strong>Multi-Stakeholder:</strong> 4 different roles must approve milestones</li>
+              <li>• <strong>Consensus Required:</strong> Each milestone needs a specific number of approvals</li>
+              <li>• <strong>Progressive Release:</strong> Funds are released per milestone upon approval</li>
+              <li>• <strong>Trustless Governance:</strong> Smart contract enforces approval rules automatically</li>
+              <li>• <strong>Transparent Process:</strong> All approvals and progress are visible on-chain</li>
+            </ul>
+            <p className="text-brand-200 text-sm mt-3">
+              This demonstrates how complex approval workflows can be automated on Stellar, 
+              ensuring transparency and reducing the need for manual intervention.
             </p>
+            <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-xs text-white/60">
+                💡 <strong>Tip:</strong> View your transaction history in the wallet sidebar (🔐) to track all demo progress!
+              </p>
+            </div>
           </div>
         </div>
       </div>

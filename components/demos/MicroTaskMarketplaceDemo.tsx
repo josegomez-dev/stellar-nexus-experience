@@ -1005,7 +1005,7 @@ export const MicroTaskMarketplaceDemo = () => {
             </div>
           </div>
         )}
-
+ 
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
           <div className="p-4 bg-red-500/20 border border-red-400/30 rounded-lg">
