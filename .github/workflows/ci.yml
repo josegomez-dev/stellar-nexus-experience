@@ -84,6 +84,8 @@ jobs:
           echo "Dependencies installed successfully"
           echo "Checking for any dependency issues..."
           npm ls --depth=0
+          echo "Checking for dependency conflicts..."
+          npm audit --audit-level=moderate || echo "Audit completed with warnings"
 
       - name: Build application
         env:
@@ -100,9 +102,17 @@ jobs:
           echo "Environment variables set:"
           echo "NODE_ENV: $NODE_ENV"
           echo "NEXT_PUBLIC_STELLAR_NETWORK: $NEXT_PUBLIC_STELLAR_NETWORK"
+          echo "Current directory contents:"
+          ls -la
           echo "Starting build..."
-          npm run build
-          echo "Build completed with exit code: $?"
+          npm run build 2>&1 | tee build.log
+          BUILD_EXIT_CODE=$?
+          echo "Build completed with exit code: $BUILD_EXIT_CODE"
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "Build failed! Build log:"
+            cat build.log
+            exit 1
+          fi
 
       - name: List build directory contents
         run: |
@@ -110,6 +120,8 @@ jobs:
           ls -la .next/ || echo ".next directory not found"
           echo "Checking if build was successful:"
           ls -la .next/static/ || echo "static directory not found"
+          echo "Build log contents:"
+          cat build.log || echo "No build log found"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -117,6 +129,14 @@ jobs:
         with:
           name: build-files
           path: .next/
+          retention-days: 7
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-log
+          path: build.log
           retention-days: 7
 
   e2e-tests:
