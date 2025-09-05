@@ -2,14 +2,19 @@
 
 import { useState } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/UserDropdown';
 import { NetworkIndicator } from '@/components/ui/NetworkIndicator';
+import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
 import Image from 'next/image';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRewardsOpen, setIsRewardsOpen] = useState(false);
+  const { isConnected } = useGlobalWallet();
+  const { account, loading } = useAccount();
 
   return (
     <header className='bg-white/10 backdrop-blur-md fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 shadow-lg'>
@@ -33,6 +38,52 @@ export const Header = () => {
 
           {/* Header Controls */}
           <div className='flex items-center space-x-4'>
+            {/* Account Status - Show when connected */}
+            {isConnected && (
+              <div className="flex items-center space-x-2">
+                {account ? (
+                  <>
+                    {/* Account Info */}
+                    <div className="hidden sm:flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
+                      <span className="text-xs text-white/70">Points:</span>
+                      <span className="text-sm font-semibold text-green-400">
+                        {account.profile.totalPoints}
+                      </span>
+                      <span className="text-xs text-white/70">Level:</span>
+                      <span className="text-sm font-semibold text-blue-400">
+                        {account.profile.level}
+                      </span>
+                    </div>
+                    
+                    {/* Rewards Button */}
+                    <Tooltip content="View Rewards & Progress">
+                      <button
+                        onClick={() => setIsRewardsOpen(true)}
+                        className='relative p-2 text-white/80 hover:text-white transition-colors'
+                      >
+                        <span className='text-xl'>🎮</span>
+                        {account.profile.totalPoints > 0 && (
+                          <span className='absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                            {account.profile.totalPoints}
+                          </span>
+                        )}
+                      </button>
+                    </Tooltip>
+                  </>
+                ) : loading ? (
+                  <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span className="text-xs text-white/70">Setting up account...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
+                    <span className="text-xs text-white/70">No account</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+
             {/* Network Indicator */}
             <div className='hidden sm:flex items-center'>
               <NetworkIndicator className='scale-90' showSwitchButton={true} />
@@ -124,6 +175,12 @@ export const Header = () => {
           </div>
         </div>
       )}
+
+      {/* Rewards Sidebar */}
+      <RewardsSidebar 
+        isOpen={isRewardsOpen} 
+        onClose={() => setIsRewardsOpen(false)} 
+      />
     </header>
   );
 };

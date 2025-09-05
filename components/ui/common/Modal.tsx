@@ -62,7 +62,7 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
         )}
 
-        <div className='p-6'>{children}</div>
+        <div>{children}</div>
       </div>
 
       {closeOnOverlayClick && <div className='absolute inset-0 -z-10' onClick={onClose} />}

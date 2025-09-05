@@ -9,6 +9,7 @@ import { WalletProvider } from '@/contexts/WalletContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { TransactionProvider } from '@/contexts/TransactionContext';
+import { AccountProvider } from '@/contexts/AccountContext';
 import Image from 'next/image';
 
 export default function DocsPage() {
@@ -67,7 +68,8 @@ export default function DocsPage() {
       <AuthProvider>
         <ToastProvider>
           <TransactionProvider>
-            <EscrowProvider>
+            <AccountProvider>
+              <EscrowProvider>
               <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900'>
                 <Header />
 
@@ -1037,7 +1039,8 @@ const EscrowComponent = () => {
 
                 <Footer />
               </div>
-            </EscrowProvider>
+              </EscrowProvider>
+            </AccountProvider>
           </TransactionProvider>
         </ToastProvider>
       </AuthProvider>

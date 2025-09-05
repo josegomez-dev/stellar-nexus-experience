@@ -13,6 +13,7 @@ import { FirebaseProvider } from '@/contexts/FirebaseContext';
 import { Providers } from '@/components/Providers';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { AccountProvider } from '@/contexts/AccountContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo';
@@ -26,8 +27,11 @@ import { ToastContainer } from '@/components/ui/Toast';
 import { AuthBanner } from '@/components/ui/AuthBanner';
 import { AuthModal } from '@/components/ui/AuthModal';
 import { UserProfile } from '@/components/ui/UserProfile';
+import { BugfenderTestPanel } from '@/components/ui/BugfenderTestPanel';
+import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
+import { logPageVisit, logDemoAction } from '@/lib/bugfender';
 
 // Demo Selection Component
 interface Demo {
@@ -345,7 +349,16 @@ const DemoSelector = ({
                         onClick={e => {
                           e.stopPropagation();
                           if (isConnected) {
+                            logDemoAction(demo.id, 'demo_launched', { 
+                              demoTitle: demo.title,
+                              isConnected 
+                            });
                             setShowImmersiveDemo(true);
+                          } else {
+                            logDemoAction(demo.id, 'demo_launch_failed', { 
+                              reason: 'wallet_not_connected',
+                              demoTitle: demo.title 
+                            });
                           }
                         }}
                         disabled={!isConnected}
@@ -407,6 +420,11 @@ function DemosPageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
+
+  // Log page visit
+  useEffect(() => {
+    logPageVisit('Demos Page', '/demos');
+  }, []);
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -730,31 +748,31 @@ function DemosPageContent() {
                     )}
                   </button>
 
-                  <a
-                    href={isConnected ? '/mini-games' : '#'}
-                    onClick={e => !isConnected && e.preventDefault()}
-                    className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 relative ${
-                      isConnected
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
-                        : 'bg-gradient-to-r from-gray-600/20 to-gray-700/20 text-gray-400 border-gray-600/30 cursor-not-allowed blur-[0.5px] opacity-70'
-                    }`}
-                    title={!isConnected ? 'Connect wallet to access the Web3 playground' : ''}
-                  >
-                    <span>Nexus Web3 Playground</span>
-                    <span className='text-xl'>
-                      <Image
-                        src='/images/icons/console.png'
-                        alt='Nexus Web3 Playground'
-                        width={50}
-                        height={20}
-                      />
-                    </span>
-                    {!isConnected && (
-                      <span className='absolute -top-1 -right-1 text-xs bg-gray-600 text-gray-300 px-1 rounded-full'>
-                        🔒
+                  <div className="relative">
+                    <a
+                      href='#'
+                      onClick={e => e.preventDefault()}
+                      className="px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 relative bg-gradient-to-r from-gray-600/20 to-gray-700/20 text-gray-400 border-gray-600/30 cursor-not-allowed blur-[0.5px] opacity-70 border-2"
+                      title="Coming Soon - Web3 Playground under development"
+                    >
+                      <span>Nexus Web3 Playground</span>
+                      <span className='text-xl'>
+                        <Image
+                          src='/images/icons/console.png'
+                          alt='Nexus Web3 Playground'
+                          width={50}
+                          height={20}
+                        />
                       </span>
-                    )}
-                  </a>
+                    </a>
+                    
+                    {/* Coming Soon Badge */}
+                    <div className='absolute -top-2 -right-2 z-10'>
+                      <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-pulse border-2 border-white'>
+                        🚧 Coming Soon
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1257,7 +1275,7 @@ function DemosPageContent() {
           demoId='hello-milestone'
           demoTitle='1. Baby Steps to Riches'
           demoDescription='Basic Escrow Flow Demo'
-          estimatedTime={8}
+          estimatedTime={1}
         >
           <HelloMilestoneDemo />
         </ImmersiveDemoModal>
@@ -1275,6 +1293,12 @@ function DemosPageContent() {
 
       {/* User Profile Modal */}
       <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
+
+      {/* Account Status Indicator */}
+      <AccountStatusIndicator />
+
+      {/* Bugfender Test Panel (Development Only) */}
+      <BugfenderTestPanel />
     </EscrowProvider>
   );
 }
@@ -1287,8 +1311,10 @@ export default function DemosPage() {
           <FirebaseProvider>
             <ToastProvider>
               <TransactionProvider>
-                <DemosPageContent />
-                <ToastContainer />
+                <AccountProvider>
+                  <DemosPageContent />
+                  <ToastContainer />
+                </AccountProvider>
               </TransactionProvider>
             </ToastProvider>
           </FirebaseProvider>

@@ -77,7 +77,7 @@ export const config = {
     id: env.NEXT_PUBLIC_ANALYTICS_ID,
     errorReporting: {
       enabled: env.NEXT_PUBLIC_ERROR_REPORTING_ENABLED,
-      endpoint: env.NEXT_PUBLIC_ERROR_REPORTING_ENDPOINT,
+      endpoint: env.NEXT_PUBLIC_ERROR_REPORTING_API_KEY,
     },
   },
 

@@ -173,7 +173,7 @@ export const FreighterInstallationGuide = ({ isOpen, onClose }: FreighterInstall
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="lg">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border border-white/20">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border border-white/20 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <div className="flex items-center space-x-3">

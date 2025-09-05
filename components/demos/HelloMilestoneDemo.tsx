@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-
+import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
@@ -28,6 +28,7 @@ interface DemoStep {
 
 export const HelloMilestoneDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
+  const { account, startDemo, completeDemo } = useAccount();
 
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
@@ -36,6 +37,12 @@ export const HelloMilestoneDemo = () => {
   const [escrowData, setEscrowData] = useState<any>(null);
   const [milestoneStatus, setMilestoneStatus] = useState<'pending' | 'completed'>('pending');
   const [demoStarted, setDemoStarted] = useState(false);
+  
+  // Check if demo was already completed
+  const demoProgress = account?.demos?.['hello-milestone'];
+  const isCompleted = demoProgress?.status === 'completed';
+  const previousScore = demoProgress?.score || 0;
+  const pointsEarned = demoProgress?.pointsEarned || 0;
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
@@ -172,13 +179,26 @@ export const HelloMilestoneDemo = () => {
     },
   ];
 
-  // Trigger confetti when demo is completed
+  // Trigger confetti and complete demo when finished
   useEffect(() => {
     console.log('🎉 Hello Milestone Demo - Current step:', currentStep);
 
     if (currentStep === 5) {
       console.log('🎉 Triggering confetti for Hello Milestone Demo!');
       setShowConfetti(true);
+      
+      // Complete the demo with a good score
+      const completeThisDemo = async () => {
+        try {
+          await completeDemo('hello-milestone', 85); // 85% score for completing the demo
+        } catch (error) {
+          console.error('Failed to complete demo:', error);
+        }
+      };
+      
+      // Complete demo after a short delay
+      setTimeout(completeThisDemo, 2000);
+      
       // Hide confetti after animation
       const timer = setTimeout(() => {
         console.log('🎉 Hiding confetti for Hello Milestone Demo');
@@ -186,7 +206,7 @@ export const HelloMilestoneDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentStep]);
+  }, [currentStep, completeDemo]);
 
   async function handleInitializeEscrow() {
     if (!walletData) {
@@ -676,19 +696,48 @@ export const HelloMilestoneDemo = () => {
           <p className='text-white/80 text-lg'>
             Experience the complete trustless escrow flow from start to finish
           </p>
+
+          {/* Demo Completion Status */}
+          {isCompleted && (
+            <div className='mt-4 p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg'>
+              <div className='flex items-center justify-center space-x-3 mb-2'>
+                <span className='text-2xl'>🏆</span>
+                <h3 className='text-green-300 font-semibold text-lg'>Demo Completed!</h3>
+              </div>
+              <div className='flex items-center justify-center space-x-6 text-sm'>
+                <div className='text-green-200'>
+                  <span className='text-green-300 font-medium'>Score:</span> {previousScore}%
+                </div>
+                <div className='text-green-200'>
+                  <span className='text-green-300 font-medium'>Points Earned:</span> {pointsEarned}
+                </div>
+              </div>
+              <p className='text-green-200 text-sm mt-2'>
+                🎮 You can replay this demo anytime to earn more points!
+              </p>
+            </div>
+          )}
+
           {!isConnected && (
             <div className='mt-4 p-4 bg-warning-500/20 border border-warning-400/30 rounded-lg'>
               <p className='text-warning-300'>
-                ⚠️ <strong>Wallet Required</strong> - Please asdasd your Stellar wallet to start the
+                ⚠️ <strong>Wallet Required</strong> - Please connect your Stellar wallet to start the
                 demo
               </p>
             </div>
           )}
-          {isConnected && (
+          {isConnected && !isCompleted && (
             <div className='mt-4 p-4 bg-success-500/20 border border-success-400/30 rounded-lg'>
               <p className='text-success-300'>
                 ✅ <strong>Wallet Connected</strong> - Ready to test! Click "Execute" on the first
                 step to begin
+              </p>
+            </div>
+          )}
+          {isConnected && isCompleted && (
+            <div className='mt-4 p-4 bg-blue-500/20 border border-blue-400/30 rounded-lg'>
+              <p className='text-blue-300'>
+                🔄 <strong>Ready for Replay</strong> - Test the demo again to improve your score and earn more points!
               </p>
             </div>
           )}

@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Badge Background -->
+  <circle cx="32" cy="32" r="30" fill="url(#gradient5)" stroke="#F59E0B" stroke-width="2"/>
+  
+  <!-- Crown -->
+  <polygon points="22,28 26,20 30,24 32,18 34,24 38,20 42,28 42,32 22,32" fill="#F59E0B" stroke="#1F2937" stroke-width="1"/>
+  
+  <!-- Gems on Crown -->
+  <circle cx="26" cy="24" r="1.5" fill="#EF4444"/>
+  <circle cx="32" cy="22" r="1.5" fill="#10B981"/>
+  <circle cx="38" cy="24" r="1.5" fill="#3B82F6"/>
+  
+  <!-- Briefcase -->
+  <rect x="26" y="34" width="12" height="8" fill="#1F2937" rx="1"/>
+  <rect x="30" y="32" width="4" height="2" fill="#1F2937"/>
+  
+  <!-- Text -->
+  <text x="32" y="54" text-anchor="middle" fill="#1F2937" font-family="Arial, sans-serif" font-size="8" font-weight="bold">GIG GURU</text>
+  
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FEF3C7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCD34D;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
+

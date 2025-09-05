@@ -16,11 +16,20 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+console.log('🔥 Initializing Firebase...');
+console.log('Firebase config:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  hasApiKey: !!firebaseConfig.apiKey
+});
+
 const app = initializeApp(firebaseConfig);
+console.log('✅ Firebase app initialized');
 
 // Initialize Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+console.log('✅ Firestore and Auth initialized');
 
 // Initialize Analytics (only in browser and if supported)
 let analytics: any = null;
@@ -34,15 +43,19 @@ if (typeof window !== 'undefined') {
 
 export { analytics };
 
-// Connect to emulators in development
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+// Connect to emulators in development (only if explicitly enabled)
+if (process.env.NODE_ENV === 'development' && 
+    process.env.FIREBASE_USE_EMULATOR === 'true' && 
+    typeof window !== 'undefined') {
   // Only connect to emulators if not already connected
   try {
+    console.log('🔧 Connecting to Firebase emulators...');
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectAuthEmulator(auth, 'http://localhost:9099');
+    console.log('✅ Connected to Firebase emulators');
   } catch (error) {
     // Emulators already connected or not available
-    console.log('Firebase emulators not available or already connected');
+    console.log('⚠️ Firebase emulators not available or already connected:', error);
   }
 }
 

@@ -12,6 +12,7 @@ import {
   generateTestStellarAddress,
 } from '@/lib/stellar-address-validation';
 import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext';
+import { AccountProvider } from '@/contexts/AccountContext';
 
 function WalletPageContent() {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet();
@@ -495,7 +496,9 @@ function WalletPageContent() {
 export default function WalletPage() {
   return (
     <WalletProvider>
-      <WalletPageContent />
+      <AccountProvider>
+        <WalletPageContent />
+      </AccountProvider>
     </WalletProvider>
   );
 }
