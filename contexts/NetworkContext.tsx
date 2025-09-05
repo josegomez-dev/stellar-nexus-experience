@@ -84,7 +84,7 @@ export const NetworkProvider = ({ children }: NetworkProviderProps) => {
     };
 
     window.addEventListener('networkChanged', handleNetworkChange as EventListener);
-    
+
     return () => {
       window.removeEventListener('networkChanged', handleNetworkChange as EventListener);
     };

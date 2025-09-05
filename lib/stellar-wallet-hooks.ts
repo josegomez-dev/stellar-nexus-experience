@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { SendTransactionResponse } from '@/types/trustless-work';
 import { stellarConfig, assetConfig } from './wallet-config';
 import { validateStellarAddress } from './stellar-address-validation';
-import { 
-  StellarWalletsKit, 
-  WalletNetwork, 
+import {
+  StellarWalletsKit,
+  WalletNetwork,
   FreighterModule,
   AlbedoModule,
   RabetModule,
   LobstrModule,
-  ISupportedWallet 
+  ISupportedWallet,
 } from '@creit.tech/stellar-wallets-kit';
 
 // POC Mode - No Stellar Wallets Kit initialization to avoid custom element conflicts
@@ -85,7 +85,7 @@ export const useWallet = (): UseWalletReturn => {
     const initializeWalletKit = async () => {
       try {
         console.log('🚀 Initializing Stellar Wallets Kit...');
-        
+
         // Create wallet modules
         const modules = [
           new FreighterModule(),
@@ -105,28 +105,30 @@ export const useWallet = (): UseWalletReturn => {
         // Get available wallets
         const supportedWallets = await kit.getSupportedWallets();
         setAvailableWallets(supportedWallets);
-        
+
         // Check if Freighter is available
         const freighterWallet = supportedWallets.find(wallet => wallet.id === 'freighter');
         setIsFreighterAvailable(freighterWallet?.isAvailable || false);
-        
+
         console.log('✅ Stellar Wallets Kit initialized');
-        console.log('📱 Available wallets:', supportedWallets.map(w => `${w.name} (${w.isAvailable ? '✅' : '❌'})`));
-        
+        console.log(
+          '📱 Available wallets:',
+          supportedWallets.map(w => `${w.name} (${w.isAvailable ? '✅' : '❌'})`)
+        );
+
         // Check if already connected
         await checkConnectionStatus(kit);
-        
       } catch (error) {
         console.error('❌ Failed to initialize Stellar Wallets Kit:', error);
         console.log('🔄 Falling back to direct Freighter API...');
-        
+
         // Fallback to direct Freighter detection
         const freighterDetected = typeof window !== 'undefined' && (window as any).stellar;
         setIsFreighterAvailable(freighterDetected);
 
-      if (freighterDetected) {
+        if (freighterDetected) {
           console.log('✅ Freighter detected via fallback method');
-      } else {
+        } else {
           console.log('❌ No Freighter wallet detected');
         }
       }
@@ -139,21 +141,23 @@ export const useWallet = (): UseWalletReturn => {
         if (addressResponse.address) {
           // Get network info
           const networkResponse = await kit.getNetwork();
-          
+
           setCurrentNetwork(networkResponse.network);
-          
+
           const networkConfig = getNetworkConfig(networkResponse.network);
-          
+
           // Get wallet info from the kit's selected module
           const selectedModule = kit['selectedModule'];
-          const connectedWallet = selectedModule ? {
-            id: selectedModule.productId,
-            name: selectedModule.productName,
-            type: 'unknown',
-            icon: selectedModule.productIcon,
-            url: selectedModule.productUrl,
-          } : null;
-          
+          const connectedWallet = selectedModule
+            ? {
+                id: selectedModule.productId,
+                name: selectedModule.productName,
+                type: 'unknown',
+                icon: selectedModule.productIcon,
+                url: selectedModule.productUrl,
+              }
+            : null;
+
           setWalletData({
             publicKey: addressResponse.address,
             network: networkResponse.network,
@@ -167,11 +171,11 @@ export const useWallet = (): UseWalletReturn => {
             walletIcon: connectedWallet?.icon,
             walletUrl: connectedWallet?.url,
           });
-          
-          console.log('✅ Wallet already connected:', { 
-            address: addressResponse.address, 
+
+          console.log('✅ Wallet already connected:', {
+            address: addressResponse.address,
             network: networkResponse.network,
-            wallet: connectedWallet?.name 
+            wallet: connectedWallet?.name,
           });
         }
       } catch (error) {
@@ -182,116 +186,126 @@ export const useWallet = (): UseWalletReturn => {
     initializeWalletKit();
   }, []);
 
-  const connect = useCallback(async (walletId?: string) => {
-    setIsLoading(true);
-    setError(null);
+  const connect = useCallback(
+    async (walletId?: string) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      console.log('Attempting to connect wallet...', walletId ? `to ${walletId}` : '');
+      try {
+        console.log('Attempting to connect wallet...', walletId ? `to ${walletId}` : '');
 
-      // Try Stellar Wallets Kit first
-      if (walletKit) {
-        try {
-          // If walletId is provided, set the wallet
-          if (walletId) {
-            walletKit.setWallet(walletId);
-          } else {
-            // If no walletId provided, try to use the first available wallet
-            const supportedWallets = await walletKit.getSupportedWallets();
-            const availableWallet = supportedWallets.find(w => w.isAvailable);
-            
-            if (!availableWallet) {
-              throw new Error('No wallet available. Please install a Stellar wallet like Freighter.');
+        // Try Stellar Wallets Kit first
+        if (walletKit) {
+          try {
+            // If walletId is provided, set the wallet
+            if (walletId) {
+              walletKit.setWallet(walletId);
+            } else {
+              // If no walletId provided, try to use the first available wallet
+              const supportedWallets = await walletKit.getSupportedWallets();
+              const availableWallet = supportedWallets.find(w => w.isAvailable);
+
+              if (!availableWallet) {
+                throw new Error(
+                  'No wallet available. Please install a Stellar wallet like Freighter.'
+                );
+              }
+
+              console.log('Auto-selecting wallet:', availableWallet.name);
+              walletKit.setWallet(availableWallet.id);
             }
-            
-            console.log('Auto-selecting wallet:', availableWallet.name);
-            walletKit.setWallet(availableWallet.id);
+
+            // Get wallet information
+            const addressResponse = await walletKit.getAddress();
+            const networkResponse = await walletKit.getNetwork();
+
+            setCurrentNetwork(networkResponse.network);
+
+            const networkConfig = getNetworkConfig(networkResponse.network);
+
+            // Get wallet info from the kit's selected module
+            const selectedModule = walletKit['selectedModule'];
+            const connectedWallet = selectedModule
+              ? {
+                  id: selectedModule.productId,
+                  name: selectedModule.productName,
+                  type: 'unknown',
+                  icon: selectedModule.productIcon,
+                  url: selectedModule.productUrl,
+                }
+              : null;
+
+            setWalletData({
+              publicKey: addressResponse.address,
+              network: networkResponse.network,
+              isConnected: true,
+              networkPassphrase: networkResponse.networkPassphrase,
+              horizonUrl: networkConfig.horizonUrl,
+              isMainnet: networkConfig.isMainnet,
+              walletName: connectedWallet?.name || 'Unknown Wallet',
+              walletType: connectedWallet?.type || 'unknown',
+              walletId: connectedWallet?.id || 'unknown',
+              walletIcon: connectedWallet?.icon,
+              walletUrl: connectedWallet?.url,
+            });
+
+            console.log('✅ Wallet connected successfully via Stellar Wallets Kit:', {
+              address: addressResponse.address,
+              network: networkResponse.network,
+              wallet: connectedWallet?.name,
+            });
+            return;
+          } catch (kitError) {
+            console.log('Stellar Wallets Kit failed, trying fallback...', kitError);
           }
+        }
+
+        // Fallback to direct Freighter API
+        if (typeof window !== 'undefined' && (window as any).stellar) {
+          console.log('🔄 Using direct Freighter API fallback...');
+          const stellar = (window as any).stellar;
+
+          // Request access to Freighter
+          await stellar.requestAccess();
 
           // Get wallet information
-          const addressResponse = await walletKit.getAddress();
-          const networkResponse = await walletKit.getNetwork();
-          
-          setCurrentNetwork(networkResponse.network);
-          
-          const networkConfig = getNetworkConfig(networkResponse.network);
-          
-          // Get wallet info from the kit's selected module
-          const selectedModule = walletKit['selectedModule'];
-          const connectedWallet = selectedModule ? {
-            id: selectedModule.productId,
-            name: selectedModule.productName,
-            type: 'unknown',
-            icon: selectedModule.productIcon,
-            url: selectedModule.productUrl,
-          } : null;
-          
+          const publicKey = await stellar.getPublicKey();
+          const network = await stellar.getNetwork();
+
+          setCurrentNetwork(network);
+
+          const networkConfig = getNetworkConfig(network);
           setWalletData({
-            publicKey: addressResponse.address,
-            network: networkResponse.network,
+            publicKey,
+            network,
             isConnected: true,
-            networkPassphrase: networkResponse.networkPassphrase,
+            networkPassphrase: networkConfig.passphrase,
             horizonUrl: networkConfig.horizonUrl,
             isMainnet: networkConfig.isMainnet,
-            walletName: connectedWallet?.name || 'Unknown Wallet',
-            walletType: connectedWallet?.type || 'unknown',
-            walletId: connectedWallet?.id || 'unknown',
-            walletIcon: connectedWallet?.icon,
-            walletUrl: connectedWallet?.url,
+            walletName: 'Freighter',
+            walletType: 'freighter',
+            walletId: 'freighter',
           });
-          
-          console.log('✅ Wallet connected successfully via Stellar Wallets Kit:', { 
-            address: addressResponse.address, 
-            network: networkResponse.network,
-            wallet: connectedWallet?.name 
-          });
-          return;
-        } catch (kitError) {
-          console.log('Stellar Wallets Kit failed, trying fallback...', kitError);
-        }
-      }
 
-      // Fallback to direct Freighter API
-      if (typeof window !== 'undefined' && (window as any).stellar) {
-        console.log('🔄 Using direct Freighter API fallback...');
-        const stellar = (window as any).stellar;
-        
-        // Request access to Freighter
-        await stellar.requestAccess();
-        
-        // Get wallet information
-        const publicKey = await stellar.getPublicKey();
-        const network = await stellar.getNetwork();
-        
-        setCurrentNetwork(network);
-        
-        const networkConfig = getNetworkConfig(network);
-        setWalletData({
-          publicKey,
-          network,
-          isConnected: true,
-          networkPassphrase: networkConfig.passphrase,
-          horizonUrl: networkConfig.horizonUrl,
-          isMainnet: networkConfig.isMainnet,
-          walletName: 'Freighter',
-          walletType: 'freighter',
-          walletId: 'freighter',
-        });
-        
-        console.log('✅ Wallet connected successfully via Freighter fallback:', { publicKey, network });
-      } else {
-        throw new Error('No wallet available. Please install Freighter browser extension.');
+          console.log('✅ Wallet connected successfully via Freighter fallback:', {
+            publicKey,
+            network,
+          });
+        } else {
+          throw new Error('No wallet available. Please install Freighter browser extension.');
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        const error = new Error(`Failed to connect wallet: ${errorMessage}`);
+        setError(error);
+        console.error('Wallet connection error:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      const error = new Error(`Failed to connect wallet: ${errorMessage}`);
-      setError(error);
-      console.error('Wallet connection error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [walletKit]);
+    },
+    [walletKit]
+  );
 
   const connectManualAddress = useCallback(async (address: string) => {
     setIsLoading(true);
@@ -304,7 +318,7 @@ export const useWallet = (): UseWalletReturn => {
       // This is useful for testing or when users want to use a specific address
       const network = 'TESTNET'; // Default to testnet for manual addresses
       setCurrentNetwork(network);
-      
+
       const networkConfig = getNetworkConfig(network);
       setWalletData({
         publicKey: address,
@@ -317,7 +331,7 @@ export const useWallet = (): UseWalletReturn => {
         walletType: 'manual',
         walletId: 'manual',
       });
-      
+
       console.log('✅ Manual address connected successfully:', { address, network });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -350,12 +364,12 @@ export const useWallet = (): UseWalletReturn => {
 
       try {
         console.log('Signing transaction with wallet...');
-        
+
         const result = await walletKit.signTransaction(xdr, {
           networkPassphrase: walletData.networkPassphrase,
           address: walletData.publicKey,
         });
-        
+
         console.log('✅ Transaction signed successfully');
         return result;
       } catch (err) {
@@ -429,13 +443,13 @@ export const useWallet = (): UseWalletReturn => {
     if (!walletKit) {
       return [];
     }
-    
+
     try {
       const supportedWallets = await walletKit.getSupportedWallets();
       return supportedWallets;
     } catch (error) {
       console.error('Error getting available wallets:', error);
-    return [];
+      return [];
     }
   }, [walletKit]);
 
@@ -447,32 +461,38 @@ export const useWallet = (): UseWalletReturn => {
 
     try {
       console.log('🔍 Detecting network change...');
-      
+
       // Get current network from wallet kit
       const networkResponse = await walletKit.getNetwork();
-      
+
       if (networkResponse.network !== currentNetwork) {
         console.log(`🔄 Network changed from ${currentNetwork} to ${networkResponse.network}`);
         setCurrentNetwork(networkResponse.network);
-        
+
         // Update wallet data with new network info
         const networkConfig = getNetworkConfig(networkResponse.network);
-        setWalletData(prev => prev ? {
-          ...prev,
-          network: networkResponse.network,
-          networkPassphrase: networkResponse.networkPassphrase,
-          horizonUrl: networkConfig.horizonUrl,
-          isMainnet: networkConfig.isMainnet,
-        } : null);
-        
+        setWalletData(prev =>
+          prev
+            ? {
+                ...prev,
+                network: networkResponse.network,
+                networkPassphrase: networkResponse.networkPassphrase,
+                horizonUrl: networkConfig.horizonUrl,
+                isMainnet: networkConfig.isMainnet,
+              }
+            : null
+        );
+
         // Dispatch custom event for other components to listen
-        window.dispatchEvent(new CustomEvent('networkChanged', {
-          detail: {
-            network: networkResponse.network,
-            isMainnet: networkConfig.isMainnet,
-            horizonUrl: networkConfig.horizonUrl,
-          }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('networkChanged', {
+            detail: {
+              network: networkResponse.network,
+              isMainnet: networkConfig.isMainnet,
+              horizonUrl: networkConfig.horizonUrl,
+            },
+          })
+        );
       }
     } catch (err) {
       console.error('Error detecting network change:', err);
@@ -480,58 +500,63 @@ export const useWallet = (): UseWalletReturn => {
   }, [walletKit, walletData, currentNetwork]);
 
   // Network switching function
-  const switchNetwork = useCallback(async (network: 'TESTNET' | 'PUBLIC') => {
-    if (!walletKit || !walletData) {
-      throw new Error('No wallet connected');
-    }
+  const switchNetwork = useCallback(
+    async (network: 'TESTNET' | 'PUBLIC') => {
+      if (!walletKit || !walletData) {
+        throw new Error('No wallet connected');
+      }
 
-    try {
-      console.log(`🔄 Switching to ${network} network...`);
-      
-      // Update the wallet kit network
-      const walletNetwork = network === 'TESTNET' ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC;
-      
-      // Create new kit instance with updated network
-      const modules = [
-        new FreighterModule(),
-        new AlbedoModule(),
-        new RabetModule(),
-        new LobstrModule(),
-      ];
-      
-      const newKit = new StellarWalletsKit({
-        network: walletNetwork,
-        modules,
-      });
-      
-      setWalletKit(newKit);
-      setCurrentNetwork(network);
-      
-      // Update wallet data
-      const networkConfig = getNetworkConfig(network);
-      setWalletData({
-        ...walletData,
-        network,
-        networkPassphrase: networkConfig.passphrase,
-        horizonUrl: networkConfig.horizonUrl,
-        isMainnet: networkConfig.isMainnet,
-      });
-      
-      // Dispatch custom event
-      window.dispatchEvent(new CustomEvent('networkChanged', {
-        detail: {
+      try {
+        console.log(`🔄 Switching to ${network} network...`);
+
+        // Update the wallet kit network
+        const walletNetwork = network === 'TESTNET' ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC;
+
+        // Create new kit instance with updated network
+        const modules = [
+          new FreighterModule(),
+          new AlbedoModule(),
+          new RabetModule(),
+          new LobstrModule(),
+        ];
+
+        const newKit = new StellarWalletsKit({
+          network: walletNetwork,
+          modules,
+        });
+
+        setWalletKit(newKit);
+        setCurrentNetwork(network);
+
+        // Update wallet data
+        const networkConfig = getNetworkConfig(network);
+        setWalletData({
+          ...walletData,
           network,
-          isMainnet: networkConfig.isMainnet,
+          networkPassphrase: networkConfig.passphrase,
           horizonUrl: networkConfig.horizonUrl,
-        }
-      }));
-      
-      console.log(`✅ Successfully switched to ${network} network`);
-    } catch (err) {
-      console.error('Error switching network:', err);
-      throw err;
-    }
-  }, [walletKit, walletData]);
+          isMainnet: networkConfig.isMainnet,
+        });
+
+        // Dispatch custom event
+        window.dispatchEvent(
+          new CustomEvent('networkChanged', {
+            detail: {
+              network,
+              isMainnet: networkConfig.isMainnet,
+              horizonUrl: networkConfig.horizonUrl,
+            },
+          })
+        );
+
+        console.log(`✅ Successfully switched to ${network} network`);
+      } catch (err) {
+        console.error('Error switching network:', err);
+        throw err;
+      }
+    },
+    [walletKit, walletData]
+  );
 
   // Open wallet modal function
   const openWalletModal = useCallback(async () => {
@@ -573,7 +598,7 @@ export const useWallet = (): UseWalletReturn => {
 
     // Listen for Freighter network changes
     window.addEventListener('freighter:networkChanged', handleNetworkChange);
-    
+
     // Also listen for our custom network change events
     window.addEventListener('networkChanged', handleNetworkChange);
 

@@ -35,10 +35,7 @@ export const Header = () => {
           <div className='flex items-center space-x-4'>
             {/* Network Indicator */}
             <div className='hidden sm:flex items-center'>
-              <NetworkIndicator 
-                className="scale-90" 
-                showSwitchButton={true}
-              />
+              <NetworkIndicator className='scale-90' showSwitchButton={true} />
             </div>
 
             {/* User Dropdown */}

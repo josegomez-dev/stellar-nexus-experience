@@ -91,9 +91,18 @@ export const HelloMilestoneDemo = () => {
         }, 100);
       }
     } else {
-      // Demo completed
-      setIsScrollingToNext(false);
-      setCurrentHighlightedStep(null);
+      // Demo completed - scroll to completion section
+      setTimeout(() => {
+        const completionSection = document.querySelector('#demo-completion-section');
+        if (completionSection) {
+          completionSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+        setIsScrollingToNext(false);
+        setCurrentHighlightedStep(null);
+      }, 1000);
     }
   };
 
@@ -584,23 +593,15 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setCurrentStep(5);
 
+      // Scroll to completion section
+      setTimeout(() => {
+        scrollToNextStep('release');
+      }, 1000);
+
       // Demo completed - show celebration animation
       setTimeout(() => {
         setShowConfetti(true);
-        setIsScrollingToNext(false);
-        setCurrentHighlightedStep(null);
-
-        // Scroll to top to show completion
-        setTimeout(() => {
-          const demoContainer = document.querySelector('.demo-container');
-          if (demoContainer) {
-            demoContainer.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-            });
-          }
-        }, 500);
-      }, 1000);
+      }, 2000);
     } catch (error) {
       const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -806,7 +807,10 @@ export const HelloMilestoneDemo = () => {
 
         {/* Success Message */}
         {currentStep === 5 && (
-          <div className='mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center'>
+          <div
+            id='demo-completion-section'
+            className='mb-8 p-6 bg-success-500/20 border border-success-400/30 rounded-lg text-center'
+          >
             <div className='flex justify-center mb-4'>
               <Image
                 src='/images/logo/logoicon.png'

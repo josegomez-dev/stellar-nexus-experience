@@ -17,7 +17,15 @@ interface WalletSidebarProps {
 }
 
 export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
-  const { walletData, isConnected, connect, connectManualAddress, disconnect, isFreighterAvailable, openWalletModal } = useGlobalWallet();
+  const {
+    walletData,
+    isConnected,
+    connect,
+    connectManualAddress,
+    disconnect,
+    isFreighterAvailable,
+    openWalletModal,
+  } = useGlobalWallet();
   const { getRecentTransactions, transactions } = useTransactionHistory();
   const { addToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -564,10 +572,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   {isExpanded && (
                     <div className='animate-fadeIn'>
                       <p className='text-xs text-white/60 mb-2'>Network</p>
-                      <NetworkIndicator 
-                        className="w-full" 
-                        showSwitchButton={true}
-                      />
+                      <NetworkIndicator className='w-full' showSwitchButton={true} />
                     </div>
                   )}
                 </div>
@@ -908,7 +913,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                             await connect(); // Connect to Freighter
                           } else {
                             // Just open sidebar for manual input
-                            console.log('Freighter not available, opening sidebar for manual input');
+                            console.log(
+                              'Freighter not available, opening sidebar for manual input'
+                            );
                           }
                         } finally {
                           setIsConnecting(false);
@@ -919,7 +926,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     >
                       {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
                     </button>
-                    
+
                     <button
                       onClick={async () => {
                         setIsConnecting(true);
