@@ -89,15 +89,15 @@ module.exports = {
       },
       animation: {
         // Only keeping animations that are actually used
-        'fadeIn': 'fadeIn 0.3s ease-out',
-        'slideInUp': 'slideInUp 0.6s ease-out',
-        'fadeInUp': 'fadeInUp 0.6s ease-out forwards',
-        'float': 'float 3s ease-in-out infinite',
-        'shimmer': 'shimmer 2s infinite',
-        'epicGlow': 'epicGlow 3s ease-in-out infinite',
-        'epicTextReveal': 'epicTextReveal 2s ease-out',
-        'epicFloatingParticles': 'epicFloatingParticles 3s ease-in-out infinite',
-        'rotatingNexus': 'rotatingNexus 2s linear infinite',
+        fadeIn: 'fadeIn 0.3s ease-out',
+        slideInUp: 'slideInUp 0.6s ease-out',
+        fadeInUp: 'fadeInUp 0.6s ease-out forwards',
+        float: 'float 3s ease-in-out infinite',
+        shimmer: 'shimmer 2s infinite',
+        epicGlow: 'epicGlow 3s ease-in-out infinite',
+        epicTextReveal: 'epicTextReveal 2s ease-out',
+        epicFloatingParticles: 'epicFloatingParticles 3s ease-in-out infinite',
+        rotatingNexus: 'rotatingNexus 2s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -122,10 +122,12 @@ module.exports = {
         },
         epicGlow: {
           '0%, 100%': {
-            textShadow: '0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9, 0 0 20px #0ea5e9, 0 0 25px #0ea5e9, 0 0 30px #0ea5e9',
+            textShadow:
+              '0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9, 0 0 20px #0ea5e9, 0 0 25px #0ea5e9, 0 0 30px #0ea5e9',
           },
           '50%': {
-            textShadow: '0 0 10px #0ea5e9, 0 0 20px #0ea5e9, 0 0 30px #0ea5e9, 0 0 40px #0ea5e9, 0 0 50px #0ea5e9, 0 0 60px #0ea5e9',
+            textShadow:
+              '0 0 10px #0ea5e9, 0 0 20px #0ea5e9, 0 0 30px #0ea5e9, 0 0 40px #0ea5e9, 0 0 50px #0ea5e9, 0 0 60px #0ea5e9',
           },
         },
         epicTextReveal: {
@@ -145,32 +147,31 @@ module.exports = {
         },
       },
       spacing: {
-        'xs': '0.25rem',
-        'sm': '0.5rem',
-        'md': '1rem',
-        'lg': '1.5rem',
-        'xl': '2rem',
+        xs: '0.25rem',
+        sm: '0.5rem',
+        md: '1rem',
+        lg: '1.5rem',
+        xl: '2rem',
         '2xl': '3rem',
         '3xl': '4rem',
         '4xl': '6rem',
       },
       borderRadius: {
-        'sm': '0.125rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
-        'xl': '0.75rem',
+        sm: '0.125rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
         '2xl': '1rem',
         '3xl': '1.5rem',
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(14, 165, 233, 0.5)',
-        'epic': '0 0 30px rgba(14, 165, 233, 0.8)',
+        glow: '0 0 20px rgba(14, 165, 233, 0.5)',
+        epic: '0 0 30px rgba(14, 165, 233, 0.8)',
       },
       zIndex: {
-        'epic': '9999',
+        epic: '9999',
       },
     },
   },
   plugins: [],
-}
-
+};

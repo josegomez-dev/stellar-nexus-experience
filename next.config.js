@@ -4,7 +4,6 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   generateEtags: false,
-}
+};
 
-module.exports = nextConfig
-
+module.exports = nextConfig;
