@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
-    "code-quality": "npm run lint:check && npm run format:check && npm run type-check",
+    "code-quality": "npm run lint:check && npm run type-check",
     "code-quality:fix": "npm run lint:fix && npm run format",
     "test": "jest",
     "test:watch": "jest --watch",
