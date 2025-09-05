@@ -79,6 +79,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "Node.js version:"
+          node --version
+          echo "npm version:"
+          npm --version
           echo "Installing dependencies..."
           npm ci
           echo "Dependencies installed successfully"
@@ -98,6 +102,31 @@ jobs:
           NEXT_PUBLIC_APP_NAME: Stellar Nexus
           NEXT_PUBLIC_APP_VERSION: 0.1.0
           NODE_ENV: production
+          NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE: 4
+          NEXT_PUBLIC_DEFAULT_ESCROW_DEADLINE_DAYS: 7
+          NEXT_PUBLIC_DEBUG_MODE: false
+          NEXT_PUBLIC_ESCROW_FEATURES_ENABLED: true
+          NEXT_PUBLIC_WALLET_FEATURES_ENABLED: true
+          NEXT_PUBLIC_DEMO_FEATURES_ENABLED: true
+          NEXT_PUBLIC_AI_FEATURES_ENABLED: true
+          NEXT_PUBLIC_ANIMATIONS_ENABLED: true
+          NEXT_PUBLIC_GLASSMORPHISM_ENABLED: true
+          NEXT_PUBLIC_GRADIENT_EFFECTS_ENABLED: true
+          NEXT_PUBLIC_LAZY_LOADING_ENABLED: true
+          NEXT_PUBLIC_IMAGE_OPTIMIZATION_ENABLED: true
+          NEXT_PUBLIC_CODE_SPLITTING_ENABLED: true
+          NEXT_PUBLIC_CONTENT_SECURITY_POLICY_ENABLED: true
+          NEXT_PUBLIC_XSS_PROTECTION_ENABLED: true
+          NEXT_PUBLIC_FRAME_OPTIONS_ENABLED: true
+          NEXT_PUBLIC_ANALYTICS_ENABLED: false
+          NEXT_PUBLIC_ERROR_REPORTING_ENABLED: false
+          NEXT_PUBLIC_AI_ASSISTANT_ENABLED: true
+          NEXT_PUBLIC_AI_ASSISTANT_NAME: NEXUS PRIME
+          NEXT_PUBLIC_AI_ASSISTANT_VOICE_ENABLED: true
+          NEXT_PUBLIC_DEMO_MODE_ENABLED: true
+          NEXT_PUBLIC_DEMO_DATA_ENABLED: true
+          NEXT_PUBLIC_FREIGHTER_APP_ID: stellar-nexus-experience
+          NEXT_PUBLIC_ALBEDO_APP_NAME: Stellar Nexus Experience
         run: |
           echo "Environment variables set:"
           echo "NODE_ENV: $NODE_ENV"
