@@ -83,8 +83,16 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: List build directory contents
+        run: |
+          echo "Checking if .next directory exists:"
+          ls -la .next/ || echo ".next directory not found"
+          echo "Checking if build was successful:"
+          ls -la .next/static/ || echo "static directory not found"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: build-files
           path: .next/
@@ -114,6 +122,13 @@ jobs:
           name: build-files
           path: .next/
 
+      - name: Verify build artifacts
+        run: |
+          echo "Checking downloaded artifacts:"
+          ls -la .next/ || echo ".next directory not found after download"
+          echo "Checking if static files exist:"
+          ls -la .next/static/ || echo "static directory not found"
+
       - name: Start application
         run: npm start &
 
@@ -131,7 +146,7 @@ jobs:
 
       - name: Upload Cypress screenshots
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && hashFiles('cypress/screenshots/**/*') != ''
         with:
           name: cypress-screenshots
           path: cypress/screenshots/
@@ -139,7 +154,7 @@ jobs:
 
       - name: Upload Cypress videos
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && hashFiles('cypress/videos/**/*') != ''
         with:
           name: cypress-videos
           path: cypress/videos/
