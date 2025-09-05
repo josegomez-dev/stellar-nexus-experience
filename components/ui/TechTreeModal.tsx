@@ -244,11 +244,10 @@ export const TechTreeModal = ({ isOpen, onClose }: TechTreeModalProps) => {
               <Image
                 src='/images/logo/logoicon.png'
                 alt='Trustless Work'
-                width={32}
-                height={32}
-                className='w-8 h-8'
+                width={50}
+                height={50}
               />
-              <h2 className='text-2xl font-bold text-white'>🌳 Trustless Work Tech Tree</h2>
+              <h2 className='text-2xl font-bold text-white'>Trustless Work Tech Tree</h2>
             </div>
             <button
               onClick={onClose}
@@ -272,7 +271,7 @@ export const TechTreeModal = ({ isOpen, onClose }: TechTreeModalProps) => {
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
-                🌳 Interactive Tech Tree
+                🌳 Trustless Work Tech Tree
               </button>
               <button
                 onClick={() => setActiveView('diagram')}

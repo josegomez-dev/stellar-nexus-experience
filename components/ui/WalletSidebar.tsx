@@ -100,6 +100,28 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     }
   }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable]);
 
+  // Track if user manually opened the sidebar (to prevent auto-close conflicts)
+  const [userOpened, setUserOpened] = useState(false);
+  
+  // Auto-close sidebar when wallet is disconnected (but allow manual opening)
+  useEffect(() => {
+    if (!isConnected && isOpen && !userOpened) {
+      // Add a small delay to prevent race conditions with button clicks
+      const timer = setTimeout(() => {
+        onToggle();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, isOpen, userOpened, onToggle]);
+
+  // Reset userOpened when sidebar closes
+  useEffect(() => {
+    if (!isOpen) {
+      setUserOpened(false);
+    }
+  }, [isOpen]);
+
   // Open mini games store in new window
   const redirectToNexusStartersLiveApp = () => {
     const width = 1200;
@@ -564,6 +586,17 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   {isExpanded && <span className='animate-fadeIn'>Explore Nexus Starters</span>}
                 </button>
 
+                <button
+                  onClick={redirectToNexusStartersLiveApp}
+                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
+                    isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                  }`}
+                  title={!isExpanded ? 'Mini Games Store' : undefined}
+                >
+                  <span className='text-lg'>📚</span>
+                  {isExpanded && <span className='animate-fadeIn'>Nexus Documentation</span>}
+                </button>
+
                 {/* Navigation Links */}
                 <div
                   className={`${
@@ -591,22 +624,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
                       isExpanded ? 'px-3 py-2' : 'px-2 py-2'
                     }`}
-                    title={!isExpanded ? 'Store' : undefined}
-                  >
-                    <Image
-                      src='/images/icons/store.png'
-                      alt='Store'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5'
-                    />
-                  </a>
-
-                  <a
-                    href='/mini-games/web3-basics-adventure'
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                    }`}
                     title={!isExpanded ? 'Console' : undefined}
                   >
                     <Image
@@ -618,21 +635,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     />
                   </a>
 
-                  <a
-                    href='/docs'
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                    }`}
-                    title={!isExpanded ? 'Docs' : undefined}
-                  >
-                    <Image
-                      src='/images/icons/docs.png'
-                      alt='Docs'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5'
-                    />
-                  </a>
                 </div>
 
                 <button
@@ -765,111 +767,98 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
         </div>
       </div>
 
-      {/* Floating Wallet Control Buttons */}
+      {/* Floating Wallet Control Buttons - Always show, different styling based on connection */}
       <div className='fixed top-20 right-4 z-30 flex flex-col space-y-3'>
-        {/* Open Wallet Button */}
-        {!isOpen && (
-          <>
-            {/* Mobile toggle button */}
-            <button
-              onClick={() => {
-                onToggle();
-                // Auto-expand the sidebar when opening
-                setTimeout(() => setIsExpanded(true), 100);
-              }}
-              className='p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden cursor-pointer relative group'
-              title='Open Wallet'
-            >
-              <span className='text-xl'>🔐</span>
-              {!isConnected && (
-                <div className='absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg'></div>
-              )}
-              {/* Hover indicator */}
-              <div className='absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-            </button>
+          {/* Open Wallet Button */}
+          {!isOpen && (
+            <>
+              {/* Mobile toggle button */}
+              <button
+                onClick={() => {
+                  setUserOpened(true);
+                  onToggle();
+                  // Auto-expand the sidebar when opening
+                  setTimeout(() => setIsExpanded(true), 100);
+                }}
+                className={`p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden cursor-pointer relative group ${
+                  isConnected 
+                    ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white' 
+                    : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
+                }`}
+                title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
+              >
+                <span className='text-xl'>{isConnected ? '🔐' : '🔌'}</span>
+                {/* Hover indicator */}
+                <div className='absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+              </button>
 
-            {/* Desktop toggle button */}
-            <button
-              onClick={() => {
-                onToggle();
-                // Auto-expand the sidebar when opening
-                setTimeout(() => setIsExpanded(true), 100);
-              }}
-              className='p-4 bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block cursor-pointer relative group'
-              title='Open Wallet'
-            >
-              <div className='flex items-center space-x-3'>
-                <span className='text-xl'>🔐</span>
-                <span className='text-sm font-medium'>Wallet</span>
-              </div>
-              {!isConnected && (
-                <div className='absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg'></div>
-              )}
-              {/* Hover indicator */}
-              <div className='absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-            </button>
-          </>
-        )}
+              {/* Desktop toggle button */}
+              <button
+                onClick={() => {
+                  setUserOpened(true);
+                  onToggle();
+                  // Auto-expand the sidebar when opening
+                  setTimeout(() => setIsExpanded(true), 100);
+                }}
+                className={`p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block cursor-pointer relative group ${
+                  isConnected 
+                    ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white' 
+                    : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
+                }`}
+                title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
+              >
+                <div className='flex items-center space-x-3'>
+                  <span className='text-xl'>{isConnected ? '🔐' : '🔌'}</span>
+                  <span className='text-sm font-medium'>{isConnected ? 'Wallet' : 'Connect'}</span>
+                </div>
+                {/* Hover indicator */}
+                <div className='absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+              </button>
+            </>
+          )}
 
-        {/* Navigation Buttons - Matching Main Menu */}
-        {!isOpen && (
-          <>
-            {/* Demos Button */}
-            <a
-              href='/demos'
-              className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-              title='Demos'
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/demos.png'
-                  alt='Demos'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 group-hover:animate-bounce'
-                />
-                <span className='text-sm font-medium hidden lg:block'>Demos</span>
-              </div>
-            </a>
+          {/* Navigation Buttons - Matching Main Menu - Only show when connected */}
+          {!isOpen && isConnected && (
+            <>
+              {/* Demos Button */}
+              <a
+                href='/demos'
+                className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+                title='Demos'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/demos.png'
+                    alt='Demos'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5 group-hover:animate-bounce'
+                  />
+                  <span className='text-sm font-medium hidden lg:block'>Demos</span>
+                </div>
+              </a>
 
-            {/* Store Button */}
-            <a
-              href='/mini-games'
-              className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-              title='Store'
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/console.png'
-                  alt='Store'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 group-hover:animate-bounce'
-                />
-                <span className='text-sm font-medium hidden lg:block'>Store</span>
-              </div>
-            </a>
+              {/* Store Button */}
+              <a
+                href='/mini-games'
+                className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+                title='Store'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/console.png'
+                    alt='Store'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5 group-hover:animate-bounce'
+                  />
+                  <span className='text-sm font-medium hidden lg:block'>Store</span>
+                </div>
+              </a>
 
-            {/* Docs Button */}
-            <a
-              href='/docs'
-              className='p-3 bg-gradient-to-br from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-              title='Docs'
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/docs.png'
-                  alt='Docs'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 group-hover:animate-bounce'
-                />
-                <span className='text-sm font-medium hidden lg:block'>Docs</span>
-              </div>
-            </a>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
 
       {/* Wallet Connection Banner */}
       {showBanner && !isConnected && !isConnecting && (
@@ -909,6 +898,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   <button
                     onClick={async () => {
                       setIsConnecting(true);
+                      setUserOpened(true); // Mark as user-initiated
                       onToggle(); // Open the sidebar
                       // Small delay to ensure sidebar opens smoothly before expanding
                       setTimeout(() => {
@@ -929,12 +919,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     className='w-full sm:w-auto px-6 py-2.5 bg-white text-amber-600 font-bold rounded-lg hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
                   >
                     {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
-                  </button>
-                  <button
-                    onClick={onToggle}
-                    className='hidden sm:block px-5 py-2.5 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-all duration-300 border-2 border-white/30 hover:border-white/50'
-                  >
-                    🪟 Open Wallet
                   </button>
                 </div>
               </div>

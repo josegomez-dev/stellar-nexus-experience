@@ -581,20 +581,39 @@ export const OnboardingOverlay = ({
         {/* Demo Tabs */}
         <div className='bg-white/5 p-4 border-b border-white/10'>
           <div className='flex flex-wrap gap-2'>
-            {demoTabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`px-4 py-2 rounded-lg border transition-all duration-300 flex items-center space-x-2 ${
-                  activeTab === tab.id
-                    ? `bg-gradient-to-r ${tab.color} text-white border-white/50 shadow-lg`
-                    : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                }`}
-              >
-                <span className='text-lg'>{tab.icon}</span>
-                <span className='font-medium'>{tab.title}</span>
-              </button>
-            ))}
+            {demoTabs.map(tab => {
+              const isFirstDemo = tab.id === 'hello-milestone';
+              const isDisabled = !isFirstDemo;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => !isDisabled && handleTabChange(tab.id)}
+                  disabled={isDisabled}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-300 flex items-center space-x-2 relative ${
+                    isDisabled
+                      ? 'bg-gray-600/20 border-gray-600/30 text-gray-400 cursor-not-allowed blur-sm opacity-50'
+                      : activeTab === tab.id
+                      ? `bg-gradient-to-r ${tab.color} text-white border-white/50 shadow-lg`
+                      : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                  }`}
+                  title={isDisabled ? 'Complete the first demo to unlock this tutorial' : ''}
+                >
+                  <span className='text-lg'>{tab.icon}</span>
+                  <span className='font-medium'>{tab.title}</span>
+                  {isDisabled && (
+                    <span className='absolute -top-1 -right-1 text-xs bg-gray-600 text-gray-300 px-1 rounded-full'>
+                      🔒
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className='mt-2 text-center'>
+            <p className='text-xs text-gray-400'>
+              💡 Complete "Baby Steps" to unlock advanced tutorials
+            </p>
           </div>
         </div>
 

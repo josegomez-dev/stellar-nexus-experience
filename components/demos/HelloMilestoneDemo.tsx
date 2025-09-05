@@ -40,6 +40,57 @@ export const HelloMilestoneDemo = () => {
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Scroll animation state
+  const [isScrollingToNext, setIsScrollingToNext] = useState(false);
+  const [currentHighlightedStep, setCurrentHighlightedStep] = useState<string | null>(null);
+
+  // Scroll animation function
+  const scrollToNextStep = (completedStepId: string) => {
+    setIsScrollingToNext(true);
+    
+    // Find the next step to highlight
+    const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
+    const currentIndex = stepOrder.indexOf(completedStepId);
+    const nextStepId = stepOrder[currentIndex + 1];
+    
+    if (nextStepId) {
+      setCurrentHighlightedStep(nextStepId);
+      
+      // Find the next step element
+      const nextStepElement = document.querySelector(`[data-step-id="${nextStepId}"]`);
+      
+      if (nextStepElement) {
+        // Add pulsing animation to the next step
+        nextStepElement.classList.add('animate-pulse', 'ring-4', 'ring-brand-400/50');
+        
+        // Scroll to the next step with smooth animation
+        setTimeout(() => {
+          nextStepElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
+          
+          // Add a glowing effect
+          setTimeout(() => {
+            nextStepElement.classList.add('shadow-2xl', 'shadow-brand-500/30');
+          }, 500);
+          
+          // Remove highlighting after 3 seconds
+          setTimeout(() => {
+            nextStepElement.classList.remove('animate-pulse', 'ring-4', 'ring-brand-400/50', 'shadow-2xl', 'shadow-brand-500/30');
+            setCurrentHighlightedStep(null);
+            setIsScrollingToNext(false);
+          }, 3000);
+        }, 100);
+      }
+    } else {
+      // Demo completed
+      setIsScrollingToNext(false);
+      setCurrentHighlightedStep(null);
+    }
+  };
+
   // Get transactions for this demo
 
   // Hooks
@@ -188,6 +239,11 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setCurrentStep(1);
       setDemoStarted(true);
+      
+      // Scroll to next step after a short delay
+      setTimeout(() => {
+        scrollToNextStep('initialize');
+      }, 1000);
     } catch (error) {
       const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -267,6 +323,11 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(2);
+      
+      // Scroll to next step after a short delay
+      setTimeout(() => {
+        scrollToNextStep('fund');
+      }, 1000);
     } catch (error) {
       const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -348,6 +409,11 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setMilestoneStatus('completed');
       setCurrentStep(3);
+      
+      // Scroll to next step after a short delay
+      setTimeout(() => {
+        scrollToNextStep('complete');
+      }, 1000);
     } catch (error) {
       const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -427,6 +493,11 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(4);
+      
+      // Scroll to next step after a short delay
+      setTimeout(() => {
+        scrollToNextStep('approve');
+      }, 1000);
     } catch (error) {
       const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -506,6 +577,24 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(5);
+      
+      // Demo completed - show celebration animation
+      setTimeout(() => {
+        setShowConfetti(true);
+        setIsScrollingToNext(false);
+        setCurrentHighlightedStep(null);
+        
+        // Scroll to top to show completion
+        setTimeout(() => {
+          const demoContainer = document.querySelector('.demo-container');
+          if (demoContainer) {
+            demoContainer.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 500);
+      }, 1000);
     } catch (error) {
       const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -571,7 +660,7 @@ export const HelloMilestoneDemo = () => {
   };
 
   return (
-    <div className='max-w-4xl mx-auto'>
+    <div className='max-w-4xl mx-auto demo-container'>
       <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 backdrop-blur-sm border border-brand-400/30 rounded-xl shadow-2xl p-8'>
         <div className='text-center mb-8'>
           <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-300 mb-4'>
@@ -602,14 +691,23 @@ export const HelloMilestoneDemo = () => {
         <div className='mb-8'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-xl font-semibold text-white'>Demo Progress</h3>
-            {demoStarted && (
-              <button
-                onClick={resetDemo}
-                className='px-4 py-2 bg-danger-500/20 hover:bg-danger-500/30 border border-danger-400/30 rounded-lg text-danger-300 hover:text-danger-200 transition-colors'
-              >
-                🔄 Reset Demo
-              </button>
-            )}
+            <div className='flex items-center space-x-4'>
+              {/* Scroll Animation Indicator */}
+              {isScrollingToNext && (
+                <div className='flex items-center space-x-2 bg-brand-500/20 border border-brand-400/30 rounded-lg px-3 py-2'>
+                  <div className='w-2 h-2 bg-brand-400 rounded-full animate-pulse'></div>
+                  <span className='text-brand-300 text-sm font-medium'>Guiding to next step...</span>
+                </div>
+              )}
+              {demoStarted && (
+                <button
+                  onClick={resetDemo}
+                  className='px-4 py-2 bg-danger-500/20 hover:bg-danger-500/30 border border-danger-400/30 rounded-lg text-danger-300 hover:text-danger-200 transition-colors'
+                >
+                  🔄 Reset Demo
+                </button>
+              )}
+            </div>
           </div>
 
           <div className='space-y-4'>

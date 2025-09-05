@@ -247,9 +247,37 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   };
 
   return (
-    <div className='fixed bottom-6 left-6 z-50'>
-      {/* Character Avatar */}
-      <div className='relative group'>
+    <>
+      {/* Speaking Character - Appears from left side when speaking */}
+      {walletConnected && isSpeaking && (
+        <div className='fixed bottom-6 left-6 z-100 animate-slideInLeft' style={{ zIndex: 1000, marginLeft: '80px', marginBottom: '-50px' }}>
+          <div className='relative'>
+            {/* Character Image */}
+            <Image
+              src='/images/character/character.png'
+              alt='NEXUS PRIME Speaking'
+              width={200}
+              height={200}
+              className='object-contain drop-shadow-2xl'
+            />
+            {/* Speech bubble effect */}
+            <div className='absolute -top-8 left-1/2 transform -translate-x-1/2'>
+              <div className='bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 border border-white/30'>
+                <div className='flex space-x-1'>
+                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping'></div>
+                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping' style={{ animationDelay: '0.2s' }}></div>
+                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping' style={{ animationDelay: '0.4s' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className='fixed bottom-6 left-6 z-50'>
+        {/* Character Avatar - Only show when wallet is connected */}
+        {walletConnected && (
+          <div className='relative group'>
         {/* Character Image/Icon */}
         <div
           className='w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative'
@@ -580,7 +608,9 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
+    </>
   );
 };

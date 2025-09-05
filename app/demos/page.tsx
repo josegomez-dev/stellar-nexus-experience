@@ -7,10 +7,12 @@ import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import { EscrowProvider } from '@/contexts/EscrowContext';
 import { WalletProvider } from '@/contexts/WalletContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Providers } from '@/components/Providers';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo';
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
@@ -19,6 +21,9 @@ import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/ImmersiveDemoModal';
 import { TechTreeModal } from '@/components/ui/TechTreeModal';
 import { ToastContainer } from '@/components/ui/Toast';
+import { AuthBanner } from '@/components/ui/AuthBanner';
+import { AuthModal } from '@/components/ui/AuthModal';
+import { UserProfile } from '@/components/ui/UserProfile';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
 
@@ -36,10 +41,12 @@ const DemoSelector = ({
   activeDemo,
   setActiveDemo,
   setShowImmersiveDemo,
+  isConnected,
 }: {
   activeDemo: string;
   setActiveDemo: (demo: string) => void;
   setShowImmersiveDemo: (show: boolean) => void;
+  isConnected: boolean;
 }) => {
   // Clap system with localStorage persistence
   const [demoClaps, setDemoClaps] = useState<Record<string, number>>(() => {
@@ -335,20 +342,33 @@ const DemoSelector = ({
                       <button
                         onClick={e => {
                           e.stopPropagation();
-                          setShowImmersiveDemo(true);
+                          if (isConnected) {
+                            setShowImmersiveDemo(true);
+                          }
                         }}
-                        className='relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform hover:scale-110 hover:rotate-1 shadow-2xl hover:shadow-brand-500/50 border-2 bg-gradient-to-r from-brand-500 via-accent-500 to-brand-400 hover:from-brand-600 hover:via-accent-600 hover:to-brand-500 text-white border-white/30 hover:border-white/60 text-lg'
+                        disabled={!isConnected}
+                        className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform shadow-2xl border-2 text-lg ${
+                          isConnected 
+                            ? 'hover:scale-110 hover:rotate-1 hover:shadow-brand-500/50 bg-gradient-to-r from-brand-500 via-accent-500 to-brand-400 hover:from-brand-600 hover:via-accent-600 hover:to-brand-500 text-white border-white/30 hover:border-white/60' 
+                            : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed blur-sm opacity-60'
+                        }`}
                       >
                         {/* Button Content */}
                         <div className='flex items-center'>
                           <div className='flex flex-col'>
-                            <span className='text-lg font-bold'>LAUNCH DEMO</span>
-                            <span className='text-xs opacity-80'>Prepare for AWESOMENESS!</span>
+                            <span className='text-lg font-bold'>
+                              {isConnected ? 'LAUNCH DEMO' : 'CONNECT WALLET'}
+                            </span>
+                            <span className='text-xs opacity-80'>
+                              {isConnected ? 'Prepare for AWESOMENESS!' : 'Required to launch demo'}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Hover Effects */}
-                        <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                        {/* Hover Effects - Only show when connected */}
+                        {isConnected && (
+                          <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                        )}
                       </button>
 
                       {/* Rotating Nexus Logo */}
@@ -383,6 +403,7 @@ const DemoSelector = ({
 
 function DemosPageContent() {
   const { isConnected } = useGlobalWallet();
+  const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
@@ -399,6 +420,11 @@ function DemosPageContent() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
   const [showTechTree, setShowTechTree] = useState(false);
+  
+  // Authentication modals
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   // Preloader effect - only on first load
   useEffect(() => {
@@ -444,17 +470,44 @@ function DemosPageContent() {
       }
     };
 
+    const handleOpenUserProfile = () => {
+      setShowUserProfile(true);
+    };
+
     window.addEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
+    window.addEventListener('openUserProfile', handleOpenUserProfile);
     return () => {
       window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
+      window.removeEventListener('openUserProfile', handleOpenUserProfile);
     };
   }, []);
+
+  // Authentication handlers
+  const handleSignUpClick = () => {
+    setAuthModalMode('signup');
+    setShowAuthModal(true);
+  };
+
+  const handleSignInClick = () => {
+    setAuthModalMode('signin');
+    setShowAuthModal(true);
+  };
+
+  const handleUserProfileClick = () => {
+    setShowUserProfile(true);
+  };
 
   return (
     <EscrowProvider>
       <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
         {/* Header */}
         <Header />
+
+        {/* Authentication Banner */}
+        <AuthBanner 
+          onSignUpClick={handleSignUpClick}
+          onSignInClick={handleSignInClick}
+        />
 
         {/* Animated background elements */}
         <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
@@ -630,7 +683,7 @@ function DemosPageContent() {
                 <br />
 
                 <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
-                  Master the art of trustless work with our hilarious demo suite on Stellar
+                  Master the art of trustless work with our demo suite on Stellar
                   blockchain
                 </p>
 
@@ -654,12 +707,46 @@ function DemosPageContent() {
                   </button>
 
                   <button
-                    onClick={() => setShowTechTree(true)}
-                    className='px-8 py-4 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                    onClick={() => isConnected && setShowTechTree(true)}
+                    disabled={!isConnected}
+                    className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 ${
+                      isConnected 
+                        ? 'bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40' 
+                        : 'bg-gradient-to-r from-gray-600/20 to-gray-700/20 text-gray-400 border-gray-600/30 cursor-not-allowed blur-[0.5px] opacity-70'
+                    }`}
+                    title={!isConnected ? 'Connect wallet to explore the tech tree' : ''}
                   >
-                    <span>Tech Tree Explorer</span>
-                    <span className='text-xl'>🌳</span>
+                    <span>Trustless Work Tech Tree</span>
+                    <span className='text-xl'>
+                      <Image src='/images/icons/demos.png' alt='Trustless Work Tech Tree' width={50} height={20} />
+                    </span>
+                    {!isConnected && (
+                      <span className='absolute -top-1 -right-1 text-xs bg-gray-600 text-gray-300 px-1 rounded-full'>
+                        🔒
+                      </span>
+                    )}
                   </button>
+
+                  <a
+                    href={isConnected ? '/mini-games' : '#'}
+                    onClick={(e) => !isConnected && e.preventDefault()}
+                    className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 relative ${
+                      isConnected 
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40' 
+                        : 'bg-gradient-to-r from-gray-600/20 to-gray-700/20 text-gray-400 border-gray-600/30 cursor-not-allowed blur-[0.5px] opacity-70'
+                    }`}
+                    title={!isConnected ? 'Connect wallet to access the Web3 playground' : ''}
+                  >
+                    <span>Nexus Web3 Playground</span>
+                    <span className='text-xl'>
+                      <Image src='/images/icons/console.png' alt='Nexus Web3 Playground' width={50} height={20} />
+                    </span>
+                    {!isConnected && (
+                      <span className='absolute -top-1 -right-1 text-xs bg-gray-600 text-gray-300 px-1 rounded-full'>
+                        🔒
+                      </span>
+                    )}
+                  </a>
                 </div>
               </div>
 
@@ -940,6 +1027,7 @@ function DemosPageContent() {
                 activeDemo={activeDemo}
                 setActiveDemo={setActiveDemo}
                 setShowImmersiveDemo={setShowImmersiveDemo}
+                isConnected={isConnected}
               />
             </div>
           </section>
@@ -1169,6 +1257,19 @@ function DemosPageContent() {
 
       {/* Tech Tree Modal */}
       <TechTreeModal isOpen={showTechTree} onClose={() => setShowTechTree(false)} />
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        mode={authModalMode}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfile 
+        isOpen={showUserProfile}
+        onClose={() => setShowUserProfile(false)}
+      />
     </EscrowProvider>
   );
 }
@@ -1176,12 +1277,14 @@ function DemosPageContent() {
 export default function DemosPage() {
   return (
     <WalletProvider>
-      <ToastProvider>
-        <TransactionProvider>
-          <DemosPageContent />
-          <ToastContainer />
-        </TransactionProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <TransactionProvider>
+            <DemosPageContent />
+            <ToastContainer />
+          </TransactionProvider>
+        </ToastProvider>
+      </AuthProvider>
     </WalletProvider>
   );
 }
