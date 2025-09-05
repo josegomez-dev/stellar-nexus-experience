@@ -9,6 +9,7 @@ import { EscrowProvider } from '@/contexts/EscrowContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NetworkProvider } from '@/contexts/NetworkContext';
+import { FirebaseProvider } from '@/contexts/FirebaseContext';
 import { Providers } from '@/components/Providers';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { ToastProvider } from '@/contexts/ToastContext';
@@ -1283,12 +1284,14 @@ export default function DemosPage() {
     <WalletProvider>
       <NetworkProvider>
         <AuthProvider>
-          <ToastProvider>
-            <TransactionProvider>
-              <DemosPageContent />
-              <ToastContainer />
-            </TransactionProvider>
-          </ToastProvider>
+          <FirebaseProvider>
+            <ToastProvider>
+              <TransactionProvider>
+                <DemosPageContent />
+                <ToastContainer />
+              </TransactionProvider>
+            </ToastProvider>
+          </FirebaseProvider>
         </AuthProvider>
       </NetworkProvider>
     </WalletProvider>

@@ -54,6 +54,7 @@ export interface UseWalletReturn {
   isLoading: boolean;
   error: Error | null;
   connect: (walletId?: string) => Promise<void>;
+  connectFreighter: () => Promise<void>;
   connectManualAddress: (address: string) => Promise<void>;
   disconnect: () => Promise<void>;
   signTransaction: (xdr: string) => Promise<{ signedTxXdr: string; signerAddress?: string }>;
@@ -79,6 +80,24 @@ export const useWallet = (): UseWalletReturn => {
   // Use refs to prevent repeated checks
   const hasCheckedFreighter = useRef(false);
   const checkInterval = useRef<NodeJS.Timeout | null>(null);
+  
+  // Periodic Freighter availability check
+  useEffect(() => {
+    const checkFreighterPeriodically = () => {
+      if (typeof window !== 'undefined') {
+        const freighterAvailable = !!(window as any).stellar || !!(window as any).freighter;
+        if (freighterAvailable !== isFreighterAvailable) {
+          console.log('🔄 Freighter availability changed:', freighterAvailable);
+          setIsFreighterAvailable(freighterAvailable);
+        }
+      }
+    };
+
+    // Check every 2 seconds for Freighter availability
+    const interval = setInterval(checkFreighterPeriodically, 2000);
+    
+    return () => clearInterval(interval);
+  }, [isFreighterAvailable]);
 
   // Initialize Stellar Wallets Kit
   useEffect(() => {
@@ -108,7 +127,13 @@ export const useWallet = (): UseWalletReturn => {
 
         // Check if Freighter is available
         const freighterWallet = supportedWallets.find(wallet => wallet.id === 'freighter');
-        setIsFreighterAvailable(freighterWallet?.isAvailable || false);
+        const freighterAvailable = freighterWallet?.isAvailable || false;
+        setIsFreighterAvailable(freighterAvailable);
+        console.log('🔍 Freighter detection:', {
+          freighterWallet,
+          isAvailable: freighterAvailable,
+          allWallets: supportedWallets.map(w => ({ id: w.id, name: w.name, isAvailable: w.isAvailable }))
+        });
 
         console.log('✅ Stellar Wallets Kit initialized');
         console.log(
@@ -123,8 +148,15 @@ export const useWallet = (): UseWalletReturn => {
         console.log('🔄 Falling back to direct Freighter API...');
 
         // Fallback to direct Freighter detection
-        const freighterDetected = typeof window !== 'undefined' && (window as any).stellar;
+        const freighterDetected = typeof window !== 'undefined' && 
+          ((window as any).stellar || (window as any).freighter);
         setIsFreighterAvailable(freighterDetected);
+        console.log('🔍 Fallback Freighter detection:', {
+          hasWindow: typeof window !== 'undefined',
+          hasStellar: !!(window as any)?.stellar,
+          hasFreighter: !!(window as any)?.freighter,
+          freighterDetected
+        });
 
         if (freighterDetected) {
           console.log('✅ Freighter detected via fallback method');
@@ -261,9 +293,9 @@ export const useWallet = (): UseWalletReturn => {
         }
 
         // Fallback to direct Freighter API
-        if (typeof window !== 'undefined' && (window as any).stellar) {
+        if (typeof window !== 'undefined' && ((window as any).stellar || (window as any).freighter)) {
           console.log('🔄 Using direct Freighter API fallback...');
-          const stellar = (window as any).stellar;
+          const stellar = (window as any).stellar || (window as any).freighter;
 
           // Request access to Freighter
           await stellar.requestAccess();
@@ -306,6 +338,85 @@ export const useWallet = (): UseWalletReturn => {
     },
     [walletKit]
   );
+
+  const connectFreighter = useCallback(async () => {
+    console.log('🔧 connectFreighter function called');
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log('Attempting to connect Freighter directly...');
+      
+      // Enhanced Freighter detection
+      const isFreighterAvailable = () => {
+        if (typeof window === 'undefined') return false;
+        
+        // Check multiple possible ways Freighter might be available
+        const stellar = (window as any).stellar;
+        const freighter = (window as any).freighter;
+        
+        console.log('🔍 Checking Freighter availability:', {
+          hasWindow: typeof window !== 'undefined',
+          hasStellar: !!stellar,
+          hasFreighter: !!freighter,
+          stellarType: typeof stellar,
+          freighterType: typeof freighter
+        });
+        
+        return !!(stellar || freighter);
+      };
+      
+      if (!isFreighterAvailable()) {
+        console.log('❌ Freighter not detected');
+        throw new Error('Freighter wallet not detected. Please install Freighter extension.');
+      }
+
+      console.log('✅ Freighter detected, proceeding with connection...');
+      
+      // Try to get the stellar object from window
+      const stellar = (window as any).stellar || (window as any).freighter;
+      
+      if (!stellar) {
+        throw new Error('Freighter API not accessible. Please ensure the extension is properly installed and enabled.');
+      }
+      
+      // Request access to Freighter
+      console.log('🔐 Requesting access to Freighter...');
+      await stellar.requestAccess();
+      
+      // Get public key
+      console.log('🔑 Getting public key...');
+      const publicKey = await stellar.getPublicKey();
+      
+      // Get network
+      console.log('🌐 Getting network...');
+      const network = await stellar.getNetwork();
+      setCurrentNetwork(network);
+      
+      const networkConfig = getNetworkConfig(network);
+      
+      setWalletData({
+        publicKey,
+        network,
+        isConnected: true,
+        networkPassphrase: networkConfig.passphrase,
+        horizonUrl: networkConfig.horizonUrl,
+        isMainnet: networkConfig.isMainnet,
+        walletName: 'Freighter',
+        walletType: 'freighter',
+        walletId: 'freighter',
+      });
+      
+      console.log('✅ Freighter connected successfully:', { publicKey, network });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const error = new Error(`Failed to connect Freighter: ${errorMessage}`);
+      setError(error);
+      console.error('❌ Freighter connection error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const connectManualAddress = useCallback(async (address: string) => {
     setIsLoading(true);
@@ -622,6 +733,7 @@ export const useWallet = (): UseWalletReturn => {
     isLoading,
     error,
     connect,
+    connectFreighter,
     connectManualAddress,
     disconnect,
     signTransaction,

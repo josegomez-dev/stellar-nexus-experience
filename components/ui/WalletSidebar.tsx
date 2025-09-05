@@ -9,6 +9,7 @@ import { Tooltip } from './Tooltip';
 import Image from 'next/image';
 import { Web3OnboardingModal } from './Web3OnboardingModal';
 import { NetworkIndicator } from './NetworkIndicator';
+import { FreighterInstallationGuide } from './FreighterInstallationGuide';
 
 interface WalletSidebarProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     walletData,
     isConnected,
     connect,
+    connectFreighter,
     connectManualAddress,
     disconnect,
     isFreighterAvailable,
@@ -36,6 +38,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
   const [showWeb3Help, setShowWeb3Help] = useState(true);
   const [showWeb3Modal, setShowWeb3Modal] = useState(false);
   const [hasShownWeb3Modal, setHasShownWeb3Modal] = useState(false);
+  const [showFreighterGuide, setShowFreighterGuide] = useState(false);
 
   // Stellar address validation function
   const isValidStellarAddress = (address: string): boolean => {
@@ -253,8 +256,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
         {/* Content */}
         <div
-          className={`flex-1 transition-all duration-300 ${isExpanded ? 'p-4' : 'p-2'}`}
-          style={{ minHeight: '400px' }}
+          className={`flex-1 transition-all duration-300 overflow-y-auto ${isExpanded ? 'p-4' : 'p-2'}`}
+          style={{ minHeight: '400px', maxHeight: 'calc(100vh - 200px)' }}
         >
           {/* Close Button - Positioned in bottom right corner */}
           <button
@@ -269,7 +272,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
           {!isConnected ? (
             // Not Connected State
-            <div className={isExpanded ? 'text-center py-8' : 'text-center py-2'}>
+            <div className={isExpanded ? 'text-center' : 'text-center py-2'}>
               <div
                 className={`${isExpanded ? 'w-16 h-16' : 'w-10 h-10'} bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-500`}
               >
@@ -284,6 +287,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </p>
                 </div>
               )}
+              
 
               <div className={`space-y-3 ${!isExpanded ? 'space-y-2' : ''}`}>
                 {/* Freighter Connect Button */}
@@ -313,29 +317,71 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       </span>
                     )}
                   </button>
-                ) : null}
-
-                {/* Web3 Help Button */}
-                {isExpanded && !isFreighterAvailable && (
+                ) : (
+                  // Fallback button when Freighter is not available
                   <button
-                    onClick={() => setShowWeb3Modal(true)}
-                    className='w-full mt-4 p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
+                    onClick={async () => {
+                      setIsConnecting(true);
+                      try {
+                        // Try to connect anyway (might work with fallback)
+                        await connect();
+                        if (!isExpanded) {
+                          setIsExpanded(true);
+                        }
+                      } catch (error) {
+                        console.log('Freighter connection failed, opening manual input');
+                        // If Freighter fails, just expand for manual input
+                        setIsExpanded(true);
+                      } finally {
+                        setIsConnecting(false);
+                      }
+                    }}
+                    disabled={isConnecting}
+                    className={`w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                      isExpanded ? 'px-4 py-3' : 'px-2 py-2.5'
+                    }`}
+                    title={!isExpanded ? 'Connect Wallet' : undefined}
                   >
-                    <div className='flex items-center justify-center space-x-2'>
-                      <div className='bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'>
-                        <img
-                          src='/images/character/nexus-prime-chat.png'
-                          className='rounded-full '
-                          alt='STELLAR NEXUS'
-                          width={50}
-                          height={50}
-                        />
-                      </div>
-                      <span className='text-sm font-medium'>New to Web3? Start Here!</span>
-                    </div>
+                    <span className='text-lg'>🔗</span>
+                    {isExpanded && (
+                      <span className='ml-2 animate-fadeIn'>
+                        {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                      </span>
+                    )}
                   </button>
                 )}
 
+
+                {/* Multi-Wallet Button */}
+                {isExpanded && (
+                  <div className='space-y-2'>
+                    
+                    <button
+                      onClick={async () => {
+                        setIsConnecting(true);
+                        try {
+                          await openWalletModal(); // Use Stellar Wallets Kit modal
+                        } catch (error) {
+                          console.error('Failed to open wallet modal:', error);
+                          addToast({
+                            type: 'error',
+                            title: 'Wallet Connection Error',
+                            message: 'Failed to open wallet selection modal',
+                            duration: 5000,
+                          });
+                        } finally {
+                          setIsConnecting(false);
+                        }
+                      }}
+                      disabled={isConnecting}
+                      className='w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                    >
+                      {isConnecting ? '🔄 Opening...' : '🎯 Multi-Wallet'}
+                    </button>
+                    
+                  </div>
+                )}
+               
                 {/* Manual Address Input */}
                 {isExpanded && (
                   <div className='space-y-2'>
@@ -466,14 +512,28 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }
                     position='bottom'
                   >
-                    <a
-                      href='/demos'
-                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                    >
-                      <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
-                    </a>
+                    {isConnected ? (
+                      <a
+                        href='/demos'
+                        className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                        }`}
+                      >
+                        <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
+                      </a>
+                    ) : (
+                      <div
+                        className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
+                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                        }`}
+                        title='Connect wallet to access Demos'
+                      >
+                        <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
+                        <div className='absolute top-1 right-1'>
+                          <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                        </div>
+                      </div>
+                    )}
                   </Tooltip>
 
                   <Tooltip
@@ -487,17 +547,68 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }
                     position='bottom'
                   >
-                    <a
-                      href='/mini-games'
-                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                    >
-                      <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
-                    </a>
+                    {isConnected ? (
+                      <a
+                        href='/mini-games'
+                        className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                        }`}
+                      >
+                        <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
+                      </a>
+                    ) : (
+                      <div
+                        className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
+                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                        }`}
+                        title='Connect wallet to access Mini-Games Store'
+                      >
+                        <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
+                        <div className='absolute top-1 right-1'>
+                          <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                        </div>
+                      </div>
+                    )}
                   </Tooltip>
                 </div>
               </div>
+<br />
+<hr />
+<br />
+               {/* Web3 Help Button */}
+ {isExpanded && !isFreighterAvailable && (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setShowFreighterGuide(true)}
+                      className='w-full p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 text-orange-200 rounded-lg transition-all duration-300 hover:from-orange-500/30 hover:to-red-500/30 hover:border-orange-400/50'
+                    >
+                      <div className='flex items-center justify-center space-x-2'>
+                        <span className='text-lg'>🔗</span>
+                        <span className='text-sm font-medium'>Install Freighter Wallet</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowWeb3Modal(true)}
+                      className='w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
+                    >
+                      <div className='flex items-center justify-center space-x-2'>
+                        <div className='bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'>
+                          <img
+                            src='/images/character/nexus-prime-chat.png'
+                            className='rounded-full '
+                            alt='STELLAR NEXUS'
+                            width={50}
+                            height={50}
+                          />
+                        </div>
+                        <span className='text-sm font-medium'>New to Web3? Start Here!</span>
+                      </div>
+                    </button>
+                  </div>
+                )}
+
+
 
               {/* Network Info - Only show when expanded */}
               {isExpanded && (
@@ -608,37 +719,77 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     isExpanded ? 'grid grid-cols-4 gap-2' : 'flex flex-col space-y-1.5'
                   }`}
                 >
-                  <a
-                    href='/demos'
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                    }`}
-                    title={!isExpanded ? 'Demos' : undefined}
-                  >
-                    <Image
-                      src='/images/icons/demos.png'
-                      alt='Demos'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5'
-                    />
-                  </a>
+                  {isConnected ? (
+                    <a
+                      href='/demos'
+                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                      }`}
+                      title={!isExpanded ? 'Demos' : undefined}
+                    >
+                      <Image
+                        src='/images/icons/demos.png'
+                        alt='Demos'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5'
+                      />
+                    </a>
+                  ) : (
+                    <div
+                      className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
+                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                      }`}
+                      title={!isExpanded ? 'Connect wallet to access Demos' : undefined}
+                    >
+                      <Image
+                        src='/images/icons/demos.png'
+                        alt='Demos'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5'
+                      />
+                      <div className='absolute top-1 right-1'>
+                        <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                      </div>
+                    </div>
+                  )}
 
-                  <a
-                    href='/mini-games'
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                    }`}
-                    title={!isExpanded ? 'Console' : undefined}
-                  >
-                    <Image
-                      src='/images/icons/console.png'
-                      alt='Console'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5'
-                    />
-                  </a>
+                  {isConnected ? (
+                    <a
+                      href='/mini-games'
+                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
+                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                      }`}
+                      title={!isExpanded ? 'Console' : undefined}
+                    >
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Console'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5'
+                      />
+                    </a>
+                  ) : (
+                    <div
+                      className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
+                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                      }`}
+                      title={!isExpanded ? 'Connect wallet to access Mini-Games Store' : undefined}
+                    >
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Console'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5'
+                      />
+                      <div className='absolute top-1 right-1'>
+                        <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -821,44 +972,86 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </>
         )}
 
-        {/* Navigation Buttons - Matching Main Menu - Only show when connected */}
-        {!isOpen && isConnected && (
+        {/* Navigation Buttons - Matching Main Menu - Always show but with different states */}
+        {!isOpen && (
           <>
             {/* Demos Button */}
-            <a
-              href='/demos'
-              className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-              title='Demos'
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/demos.png'
-                  alt='Demos'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 group-hover:animate-bounce'
-                />
-                <span className='text-sm font-medium hidden lg:block'>Demos</span>
+            {isConnected ? (
+              <a
+                href='/demos'
+                className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+                title='Demos'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/demos.png'
+                    alt='Demos'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5 group-hover:animate-bounce'
+                  />
+                  <span className='text-sm font-medium hidden lg:block'>Demos</span>
+                </div>
+              </a>
+            ) : (
+              <div
+                className='p-3 bg-gray-500/30 rounded-lg shadow-lg relative cursor-not-allowed blur-[1px] opacity-70'
+                title='Connect wallet to access Demos'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/demos.png'
+                    alt='Demos'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5'
+                  />
+                  <span className='text-sm font-medium hidden lg:block text-gray-400'>Demos</span>
+                  <div className='absolute top-1 right-1'>
+                    <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                  </div>
+                </div>
               </div>
-            </a>
+            )}
 
             {/* Store Button */}
-            <a
-              href='/mini-games'
-              className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-              title='Store'
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/console.png'
-                  alt='Store'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 group-hover:animate-bounce'
-                />
-                <span className='text-sm font-medium hidden lg:block'>Store</span>
+            {isConnected ? (
+              <a
+                href='/mini-games'
+                className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+                title='Store'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/console.png'
+                    alt='Store'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5 group-hover:animate-bounce'
+                  />
+                  <span className='text-sm font-medium hidden lg:block'>Store</span>
+                </div>
+              </a>
+            ) : (
+              <div
+                className='p-3 bg-gray-500/30 rounded-lg shadow-lg relative cursor-not-allowed blur-[1px] opacity-70'
+                title='Connect wallet to access Mini-Games Store'
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/console.png'
+                    alt='Store'
+                    width={20}
+                    height={20}
+                    className='w-5 h-5'
+                  />
+                  <span className='text-sm font-medium hidden lg:block text-gray-400'>Store</span>
+                  <div className='absolute top-1 right-1'>
+                    <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                  </div>
+                </div>
               </div>
-            </a>
+            )}
           </>
         )}
       </div>
@@ -949,6 +1142,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     >
                       {isConnecting ? '🔄 Opening...' : '🎯 Multi-Wallet'}
                     </button>
+
+                    <button
+                      onClick={() => setShowFreighterGuide(true)}
+                      className='w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-orange-400/50'
+                    >
+                      🔗 Install Freighter
+                    </button>
                   </div>
                 </div>
               </div>
@@ -959,6 +1159,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
       {/* Web3 Onboarding Modal */}
       <Web3OnboardingModal isOpen={showWeb3Modal} onClose={() => setShowWeb3Modal(false)} />
+      
+      {/* Freighter Installation Guide */}
+      <FreighterInstallationGuide isOpen={showFreighterGuide} onClose={() => setShowFreighterGuide(false)} />
     </>
   );
 };

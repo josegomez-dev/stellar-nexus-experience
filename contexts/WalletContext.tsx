@@ -9,6 +9,7 @@ interface WalletContextType {
   isLoading: boolean;
   error: Error | null;
   connect: (walletId?: string) => Promise<void>;
+  connectFreighter: () => Promise<void>;
   connectManualAddress: (address: string) => Promise<void>;
   disconnect: () => Promise<void>;
   isFreighterAvailable: boolean;
@@ -42,6 +43,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     isLoading: walletHook.isLoading,
     error: walletHook.error,
     connect: walletHook.connect,
+    connectFreighter: walletHook.connectFreighter,
     connectManualAddress: walletHook.connectManualAddress,
     disconnect: walletHook.disconnect,
     isFreighterAvailable: walletHook.isFreighterAvailable,

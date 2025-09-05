@@ -99,17 +99,6 @@ export const config = {
     freighterAppId: env.NEXT_PUBLIC_FREIGHTER_APP_ID,
     albedoAppName: env.NEXT_PUBLIC_ALBEDO_APP_NAME,
   },
-
-  // API Configuration
-  api: {
-    baseUrl: env.NEXT_PUBLIC_API_BASE_URL,
-    externalKey: env.EXTERNAL_API_KEY,
-  },
-
-  // Database Configuration
-  database: {
-    url: env.DATABASE_URL,
-  },
 };
 
 // Export individual config sections for convenience
@@ -126,8 +115,6 @@ export const {
   ai,
   demo,
   wallet,
-  api,
-  database,
 } = config;
 
 // Default export

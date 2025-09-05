@@ -48,6 +48,7 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   updateDemoProgress: (demoId: string, progress: Partial<DemoProgress[string]>) => Promise<void>;
+  initializeUserWithFirebase: (username: string) => Promise<void>;
   addBadge: (badge: Omit<Badge, 'earnedAt'>) => Promise<void>;
   checkDemoCompletion: (demoId: string) => boolean;
   getUserStats: () => {
@@ -299,6 +300,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   };
 
+  const initializeUserWithFirebase = async (username: string): Promise<void> => {
+    if (!walletData?.publicKey) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Create user in local storage (existing logic)
+      const newUser: User = {
+        id: walletData.publicKey,
+        walletAddress: walletData.publicKey,
+        username,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+        demoProgress: {},
+        badges: [],
+        level: 1,
+        experience: 0,
+      };
+
+      localStorage.setItem(`user_${walletData.publicKey}`, JSON.stringify(newUser));
+      setUser(newUser);
+      
+      console.log('✅ User initialized with Firebase:', username);
+    } catch (err) {
+      console.error('Error initializing user with Firebase:', err);
+      throw new Error('Failed to initialize user');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -309,6 +343,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     updateUser,
     updateDemoProgress,
+    initializeUserWithFirebase,
     addBadge,
     checkDemoCompletion,
     getUserStats,

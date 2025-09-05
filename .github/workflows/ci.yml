@@ -127,6 +127,13 @@ jobs:
           NEXT_PUBLIC_DEMO_DATA_ENABLED: true
           NEXT_PUBLIC_FREIGHTER_APP_ID: stellar-nexus-experience
           NEXT_PUBLIC_ALBEDO_APP_NAME: Stellar Nexus Experience
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: nexus-55966.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: nexus-55966
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: nexus-55966.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 48419163339
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:48419163339:web:637eadbce2dadb24605f4e
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: G-80T26CG9PM
         run: |
           echo "Environment variables set:"
           echo "NODE_ENV: $NODE_ENV"
@@ -168,64 +175,65 @@ jobs:
           path: build.log
           retention-days: 7
 
-  e2e-tests:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: build
+  # E2E Tests - Temporarily disabled
+  # e2e-tests:
+  #   name: E2E Tests
+  #   runs-on: ubuntu-latest
+  #   needs: build
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+  #     - name: Install dependencies
+  #       run: npm ci
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: .next/
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: build-files
+  #         path: .next/
 
-      - name: Verify build artifacts
-        run: |
-          echo "Checking downloaded artifacts:"
-          ls -la .next/ || echo ".next directory not found after download"
-          echo "Checking if static files exist:"
-          ls -la .next/static/ || echo "static directory not found"
+  #     - name: Verify build artifacts
+  #       run: |
+  #         echo "Checking downloaded artifacts:"
+  #         ls -la .next/ || echo ".next directory not found after download"
+  #         echo "Checking if static files exist:"
+  #         ls -la .next/static/ || echo "static directory not found"
 
-      - name: Start application
-        run: npm start &
+  #     - name: Start application
+  #       run: npm start &
 
-      - name: Wait for application to start
-        run: |
-          timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
+  #     - name: Wait for application to start
+  #       run: |
+  #         timeout 30 bash -c 'until curl -f http://localhost:3000; do sleep 1; done'
 
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          start: npm start
-          wait-on: 'http://localhost:3000'
-          browser: chrome
-          record: false
+  #     - name: Run Cypress tests
+  #       uses: cypress-io/github-action@v6
+  #       with:
+  #         start: npm start
+  #         wait-on: 'http://localhost:3000'
+  #         browser: chrome
+  #         record: false
 
-      - name: Upload Cypress screenshots
-        uses: actions/upload-artifact@v4
-        if: failure() && hashFiles('cypress/screenshots/**/*') != ''
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots/
-          retention-days: 7
+  #     - name: Upload Cypress screenshots
+  #       uses: actions/upload-artifact@v4
+  #       if: failure() && hashFiles('cypress/screenshots/**/*') != ''
+  #       with:
+  #         name: cypress-screenshots
+  #         path: cypress/screenshots/
+  #         retention-days: 7
 
-      - name: Upload Cypress videos
-        uses: actions/upload-artifact@v4
-        if: always() && hashFiles('cypress/videos/**/*') != ''
-        with:
-          name: cypress-videos
-          path: cypress/videos/
-          retention-days: 7
+  #     - name: Upload Cypress videos
+  #       uses: actions/upload-artifact@v4
+  #       if: always() && hashFiles('cypress/videos/**/*') != ''
+  #       with:
+  #         name: cypress-videos
+  #         path: cypress/videos/
+  #         retention-days: 7

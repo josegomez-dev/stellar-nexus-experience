@@ -123,33 +123,6 @@ const envSchema = z.object({
     .describe('Session encryption secret (server-side only)'),
 
   // ============================================================================
-  // API CONFIGURATION
-  // ============================================================================
-
-  // External API configuration
-  NEXT_PUBLIC_API_BASE_URL: z
-    .string()
-    .url('Invalid API base URL')
-    .optional()
-    .describe('Base URL for external API calls'),
-
-  EXTERNAL_API_KEY: z
-    .string()
-    .min(1, 'API key cannot be empty')
-    .optional()
-    .describe('External API key (server-side only)'),
-
-  // ============================================================================
-  // DATABASE CONFIGURATION
-  // ============================================================================
-
-  DATABASE_URL: z
-    .string()
-    .url('Invalid database URL')
-    .optional()
-    .describe('Database connection URL (server-side only)'),
-
-  // ============================================================================
   // FEATURE FLAGS
   // ============================================================================
 
@@ -399,9 +372,6 @@ const parseEnv = () => {
     'NEXT_PUBLIC_ALBEDO_APP_NAME',
     'JWT_SECRET',
     'SESSION_SECRET',
-    'NEXT_PUBLIC_API_BASE_URL',
-    'EXTERNAL_API_KEY',
-    'DATABASE_URL',
   ];
 
   // Check for missing required variables

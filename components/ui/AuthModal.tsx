@@ -12,7 +12,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) => {
-  const { signUp, signIn, isLoading, error } = useAuth();
+  const { signUp, signIn, initializeUserWithFirebase, isLoading, error } = useAuth();
   const { walletData, isConnected } = useGlobalWallet();
   const [currentMode, setCurrentMode] = useState<'signup' | 'signin'>(mode);
   const [formData, setFormData] = useState({
@@ -274,11 +274,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
     setIsSubmitting(true);
     try {
       if (currentMode === 'signup') {
-        await signUp(
-          walletData.publicKey,
-          formData.username || undefined,
-          formData.email || undefined
-        );
+        // Use Firebase initialization for new users
+        await initializeUserWithFirebase(formData.username);
       } else {
         await signIn(walletData.publicKey);
       }
