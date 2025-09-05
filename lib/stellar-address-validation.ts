@@ -10,37 +10,42 @@
  */
 export function isValidStellarAddress(address: string): boolean {
   if (!address || typeof address !== 'string') {
-    return false
+    return false;
   }
 
   // Stellar addresses must be exactly 56 characters long
   if (address.length !== 56) {
-    return false
+    return false;
   }
 
   // Stellar addresses must start with 'G' (for public keys)
   if (!address.startsWith('G')) {
-    return false
+    return false;
   }
 
   // Stellar addresses must contain only base32 characters (A-Z, 2-7)
-  const base32Regex = /^[ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]+$/
+  const base32Regex = /^[ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]+$/;
   if (!base32Regex.test(address)) {
-    return false
+    return false;
   }
 
   // Additional validation: Check for common invalid patterns
   // Stellar addresses should not contain easily mistyped characters
-  if (address.includes('0') || address.includes('1') || address.includes('8') || address.includes('9')) {
-    return false
+  if (
+    address.includes('0') ||
+    address.includes('1') ||
+    address.includes('8') ||
+    address.includes('9')
+  ) {
+    return false;
   }
 
   // Stellar addresses should not contain lowercase letters
   if (address !== address.toUpperCase()) {
-    return false
+    return false;
   }
 
-  return true
+  return true;
 }
 
 /**
@@ -49,53 +54,59 @@ export function isValidStellarAddress(address: string): boolean {
  * @returns Validation result object with isValid boolean and error message
  */
 export function validateStellarAddress(address: string): {
-  isValid: boolean
-  error?: string
+  isValid: boolean;
+  error?: string;
 } {
   if (!address || typeof address !== 'string') {
     return {
       isValid: false,
-      error: 'Address is required and must be a string'
-    }
+      error: 'Address is required and must be a string',
+    };
   }
 
   if (address.length !== 56) {
     return {
       isValid: false,
-      error: `Address must be exactly 56 characters long (current: ${address.length})`
-    }
+      error: `Address must be exactly 56 characters long (current: ${address.length})`,
+    };
   }
 
   if (!address.startsWith('G')) {
     return {
       isValid: false,
-      error: 'Stellar addresses must start with "G"'
-    }
+      error: 'Stellar addresses must start with "G"',
+    };
   }
 
-  const base32Regex = /^[ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]+$/
+  const base32Regex = /^[ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]+$/;
   if (!base32Regex.test(address)) {
     return {
       isValid: false,
-      error: 'Address contains invalid characters. Only A-Z and 2-7 are allowed'
-    }
+      error: 'Address contains invalid characters. Only A-Z and 2-7 are allowed',
+    };
   }
 
-  if (address.includes('0') || address.includes('1') || address.includes('8') || address.includes('9')) {
+  if (
+    address.includes('0') ||
+    address.includes('1') ||
+    address.includes('8') ||
+    address.includes('9')
+  ) {
     return {
       isValid: false,
-      error: 'Address contains invalid characters (0, 1, 8, 9 are not allowed in Stellar addresses)'
-    }
+      error:
+        'Address contains invalid characters (0, 1, 8, 9 are not allowed in Stellar addresses)',
+    };
   }
 
   if (address !== address.toUpperCase()) {
     return {
       isValid: false,
-      error: 'Address must be in uppercase'
-    }
+      error: 'Address must be in uppercase',
+    };
   }
 
-  return { isValid: true }
+  return { isValid: true };
 }
 
 /**
@@ -106,19 +117,19 @@ export function validateStellarAddress(address: string): {
  * @returns Formatted address string
  */
 export function formatStellarAddress(
-  address: string, 
-  startLength: number = 8, 
+  address: string,
+  startLength: number = 8,
   endLength: number = 4
 ): string {
   if (!isValidStellarAddress(address)) {
-    return 'Invalid Address'
+    return 'Invalid Address';
   }
 
   if (address.length <= startLength + endLength + 3) {
-    return address
+    return address;
   }
 
-  return `${address.slice(0, startLength)}...${address.slice(-endLength)}`
+  return `${address.slice(0, startLength)}...${address.slice(-endLength)}`;
 }
 
 /**
@@ -128,16 +139,16 @@ export function formatStellarAddress(
  */
 export function sanitizeStellarAddressInput(input: string): string {
   if (!input || typeof input !== 'string') {
-    return ''
+    return '';
   }
 
   // Remove whitespace and convert to uppercase
-  let sanitized = input.trim().toUpperCase()
+  let sanitized = input.trim().toUpperCase();
 
   // Remove any non-base32 characters
-  sanitized = sanitized.replace(/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]/g, '')
+  sanitized = sanitized.replace(/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ234567]/g, '');
 
-  return sanitized
+  return sanitized;
 }
 
 /**
@@ -146,14 +157,14 @@ export function sanitizeStellarAddressInput(input: string): string {
  * @returns A valid format Stellar address string
  */
 export function generateTestStellarAddress(): string {
-  const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-  let address = 'G' // Stellar addresses start with G
-  
+  const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let address = 'G'; // Stellar addresses start with G
+
   // Generate 55 random characters (total length will be 56)
   for (let i = 0; i < 55; i++) {
-    const randomIndex = Math.floor(Math.random() * base32Chars.length)
-    address += base32Chars[randomIndex]
+    const randomIndex = Math.floor(Math.random() * base32Chars.length);
+    address += base32Chars[randomIndex];
   }
-  
-  return address
+
+  return address;
 }

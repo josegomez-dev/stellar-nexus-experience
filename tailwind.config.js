@@ -87,6 +87,88 @@ module.exports = {
           950: '#0a0a0a',
         },
       },
+      animation: {
+        // Only keeping animations that are actually used
+        'fadeIn': 'fadeIn 0.3s ease-out',
+        'slideInUp': 'slideInUp 0.6s ease-out',
+        'fadeInUp': 'fadeInUp 0.6s ease-out forwards',
+        'float': 'float 3s ease-in-out infinite',
+        'shimmer': 'shimmer 2s infinite',
+        'epicGlow': 'epicGlow 3s ease-in-out infinite',
+        'epicTextReveal': 'epicTextReveal 2s ease-out',
+        'epicFloatingParticles': 'epicFloatingParticles 3s ease-in-out infinite',
+        'rotatingNexus': 'rotatingNexus 2s linear infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideInUp: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        epicGlow: {
+          '0%, 100%': {
+            textShadow: '0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9, 0 0 20px #0ea5e9, 0 0 25px #0ea5e9, 0 0 30px #0ea5e9',
+          },
+          '50%': {
+            textShadow: '0 0 10px #0ea5e9, 0 0 20px #0ea5e9, 0 0 30px #0ea5e9, 0 0 40px #0ea5e9, 0 0 50px #0ea5e9, 0 0 60px #0ea5e9',
+          },
+        },
+        epicTextReveal: {
+          '0%': { clipPath: 'inset(0 100% 0 0)', transform: 'translateX(-20px)', opacity: '0' },
+          '50%': { clipPath: 'inset(0 0% 0 0)', transform: 'translateX(0)', opacity: '1' },
+          '100%': { clipPath: 'inset(0 0% 0 0)', transform: 'translateX(0)', opacity: '1' },
+        },
+        epicFloatingParticles: {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0.8' },
+          '25%': { transform: 'translateY(-10px) rotate(90deg)', opacity: '1' },
+          '50%': { transform: 'translateY(-20px) rotate(180deg)', opacity: '0.6' },
+          '75%': { transform: 'translateY(-10px) rotate(270deg)', opacity: '1' },
+        },
+        rotatingNexus: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      spacing: {
+        'xs': '0.25rem',
+        'sm': '0.5rem',
+        'md': '1rem',
+        'lg': '1.5rem',
+        'xl': '2rem',
+        '2xl': '3rem',
+        '3xl': '4rem',
+        '4xl': '6rem',
+      },
+      borderRadius: {
+        'sm': '0.125rem',
+        'md': '0.375rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'glow': '0 0 20px rgba(14, 165, 233, 0.5)',
+        'epic': '0 0 30px rgba(14, 165, 233, 0.8)',
+      },
+      zIndex: {
+        'epic': '9999',
+      },
     },
   },
   plugins: [],

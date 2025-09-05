@@ -1,72 +1,68 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface TransactionStatus {
-  hash: string
-  status: 'pending' | 'success' | 'failed'
-  message: string
-  timestamp: Date
-  type: 'escrow' | 'milestone' | 'fund' | 'approve' | 'release' | 'dispute'
-  demoId?: string
-  amount?: string
-  asset?: string
+  hash: string;
+  status: 'pending' | 'success' | 'failed';
+  message: string;
+  timestamp: Date;
+  type: 'escrow' | 'milestone' | 'fund' | 'approve' | 'release' | 'dispute';
+  demoId?: string;
+  amount?: string;
+  asset?: string;
 }
 
 interface TransactionContextType {
-  transactions: TransactionStatus[]
-  addTransaction: (transaction: Omit<TransactionStatus, 'timestamp'>) => TransactionStatus
-  updateTransaction: (hash: string, status: 'success' | 'failed', message: string) => void
-  clearTransactions: () => void
-  getTransactionsByDemo: (demoId: string) => TransactionStatus[]
-  getRecentTransactions: (limit?: number) => TransactionStatus[]
+  transactions: TransactionStatus[];
+  addTransaction: (transaction: Omit<TransactionStatus, 'timestamp'>) => TransactionStatus;
+  updateTransaction: (hash: string, status: 'success' | 'failed', message: string) => void;
+  clearTransactions: () => void;
+  getTransactionsByDemo: (demoId: string) => TransactionStatus[];
+  getRecentTransactions: (limit?: number) => TransactionStatus[];
 }
 
-const TransactionContext = createContext<TransactionContextType | undefined>(undefined)
+const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
 export const useTransactionHistory = () => {
-  const context = useContext(TransactionContext)
+  const context = useContext(TransactionContext);
   if (context === undefined) {
-    throw new Error('useTransactionHistory must be used within a TransactionProvider')
+    throw new Error('useTransactionHistory must be used within a TransactionProvider');
   }
-  return context
-}
+  return context;
+};
 
 interface TransactionProviderProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const TransactionProvider = ({ children }: TransactionProviderProps) => {
-  const [transactions, setTransactions] = useState<TransactionStatus[]>([])
+  const [transactions, setTransactions] = useState<TransactionStatus[]>([]);
 
   const addTransaction = (transaction: Omit<TransactionStatus, 'timestamp'>): TransactionStatus => {
     const newTransaction: TransactionStatus = {
       ...transaction,
-      timestamp: new Date()
-    }
-    setTransactions(prev => [newTransaction, ...prev])
-    return newTransaction
-  }
+      timestamp: new Date(),
+    };
+    setTransactions(prev => [newTransaction, ...prev]);
+    return newTransaction;
+  };
 
   const updateTransaction = (hash: string, status: 'success' | 'failed', message: string) => {
-    setTransactions(prev => 
-      prev.map(tx => 
-        tx.hash === hash ? { ...tx, status, message } : tx
-      )
-    )
-  }
+    setTransactions(prev => prev.map(tx => (tx.hash === hash ? { ...tx, status, message } : tx)));
+  };
 
   const clearTransactions = () => {
-    setTransactions([])
-  }
+    setTransactions([]);
+  };
 
   const getTransactionsByDemo = (demoId: string) => {
-    return transactions.filter(tx => tx.demoId === demoId)
-  }
+    return transactions.filter(tx => tx.demoId === demoId);
+  };
 
   const getRecentTransactions = (limit: number = 10) => {
-    return transactions.slice(0, limit)
-  }
+    return transactions.slice(0, limit);
+  };
 
   const value: TransactionContextType = {
     transactions,
@@ -74,12 +70,8 @@ export const TransactionProvider = ({ children }: TransactionProviderProps) => {
     updateTransaction,
     clearTransactions,
     getTransactionsByDemo,
-    getRecentTransactions
-  }
+    getRecentTransactions,
+  };
 
-  return (
-    <TransactionContext.Provider value={value}>
-      {children}
-    </TransactionContext.Provider>
-  )
-}
+  return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>;
+};

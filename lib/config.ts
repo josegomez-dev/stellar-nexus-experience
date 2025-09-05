@@ -1,76 +1,134 @@
+import env from './env';
+
 // Centralized configuration for the Trustless Work application
 // This file provides a single source of truth for all environment variables
 
 export const config = {
   // Stellar Network Configuration
   stellar: {
-    network: process.env.NEXT_PUBLIC_STELLAR_NETWORK || 'TESTNET',
-    horizonUrl: process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'PUBLIC' 
-      ? process.env.NEXT_PUBLIC_STELLAR_HORIZON_PUBLIC || 'https://horizon.stellar.org'
-      : process.env.NEXT_PUBLIC_STELLAR_HORIZON_TESTNET || 'https://horizon-testnet.stellar.org',
+    network: env.NEXT_PUBLIC_STELLAR_NETWORK,
+    horizonUrl:
+      env.NEXT_PUBLIC_STELLAR_NETWORK === 'PUBLIC'
+        ? env.NEXT_PUBLIC_STELLAR_HORIZON_PUBLIC
+        : env.NEXT_PUBLIC_STELLAR_HORIZON_TESTNET,
   },
 
   // Asset Configuration
   asset: {
     defaultAsset: {
-      code: process.env.NEXT_PUBLIC_DEFAULT_ASSET_CODE || 'USDC',
-      issuer: process.env.NEXT_PUBLIC_DEFAULT_ASSET_ISSUER || 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA',
-      decimals: 10000000
+      code: env.NEXT_PUBLIC_DEFAULT_ASSET_CODE,
+      issuer: env.NEXT_PUBLIC_DEFAULT_ASSET_ISSUER,
+      decimals: env.NEXT_PUBLIC_DEFAULT_ASSET_DECIMALS,
     },
-    platformFee: parseInt(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE || '4'),
-    defaultEscrowDeadlineDays: parseInt(process.env.NEXT_PUBLIC_DEFAULT_ESCROW_DEADLINE_DAYS || '7'),
+    platformFee: env.NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE,
+    defaultEscrowDeadlineDays: env.NEXT_PUBLIC_DEFAULT_ESCROW_DEADLINE_DAYS,
   },
 
   // App Configuration
   app: {
-    name: process.env.NEXT_PUBLIC_APP_NAME || 'Stellar Nexus',
-    version: process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0',
-    debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true',
-    platformPublicKey: process.env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY || '',
+    name: env.NEXT_PUBLIC_APP_NAME,
+    version: env.NEXT_PUBLIC_APP_VERSION,
+    debugMode: env.NEXT_PUBLIC_DEBUG_MODE || false,
+    platformPublicKey: env.NEXT_PUBLIC_PLATFORM_PUBLIC_KEY,
   },
 
   // Development Configuration
   development: {
-    nodeEnv: process.env.NODE_ENV || 'development',
-    isDevelopment: process.env.NODE_ENV === 'development',
-    isProduction: process.env.NODE_ENV === 'production',
-  }
-}
+    nodeEnv: env.NODE_ENV,
+    isDevelopment: env.NODE_ENV === 'development',
+    isProduction: env.NODE_ENV === 'production',
+    isTest: env.NODE_ENV === 'test',
+  },
 
-// Validation function to ensure required configuration is present
-export const validateConfig = () => {
-  const errors: string[] = []
+  // Feature Flags
+  features: {
+    escrow: env.NEXT_PUBLIC_ESCROW_FEATURES_ENABLED,
+    wallet: env.NEXT_PUBLIC_WALLET_FEATURES_ENABLED,
+    demo: env.NEXT_PUBLIC_DEMO_FEATURES_ENABLED,
+    ai: env.NEXT_PUBLIC_AI_FEATURES_ENABLED,
+  },
 
-  if (!config.stellar.network) {
-    errors.push('NEXT_PUBLIC_STELLAR_NETWORK is required')
-  }
+  // UI Configuration
+  ui: {
+    animations: env.NEXT_PUBLIC_ANIMATIONS_ENABLED,
+    glassmorphism: env.NEXT_PUBLIC_GLASSMORPHISM_ENABLED,
+    gradientEffects: env.NEXT_PUBLIC_GRADIENT_EFFECTS_ENABLED,
+  },
 
-  if (!config.asset.defaultAsset.code) {
-    errors.push('NEXT_PUBLIC_DEFAULT_ASSET_CODE is required')
-  }
+  // Performance Configuration
+  performance: {
+    lazyLoading: env.NEXT_PUBLIC_LAZY_LOADING_ENABLED,
+    imageOptimization: env.NEXT_PUBLIC_IMAGE_OPTIMIZATION_ENABLED,
+    codeSplitting: env.NEXT_PUBLIC_CODE_SPLITTING_ENABLED,
+  },
 
-  if (!config.asset.defaultAsset.issuer) {
-    errors.push('NEXT_PUBLIC_DEFAULT_ASSET_ISSUER is required')
-  }
+  // Security Configuration
+  security: {
+    contentSecurityPolicy: env.NEXT_PUBLIC_CONTENT_SECURITY_POLICY_ENABLED,
+    xssProtection: env.NEXT_PUBLIC_XSS_PROTECTION_ENABLED,
+    frameOptions: env.NEXT_PUBLIC_FRAME_OPTIONS_ENABLED,
+    jwtSecret: env.JWT_SECRET,
+    sessionSecret: env.SESSION_SECRET,
+  },
 
-  if (config.asset.platformFee < 0 || config.asset.platformFee > 100) {
-    errors.push('NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE must be between 0 and 100')
-  }
+  // Analytics & Monitoring
+  analytics: {
+    enabled: env.NEXT_PUBLIC_ANALYTICS_ENABLED,
+    id: env.NEXT_PUBLIC_ANALYTICS_ID,
+    errorReporting: {
+      enabled: env.NEXT_PUBLIC_ERROR_REPORTING_ENABLED,
+      endpoint: env.NEXT_PUBLIC_ERROR_REPORTING_ENDPOINT,
+    },
+  },
 
-  if (config.asset.defaultEscrowDeadlineDays < 1) {
-    errors.push('NEXT_PUBLIC_DEFAULT_ESCROW_DEADLINE_DAYS must be at least 1')
-  }
+  // AI Assistant Configuration
+  ai: {
+    enabled: env.NEXT_PUBLIC_AI_ASSISTANT_ENABLED,
+    name: env.NEXT_PUBLIC_AI_ASSISTANT_NAME,
+    voiceEnabled: env.NEXT_PUBLIC_AI_ASSISTANT_VOICE_ENABLED,
+  },
 
-  if (errors.length > 0) {
-    console.error('Configuration validation failed:', errors)
-    return false
-  }
+  // Demo Configuration
+  demo: {
+    modeEnabled: env.NEXT_PUBLIC_DEMO_MODE_ENABLED,
+    dataEnabled: env.NEXT_PUBLIC_DEMO_DATA_ENABLED,
+  },
 
-  return true
-}
+  // Wallet Configuration
+  wallet: {
+    freighterAppId: env.NEXT_PUBLIC_FREIGHTER_APP_ID,
+    albedoAppName: env.NEXT_PUBLIC_ALBEDO_APP_NAME,
+  },
+
+  // API Configuration
+  api: {
+    baseUrl: env.NEXT_PUBLIC_API_BASE_URL,
+    externalKey: env.EXTERNAL_API_KEY,
+  },
+
+  // Database Configuration
+  database: {
+    url: env.DATABASE_URL,
+  },
+};
 
 // Export individual config sections for convenience
-export const { stellar, asset, app, development } = config
+export const {
+  stellar,
+  asset,
+  app,
+  development,
+  features,
+  ui,
+  performance,
+  security,
+  analytics,
+  ai,
+  demo,
+  wallet,
+  api,
+  database,
+} = config;
 
 // Default export
-export default config
+export default config;

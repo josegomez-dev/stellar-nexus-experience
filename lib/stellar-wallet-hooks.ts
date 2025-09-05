@@ -1,41 +1,50 @@
-import { useState, useEffect, useCallback } from 'react'
-import { SendTransactionResponse } from '@/types/trustless-work'
-import { stellarConfig, assetConfig } from './wallet-config'
-import { validateStellarAddress } from './stellar-address-validation'
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { SendTransactionResponse } from '@/types/trustless-work';
+import { stellarConfig, assetConfig } from './wallet-config';
+import { validateStellarAddress } from './stellar-address-validation';
 
 // POC Mode - No Stellar Wallets Kit initialization to avoid custom element conflicts
-const POC_MODE = process.env.NODE_ENV === 'development'
+const POC_MODE = process.env.NODE_ENV === 'development';
 
 export interface WalletData {
-  publicKey: string
-  network: string
-  isConnected: boolean
+  publicKey: string;
+  network: string;
+  isConnected: boolean;
 }
 
 export interface UseWalletReturn {
-  walletData: WalletData | null
-  isConnected: boolean
-  isLoading: boolean
-  error: Error | null
-  connect: (walletId?: string) => Promise<void>
-  disconnect: () => Promise<void>
-  signTransaction: (xdr: string) => Promise<{ signedTxXdr: string; signerAddress?: string }>
-  sendTransaction: (signedXdr: string) => Promise<SendTransactionResponse>
-  getAvailableWallets: () => Promise<Array<{id: string, name: string}>>
-  isFreighterAvailable: boolean
+  walletData: WalletData | null;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  connect: (walletId?: string) => Promise<void>;
+  disconnect: () => Promise<void>;
+  signTransaction: (xdr: string) => Promise<{ signedTxXdr: string; signerAddress?: string }>;
+  sendTransaction: (signedXdr: string) => Promise<SendTransactionResponse>;
+  getAvailableWallets: () => Promise<Array<{ id: string; name: string }>>;
+  isFreighterAvailable: boolean;
 }
 
 export const useWallet = (): UseWalletReturn => {
-  const [walletData, setWalletData] = useState<WalletData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
-  const [isFreighterAvailable, setIsFreighterAvailable] = useState(false)
+  const [walletData, setWalletData] = useState<WalletData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isFreighterAvailable, setIsFreighterAvailable] = useState(false);
+
+  // Use refs to prevent repeated checks
+  const hasCheckedFreighter = useRef(false);
+  const checkInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Check for Freighter wallet (but don't use Stellar Wallets Kit)
   useEffect(() => {
+    // Only check once per component mount to prevent repeated logs
+    if (hasCheckedFreighter.current) {
+      return;
+    }
+
     const checkFreighter = () => {
       // Check multiple possible Freighter detection methods
-      const freighterDetected = (
+      const freighterDetected =
         // Method 1: Check for window.stellar (common Freighter pattern)
         (typeof window !== 'undefined' && (window as any).stellar) ||
         // Method 2: Check for window.freighter
@@ -43,180 +52,203 @@ export const useWallet = (): UseWalletReturn => {
         // Method 3: Check for document.querySelector('[data-freighter]')
         (typeof document !== 'undefined' && document.querySelector('[data-freighter]')) ||
         // Method 4: Check for specific Freighter extension ID patterns
-        (typeof window !== 'undefined' && 
-         (window as any).navigator?.userAgent?.includes('Freighter') ||
-         (window as any).navigator?.userAgent?.includes('freighter'))
-      )
-      
+        (typeof window !== 'undefined' &&
+          (window as any).navigator?.userAgent?.includes('Freighter')) ||
+        (window as any).navigator?.userAgent?.includes('freighter');
+
       if (freighterDetected) {
-        setIsFreighterAvailable(true)
-        console.log('✅ Freighter wallet detected (POC mode)')
-        console.log('Freighter detection details:', {
-          hasStellar: !!(window as any).stellar,
-          hasFreighter: !!(window as any).freighter,
-          hasDataFreighter: !!document.querySelector('[data-freighter]'),
-          userAgent: (window as any).navigator?.userAgent
-        })
+        setIsFreighterAvailable(true);
+        console.log('✅ Freighter wallet detected (POC mode)');
+        // Stop checking once detected
+        if (checkInterval.current) {
+          clearInterval(checkInterval.current);
+          checkInterval.current = null;
+        }
       } else {
-        setIsFreighterAvailable(false)
-        console.log('❌ Freighter wallet not detected (POC mode)')
-        console.log('Detection attempt details:', {
-          hasStellar: !!(window as any).stellar,
-          hasFreighter: !!(window as any).freighter,
-          hasDataFreighter: !!document.querySelector('[data-freighter]'),
-          userAgent: (window as any).navigator?.userAgent
-        })
+        setIsFreighterAvailable(false);
+        // Only log once per check, not on every render
+        if (!hasCheckedFreighter.current) {
+          console.log('❌ Freighter wallet not detected (POC mode)');
+          console.log('Detection attempt details:', {
+            hasStellar: !!(window as any).stellar,
+            hasFreighter: !!(window as any).freighter,
+            hasDataFreighter: !!document.querySelector('[data-freighter]'),
+            userAgent: (window as any).navigator?.userAgent,
+          });
+        }
       }
-    }
-    
+    };
+
     // Check immediately
-    checkFreighter()
-    
-    // Check again after a short delay (in case extension loads after page)
-    const delayedCheck = setTimeout(checkFreighter, 1000)
-    
+    checkFreighter();
+    hasCheckedFreighter.current = true;
+
+    // Check again after a longer delay (in case extension loads after page)
+    const delayedCheck = setTimeout(() => {
+      if (!isFreighterAvailable) {
+        checkFreighter();
+      }
+    }, 2000);
+
     // Listen for Freighter installation
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'FREIGHTER_EXTENSION_READY') {
-        setIsFreighterAvailable(true)
-        console.log('✅ Freighter wallet ready (POC mode)')
+        setIsFreighterAvailable(true);
+        console.log('✅ Freighter wallet ready (POC mode)');
+        // Stop checking once detected
+        if (checkInterval.current) {
+          clearInterval(checkInterval.current);
+          checkInterval.current = null;
+        }
       }
-    }
-    
+    };
+
     // Listen for extension installation
-    window.addEventListener('message', handleMessage)
-    
-    // Also check periodically for newly installed extensions
-    const intervalCheck = setInterval(checkFreighter, 5000)
-    
+    window.addEventListener('message', handleMessage);
+
+    // Check less frequently for newly installed extensions (every 10 seconds instead of 5)
+    checkInterval.current = setInterval(() => {
+      if (!isFreighterAvailable) {
+        checkFreighter();
+      }
+    }, 10000);
+
     return () => {
-      window.removeEventListener('message', handleMessage)
-      clearTimeout(delayedCheck)
-      clearInterval(intervalCheck)
-    }
-  }, [])
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(delayedCheck);
+      if (checkInterval.current) {
+        clearInterval(checkInterval.current);
+        checkInterval.current = null;
+      }
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   const connect = useCallback(async (walletId?: string) => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      console.log('Attempting to connect wallet (POC mode)...')
-      
+      console.log('Attempting to connect wallet (POC mode)...');
+
       // Validate the Stellar address format
       if (walletId) {
-        const validation = validateStellarAddress(walletId)
+        const validation = validateStellarAddress(walletId);
         if (!validation.isValid) {
-          throw new Error(validation.error || 'Invalid Stellar address format')
+          throw new Error(validation.error || 'Invalid Stellar address format');
         }
-        
-        console.log('Using manual wallet address:', walletId)
+
+        console.log('Using manual wallet address:', walletId);
         setWalletData({
           publicKey: walletId,
           network: stellarConfig.network,
-          isConnected: true
-        })
-        console.log('Manual connection successful!')
-        return
+          isConnected: true,
+        });
+        console.log('Manual connection successful!');
+        return;
       }
-      
+
       // If no wallet ID provided, show error
-      throw new Error('Please provide a Stellar wallet address to connect.')
-      
+      throw new Error('Please provide a Stellar wallet address to connect.');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      const error = new Error(`Failed to connect wallet: ${errorMessage}`)
-      setError(error)
-      throw error
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const error = new Error(`Failed to connect wallet: ${errorMessage}`);
+      setError(error);
+      throw error;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   const disconnect = useCallback(async () => {
     try {
-      setWalletData(null)
-      console.log('Wallet disconnected (POC mode)')
+      setWalletData(null);
+      console.log('Wallet disconnected (POC mode)');
     } catch (err) {
-      console.error('Error disconnecting wallet:', err)
+      console.error('Error disconnecting wallet:', err);
     }
-  }, [])
+  }, []);
 
-  const signTransaction = useCallback(async (xdr: string) => {
-    if (!walletData) {
-      throw new Error('Wallet not connected')
-    }
+  const signTransaction = useCallback(
+    async (xdr: string) => {
+      if (!walletData) {
+        throw new Error('Wallet not connected');
+      }
 
-    console.log('POC mode: Simulating transaction signing')
-    await new Promise(resolve => setTimeout(resolve, 500)) // Simulate delay
-    
-    return {
-      signedTxXdr: `signed_${xdr}_${Date.now()}`,
-      signerAddress: walletData.publicKey
-    }
-  }, [walletData])
+      console.log('POC mode: Simulating transaction signing');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
 
-  const sendTransaction = useCallback(async (signedXdr: string) => {
-    // Mock implementation for POC
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const hash = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      const contractId = `contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      
       return {
-        success: true,
-        hash,
-        status: 'success',
-        message: 'Transaction successful (POC)',
-        contractId,
-        escrow: {
-          id: contractId,
-          type: 'multi-release',
-          asset: {
-            code: assetConfig.defaultAsset.code,
-            issuer: assetConfig.defaultAsset.issuer,
-            decimals: assetConfig.defaultAsset.decimals
+        signedTxXdr: `signed_${xdr}_${Date.now()}`,
+        signerAddress: walletData.publicKey,
+      };
+    },
+    [walletData]
+  );
+
+  const sendTransaction = useCallback(
+    async (signedXdr: string) => {
+      // Mock implementation for POC
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const hash = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const contractId = `contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        return {
+          success: true,
+          hash,
+          status: 'success',
+          message: 'Transaction successful (POC)',
+          contractId,
+          escrow: {
+            id: contractId,
+            type: 'multi-release',
+            asset: {
+              code: assetConfig.defaultAsset.code,
+              issuer: assetConfig.defaultAsset.issuer,
+              decimals: assetConfig.defaultAsset.decimals,
+            },
+            amount: '1000000',
+            platformFee: assetConfig.platformFee,
+            buyer: walletData?.publicKey || '',
+            seller: walletData?.publicKey || '',
+            arbiter: walletData?.publicKey || '',
+            terms: 'POC escrow contract',
+            deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            releases: [
+              {
+                id: `release_${Date.now()}_1`,
+                amount: '1000000',
+                status: 'pending' as const,
+                createdAt: new Date().toISOString(),
+              },
+            ],
+            metadata: {
+              description: 'POC escrow contract',
+              category: 'demo',
+            },
           },
-          amount: '1000000',
-          platformFee: assetConfig.platformFee,
-          buyer: walletData?.publicKey || '',
-          seller: walletData?.publicKey || '',
-          arbiter: walletData?.publicKey || '',
-          terms: 'POC escrow contract',
-          deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          releases: [
-            {
-              id: `release_${Date.now()}_1`,
-              amount: '1000000',
-              status: 'pending' as const,
-              createdAt: new Date().toISOString()
-            }
-          ],
-          metadata: {
-            description: 'POC escrow contract',
-            category: 'demo'
-          }
-        }
+        };
+      } catch (err) {
+        return {
+          success: false,
+          status: 'error',
+          message: 'Failed to send transaction',
+          contractId: '',
+          escrow: null,
+        };
       }
-    } catch (err) {
-      return {
-        success: false,
-        status: 'error',
-        message: 'Failed to send transaction',
-        contractId: '',
-        escrow: null
-      }
-    }
-  }, [walletData?.publicKey])
+    },
+    [walletData?.publicKey]
+  );
 
   const getAvailableWallets = useCallback(async () => {
     // Since we're using user input for wallet addresses, return empty array
     // The user will type their own Stellar wallet address
-    return []
-  }, [])
+    return [];
+  }, []);
 
   return {
     walletData,
@@ -228,6 +260,6 @@ export const useWallet = (): UseWalletReturn => {
     signTransaction,
     sendTransaction,
     getAvailableWallets,
-    isFreighterAvailable
-  }
-}
+    isFreighterAvailable,
+  };
+};

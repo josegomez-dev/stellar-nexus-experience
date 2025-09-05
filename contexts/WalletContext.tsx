@@ -1,35 +1,35 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { useWallet } from '@/lib/stellar-wallet-hooks'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useWallet } from '@/lib/stellar-wallet-hooks';
 
 interface WalletContextType {
-  walletData: any
-  isConnected: boolean
-  isLoading: boolean
-  error: Error | null
-  connect: (walletId?: string) => Promise<void>
-  disconnect: () => Promise<void>
-  isFreighterAvailable: boolean
+  walletData: any;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: Error | null;
+  connect: (walletId?: string) => Promise<void>;
+  disconnect: () => Promise<void>;
+  isFreighterAvailable: boolean;
 }
 
-const WalletContext = createContext<WalletContextType | undefined>(undefined)
+const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const useGlobalWallet = () => {
-  const context = useContext(WalletContext)
+  const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error('useGlobalWallet must be used within a WalletProvider')
+    throw new Error('useGlobalWallet must be used within a WalletProvider');
   }
-  return context
-}
+  return context;
+};
 
 interface WalletProviderProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const WalletProvider = ({ children }: WalletProviderProps) => {
-  const walletHook = useWallet()
-  
+  const walletHook = useWallet();
+
   // Share the wallet state globally
   const value: WalletContextType = {
     walletData: walletHook.walletData,
@@ -38,12 +38,8 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     error: walletHook.error,
     connect: walletHook.connect,
     disconnect: walletHook.disconnect,
-    isFreighterAvailable: walletHook.isFreighterAvailable
-  }
+    isFreighterAvailable: walletHook.isFreighterAvailable,
+  };
 
-  return (
-    <WalletContext.Provider value={value}>
-      {children}
-    </WalletContext.Provider>
-  )
-}
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
+};
