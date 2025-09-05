@@ -90,6 +90,11 @@ jspm_packages/
 tmp/
 temp/
 
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
 # Stellar specific
 stellar-keys/
 *.key
