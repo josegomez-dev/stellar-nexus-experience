@@ -324,7 +324,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       setPointsTransactions(transactions);
 
       // Check if a new badge was earned (after refresh)
-      const updatedAccount = await accountService.getAccount(account.id);
+      const updatedAccount = await accountService.getAccountById(account.id);
       if (updatedAccount && updatedAccount.badges.length > account.badges.length) {
         const newBadges = updatedAccount.badges.filter(
           newBadge => !account.badges.some(oldBadge => oldBadge.name === newBadge.name)

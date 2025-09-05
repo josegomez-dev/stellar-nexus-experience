@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import MiniGameStore from '@/components/games/MiniGameStore';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { AuthProvider } from '@/contexts/AuthContext';

@@ -12,7 +12,8 @@ import {
   limit,
   Timestamp,
   serverTimestamp,
-  increment
+  increment,
+  arrayUnion
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,6 +66,13 @@ export class AccountService {
         demo1: {
           demoId: 'demo1',
           demoName: 'Baby Steps to Riches',
+          status: 'locked',
+          attempts: 0,
+          pointsEarned: 0,
+        },
+        'hello-milestone': {
+          demoId: 'hello-milestone',
+          demoName: 'Hello Milestone Demo',
           status: 'available',
           attempts: 0,
           pointsEarned: 0,
@@ -76,6 +84,13 @@ export class AccountService {
           attempts: 0,
           pointsEarned: 0,
         },
+        'milestone-voting': {
+          demoId: 'milestone-voting',
+          demoName: 'Democracy in Action',
+          status: 'locked',
+          attempts: 0,
+          pointsEarned: 0,
+        },
         demo3: {
           demoId: 'demo3',
           demoName: 'Dispute Resolution',
@@ -83,9 +98,23 @@ export class AccountService {
           attempts: 0,
           pointsEarned: 0,
         },
+        'dispute-resolution': {
+          demoId: 'dispute-resolution',
+          demoName: 'Drama Queen Escrow',
+          status: 'locked',
+          attempts: 0,
+          pointsEarned: 0,
+        },
         demo4: {
           demoId: 'demo4',
           demoName: 'Micro Task Marketplace',
+          status: 'locked',
+          attempts: 0,
+          pointsEarned: 0,
+        },
+        'micro-task-marketplace': {
+          demoId: 'micro-task-marketplace',
+          demoName: 'Gig Economy Madness',
           status: 'locked',
           attempts: 0,
           pointsEarned: 0,
@@ -242,7 +271,7 @@ export class AccountService {
   async awardBadge(accountId: string, badge: NFTBadge): Promise<void> {
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
-      badges: [...badge], // Add to badges array
+      badges: arrayUnion(badge), // Add to badges array
       'profile.totalPoints': increment(badge.pointsValue),
       updatedAt: serverTimestamp(),
     });

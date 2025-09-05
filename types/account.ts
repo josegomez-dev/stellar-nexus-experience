@@ -59,9 +59,13 @@ export interface UserAccount {
   // Demo progress
   demos: {
     demo1: DemoProgress;
+    'hello-milestone': DemoProgress;
     demo2: DemoProgress;
+    'milestone-voting': DemoProgress;
     demo3: DemoProgress;
+    'dispute-resolution': DemoProgress;
     demo4: DemoProgress;
+    'micro-task-marketplace': DemoProgress;
   };
   
   // Rewards and badges

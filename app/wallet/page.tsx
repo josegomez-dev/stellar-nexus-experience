@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
