@@ -41,6 +41,8 @@
     "test:e2e:record": "cypress run --record --key YOUR_CYPRESS_KEY",
     "test:demo": "cypress run --spec 'cypress/e2e/first-demo.cy.ts'",
     "test:demo:open": "cypress open --config specPattern='cypress/e2e/first-demo.cy.ts'",
+    "test:demo:comprehensive": "cypress run --spec 'cypress/e2e/comprehensive-demo-flow.cy.ts'",
+    "test:demo:comprehensive:open": "cypress open --config specPattern='cypress/e2e/comprehensive-demo-flow.cy.ts'",
     "dev:clean": "rm -rf .next && npm run dev",
     "dev:reset": "rm -rf .next node_modules package-lock.json && npm install && npm run dev",
     "build:analyze": "ANALYZE=true npm run build",
