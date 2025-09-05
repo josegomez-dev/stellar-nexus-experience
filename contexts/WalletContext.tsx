@@ -9,8 +9,13 @@ interface WalletContextType {
   isLoading: boolean;
   error: Error | null;
   connect: (walletId?: string) => Promise<void>;
+  connectManualAddress: (address: string) => Promise<void>;
   disconnect: () => Promise<void>;
   isFreighterAvailable: boolean;
+  currentNetwork: string;
+  switchNetwork: (network: 'TESTNET' | 'PUBLIC') => Promise<void>;
+  detectNetworkChange: () => Promise<void>;
+  openWalletModal: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -37,8 +42,13 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     isLoading: walletHook.isLoading,
     error: walletHook.error,
     connect: walletHook.connect,
+    connectManualAddress: walletHook.connectManualAddress,
     disconnect: walletHook.disconnect,
     isFreighterAvailable: walletHook.isFreighterAvailable,
+    currentNetwork: walletHook.currentNetwork,
+    switchNetwork: walletHook.switchNetwork,
+    detectNetworkChange: walletHook.detectNetworkChange,
+    openWalletModal: walletHook.openWalletModal,
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

@@ -264,16 +264,16 @@ export const checkBadgeEligibility = (
   switch (badge.requirements.type) {
     case 'demo_completion':
       return userStats.completedDemos.includes(badge.requirements.value);
-    
+
     case 'milestone_completion':
       return userStats.totalMilestones >= badge.requirements.value;
-    
+
     case 'time_spent':
       return userStats.totalTimeSpent >= badge.requirements.value;
-    
+
     case 'level_reached':
       return userStats.level >= badge.requirements.value;
-    
+
     case 'custom':
       switch (badge.requirements.condition) {
         case 'early_user':
@@ -284,7 +284,7 @@ export const checkBadgeEligibility = (
         default:
           return false;
       }
-    
+
     default:
       return false;
   }

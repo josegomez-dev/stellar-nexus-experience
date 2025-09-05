@@ -1,6 +1,7 @@
 # 🚀 Developer Guide - Nexus Experience
 
-> **Complete onboarding guide for developers joining the Nexus Experience project**
+> **Complete onboarding guide for developers joining the Nexus Experience
+> project**
 
 ## 📋 **Quick Start**
 
@@ -22,6 +23,7 @@ npm run setup:dev
 ```
 
 This will:
+
 - Install dependencies
 - Create environment file from template
 - Fix code formatting
@@ -243,6 +245,7 @@ npm run env:check
 ```
 
 This will show:
+
 - ✅ Environment loaded successfully
 - 📊 Number of public variables
 - 🔐 Number of server variables
@@ -278,17 +281,20 @@ NEXT_PUBLIC_APP_VERSION=0.1.0
 ## 🧪 **Testing Strategy**
 
 ### **Unit Tests**
+
 - **Location**: `__tests__/` directory
 - **Command**: `npm run test:unit`
 - **Watch mode**: `npm run test:unit:watch`
 - **Coverage**: `npm run test:coverage`
 
 ### **Component Tests**
+
 - **Location**: `components/**/*.test.tsx`
 - **Command**: `npm run test:components`
 - **Watch mode**: `npm run test:components:watch`
 
 ### **E2E Tests**
+
 - **Location**: `cypress/e2e/`
 - **Command**: `npm run test:e2e`
 - **UI**: `npm run test:e2e:open`
@@ -327,6 +333,7 @@ const easing = DESIGN_TOKENS.animations.easing['ease-out'];
 ### **Common Issues**
 
 #### **Environment Problems**
+
 ```bash
 # Check environment status
 npm run env:check
@@ -339,6 +346,7 @@ npm run env:validate
 ```
 
 #### **Build Issues**
+
 ```bash
 # Clean build
 npm run build:clean
@@ -348,6 +356,7 @@ npm run dev:reset
 ```
 
 #### **Test Failures**
+
 ```bash
 # Run tests in isolation
 npm run test:unit -- --testNamePattern="test name"
@@ -357,6 +366,7 @@ npm run test:coverage:open
 ```
 
 #### **Development Server Issues**
+
 ```bash
 # Clean start
 npm run dev:clean

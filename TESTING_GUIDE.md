@@ -371,4 +371,3 @@ npx lint-staged
 - Pair programming for complex test scenarios
 - Regular test maintenance sessions
 - Share testing knowledge and best practices
-

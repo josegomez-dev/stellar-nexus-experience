@@ -82,6 +82,3 @@ export const FEATURE_FLAGS = {
   POINTS_SYSTEM: true,
   TUTORIAL_TTS: false,
 } as const;
-
-
-

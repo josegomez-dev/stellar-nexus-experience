@@ -241,12 +241,7 @@ export const TechTreeModal = ({ isOpen, onClose }: TechTreeModalProps) => {
         <div className='bg-gradient-to-r from-brand-500/20 to-accent-500/20 p-6 border-b border-white/20'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-3'>
-              <Image
-                src='/images/logo/logoicon.png'
-                alt='Trustless Work'
-                width={50}
-                height={50}
-              />
+              <Image src='/images/logo/logoicon.png' alt='Trustless Work' width={50} height={50} />
               <h2 className='text-2xl font-bold text-white'>Trustless Work Tech Tree</h2>
             </div>
             <button

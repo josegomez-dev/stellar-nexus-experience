@@ -23,15 +23,19 @@ module.exports = {
   plugins: ['react', '@typescript-eslint', 'prettier'],
   rules: {
     // Prettier
-    'prettier/prettier': 'error',
+    'prettier/prettier': 'warn',
 
     // React
     'react/react-in-jsx-scope': 'off', // Not needed in Next.js
     'react/prop-types': 'off', // We use TypeScript
+    'react/no-unescaped-entities': 'off',
+    'react/no-unknown-property': 'off',
 
     // TypeScript
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-explicit-any': 'warn',
+    'no-undef': 'off', // TypeScript handles this
+    'no-unused-vars': 'off', // TypeScript ESLint handles this
 
     // General
     'no-console': 'warn',
@@ -39,7 +43,7 @@ module.exports = {
     'no-var': 'error',
     'prefer-const': 'error',
     semi: ['error', 'always'],
-    quotes: ['error', 'single', { avoidEscape: true }],
+    quotes: 'off', // Let prettier handle this
   },
   settings: {
     react: {

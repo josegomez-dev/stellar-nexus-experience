@@ -36,7 +36,8 @@ export const UserDropdown = () => {
     return `${word1.charAt(0).toUpperCase()}${word1.slice(1)} ${word2.charAt(0).toUpperCase()}${word2.slice(1)}`;
   };
 
-  const displayName = isAuthenticated && user ? user.username : generateDisplayName(walletData?.publicKey || '');
+  const displayName =
+    isAuthenticated && user ? user.username : generateDisplayName(walletData?.publicKey || '');
   const stats = getUserStats();
 
   const handleDisconnect = () => {
@@ -83,7 +84,9 @@ export const UserDropdown = () => {
                   <div className='flex items-center space-x-2 mt-1'>
                     <span className='text-brand-300 text-xs'>Level {stats.level}</span>
                     <span className='text-white/50 text-xs'>•</span>
-                    <span className='text-accent-300 text-xs'>{stats.totalDemosCompleted} demos</span>
+                    <span className='text-accent-300 text-xs'>
+                      {stats.totalDemosCompleted} demos
+                    </span>
                   </div>
                 )}
               </div>
@@ -125,7 +128,12 @@ export const UserDropdown = () => {
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
                 >
                   <span className='text-lg'>
-                    <Image src='/images/icons/demos.png' alt='Web3 Playground' width={50} height={20} />
+                    <Image
+                      src='/images/icons/demos.png'
+                      alt='Web3 Playground'
+                      width={50}
+                      height={20}
+                    />
                   </span>
                   <span>Stellar Nexus Experience</span>
                 </a>
@@ -135,7 +143,12 @@ export const UserDropdown = () => {
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
                 >
                   <span className='text-lg'>
-                    <Image src='/images/icons/console.png' alt='Web3 Playground' width={50} height={20} />
+                    <Image
+                      src='/images/icons/console.png'
+                      alt='Web3 Playground'
+                      width={50}
+                      height={20}
+                    />
                   </span>
                   <span>Nexus Web3 Playground</span>
                 </a>
@@ -168,7 +181,7 @@ export const UserDropdown = () => {
                     <span>Leaderboard</span>
                   </div>
                   <span className='text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full font-medium'>
-                  Coming Soon
+                    Coming Soon
                   </span>
                 </button>
 
@@ -182,7 +195,8 @@ export const UserDropdown = () => {
               </>
             ) : (
               <p className='text-white/60 text-xs'>
-                Connect your wallet to access the full features of <span className='font-bold'>Stellar Nexus Experience</span>
+                Connect your wallet to access the full features of{' '}
+                <span className='font-bold'>Stellar Nexus Experience</span>
               </p>
             )}
           </div>

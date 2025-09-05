@@ -23,7 +23,11 @@ export interface DemoProgressData {
   score?: number;
 }
 
-export const useDemoProgress = (demoId: string, demoName: string, steps: Omit<DemoStep, 'completed' | 'completedAt'>[]) => {
+export const useDemoProgress = (
+  demoId: string,
+  demoName: string,
+  steps: Omit<DemoStep, 'completed' | 'completedAt'>[]
+) => {
   const { user, updateDemoProgress, addBadge, isAuthenticated } = useAuth();
 
   // Initialize demo progress
@@ -43,52 +47,58 @@ export const useDemoProgress = (demoId: string, demoName: string, steps: Omit<De
   }, [demoId, steps.length, user, updateDemoProgress, isAuthenticated]);
 
   // Complete a step
-  const completeStep = useCallback(async (stepId: string) => {
-    if (!isAuthenticated || !user) return;
+  const completeStep = useCallback(
+    async (stepId: string) => {
+      if (!isAuthenticated || !user) return;
 
-    const existingProgress = user.demoProgress[demoId];
-    if (!existingProgress) {
-      await updateDemoProgress(demoId, {
-        completed: false,
-        stepsCompleted: 1,
-        totalSteps: steps.length,
-        timeSpent: 0,
-      });
-    } else {
-      const newStepsCompleted = Math.min(existingProgress.stepsCompleted + 1, steps.length);
-      const isCompleted = newStepsCompleted === steps.length;
-      
-      await updateDemoProgress(demoId, {
-        stepsCompleted: newStepsCompleted,
-        completed: isCompleted,
-        completedAt: isCompleted ? new Date().toISOString() : undefined,
-      });
-
-      // Add completion badge if demo is completed
-      if (isCompleted) {
-        await addBadge({
-          id: `demo-completed-${demoId}`,
-          name: `${demoName} Master`,
-          description: `Completed the ${demoName} demo successfully`,
-          icon: '🏆',
-          rarity: 'common',
-          category: 'demo',
+      const existingProgress = user.demoProgress[demoId];
+      if (!existingProgress) {
+        await updateDemoProgress(demoId, {
+          completed: false,
+          stepsCompleted: 1,
+          totalSteps: steps.length,
+          timeSpent: 0,
         });
+      } else {
+        const newStepsCompleted = Math.min(existingProgress.stepsCompleted + 1, steps.length);
+        const isCompleted = newStepsCompleted === steps.length;
+
+        await updateDemoProgress(demoId, {
+          stepsCompleted: newStepsCompleted,
+          completed: isCompleted,
+          completedAt: isCompleted ? new Date().toISOString() : undefined,
+        });
+
+        // Add completion badge if demo is completed
+        if (isCompleted) {
+          await addBadge({
+            id: `demo-completed-${demoId}`,
+            name: `${demoName} Master`,
+            description: `Completed the ${demoName} demo successfully`,
+            icon: '🏆',
+            rarity: 'common',
+            category: 'demo',
+          });
+        }
       }
-    }
-  }, [demoId, demoName, steps.length, user, updateDemoProgress, addBadge, isAuthenticated]);
+    },
+    [demoId, demoName, steps.length, user, updateDemoProgress, addBadge, isAuthenticated]
+  );
 
   // Update time spent
-  const updateTimeSpent = useCallback(async (timeSpent: number) => {
-    if (!isAuthenticated || !user) return;
+  const updateTimeSpent = useCallback(
+    async (timeSpent: number) => {
+      if (!isAuthenticated || !user) return;
 
-    const existingProgress = user.demoProgress[demoId];
-    if (existingProgress) {
-      await updateDemoProgress(demoId, {
-        timeSpent: existingProgress.timeSpent + timeSpent,
-      });
-    }
-  }, [demoId, user, updateDemoProgress, isAuthenticated]);
+      const existingProgress = user.demoProgress[demoId];
+      if (existingProgress) {
+        await updateDemoProgress(demoId, {
+          timeSpent: existingProgress.timeSpent + timeSpent,
+        });
+      }
+    },
+    [demoId, user, updateDemoProgress, isAuthenticated]
+  );
 
   // Get current progress
   const getCurrentProgress = useCallback(() => {
@@ -123,7 +133,8 @@ export const useDemoProgress = (demoId: string, demoName: string, steps: Omit<De
       steps: steps.map((step, index) => ({
         ...step,
         completed: index < existingProgress.stepsCompleted,
-        completedAt: index < existingProgress.stepsCompleted ? existingProgress.completedAt : undefined,
+        completedAt:
+          index < existingProgress.stepsCompleted ? existingProgress.completedAt : undefined,
       })),
       currentStep: existingProgress.stepsCompleted,
       totalSteps: existingProgress.totalSteps,

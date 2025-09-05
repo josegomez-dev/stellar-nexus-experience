@@ -170,12 +170,10 @@ npm run clean               # Clean up cache
 ---
 
 **💡 Pro Tips:**
+
 - Use `npm run dev:clean` if you encounter strange build issues
 - Use `npm run health:full` to verify everything is working
 - Use `npm run test:demo:open` to manually test your changes
 - Use `npm run check:fix` before committing to automatically fix issues
 
 **🚀 Happy coding!**
-
-
-

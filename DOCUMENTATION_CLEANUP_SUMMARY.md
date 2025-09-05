@@ -151,4 +151,3 @@ and Web3 projects!** 🎉
 _This cleanup ensures that new developers can quickly understand and contribute
 to the Nexus Experience project while maintaining a professional, attractive
 presentation for the Web3 community._
-

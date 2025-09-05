@@ -88,7 +88,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userData = JSON.parse(existingUser);
           setUser(userData);
-          console.log('✅ Auto-signed in existing user:', userData.username || userData.walletAddress);
+          console.log(
+            '✅ Auto-signed in existing user:',
+            userData.username || userData.walletAddress
+          );
         } catch (err) {
           console.error('Error parsing user data:', err);
         }
@@ -99,7 +102,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [isConnected, walletData?.publicKey]);
 
-  const signUp = async (walletAddress: string, username?: string, email?: string): Promise<void> => {
+  const signUp = async (
+    walletAddress: string,
+    username?: string,
+    email?: string
+  ): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
@@ -189,7 +196,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateDemoProgress = async (demoId: string, progress: Partial<DemoProgress[string]>): Promise<void> => {
+  const updateDemoProgress = async (
+    demoId: string,
+    progress: Partial<DemoProgress[string]>
+  ): Promise<void> => {
     if (!user) return;
 
     try {
@@ -275,7 +285,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     const totalDemosCompleted = Object.values(user.demoProgress).filter(p => p.completed).length;
-    const totalTimeSpent = Object.values(user.demoProgress).reduce((sum, p) => sum + p.timeSpent, 0);
+    const totalTimeSpent = Object.values(user.demoProgress).reduce(
+      (sum, p) => sum + p.timeSpent,
+      0
+    );
 
     return {
       totalDemosCompleted,

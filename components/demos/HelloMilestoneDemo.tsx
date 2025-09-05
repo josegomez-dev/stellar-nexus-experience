@@ -47,38 +47,44 @@ export const HelloMilestoneDemo = () => {
   // Scroll animation function
   const scrollToNextStep = (completedStepId: string) => {
     setIsScrollingToNext(true);
-    
+
     // Find the next step to highlight
     const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
     const currentIndex = stepOrder.indexOf(completedStepId);
     const nextStepId = stepOrder[currentIndex + 1];
-    
+
     if (nextStepId) {
       setCurrentHighlightedStep(nextStepId);
-      
+
       // Find the next step element
       const nextStepElement = document.querySelector(`[data-step-id="${nextStepId}"]`);
-      
+
       if (nextStepElement) {
         // Add pulsing animation to the next step
         nextStepElement.classList.add('animate-pulse', 'ring-4', 'ring-brand-400/50');
-        
+
         // Scroll to the next step with smooth animation
         setTimeout(() => {
           nextStepElement.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
-            inline: 'nearest'
+            inline: 'nearest',
           });
-          
+
           // Add a glowing effect
           setTimeout(() => {
             nextStepElement.classList.add('shadow-2xl', 'shadow-brand-500/30');
           }, 500);
-          
+
           // Remove highlighting after 3 seconds
           setTimeout(() => {
-            nextStepElement.classList.remove('animate-pulse', 'ring-4', 'ring-brand-400/50', 'shadow-2xl', 'shadow-brand-500/30');
+            nextStepElement.classList.remove(
+              'animate-pulse',
+              'ring-4',
+              'ring-brand-400/50',
+              'shadow-2xl',
+              'shadow-brand-500/30'
+            );
             setCurrentHighlightedStep(null);
             setIsScrollingToNext(false);
           }, 3000);
@@ -239,7 +245,7 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setCurrentStep(1);
       setDemoStarted(true);
-      
+
       // Scroll to next step after a short delay
       setTimeout(() => {
         scrollToNextStep('initialize');
@@ -323,7 +329,7 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(2);
-      
+
       // Scroll to next step after a short delay
       setTimeout(() => {
         scrollToNextStep('fund');
@@ -409,7 +415,7 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setMilestoneStatus('completed');
       setCurrentStep(3);
-      
+
       // Scroll to next step after a short delay
       setTimeout(() => {
         scrollToNextStep('complete');
@@ -493,7 +499,7 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(4);
-      
+
       // Scroll to next step after a short delay
       setTimeout(() => {
         scrollToNextStep('approve');
@@ -577,20 +583,20 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(5);
-      
+
       // Demo completed - show celebration animation
       setTimeout(() => {
         setShowConfetti(true);
         setIsScrollingToNext(false);
         setCurrentHighlightedStep(null);
-        
+
         // Scroll to top to show completion
         setTimeout(() => {
           const demoContainer = document.querySelector('.demo-container');
           if (demoContainer) {
             demoContainer.scrollIntoView({
               behavior: 'smooth',
-              block: 'start'
+              block: 'start',
             });
           }
         }, 500);
@@ -696,7 +702,9 @@ export const HelloMilestoneDemo = () => {
               {isScrollingToNext && (
                 <div className='flex items-center space-x-2 bg-brand-500/20 border border-brand-400/30 rounded-lg px-3 py-2'>
                   <div className='w-2 h-2 bg-brand-400 rounded-full animate-pulse'></div>
-                  <span className='text-brand-300 text-sm font-medium'>Guiding to next step...</span>
+                  <span className='text-brand-300 text-sm font-medium'>
+                    Guiding to next step...
+                  </span>
                 </div>
               )}
               {demoStarted && (

@@ -584,7 +584,7 @@ export const OnboardingOverlay = ({
             {demoTabs.map(tab => {
               const isFirstDemo = tab.id === 'hello-milestone';
               const isDisabled = !isFirstDemo;
-              
+
               return (
                 <button
                   key={tab.id}
@@ -594,8 +594,8 @@ export const OnboardingOverlay = ({
                     isDisabled
                       ? 'bg-gray-600/20 border-gray-600/30 text-gray-400 cursor-not-allowed blur-sm opacity-50'
                       : activeTab === tab.id
-                      ? `bg-gradient-to-r ${tab.color} text-white border-white/50 shadow-lg`
-                      : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                        ? `bg-gradient-to-r ${tab.color} text-white border-white/50 shadow-lg`
+                        : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                   }`}
                   title={isDisabled ? 'Complete the first demo to unlock this tutorial' : ''}
                 >

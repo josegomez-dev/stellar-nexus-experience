@@ -250,7 +250,10 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     <>
       {/* Speaking Character - Appears from left side when speaking */}
       {walletConnected && isSpeaking && (
-        <div className='fixed bottom-6 left-6 z-100 animate-slideInLeft' style={{ zIndex: 1000, marginLeft: '80px', marginBottom: '-50px' }}>
+        <div
+          className='fixed bottom-6 left-6 z-100 animate-slideInLeft'
+          style={{ zIndex: 1000, marginLeft: '80px', marginBottom: '-50px' }}
+        >
           <div className='relative'>
             {/* Character Image */}
             <Image
@@ -265,8 +268,14 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               <div className='bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 border border-white/30'>
                 <div className='flex space-x-1'>
                   <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping'></div>
-                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping' style={{ animationDelay: '0.2s' }}></div>
-                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping' style={{ animationDelay: '0.4s' }}></div>
+                  <div
+                    className='w-1 h-1 bg-purple-400 rounded-full animate-ping'
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
+                  <div
+                    className='w-1 h-1 bg-purple-400 rounded-full animate-ping'
+                    style={{ animationDelay: '0.4s' }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -278,339 +287,345 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         {/* Character Avatar - Only show when wallet is connected */}
         {walletConnected && (
           <div className='relative group'>
-        {/* Character Image/Icon */}
-        <div
-          className='w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative'
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {/* Voice Toggle Button */}
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              toggleTts();
-            }}
-            className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
-              ttsEnabled
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-                : 'bg-gradient-to-r from-red-500 to-pink-600'
-            }`}
-            title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-          >
-            <span className='text-sm text-white'>{ttsEnabled ? '🔊' : '🔇'}</span>
-          </button>
-          <div className='w-full h-full rounded-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden'>
-            {/* Stellar Network Pattern */}
-            <div className='absolute inset-0 opacity-30'>
-              <div className='w-full h-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.3)_0%,_transparent_70%)]'></div>
-            </div>
-            {/* Character Image */}
-            <Image
-              src='/images/character/nexus-prime-chat.png'
-              alt='NEXUS PRIME'
-              width={80}
-              height={80}
-              className='w-16 h-16 rounded-full relative z-10 object-cover'
-            />
-            {/* Glowing Effect */}
-            <div className='absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'></div>
-          </div>
-        </div>
-
-        {/* Speech Bubble */}
-        {isExpanded && (
-          <div className='absolute bottom-20 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
-            {/* Arrow */}
-            <div className='absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
-
-            {/* Character Header */}
-            <div className='flex items-center justify-between mb-3'>
-              <div className='flex items-center space-x-3'>
-                <div className='w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden'>
-                  <Image
-                    src='/images/character/nexus-prime-chat.png'
-                    alt='NEXUS PRIME'
-                    width={32}
-                    height={32}
-                    className='w-full h-full object-cover'
-                  />
+            {/* Character Image/Icon */}
+            <div
+              className='w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative'
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {/* Voice Toggle Button */}
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  toggleTts();
+                }}
+                className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
+                  ttsEnabled
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600'
+                    : 'bg-gradient-to-r from-red-500 to-pink-600'
+                }`}
+                title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
+              >
+                <span className='text-sm text-white'>{ttsEnabled ? '🔊' : '🔇'}</span>
+              </button>
+              <div className='w-full h-full rounded-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden'>
+                {/* Stellar Network Pattern */}
+                <div className='absolute inset-0 opacity-30'>
+                  <div className='w-full h-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.3)_0%,_transparent_70%)]'></div>
                 </div>
-                <div>
-                  <h4 className='text-cyan-300 font-semibold text-sm'>NEXUS PRIME</h4>
-                  <p className='text-white/60 text-xs'>Guardian of STELLAR NEXUS</p>
-                </div>
-              </div>
-
-              {/* TTS Controls in Chat Header */}
-              <div className='flex items-center space-x-2'>
-                {/* Play Current Message Button */}
-                <button
-                  onClick={() => {
-                    if (ttsEnabled && currentMessage) {
-                      speakMessage(currentMessage);
-                    }
-                  }}
-                  disabled={!ttsEnabled || !currentMessage || isSpeaking}
-                  className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                    !ttsEnabled || !currentMessage || isSpeaking
-                      ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                  }`}
-                  title={
-                    !ttsEnabled
-                      ? 'Voice is disabled'
-                      : !currentMessage
-                        ? 'No message to play'
-                        : isSpeaking
-                          ? 'Already speaking'
-                          : 'Play current message with voice'
-                  }
-                >
-                  <span className='text-sm'>{isSpeaking ? '⏸️' : '▶️'}</span>
-                </button>
-
-                {/* TTS Toggle */}
-                <button
-                  onClick={toggleTts}
-                  className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                    ttsEnabled
-                      ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                      : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                  }`}
-                  title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-                >
-                  <span className='text-sm'>{ttsEnabled ? '🔊' : '🔇'}</span>
-                </button>
+                {/* Character Image */}
+                <Image
+                  src='/images/character/nexus-prime-chat.png'
+                  alt='NEXUS PRIME'
+                  width={80}
+                  height={80}
+                  className='w-16 h-16 rounded-full relative z-10 object-cover'
+                />
+                {/* Glowing Effect */}
+                <div className='absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'></div>
               </div>
             </div>
 
-            {/* Message */}
-            <div className='mb-3'>
-              {showTutorial ? (
-                <div>
-                  <h5 className='text-cyan-300 font-semibold text-sm mb-2'>
-                    {tutorialSteps[tutorialStep].title}
-                  </h5>
-                  <p className='text-white/90 text-sm leading-relaxed'>
-                    {tutorialSteps[tutorialStep].message}
-                  </p>
-                  <div className='mt-2 p-2 bg-white/5 rounded-lg border border-white/10'>
-                    <p className='text-cyan-300 text-xs font-medium'>
-                      💡 {tutorialSteps[tutorialStep].action}
-                    </p>
+            {/* Speech Bubble */}
+            {isExpanded && (
+              <div className='absolute bottom-20 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
+                {/* Arrow */}
+                <div className='absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
+
+                {/* Character Header */}
+                <div className='flex items-center justify-between mb-3'>
+                  <div className='flex items-center space-x-3'>
+                    <div className='w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden'>
+                      <Image
+                        src='/images/character/nexus-prime-chat.png'
+                        alt='NEXUS PRIME'
+                        width={32}
+                        height={32}
+                        className='w-full h-full object-cover'
+                      />
+                    </div>
+                    <div>
+                      <h4 className='text-cyan-300 font-semibold text-sm'>NEXUS PRIME</h4>
+                      <p className='text-white/60 text-xs'>Guardian of STELLAR NEXUS</p>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div>
-                  <p className='text-white/90 text-sm leading-relaxed'>
-                    {currentMessage}
-                    {isTyping && <span className='inline-block w-2 h-4 bg-cyan-400 ml-1'></span>}
-                  </p>
 
-                  {/* TTS Controls for Regular Chat */}
-                  <div className='mt-2 flex items-center justify-between'>
-                    <span className='text-xs text-white/60'>Voice Assistant:</span>
-                    <div className='flex items-center space-x-2'>
-                      {/* Play Button */}
-                      <button
-                        onClick={() => {
-                          if (ttsEnabled && currentMessage) {
-                            speakMessage(currentMessage);
-                          }
-                        }}
-                        disabled={!ttsEnabled || !currentMessage || isSpeaking}
-                        className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
-                          !ttsEnabled || !currentMessage || isSpeaking
-                            ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                        }`}
-                        title={
-                          !ttsEnabled
-                            ? 'Voice is disabled'
-                            : !currentMessage
-                              ? 'No message to play'
-                              : isSpeaking
-                                ? 'Already speaking'
-                                : 'Play message with voice'
+                  {/* TTS Controls in Chat Header */}
+                  <div className='flex items-center space-x-2'>
+                    {/* Play Current Message Button */}
+                    <button
+                      onClick={() => {
+                        if (ttsEnabled && currentMessage) {
+                          speakMessage(currentMessage);
                         }
-                      >
-                        {isSpeaking ? '⏸️' : '▶️'}
-                      </button>
-
-                      {/* TTS Toggle */}
-                      <button
-                        onClick={toggleTts}
-                        className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
-                          ttsEnabled
-                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                            : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                        }`}
-                        title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-                      >
-                        {ttsEnabled ? '🔊 ON' : '🔇 OFF'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Status Indicators */}
-            <div className='flex items-center justify-between text-xs'>
-              <div className='flex items-center space-x-2'>
-                <div className='w-2 h-2 bg-green-400 rounded-full'></div>
-                <span className='text-white/60'>Online</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                {isSpeaking ? (
-                  <>
-                    <div className='w-2 h-2 bg-purple-400 rounded-full'></div>
-                    <span className='text-purple-300'>Speaking...</span>
-                  </>
-                ) : (
-                  <>
-                    <div className='w-2 h-2 bg-cyan-400 rounded-full'></div>
-                    <span className='text-white/60'>Stellar Network</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Tutorial Actions */}
-            <div className='mt-3 pt-3 border-t border-white/10'>
-              {!showTutorial ? (
-                <div className='space-y-2'>
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className='w-full px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition-colors border border-white/20 hover:border-white/30'
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              ) : (
-                <div className='space-y-2'>
-                  {/* Tutorial Progress and TTS Toggle */}
-                  <div className='flex items-center justify-between mb-2'>
-                    <div className='flex-1 text-center'>
-                      <div className='w-full bg-white/10 rounded-full h-1 mb-2'>
-                        <div
-                          className='bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full'
-                          style={{ width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className='text-xs text-white/60'>
-                        Step {tutorialStep + 1} of {tutorialSteps.length}
-                      </span>
-                    </div>
-
-                    {/* TTS Controls for Tutorial */}
-                    <div className='flex items-center space-x-2'>
-                      {/* Play Tutorial Step Button */}
-                      <button
-                        onClick={() => {
-                          if (ttsEnabled) {
-                            const step = tutorialSteps[tutorialStep];
-                            speakMessage(`${step.title}. ${step.message}`);
-                          }
-                        }}
-                        disabled={!ttsEnabled || isSpeaking}
-                        className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                          !ttsEnabled || isSpeaking
-                            ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                        }`}
-                        title={
-                          !ttsEnabled
-                            ? 'Voice is disabled'
+                      }}
+                      disabled={!ttsEnabled || !currentMessage || isSpeaking}
+                      className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        !ttsEnabled || !currentMessage || isSpeaking
+                          ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                      }`}
+                      title={
+                        !ttsEnabled
+                          ? 'Voice is disabled'
+                          : !currentMessage
+                            ? 'No message to play'
                             : isSpeaking
                               ? 'Already speaking'
-                              : 'Replay tutorial step with voice'
-                        }
-                      >
-                        <span className='text-xs'>{isSpeaking ? '⏸️' : '▶️'}</span>
-                      </button>
+                              : 'Play current message with voice'
+                      }
+                    >
+                      <span className='text-sm'>{isSpeaking ? '⏸️' : '▶️'}</span>
+                    </button>
 
-                      {/* TTS Toggle */}
+                    {/* TTS Toggle */}
+                    <button
+                      onClick={toggleTts}
+                      className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                        ttsEnabled
+                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
+                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                      }`}
+                      title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
+                    >
+                      <span className='text-sm'>{ttsEnabled ? '🔊' : '🔇'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div className='mb-3'>
+                  {showTutorial ? (
+                    <div>
+                      <h5 className='text-cyan-300 font-semibold text-sm mb-2'>
+                        {tutorialSteps[tutorialStep].title}
+                      </h5>
+                      <p className='text-white/90 text-sm leading-relaxed'>
+                        {tutorialSteps[tutorialStep].message}
+                      </p>
+                      <div className='mt-2 p-2 bg-white/5 rounded-lg border border-white/10'>
+                        <p className='text-cyan-300 text-xs font-medium'>
+                          💡 {tutorialSteps[tutorialStep].action}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className='text-white/90 text-sm leading-relaxed'>
+                        {currentMessage}
+                        {isTyping && (
+                          <span className='inline-block w-2 h-4 bg-cyan-400 ml-1'></span>
+                        )}
+                      </p>
+
+                      {/* TTS Controls for Regular Chat */}
+                      <div className='mt-2 flex items-center justify-between'>
+                        <span className='text-xs text-white/60'>Voice Assistant:</span>
+                        <div className='flex items-center space-x-2'>
+                          {/* Play Button */}
+                          <button
+                            onClick={() => {
+                              if (ttsEnabled && currentMessage) {
+                                speakMessage(currentMessage);
+                              }
+                            }}
+                            disabled={!ttsEnabled || !currentMessage || isSpeaking}
+                            className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
+                              !ttsEnabled || !currentMessage || isSpeaking
+                                ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                            }`}
+                            title={
+                              !ttsEnabled
+                                ? 'Voice is disabled'
+                                : !currentMessage
+                                  ? 'No message to play'
+                                  : isSpeaking
+                                    ? 'Already speaking'
+                                    : 'Play message with voice'
+                            }
+                          >
+                            {isSpeaking ? '⏸️' : '▶️'}
+                          </button>
+
+                          {/* TTS Toggle */}
+                          <button
+                            onClick={toggleTts}
+                            className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
+                              ttsEnabled
+                                ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
+                                : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                            }`}
+                            title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
+                          >
+                            {ttsEnabled ? '🔊 ON' : '🔇 OFF'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Indicators */}
+                <div className='flex items-center justify-between text-xs'>
+                  <div className='flex items-center space-x-2'>
+                    <div className='w-2 h-2 bg-green-400 rounded-full'></div>
+                    <span className='text-white/60'>Online</span>
+                  </div>
+                  <div className='flex items-center space-x-2'>
+                    {isSpeaking ? (
+                      <>
+                        <div className='w-2 h-2 bg-purple-400 rounded-full'></div>
+                        <span className='text-purple-300'>Speaking...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className='w-2 h-2 bg-cyan-400 rounded-full'></div>
+                        <span className='text-white/60'>Stellar Network</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tutorial Actions */}
+                <div className='mt-3 pt-3 border-t border-white/10'>
+                  {!showTutorial ? (
+                    <div className='space-y-2'>
                       <button
-                        onClick={toggleTts}
-                        className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                          ttsEnabled
-                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                            : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                        }`}
-                        title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
+                        onClick={() => setIsExpanded(false)}
+                        className='w-full px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg transition-colors border border-white/20 hover:border-white/30'
                       >
-                        <span className='text-xs'>{ttsEnabled ? '🔊' : '🔇'}</span>
+                        Dismiss
                       </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className='space-y-2'>
+                      {/* Tutorial Progress and TTS Toggle */}
+                      <div className='flex items-center justify-between mb-2'>
+                        <div className='flex-1 text-center'>
+                          <div className='w-full bg-white/10 rounded-full h-1 mb-2'>
+                            <div
+                              className='bg-gradient-to-r from-cyan-500 to-purple-600 h-1 rounded-full'
+                              style={{
+                                width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%`,
+                              }}
+                            ></div>
+                          </div>
+                          <span className='text-xs text-white/60'>
+                            Step {tutorialStep + 1} of {tutorialSteps.length}
+                          </span>
+                        </div>
 
-                  {/* Tutorial Navigation */}
-                  <div className='flex space-x-2'>
-                    <button
-                      onClick={previousTutorialStep}
-                      disabled={tutorialStep === 0}
-                      className={`flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors border ${
-                        tutorialStep === 0
-                          ? 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed'
-                          : 'bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white/30'
-                      }`}
-                    >
-                      ← Previous
-                    </button>
-                    <button
-                      onClick={nextTutorialStep}
-                      className='flex-1 px-2 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-semibold rounded-lg transition-all duration-300'
-                    >
-                      {tutorialStep === tutorialSteps.length - 1 ? 'Finish' : 'Next →'}
-                    </button>
-                  </div>
+                        {/* TTS Controls for Tutorial */}
+                        <div className='flex items-center space-x-2'>
+                          {/* Play Tutorial Step Button */}
+                          <button
+                            onClick={() => {
+                              if (ttsEnabled) {
+                                const step = tutorialSteps[tutorialStep];
+                                speakMessage(`${step.title}. ${step.message}`);
+                              }
+                            }}
+                            disabled={!ttsEnabled || isSpeaking}
+                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                              !ttsEnabled || isSpeaking
+                                ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
+                            }`}
+                            title={
+                              !ttsEnabled
+                                ? 'Voice is disabled'
+                                : isSpeaking
+                                  ? 'Already speaking'
+                                  : 'Replay tutorial step with voice'
+                            }
+                          >
+                            <span className='text-xs'>{isSpeaking ? '⏸️' : '▶️'}</span>
+                          </button>
 
-                  <button
-                    onClick={skipTutorial}
-                    className='w-full px-2 py-1.5 text-white/60 hover:text-white text-xs rounded-lg transition-colors'
-                  >
-                    Skip Tutorial
-                  </button>
+                          {/* TTS Toggle */}
+                          <button
+                            onClick={toggleTts}
+                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+                              ttsEnabled
+                                ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
+                                : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
+                            }`}
+                            title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
+                          >
+                            <span className='text-xs'>{ttsEnabled ? '🔊' : '🔇'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tutorial Navigation */}
+                      <div className='flex space-x-2'>
+                        <button
+                          onClick={previousTutorialStep}
+                          disabled={tutorialStep === 0}
+                          className={`flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors border ${
+                            tutorialStep === 0
+                              ? 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed'
+                              : 'bg-white/10 hover:bg-white/20 text-white border-white/20 hover:border-white/30'
+                          }`}
+                        >
+                          ← Previous
+                        </button>
+                        <button
+                          onClick={nextTutorialStep}
+                          className='flex-1 px-2 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-semibold rounded-lg transition-all duration-300'
+                        >
+                          {tutorialStep === tutorialSteps.length - 1 ? 'Finish' : 'Next →'}
+                        </button>
+                      </div>
+
+                      <button
+                        onClick={skipTutorial}
+                        className='w-full px-2 py-1.5 text-white/60 hover:text-white text-xs rounded-lg transition-colors'
+                      >
+                        Skip Tutorial
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+              </div>
+            )}
 
-        {/* Simple Hover Tooltip */}
-        {!isExpanded && (
-          <div className='absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none'>
-            <div className='bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-xl shadow-2xl p-3 w-48'>
-              {/* Arrow */}
-              <div className='absolute -bottom-2 left-6 w-3 h-3 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
+            {/* Simple Hover Tooltip */}
+            {!isExpanded && (
+              <div className='absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none'>
+                <div className='bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-xl shadow-2xl p-3 w-48'>
+                  {/* Arrow */}
+                  <div className='absolute -bottom-2 left-6 w-3 h-3 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
 
-              {/* Simple Message */}
-              <div className='text-center'>
-                <p className='text-white/90 text-sm font-medium'>Click to chat with NEXUS PRIME</p>
-                <p className='text-cyan-300 text-xs mt-1'>Your AI Guardian</p>
+                  {/* Simple Message */}
+                  <div className='text-center'>
+                    <p className='text-white/90 text-sm font-medium'>
+                      Click to chat with NEXUS PRIME
+                    </p>
+                    <p className='text-cyan-300 text-xs mt-1'>Your AI Guardian</p>
 
-                {/* TTS Status in Tooltip */}
-                <div className='mt-2 pt-2 border-t border-white/10'>
-                  <div className='flex items-center justify-center space-x-2'>
-                    <span className='text-xs text-white/60'>Voice:</span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        ttsEnabled
-                          ? 'bg-green-500/20 text-green-300 border border-green-400/50'
-                          : 'bg-red-500/20 text-red-300 border border-red-400/50'
-                      }`}
-                    >
-                      {ttsEnabled ? 'ON 🔊' : 'OFF 🔇'}
-                    </span>
+                    {/* TTS Status in Tooltip */}
+                    <div className='mt-2 pt-2 border-t border-white/10'>
+                      <div className='flex items-center justify-center space-x-2'>
+                        <span className='text-xs text-white/60'>Voice:</span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            ttsEnabled
+                              ? 'bg-green-500/20 text-green-300 border border-green-400/50'
+                              : 'bg-red-500/20 text-red-300 border border-red-400/50'
+                          }`}
+                        >
+                          {ttsEnabled ? 'ON 🔊' : 'OFF 🔇'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
-        </div>
-      )}
-    </div>
+      </div>
     </>
   );
 };

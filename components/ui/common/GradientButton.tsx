@@ -78,4 +78,3 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
     </button>
   );
 };
-

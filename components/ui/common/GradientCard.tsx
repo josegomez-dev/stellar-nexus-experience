@@ -78,4 +78,3 @@ export const GradientCard: React.FC<GradientCardProps> = ({
 
   return <div className={baseClasses}>{children}</div>;
 };
-

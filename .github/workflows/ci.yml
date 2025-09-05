@@ -144,4 +144,3 @@ jobs:
           name: cypress-videos
           path: cypress/videos/
           retention-days: 7
-

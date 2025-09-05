@@ -5,6 +5,7 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/UserDropdown';
+import { NetworkIndicator } from '@/components/ui/NetworkIndicator';
 import Image from 'next/image';
 
 export const Header = () => {
@@ -30,21 +31,14 @@ export const Header = () => {
             </div>
           </div>
 
-
           {/* Header Controls */}
           <div className='flex items-center space-x-4'>
             {/* Network Indicator */}
-            <div className='hidden sm:flex items-center space-x-2'>
-              <span className='text-xs text-white/60'>Network:</span>
-              <span
-                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  stellarConfig.network === 'TESTNET'
-                    ? 'bg-warning-500/30 text-warning-200 border border-warning-400/30'
-                    : 'bg-success-500/30 text-success-200 border border-success-400/30'
-                }`}
-              >
-                {stellarConfig.network}
-              </span>
+            <div className='hidden sm:flex items-center'>
+              <NetworkIndicator 
+                className="scale-90" 
+                showSwitchButton={true}
+              />
             </div>
 
             {/* User Dropdown */}

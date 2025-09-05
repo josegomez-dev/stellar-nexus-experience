@@ -8,6 +8,7 @@ import { stellarConfig } from '@/lib/wallet-config';
 import { Tooltip } from './Tooltip';
 import Image from 'next/image';
 import { Web3OnboardingModal } from './Web3OnboardingModal';
+import { NetworkIndicator } from './NetworkIndicator';
 
 interface WalletSidebarProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface WalletSidebarProps {
 }
 
 export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
-  const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet();
+  const { walletData, isConnected, connect, connectManualAddress, disconnect, isFreighterAvailable, openWalletModal } = useGlobalWallet();
   const { getRecentTransactions, transactions } = useTransactionHistory();
   const { addToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -102,7 +103,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
   // Track if user manually opened the sidebar (to prevent auto-close conflicts)
   const [userOpened, setUserOpened] = useState(false);
-  
+
   // Auto-close sidebar when wallet is disconnected (but allow manual opening)
   useEffect(() => {
     if (!isConnected && isOpen && !userOpened) {
@@ -110,7 +111,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       const timer = setTimeout(() => {
         onToggle();
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isConnected, isOpen, userOpened, onToggle]);
@@ -413,12 +414,12 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
                         setIsConnecting(true);
                         try {
-                          await connect(manualAddress.trim());
+                          await connectManualAddress(manualAddress.trim());
                           setManualAddress('');
                           addToast({
                             type: 'success',
                             title: 'Wallet Connected',
-                            message: 'Successfully connected to Stellar wallet',
+                            message: 'Successfully connected to manual Stellar address',
                             duration: 4000,
                           });
                         } catch (error) {
@@ -562,12 +563,11 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   {/* Network Info - Only show when expanded */}
                   {isExpanded && (
                     <div className='animate-fadeIn'>
-                      <p className='text-xs text-white/60 mb-1'>Network</p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded bg-gradient-to-r ${getNetworkColor()} bg-clip-text text-transparent font-medium`}
-                      >
-                        {walletData?.network || stellarConfig.network}
-                      </span>
+                      <p className='text-xs text-white/60 mb-2'>Network</p>
+                      <NetworkIndicator 
+                        className="w-full" 
+                        showSwitchButton={true}
+                      />
                     </div>
                   )}
                 </div>
@@ -634,7 +634,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       className='w-5 h-5'
                     />
                   </a>
-
                 </div>
 
                 <button
@@ -769,96 +768,95 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
       {/* Floating Wallet Control Buttons - Always show, different styling based on connection */}
       <div className='fixed top-20 right-4 z-30 flex flex-col space-y-3'>
-          {/* Open Wallet Button */}
-          {!isOpen && (
-            <>
-              {/* Mobile toggle button */}
-              <button
-                onClick={() => {
-                  setUserOpened(true);
-                  onToggle();
-                  // Auto-expand the sidebar when opening
-                  setTimeout(() => setIsExpanded(true), 100);
-                }}
-                className={`p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden cursor-pointer relative group ${
-                  isConnected 
-                    ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white' 
-                    : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
-                }`}
-                title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
-              >
+        {/* Open Wallet Button */}
+        {!isOpen && (
+          <>
+            {/* Mobile toggle button */}
+            <button
+              onClick={() => {
+                setUserOpened(true);
+                onToggle();
+                // Auto-expand the sidebar when opening
+                setTimeout(() => setIsExpanded(true), 100);
+              }}
+              className={`p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 lg:hidden cursor-pointer relative group ${
+                isConnected
+                  ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white'
+                  : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
+              }`}
+              title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
+            >
+              <span className='text-xl'>{isConnected ? '🔐' : '🔌'}</span>
+              {/* Hover indicator */}
+              <div className='absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+            </button>
+
+            {/* Desktop toggle button */}
+            <button
+              onClick={() => {
+                setUserOpened(true);
+                onToggle();
+                // Auto-expand the sidebar when opening
+                setTimeout(() => setIsExpanded(true), 100);
+              }}
+              className={`p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block cursor-pointer relative group ${
+                isConnected
+                  ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white'
+                  : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
+              }`}
+              title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
+            >
+              <div className='flex items-center space-x-3'>
                 <span className='text-xl'>{isConnected ? '🔐' : '🔌'}</span>
-                {/* Hover indicator */}
-                <div className='absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-              </button>
+                <span className='text-sm font-medium'>{isConnected ? 'Wallet' : 'Connect'}</span>
+              </div>
+              {/* Hover indicator */}
+              <div className='absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+            </button>
+          </>
+        )}
 
-              {/* Desktop toggle button */}
-              <button
-                onClick={() => {
-                  setUserOpened(true);
-                  onToggle();
-                  // Auto-expand the sidebar when opening
-                  setTimeout(() => setIsExpanded(true), 100);
-                }}
-                className={`p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden lg:block cursor-pointer relative group ${
-                  isConnected 
-                    ? 'bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white' 
-                    : 'bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-gray-300'
-                }`}
-                title={isConnected ? 'Open Wallet' : 'Connect Wallet'}
-              >
-                <div className='flex items-center space-x-3'>
-                  <span className='text-xl'>{isConnected ? '🔐' : '🔌'}</span>
-                  <span className='text-sm font-medium'>{isConnected ? 'Wallet' : 'Connect'}</span>
-                </div>
-                {/* Hover indicator */}
-                <div className='absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-              </button>
-            </>
-          )}
+        {/* Navigation Buttons - Matching Main Menu - Only show when connected */}
+        {!isOpen && isConnected && (
+          <>
+            {/* Demos Button */}
+            <a
+              href='/demos'
+              className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+              title='Demos'
+            >
+              <div className='flex items-center space-x-2'>
+                <Image
+                  src='/images/icons/demos.png'
+                  alt='Demos'
+                  width={20}
+                  height={20}
+                  className='w-5 h-5 group-hover:animate-bounce'
+                />
+                <span className='text-sm font-medium hidden lg:block'>Demos</span>
+              </div>
+            </a>
 
-          {/* Navigation Buttons - Matching Main Menu - Only show when connected */}
-          {!isOpen && isConnected && (
-            <>
-              {/* Demos Button */}
-              <a
-                href='/demos'
-                className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-                title='Demos'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/demos.png'
-                    alt='Demos'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5 group-hover:animate-bounce'
-                  />
-                  <span className='text-sm font-medium hidden lg:block'>Demos</span>
-                </div>
-              </a>
-
-              {/* Store Button */}
-              <a
-                href='/mini-games'
-                className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-                title='Store'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/console.png'
-                    alt='Store'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5 group-hover:animate-bounce'
-                  />
-                  <span className='text-sm font-medium hidden lg:block'>Store</span>
-                </div>
-              </a>
-
-            </>
-          )}
-        </div>
+            {/* Store Button */}
+            <a
+              href='/mini-games'
+              className='p-3 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
+              title='Store'
+            >
+              <div className='flex items-center space-x-2'>
+                <Image
+                  src='/images/icons/console.png'
+                  alt='Store'
+                  width={20}
+                  height={20}
+                  className='w-5 h-5 group-hover:animate-bounce'
+                />
+                <span className='text-sm font-medium hidden lg:block'>Store</span>
+              </div>
+            </a>
+          </>
+        )}
+      </div>
 
       {/* Wallet Connection Banner */}
       {showBanner && !isConnected && !isConnecting && (
@@ -895,31 +893,56 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </div>
                 </div>
                 <div className='flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3'>
-                  <button
-                    onClick={async () => {
-                      setIsConnecting(true);
-                      setUserOpened(true); // Mark as user-initiated
-                      onToggle(); // Open the sidebar
-                      // Small delay to ensure sidebar opens smoothly before expanding
-                      setTimeout(() => {
-                        setIsExpanded(true); // Expand it
-                      }, 100);
-                      try {
-                        if (isFreighterAvailable) {
-                          await connect(); // Connect to Freighter
-                        } else {
-                          // Just open sidebar for manual input
-                          console.log('Freighter not available, opening sidebar for manual input');
+                  <div className='flex flex-col sm:flex-row gap-3'>
+                    <button
+                      onClick={async () => {
+                        setIsConnecting(true);
+                        setUserOpened(true); // Mark as user-initiated
+                        onToggle(); // Open the sidebar
+                        // Small delay to ensure sidebar opens smoothly before expanding
+                        setTimeout(() => {
+                          setIsExpanded(true); // Expand it
+                        }, 100);
+                        try {
+                          if (isFreighterAvailable) {
+                            await connect(); // Connect to Freighter
+                          } else {
+                            // Just open sidebar for manual input
+                            console.log('Freighter not available, opening sidebar for manual input');
+                          }
+                        } finally {
+                          setIsConnecting(false);
                         }
-                      } finally {
-                        setIsConnecting(false);
-                      }
-                    }}
-                    disabled={isConnecting}
-                    className='w-full sm:w-auto px-6 py-2.5 bg-white text-amber-600 font-bold rounded-lg hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
-                  >
-                    {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
-                  </button>
+                      }}
+                      disabled={isConnecting}
+                      className='w-full sm:w-auto px-6 py-2.5 bg-white text-amber-600 font-bold rounded-lg hover:bg-white/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
+                    >
+                      {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
+                    </button>
+                    
+                    <button
+                      onClick={async () => {
+                        setIsConnecting(true);
+                        try {
+                          await openWalletModal(); // Use Stellar Wallets Kit modal
+                        } catch (error) {
+                          console.error('Failed to open wallet modal:', error);
+                          addToast({
+                            type: 'error',
+                            title: 'Wallet Connection Error',
+                            message: 'Failed to open wallet selection modal',
+                            duration: 5000,
+                          });
+                        } finally {
+                          setIsConnecting(false);
+                        }
+                      }}
+                      disabled={isConnecting}
+                      className='w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-purple-400/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
+                    >
+                      {isConnecting ? '🔄 Opening...' : '🎯 Multi-Wallet'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
