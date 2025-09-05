@@ -22,7 +22,7 @@
     "test:all": "npm run test:coverage && npm run test:e2e",
     "purge-css": "node scripts/purge-css.js",
     "optimize-css": "npm run purge-css && npm run format",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "check": "npm run code-quality && npm run test",
     "check:fix": "npm run code-quality:fix && npm run test",
     "env:check": "node -e \"console.log('🔍 Environment Status:'); console.log('📊 Public variables:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')).length); console.log('🔐 Server variables:', Object.keys(process.env).filter(k => !k.startsWith('NEXT_PUBLIC_')).length); console.log('✅ Environment check completed')\"",
