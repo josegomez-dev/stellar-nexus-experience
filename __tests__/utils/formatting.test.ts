@@ -54,18 +54,18 @@ describe('formatting utilities', () => {
 
   describe('formatDate', () => {
     it('should format date with default options', () => {
-      const date = new Date('2023-12-25');
+      const date = new Date('2023-12-25T12:00:00Z');
       const formatted = formatDate(date);
-      expect(formatted).toMatch(/Dec 24, 2023/);
+      expect(formatted).toMatch(/Dec 25, 2023/);
     });
 
     it('should format date string', () => {
-      const formatted = formatDate('2023-12-25');
-      expect(formatted).toMatch(/Dec 24, 2023/);
+      const formatted = formatDate('2023-12-25T12:00:00Z');
+      expect(formatted).toMatch(/Dec 25, 2023/);
     });
 
     it('should format with custom options', () => {
-      const date = new Date('2023-12-25');
+      const date = new Date('2023-12-25T12:00:00Z');
       const formatted = formatDate(date, { year: 'numeric', month: 'long' });
       expect(formatted).toBe('December 2023');
     });
