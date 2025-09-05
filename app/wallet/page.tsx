@@ -16,6 +16,8 @@ import {
 } from '@/lib/stellar-address-validation';
 import { useGlobalWallet, WalletProvider } from '@/contexts/WalletContext';
 import { AccountProvider } from '@/contexts/AccountContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import { ToastContainer } from '@/components/ui/Toast';
 
 function WalletPageContent() {
   const { walletData, isConnected, connect, disconnect, isFreighterAvailable } = useGlobalWallet();
@@ -499,9 +501,12 @@ function WalletPageContent() {
 export default function WalletPage() {
   return (
     <WalletProvider>
-      <AccountProvider>
-        <WalletPageContent />
-      </AccountProvider>
+      <ToastProvider>
+        <AccountProvider>
+          <WalletPageContent />
+          <ToastContainer />
+        </AccountProvider>
+      </ToastProvider>
     </WalletProvider>
   );
 }
