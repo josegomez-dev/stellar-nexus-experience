@@ -29,6 +29,8 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "cypress.config.ts",
+    "cypress/**/*"
   ]
 }
