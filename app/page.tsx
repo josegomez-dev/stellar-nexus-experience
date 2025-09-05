@@ -87,14 +87,9 @@ function HomeContent() {
                 <div className='epic-particle'></div>
 
                 <p className='epic-text text-2xl md:text-3xl text-center leading-relaxed'>
-                  Experience the future of decentralized work with the Stellar Nexus Experience on
-                  the Stellar blockchain
+                  Experience the future of Decentralized Technology
                 </p>
 
-                {/* Epic Subtitle */}
-                <p className='text-brand-300 text-lg text-center mt-4 font-medium animate-pulse'>
-                  ✨ Where Trust Meets Innovation ✨
-                </p>
               </div>
 
               <div className='flex justify-center -mb-10 relative group'>
@@ -270,7 +265,14 @@ function HomeContent() {
                 <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
                   Powered by <span className='text-brand-200 font-semibold'>Trustless Work</span>
                 </p>
+
+
+                {/* Epic Subtitle */}
+                <p className='text-brand-300 text-lg text-center mt-4 font-medium animate-pulse'>
+                  ✨ Where Trust Meets Innovation ✨
+                </p>
               </div>
+
             </div>
           </section>
 
