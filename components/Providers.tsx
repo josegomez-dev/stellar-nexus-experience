@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { BadgeAnimationProvider } from '@/contexts/BadgeAnimationContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 import { BugfenderInit } from './BugfenderInit';
 
@@ -14,10 +15,12 @@ export const Providers = ({ children }: ProvidersProps) => {
   return (
     <TransactionProvider>
       <ToastProvider>
-        <AccountProvider>
-          <BugfenderInit />
-          {children}
-        </AccountProvider>
+        <BadgeAnimationProvider>
+          <AccountProvider>
+            <BugfenderInit />
+            {children}
+          </AccountProvider>
+        </BadgeAnimationProvider>
       </ToastProvider>
     </TransactionProvider>
   );

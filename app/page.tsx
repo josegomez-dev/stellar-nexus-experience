@@ -1,24 +1,12 @@
 'use client';
 
 import { EscrowProvider } from '@/contexts/EscrowContext';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Image from 'next/image';
+import PlasmaBubbles from '@/components/effects/PlasmaBubbles';
+
 
 function HomeContent() {
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   // Mouse following plasma ball effect
   useEffect(() => {
@@ -69,7 +57,10 @@ function HomeContent() {
 
   return (
     <EscrowProvider>
-      <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
+      <div id='top' className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
+        {/* Floating Plasma Bubbles with Analytics Info */}
+        <PlasmaBubbles />
+        
         {/* Animated background elements */}
         <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
 
@@ -231,9 +222,9 @@ function HomeContent() {
                   <div className='plasma-glow absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-brand-500/20 to-accent-600/20 blur-xl animate-pulse group-hover:from-brand-300/40 group-hover:via-brand-400/40 group-hover:to-accent-500/40 group-hover:blur-2xl transition-all duration-500'></div>
                 </div>
               </div>
-              <button
-                onClick={() => (window.location.href = '/demos')}
-                className='w-full px-12 py-6 bg-gradient-to-r from-brand-500 via-accent-600 to-brand-700 hover:from-brand-600 hover:via-accent-700 hover:to-brand-800 text-white font-bold rounded-2xl transition-all duration-700 ease-out transform hover:scale-105 shadow-2xl hover:shadow-[0_0_50px_rgba(14,165,233,0.6)] flex items-center justify-center space-x-4 relative z-50 overflow-hidden group/button border-2 border-brand-400/50 hover:border-brand-300/80'
+              <a
+                href='/demos'
+                className='w-full px-12 py-6 bg-gradient-to-r from-brand-500 via-accent-600 to-brand-700 hover:from-brand-600 hover:via-accent-700 hover:to-brand-800 text-white font-bold rounded-2xl transition-all duration-700 ease-out transform hover:scale-105 shadow-2xl hover:shadow-[0_0_50px_rgba(14,165,233,0.6)] flex items-center justify-center space-x-4 relative z-50 overflow-hidden group/button border-2 border-brand-400/50 hover:border-brand-300/80 inline-block text-center'
               >
                 {/* Epic Plasma Background Effect */}
                 <div className='absolute inset-0 bg-gradient-to-r from-brand-500/20 via-accent-600/30 to-brand-700/20 animate-pulse'></div>
@@ -257,7 +248,7 @@ function HomeContent() {
                     STELLAR NEXUS EXPERIENCE
                   </span>
                 </span>
-              </button>
+              </a>
 
               {/* Powered by Trustless Work */}
               <div className='text-center mt-4'>
@@ -280,16 +271,87 @@ function HomeContent() {
           /> */}
         </main>
 
+        {/* Custom Footer - Revolutionary Impact Section */}
+        <footer className="relative mt-16 py-16 bg-gradient-to-b from-transparent via-brand-900/30 to-brand-900/60 border-t border-brand-400/20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-brand-500/10 via-accent-500/20 to-brand-600/10 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="relative bg-gradient-to-br from-brand-900/60 to-accent-900/40 backdrop-blur-sm border border-brand-400/40 rounded-2xl p-8 text-center hover:border-brand-300/60 transition-all duration-500">
+                  <div className="mb-6">
+                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                      🌟 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                        Revolutionary Impact
+                      </span> 🌟
+                    </h3>
+                    <p className="text-xl text-brand-200 max-w-4xl mx-auto leading-relaxed">
+                      Trustless Work is pioneering the future of decentralized employment on Stellar. 
+                      With exponential growth in user adoption and transaction volume, we're creating 
+                      the infrastructure for a <span className="text-yellow-400 font-semibold">$50B+ market opportunity</span>.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    <div className="text-left">
+                      <h4 className="text-lg font-semibold text-brand-300 mb-3">🚀 Market Opportunity</h4>
+                      <ul className="space-y-2 text-brand-200">
+                        <li>• $50B+ global freelance market</li>
+                        <li>• 57M+ freelancers worldwide</li>
+                        <li>• Growing demand for trustless solutions</li>
+                        <li>• Stellar ecosystem expansion</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="text-left">
+                      <h4 className="text-lg font-semibold text-accent-300 mb-3">💎 Competitive Advantages</h4>
+                      <ul className="space-y-2 text-brand-200">
+                        <li>• First-mover advantage on Stellar</li>
+                        <li>• Proven product-market fit</li>
+                        <li>• Exponential user growth</li>
+                        <li>• Enterprise-ready infrastructure</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-brand-400/30">
+                    <p className="text-lg text-brand-300 font-medium">
+                      📈 <span className="text-white font-semibold">Ready to scale</span> with the right funding partner
+                    </p>
+                  </div>
+
+                  {/* Footer Links */}
+                  <div className="mt-8 pt-6 border-t border-brand-400/20">
+                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                      <div className="flex items-center space-x-6">
+                        <div className="text-brand-300 text-sm">
+                          © 2025 • Nexus Trustless Work • Built on Stellar
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-6">
+                        <a href="#" className="text-brand-300 hover:text-white transition-colors text-sm">Privacy</a>
+                        <a href="#" className="text-brand-300 hover:text-white transition-colors text-sm">Terms</a>
+                        <a href="#" className="text-brand-300 hover:text-white transition-colors text-sm">Contact</a>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-green-400 text-sm font-medium">Platform Online</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+
         {/* Back to Top Button */}
-        {showBackToTop && (
-          <button
-            onClick={scrollToTop}
-            className='fixed bottom-8 right-8 z-50 bg-gradient-to-r from-brand-500 to-accent-600 text-white p-3 rounded-full shadow-lg hover:from-brand-600 hover:to-accent-700 transition-all duration-300 transform hover:scale-110 backdrop-blur-sm border border-brand-400/30'
-            title='Back to top'
-          >
-            <span className='text-xl font-bold'>↑</span>
-          </button>
-        )}
+        <a
+          href='#top'
+          className='fixed bottom-8 right-8 z-50 bg-gradient-to-r from-brand-500 to-accent-600 text-white p-3 rounded-full shadow-lg hover:from-brand-600 hover:to-accent-700 transition-all duration-300 transform hover:scale-110 backdrop-blur-sm border border-brand-400/30'
+          title='Back to top'
+        >
+          <span className='text-xl font-bold'>↑</span>
+        </a>
       </div>
     </EscrowProvider>
   );

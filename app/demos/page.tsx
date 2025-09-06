@@ -16,6 +16,7 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo';
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
@@ -54,6 +55,7 @@ const DemoSelector = ({
   setShowImmersiveDemo: (show: boolean) => void;
   isConnected: boolean;
 }) => {
+  const { getCompletedDemos } = useAccount();
   // Clap system with localStorage persistence
   const [demoClaps, setDemoClaps] = useState<Record<string, number>>(() => {
     if (typeof window !== 'undefined') {
@@ -199,12 +201,17 @@ const DemoSelector = ({
       {/* Demo Cards */}
       <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-2'>
         {demos.map(demo => {
+          const completedDemos = getCompletedDemos();
+          const isCompleted = completedDemos.includes(demo.id);
+          
           return (
             <div
               key={demo.id}
               className={`demo-card p-6 rounded-xl border-2 transition-all duration-500 ease-out transform hover:scale-105 min-h-[420px] relative overflow-hidden group ${
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
+                  : isCompleted
+                  ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20'
                   : 'border-white/20 bg-gradient-to-br from-white/5 to-white/10 hover:border-white/30 hover:from-white/10 hover:to-white/15'
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
@@ -220,6 +227,15 @@ const DemoSelector = ({
                       🔒 Requires Multi-Stakeholders
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Completed Badge for finished demos */}
+              {demo.isReady && isCompleted && (
+                <div className='absolute top-4 right-4 z-50'>
+                  <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2'>
+                    ✅ Completed
+                  </div>
                 </div>
               )}
 
@@ -372,10 +388,18 @@ const DemoSelector = ({
                         <div className='flex items-center'>
                           <div className='flex flex-col'>
                             <span className='text-lg font-bold'>
-                              {isConnected ? 'LAUNCH DEMO' : 'CONNECT WALLET'}
+                              {!isConnected 
+                                ? 'CONNECT WALLET' 
+                                : isCompleted 
+                                ? 'PLAY AGAIN' 
+                                : 'LAUNCH DEMO'}
                             </span>
                             <span className='text-xs opacity-80'>
-                              {isConnected ? 'Prepare for AWESOMENESS!' : 'Required to launch demo'}
+                              {!isConnected 
+                                ? 'Required to launch demo'
+                                : isCompleted 
+                                ? 'Replay and earn bonus points!' 
+                                : 'Prepare for AWESOMENESS!'}
                             </span>
                           </div>
                         </div>

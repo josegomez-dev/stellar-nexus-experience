@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
+import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor } from '@/lib/badge-config';
+import { Badge3D, Badge3DStyles } from '@/components/ui/Badge3D';
 import Image from 'next/image';
 
 interface UserProfileProps {
@@ -11,11 +14,16 @@ interface UserProfileProps {
 
 export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
   const { user, signOut, getUserStats } = useAuth();
+  const { account, getLevel, getExperienceProgress, getMainDemoProgress } = useAccount();
   const [activeTab, setActiveTab] = useState<'stats' | 'badges' | 'progress'>('stats');
 
-  if (!isOpen || !user) return null;
+  if (!isOpen || (!user && !account)) return null;
 
+  // Prioritize AccountContext data for consistency with RewardsSidebar
   const stats = getUserStats();
+  const level = account ? getLevel() : stats.level;
+  const expProgress = account ? getExperienceProgress() : null;
+  const mainDemoProgress = account ? getMainDemoProgress() : { completed: stats.totalDemosCompleted, total: 4 };
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -27,11 +35,16 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
   };
 
   const getLevelProgress = () => {
+    if (account && expProgress) {
+      return (expProgress.current / expProgress.next) * 100;
+    }
     const currentLevelXP = (stats.level - 1) * 500;
     const nextLevelXP = stats.level * 500;
     const progress = ((stats.experience - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
     return Math.min(progress, 100);
   };
+
+  const expPercentage = account && expProgress ? (expProgress.current / expProgress.next) * 100 : getLevelProgress();
 
   return (
     <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm'>
@@ -70,12 +83,19 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
 
               {/* User info */}
               <div className='flex-1'>
-                <h2 className='text-xl font-bold text-white'>{user.username}</h2>
+                <h2 className='text-xl font-bold text-white'>
+                  {user ? user.username : (account ? `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}` : 'Guest User')}
+                </h2>
                 <p className='text-white/70 text-sm'>
-                  Level {stats.level} • {stats.experience} XP
+                  Level {level} • {account ? account.profile.experience : stats.experience} XP
                 </p>
                 <p className='text-brand-300 text-xs font-mono'>
-                  {user.walletAddress.slice(0, 12)}...{user.walletAddress.slice(-8)}
+                  {user ? 
+                    `${user.walletAddress.slice(0, 12)}...${user.walletAddress.slice(-8)}` : 
+                    account ? 
+                      `${account.walletAddress.slice(0, 12)}...${account.walletAddress.slice(-8)}` : 
+                      'No wallet connected'
+                  }
                 </p>
               </div>
 
@@ -125,40 +145,71 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                 <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
                   <div className='flex items-center justify-between mb-2'>
                     <h3 className='text-white font-semibold'>Level Progress</h3>
-                    <span className='text-brand-300 text-sm'>Level {stats.level}</span>
+                    <span className='text-brand-300 text-sm'>Level {level}</span>
                   </div>
                   <div className='w-full bg-white/10 rounded-full h-3'>
                     <div
                       className='bg-gradient-to-r from-brand-500 to-accent-500 h-3 rounded-full transition-all duration-500'
-                      style={{ width: `${getLevelProgress()}%` }}
+                      style={{ width: `${expPercentage}%` }}
                     ></div>
                   </div>
                   <p className='text-white/70 text-xs mt-2'>
-                    {stats.experience} XP • Next level at {stats.level * 500} XP
+                    {account && expProgress ? 
+                      `${expProgress.current} / ${expProgress.next} XP` : 
+                      `${stats.experience} XP • Next level at ${stats.level * 500} XP`
+                    }
                   </p>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid - Consistent with RewardsSidebar */}
                 <div className='grid grid-cols-2 gap-4'>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
-                    <div className='text-2xl font-bold text-brand-300'>
-                      {stats.totalDemosCompleted}
+                    <div className='text-2xl font-bold text-green-300'>
+                      {account ? account.profile.totalPoints : stats.experience}
+                    </div>
+                    <div className='text-white/70 text-sm'>Total Points</div>
+                  </div>
+                  <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
+                    <div className='text-2xl font-bold text-yellow-300'>
+                      {mainDemoProgress.completed} / {mainDemoProgress.total}
                     </div>
                     <div className='text-white/70 text-sm'>Demos Completed</div>
                   </div>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
-                    <div className='text-2xl font-bold text-accent-300'>
-                      {formatTime(stats.totalTimeSpent)}
+                    <div className='text-2xl font-bold text-indigo-300'>
+                      {account ? account.badges.length : stats.badgesEarned}
                     </div>
-                    <div className='text-white/70 text-sm'>Time Spent</div>
-                  </div>
-                  <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
-                    <div className='text-2xl font-bold text-yellow-300'>{stats.badgesEarned}</div>
                     <div className='text-white/70 text-sm'>Badges Earned</div>
                   </div>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
-                    <div className='text-2xl font-bold text-green-300'>{stats.experience}</div>
-                    <div className='text-white/70 text-sm'>Total XP</div>
+                    <div className='text-2xl font-bold text-accent-300'>
+                      {formatTime(account ? account.stats.totalTimeSpent : stats.totalTimeSpent)}
+                    </div>
+                    <div className='text-white/70 text-sm'>Time Spent</div>
+                  </div>
+                </div>
+
+                {/* Recent Badges - Consistent with RewardsSidebar */}
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <h3 className='text-white font-semibold mb-3'>Recent Badges</h3>
+                  <div className='space-y-2'>
+                    {account && account.badges.slice(-3).map((badge) => (
+                      <div key={badge.id} className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'>
+                        <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
+                          🏆
+                        </div>
+                        <div className='flex-1'>
+                          <div className='text-sm font-medium text-white'>{badge.name}</div>
+                          <div className='text-xs text-gray-400'>{badge.description}</div>
+                        </div>
+                        <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
+                      </div>
+                    ))}
+                    {(!account || account.badges.length === 0) && (
+                      <div className='text-center text-gray-400 py-4'>
+                        Complete demos to earn badges!
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -166,93 +217,129 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
 
             {activeTab === 'badges' && (
               <div className='space-y-4'>
-                {user.badges.length === 0 ? (
-                  <div className='text-center py-8'>
-                    <div className='text-4xl mb-4'>🏆</div>
-                    <h3 className='text-white font-semibold mb-2'>No badges yet!</h3>
-                    <p className='text-white/70 text-sm'>
-                      Complete demos and achieve milestones to earn your first badges.
-                    </p>
-                  </div>
-                ) : (
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                    {user.badges.map(badge => (
-                      <div
-                        key={badge.id}
-                        className={`p-4 rounded-lg border ${
-                          badge.rarity === 'legendary'
-                            ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/30'
-                            : badge.rarity === 'epic'
-                              ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400/30'
-                              : badge.rarity === 'rare'
-                                ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400/30'
-                                : 'bg-white/5 border-white/10'
-                        }`}
-                      >
-                        <div className='flex items-center space-x-3'>
-                          <div className='text-2xl'>{badge.icon}</div>
-                          <div className='flex-1'>
-                            <h4 className='text-white font-semibold'>{badge.name}</h4>
-                            <p className='text-white/70 text-sm'>{badge.description}</p>
-                            <p className='text-white/60 text-xs mt-1'>
-                              Earned: {new Date(badge.earnedAt).toLocaleDateString()}
-                            </p>
-                          </div>
+                {(() => {
+                  // Only show badges if account exists (consistent with RewardsSidebar)
+                  if (!account) {
+                    return (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-4">🏆</div>
+                        <h3 className="text-white font-semibold mb-2">Connect Account</h3>
+                        <p className="text-white/70 text-sm">
+                          Connect your wallet to view your badges.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  // Use exact same logic as RewardsSidebar
+                  const earnedBadgeNames = account.badges.map(badge => badge.name);
+                  const badgesWithStatus = AVAILABLE_BADGES.map(badge => ({
+                    ...badge,
+                    isEarned: earnedBadgeNames.includes(badge.name),
+                    earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt
+                  }));
+
+                  const earnedCount = earnedBadgeNames.length;
+                  const totalCount = AVAILABLE_BADGES.length;
+
+                  return (
+                    <div className='space-y-4'>
+                      {/* Badge Progress - Identical to RewardsSidebar */}
+                      <div className='text-center mb-4'>
+                        <div className='text-2xl font-bold text-white'>{earnedCount} / {totalCount}</div>
+                        <div className='text-sm text-gray-400'>Badges Collected</div>
+                        <div className='w-full bg-gray-700 rounded-full h-2 mt-2'>
+                          <div 
+                            className='bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500'
+                            style={{ width: `${(earnedCount / totalCount) * 100}%` }}
+                          />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      {/* 3D Badge Grid */}
+                      <div className='grid grid-cols-1 gap-4 max-h-80 overflow-y-auto'>
+                        {badgesWithStatus.map(badge => (
+                          <Badge3D
+                            key={badge.id}
+                            badge={badge}
+                            size="md"
+                            compact={false}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
             {activeTab === 'progress' && (
               <div className='space-y-4'>
-                {Object.keys(user.demoProgress).length === 0 ? (
-                  <div className='text-center py-8'>
-                    <div className='text-4xl mb-4'>📈</div>
-                    <h3 className='text-white font-semibold mb-2'>No progress yet!</h3>
-                    <p className='text-white/70 text-sm'>
-                      Start completing demos to track your progress here.
-                    </p>
-                  </div>
-                ) : (
-                  <div className='space-y-3'>
-                    {Object.entries(user.demoProgress).map(([demoId, progress]) => (
-                      <div
-                        key={demoId}
-                        className='bg-white/5 rounded-lg p-4 border border-white/10'
-                      >
-                        <div className='flex items-center justify-between mb-2'>
-                          <h4 className='text-white font-semibold capitalize'>
-                            {demoId.replace('-', ' ')} Demo
-                          </h4>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              progress.completed
-                                ? 'bg-green-500/20 text-green-300'
-                                : 'bg-yellow-500/20 text-yellow-300'
-                            }`}
-                          >
-                            {progress.completed ? 'Completed' : 'In Progress'}
-                          </span>
-                        </div>
-                        <div className='flex items-center space-x-4 text-sm text-white/70'>
-                          <span>
-                            Steps: {progress.stepsCompleted}/{progress.totalSteps}
-                          </span>
-                          <span>Time: {formatTime(progress.timeSpent)}</span>
-                          {progress.score && <span>Score: {progress.score}%</span>}
-                        </div>
-                        {progress.completedAt && (
-                          <p className='text-white/60 text-xs mt-2'>
-                            Completed: {new Date(progress.completedAt).toLocaleDateString()}
-                          </p>
-                        )}
+                {(() => {
+                  if (!account) {
+                    return (
+                      <div className='text-center py-8'>
+                        <div className='text-4xl mb-4'>📈</div>
+                        <h3 className='text-white font-semibold mb-2'>Connect Account</h3>
+                        <p className='text-white/70 text-sm'>
+                          Connect your wallet to view your demo progress.
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+
+                  // Only show the 4 main demos (same as used in demo completion counting)
+                  const mainDemos = ['hello-milestone', 'milestone-voting', 'dispute-resolution', 'micro-task-marketplace'];
+                  const demoProgress = account.demos;
+                  
+                  return (
+                    <div className='space-y-3'>
+                      {mainDemos.map((demoId) => {
+                        const progress = demoProgress[demoId as keyof typeof demoProgress];
+                        if (!progress) return null;
+                        
+                        const isCompleted = progress.status === 'completed';
+                        const pointsEarned = progress.pointsEarned || 0;
+                        
+                        return (
+                          <div
+                            key={demoId}
+                            className='bg-white/5 rounded-lg p-4 border border-white/10'
+                          >
+                            <div className='flex items-center justify-between mb-2'>
+                              <h4 className='text-white font-semibold'>
+                                {progress.demoName}
+                              </h4>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  isCompleted
+                                    ? 'bg-green-500/20 text-green-300'
+                                    : progress.status === 'in_progress'
+                                      ? 'bg-yellow-500/20 text-yellow-300'
+                                      : progress.status === 'available'
+                                        ? 'bg-blue-500/20 text-blue-300'
+                                        : 'bg-gray-500/20 text-gray-300'
+                                }`}
+                              >
+                                {progress.status.charAt(0).toUpperCase() + progress.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className='flex items-center space-x-4 text-sm text-white/70'>
+                              <span>Attempts: {progress.attempts}</span>
+                              {pointsEarned > 0 && <span>Points: {pointsEarned}</span>}
+                              {progress.score && <span>Score: {progress.score}%</span>}
+                            </div>
+                            {progress.completedAt && (
+                              <p className='text-white/60 text-xs mt-2'>
+                                Completed: {progress.completedAt.toDate().toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }).filter(Boolean)}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -261,18 +348,23 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
           <div className='px-6 py-4 bg-white/5 border-t border-white/10'>
             <div className='flex items-center justify-between'>
               <div className='text-white/60 text-xs'>
-                Member since {new Date(user.createdAt).toLocaleDateString()}
+                Member since {new Date(
+                  account ? account.createdAt.toDate() : user ? user.createdAt : new Date()
+                ).toLocaleDateString()}
               </div>
-              <button
-                onClick={signOut}
-                className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 text-sm'
-              >
-                Sign Out
-              </button>
+              {user && (
+                <button
+                  onClick={signOut}
+                  className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 text-sm'
+                >
+                  Sign Out
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+      <Badge3DStyles />
     </div>
   );
 };

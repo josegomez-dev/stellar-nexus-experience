@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
 import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor, type BadgeConfig } from '@/lib/badge-config';
-import Image from 'next/image';
+import { Badge3D, Badge3DStyles } from '@/components/ui/Badge3D';
 
 interface RewardsSidebarProps {
   isOpen: boolean;
@@ -11,9 +11,10 @@ interface RewardsSidebarProps {
 }
 
 export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose }) => {
-  const { account, pointsTransactions, getLevel, getExperienceProgress } = useAccount();
+  const { account, pointsTransactions, getLevel, getExperienceProgress, getMainDemoProgress } = useAccount();
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'transactions' | 'leaderboard'>('overview');
 
+  // Only show when account exists - consistent with UserProfile
   if (!account) {
     return null;
   }
@@ -21,6 +22,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   const level = getLevel();
   const expProgress = getExperienceProgress();
   const expPercentage = (expProgress.current / expProgress.next) * 100;
+  const mainDemoProgress = getMainDemoProgress();
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -54,7 +56,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
           <div className="text-sm text-gray-300">Total Points</div>
         </div>
         <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg p-4 border border-yellow-400/30">
-          <div className="text-2xl font-bold text-yellow-400">{account.stats.totalDemosCompleted}</div>
+          <div className="text-2xl font-bold text-yellow-400">{mainDemoProgress.completed} / {mainDemoProgress.total}</div>
           <div className="text-sm text-gray-300">Demos Completed</div>
         </div>
       </div>
@@ -86,15 +88,15 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   );
 
   const renderBadges = () => {
-    // Check which badges are earned by the user
-    const earnedBadgeIds = account.badges.map(badge => badge.id);
+    // Check which badges are earned by the user (match by name since that's how they're stored)
+    const earnedBadgeNames = account.badges.map(badge => badge.name);
     const badgesWithStatus = AVAILABLE_BADGES.map(badge => ({
       ...badge,
-      isEarned: earnedBadgeIds.includes(badge.id),
-      earnedAt: account.badges.find(b => b.id === badge.id)?.earnedAt
+      isEarned: earnedBadgeNames.includes(badge.name),
+      earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt
     }));
 
-    const earnedCount = earnedBadgeIds.length;
+    const earnedCount = earnedBadgeNames.length;
     const totalCount = AVAILABLE_BADGES.length;
 
     return (
@@ -112,67 +114,12 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
         
         <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
           {badgesWithStatus.map((badge) => (
-            <div 
-              key={badge.id} 
-              className={`rounded-lg p-4 border transition-all duration-300 ${
-                badge.isEarned 
-                  ? 'bg-gradient-to-r from-gray-800/80 to-gray-700/80 border-gray-600/50 shadow-lg' 
-                  : 'bg-gradient-to-r from-gray-900/50 to-gray-800/50 border-gray-700/30 opacity-60'
-              }`}
-            >
-              <div className="flex items-start space-x-3">
-                <div className="relative">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden ${
-                    badge.isEarned ? '' : 'grayscale'
-                  }`}>
-                    <Image
-                      src={badge.imageUrl}
-                      alt={badge.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  {badge.isEarned && (
-                    <div className="absolute -top-1 -right-1 bg-green-500 rounded-full w-4 h-4 flex items-center justify-center">
-                      <span className="text-white text-xs">✓</span>
-                    </div>
-                  )}
-                  {!badge.isEarned && (
-                    <div className="absolute -top-1 -right-1 bg-gray-600 rounded-full w-4 h-4 flex items-center justify-center">
-                      <span className="text-gray-300 text-xs">🔒</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className={`font-semibold ${badge.isEarned ? 'text-white' : 'text-gray-400'}`}>
-                      {badge.name}
-                    </h4>
-                    <span className={`text-xs px-2 py-1 rounded-full bg-gradient-to-r ${getRarityColor(badge.rarity)} ${getRarityTextColor(badge.rarity)}`}>
-                      {badge.rarity}
-                    </span>
-                  </div>
-                  <p className={`text-sm mb-2 ${badge.isEarned ? 'text-gray-300' : 'text-gray-500'}`}>
-                    {badge.description}
-                  </p>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={badge.isEarned ? 'text-green-400' : 'text-gray-500'}>
-                      +{badge.pointsValue} points
-                    </span>
-                    {badge.isEarned && badge.earnedAt ? (
-                      <span className="text-gray-400">
-                        {badge.earnedAt.toDate().toLocaleDateString()}
-                      </span>
-                    ) : (
-                      <span className="text-gray-500 text-xs">
-                        {badge.requirement}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Badge3D
+              key={badge.id}
+              badge={badge}
+              size="sm"
+              compact={true}
+            />
           ))}
         </div>
       </div>
@@ -221,17 +168,52 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   const renderLeaderboard = () => (
     <div className="space-y-4">
-      <div className="text-center mb-4">
+      <div className="text-center mb-4 relative">
         <div className="text-lg font-semibold text-white">Global Leaderboard</div>
         <div className="text-sm text-gray-400">Top players by points</div>
+        
+        {/* Coming Soon Badge */}
+        <div className="absolute -top-2 -right-2">
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-pulse">
+            🚧 Coming Soon
+          </div>
+        </div>
       </div>
       
       <div className="space-y-2">
-        {/* Placeholder for leaderboard - would need to implement */}
-        <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-lg p-4 border border-gray-600/30 text-center">
-          <div className="text-gray-400 mb-2">🥇</div>
-          <div className="text-white font-semibold">Coming Soon</div>
-          <div className="text-sm text-gray-500">Leaderboard feature in development</div>
+        {/* Enhanced placeholder with blur effect */}
+        <div className="relative overflow-hidden rounded-lg">
+          {/* Blur Overlay */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-lg z-10"></div>
+          
+          {/* Content with reduced opacity */}
+          <div className="relative z-20 opacity-30">
+            <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-lg p-4 border border-gray-600/30">
+              <div className="space-y-3">
+                {/* Mock leaderboard entries */}
+                {[1, 2, 3, 4, 5].map((position) => (
+                  <div key={position} className="flex items-center justify-between p-2 bg-black/20 rounded">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-xs font-bold">
+                        {position}
+                      </div>
+                      <div className="text-sm text-white font-medium">Player {position}</div>
+                    </div>
+                    <div className="text-sm text-gray-300">{(1000 - position * 150).toLocaleString()} pts</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Center message */}
+          <div className="absolute inset-0 flex items-center justify-center z-30">
+            <div className="text-center">
+              <div className="text-4xl mb-2">🏆</div>
+              <div className="text-white font-semibold mb-1">Leaderboard Coming Soon!</div>
+              <div className="text-sm text-gray-400">Compete with other players</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -302,6 +284,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
           {renderContent()}
         </div>
       </div>
+      <Badge3DStyles />
     </>
   );
 };

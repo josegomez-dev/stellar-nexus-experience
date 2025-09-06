@@ -138,20 +138,27 @@ export const UserDropdown = () => {
                   <span>Stellar Nexus Experience</span>
                 </a>
 
-                <a
-                  href='/mini-games'
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+                <button
+                  disabled
+                  className='w-full flex items-center justify-between px-3 py-2 text-gray-400 cursor-not-allowed rounded-lg transition-colors duration-200 text-sm relative'
+                  title='Nexus Web3 Playground coming soon!'
                 >
-                  <span className='text-lg'>
-                    <Image
-                      src='/images/icons/console.png'
-                      alt='Web3 Playground'
-                      width={50}
-                      height={20}
-                    />
+                  <div className='flex items-center space-x-3'>
+                    <span className='text-lg'>
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Web3 Playground'
+                        width={50}
+                        height={20}
+                        className='opacity-50 grayscale'
+                      />
+                    </span>
+                    <span>Nexus Web3 Playground</span>
+                  </div>
+                  <span className='text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-1 rounded-full font-medium'>
+                    Coming Soon
                   </span>
-                  <span>Nexus Web3 Playground</span>
-                </a>
+                </button>
 
                 <hr />
 

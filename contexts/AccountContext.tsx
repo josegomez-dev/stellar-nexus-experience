@@ -5,6 +5,8 @@ import { UserAccount, PointsTransaction } from '@/types/account';
 import { accountService } from '@/lib/account-service';
 import { useGlobalWallet } from './WalletContext';
 import { useToast } from './ToastContext';
+import { useBadgeAnimation } from './BadgeAnimationContext';
+import { AVAILABLE_BADGES } from '@/lib/badge-config';
 import { logInfo, logError, logWarning, setAccountInfo, setUserInfo } from '@/lib/bugfender';
 
 interface AccountContextType {
@@ -23,6 +25,7 @@ interface AccountContextType {
   getExperienceProgress: () => { current: number; next: number };
   getAvailableDemos: () => string[];
   getCompletedDemos: () => string[];
+  getMainDemoProgress: () => { completed: number; total: number };
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -47,6 +50,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
+  const { showBadgeAnimation } = useBadgeAnimation();
 
   // Load account when wallet connects
   useEffect(() => {
@@ -189,9 +193,19 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       addToast({
         type: 'success',
         title: '🎉 Account Created!',
-        message: 'Welcome to Trustless Work! You earned 100 bonus points.',
+        message: 'Welcome to Trustless Work! You earned 150 points and the Trust Guardian badge!',
         duration: 5000,
       });
+
+      // Show epic badge animation for Trust Guardian badge (client-side only)
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const trustGuardianBadge = AVAILABLE_BADGES.find(badge => badge.name === 'Trust Guardian');
+          if (trustGuardianBadge) {
+            showBadgeAnimation(trustGuardianBadge, 50);
+          }
+        }, 1000);
+      }
       
     } catch (err) {
       // More specific error messages
@@ -290,7 +304,11 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         score 
       });
 
-      // Calculate points that will be earned
+      // Check if this is first completion for points calculation
+      const currentDemo = account.demos[demoId as keyof typeof account.demos];
+      const isFirstCompletion = currentDemo?.status !== 'completed';
+      
+      // Calculate points that will be earned (this mirrors the server logic)
       const basePoints = {
         'demo1': 100,
         'hello-milestone': 100,
@@ -304,13 +322,23 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       
       const base = basePoints[demoId as keyof typeof basePoints] || 100;
       const scoreMultiplier = Math.max(0.5, score / 100);
-      const pointsEarned = Math.round(base * scoreMultiplier);
+      let pointsEarned = Math.round(base * scoreMultiplier);
+      
+      // Give reduced points for replays (25% of original)
+      if (!isFirstCompletion) {
+        pointsEarned = Math.round(pointsEarned * 0.25);
+      }
 
       // Show completion toast
+      const toastTitle = isFirstCompletion ? '🎉 Demo Completed!' : '🔄 Demo Replayed!';
+      const toastMessage = isFirstCompletion 
+        ? `Earned ${pointsEarned} points with ${score}% score` 
+        : `Earned ${pointsEarned} bonus points (${score}% score)`;
+        
       addToast({ 
         type: 'success', 
-        title: '🎉 Demo Completed!', 
-        message: `Earned ${pointsEarned} points with ${score}% score`, 
+        title: toastTitle, 
+        message: toastMessage, 
         duration: 4000 
       });
       
@@ -323,22 +351,25 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       const transactions = await accountService.getPointsTransactions(account.id);
       setPointsTransactions(transactions);
 
-      // Check if a new badge was earned (after refresh)
-      const updatedAccount = await accountService.getAccountById(account.id);
-      if (updatedAccount && updatedAccount.badges.length > account.badges.length) {
-        const newBadges = updatedAccount.badges.filter(
-          newBadge => !account.badges.some(oldBadge => oldBadge.name === newBadge.name)
-        );
-        
-        newBadges.forEach(badge => {
-          addToast({ 
-            type: 'success', 
-            title: '🏆 New Badge Earned!', 
-            message: `${badge.name} - ${badge.description}`, 
-            duration: 6000 
-          });
-        });
-      }
+        // Check if a new badge was earned (only on first completion)
+        if (isFirstCompletion && typeof window !== 'undefined') {
+          const updatedAccount = await accountService.getAccountById(account.id);
+          if (updatedAccount && updatedAccount.badges.length > account.badges.length) {
+            const newBadges = updatedAccount.badges.filter(
+              newBadge => !account.badges.some(oldBadge => oldBadge.name === newBadge.name)
+            );
+            
+            // Show epic badge animations for newly earned badges (client-side only)
+            newBadges.forEach((badge, index) => {
+              setTimeout(() => {
+                const badgeConfig = AVAILABLE_BADGES.find(b => b.name === badge.name);
+                if (badgeConfig) {
+                  showBadgeAnimation(badgeConfig, badge.pointsValue);
+                }
+              }, 2000 + (index * 5500)); // Stagger multiple badge animations
+            });
+          }
+        }
       
       logInfo(`Demo completed successfully: ${demoId}`, { 
         score,
@@ -407,6 +438,11 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       .map(([demoId, _]) => demoId);
   };
 
+  const getMainDemoProgress = () => {
+    if (!account) return { completed: 0, total: 4 };
+    return accountService.getMainDemoCompletionCount(account);
+  };
+
   const value: AccountContextType = {
     account,
     loading,
@@ -423,6 +459,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     getExperienceProgress,
     getAvailableDemos,
     getCompletedDemos,
+    getMainDemoProgress,
   };
 
   return (

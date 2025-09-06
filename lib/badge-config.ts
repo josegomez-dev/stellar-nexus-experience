@@ -1,14 +1,41 @@
+export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary';
+export type BadgeCategory = 'account' | 'demo' | 'achievement' | 'special';
+
 export interface BadgeConfig {
   id: string;
   name: string;
   description: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: BadgeRarity;
   pointsValue: number;
   requirement: string;
-  category: 'account' | 'demo' | 'achievement' | 'special';
-  imageUrl: string;
+  category: BadgeCategory;
+  imageUrl?: string; // Optional - kept for compatibility, but we use SVG emblems
   isEarned?: boolean;
 }
+
+// Rarity styles for 3D badge rendering
+export const rarityStyles: Record<BadgeRarity, { ring: string; glow: string; text: string }> = {
+  common: {
+    ring: "from-slate-200/70 via-slate-400/70 to-slate-300/70",
+    glow: "shadow-[0_0_40px_-8px_rgba(148,163,184,0.45)]",
+    text: "text-slate-200",
+  },
+  rare: {
+    ring: "from-sky-200 via-cyan-300 to-sky-400",
+    glow: "shadow-[0_0_50px_-6px_rgba(56,189,248,0.55)]",
+    text: "text-sky-100",
+  },
+  epic: {
+    ring: "from-fuchsia-200 via-violet-300 to-indigo-300",
+    glow: "shadow-[0_0_60px_-6px_rgba(168,85,247,0.6)]",
+    text: "text-fuchsia-100",
+  },
+  legendary: {
+    ring: "from-amber-200 via-yellow-300 to-orange-300",
+    glow: "shadow-[0_0_70px_-4px_rgba(251,191,36,0.65)]",
+    text: "text-amber-100",
+  },
+};
 
 export const AVAILABLE_BADGES: BadgeConfig[] = [
   {
@@ -17,9 +44,8 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     description: 'Welcome to the world of trustless work! Your journey begins here.',
     rarity: 'common',
     pointsValue: 50,
-    requirement: 'Create your first account',
+    requirement: 'Create your first account and earn 100+ bonus points',
     category: 'account',
-    imageUrl: '/images/badges/placeholder-trust-guardian.svg',
   },
   {
     id: 'escrow-expert',
@@ -29,7 +55,6 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     pointsValue: 100,
     requirement: 'Complete Demo 1: Baby Steps to Riches',
     category: 'demo',
-    imageUrl: '/images/badges/placeholder-escrow-expert.svg',
   },
   {
     id: 'blockchain-pioneer',
@@ -39,7 +64,6 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     pointsValue: 150,
     requirement: 'Complete Demo 2: Democracy in Action',
     category: 'demo',
-    imageUrl: '/images/badges/placeholder-blockchain-pioneer.svg',
   },
   {
     id: 'dispute-detective',
@@ -49,7 +73,6 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     pointsValue: 200,
     requirement: 'Complete Demo 3: Drama Queen Escrow',
     category: 'demo',
-    imageUrl: '/images/badges/placeholder-dispute-detective.svg',
   },
   {
     id: 'gig-economy-guru',
@@ -59,7 +82,6 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     pointsValue: 250,
     requirement: 'Complete Demo 4: Gig Economy Madness',
     category: 'demo',
-    imageUrl: '/images/badges/placeholder-gig-guru.svg',
   },
   {
     id: 'stellar-champion',
@@ -67,9 +89,8 @@ export const AVAILABLE_BADGES: BadgeConfig[] = [
     description: 'The ultimate Trustless Work champion! You\'ve conquered it all!',
     rarity: 'legendary',
     pointsValue: 500,
-    requirement: 'Complete all 4 demos with perfect scores',
+    requirement: 'Complete all 4 demos and invite a friend',
     category: 'achievement',
-    imageUrl: '/images/badges/placeholder-stellar-champion.svg',
   },
 ];
 
