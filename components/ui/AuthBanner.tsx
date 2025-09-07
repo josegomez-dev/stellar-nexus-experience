@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import Image from 'next/image';
 
@@ -11,12 +11,12 @@ interface AuthBannerProps {
 }
 
 export const AuthBanner: React.FC<AuthBannerProps> = ({ onSignUpClick, onSignInClick }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { account } = useAccount();
   const { isConnected, walletData } = useGlobalWallet();
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Don't show banner if user is authenticated or banner is dismissed
-  if (isAuthenticated || isDismissed) {
+  // Don't show banner if user has an account or banner is dismissed
+  if (account || isDismissed) {
     return null;
   }
 
