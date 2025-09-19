@@ -515,8 +515,18 @@ export const HelloMilestoneDemo = () => {
   }, [currentStep, completeDemo]);
 
   async function handleInitializeEscrow() {
+    console.log('🚀 Starting handleInitializeEscrow...');
+    console.log('📊 Current state:', { 
+      useRealTrustlessWork, 
+      isConnected, 
+      walletData: walletData ? 'present' : 'missing',
+      networkValidation,
+      currentStep
+    });
+
     // Enhanced wallet and network validation
     if (!walletData) {
+      console.log('❌ No wallet data found');
       addToast({
         type: 'warning',
         title: '🔗 Wallet Connection Required',
@@ -528,6 +538,7 @@ export const HelloMilestoneDemo = () => {
 
     // Validate network connection for real transactions
     if (useRealTrustlessWork && networkValidation && !networkValidation.isValid) {
+      console.log('❌ Network validation failed:', networkValidation.message);
       addToast({
         type: 'error',
         title: '🌐 Network Validation Failed',
@@ -537,13 +548,13 @@ export const HelloMilestoneDemo = () => {
       return;
     }
 
-    // Skip account funding check to avoid SDK issues - Freighter will handle validation
-
     // Show process explanation
+    console.log('📝 Setting process explanation...');
     setCurrentProcessStep('initialize');
     setShowProcessExplanation(true);
 
     try {
+      console.log('📢 Showing starting toast...');
       // Show starting toast with enhanced messaging
       addToast({
         type: 'info',
@@ -574,12 +585,28 @@ export const HelloMilestoneDemo = () => {
         },
       };
 
+      console.log('🔗 Creating payload:', payload);
+
       const txHash = generateTransactionHash('initialize');
       const urls = createExplorerUrls(txHash);
       
+      console.log('📝 Generated transaction hash:', txHash);
+      console.log('🌐 Explorer URLs:', urls);
+      
       // Track this transaction for this step with enhanced details
-      setPendingTransactions(prev => ({ ...prev, 'initialize': txHash }));
-      setTransactionStatuses(prev => ({ ...prev, [txHash]: 'pending' }));
+      console.log('📊 Setting transaction states...');
+      setPendingTransactions(prev => {
+        const newState = { ...prev, 'initialize': txHash };
+        console.log('📊 New pendingTransactions:', newState);
+        return newState;
+      });
+      
+      setTransactionStatuses(prev => {
+        const newState: Record<string, 'pending' | 'success' | 'failed'> = { ...prev, [txHash]: 'pending' };
+        console.log('📊 New transactionStatuses:', newState);
+        return newState;
+      });
+      
       setTransactionDetails(prev => ({
         ...prev,
         [txHash]: {
@@ -593,22 +620,7 @@ export const HelloMilestoneDemo = () => {
         }
       }));
       
-      // Set up automatic completion timeout (5 seconds for better demo flow)
-      if (useRealTrustlessWork) {
-        const timeout = setTimeout(() => {
-          console.log('⏰ Transaction timeout reached, auto-completing for demo progression');
-          updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Transaction auto-completed for smooth demo experience');
-          addToast({
-            type: 'success',
-            title: '⚡ Auto-Confirmed',
-            message: 'Transaction confirmed automatically for better demo flow!',
-            duration: 4000,
-          });
-        }, 5000); // 5 seconds timeout for better UX
-        
-        setTransactionTimeouts(prev => ({ ...prev, [txHash]: timeout }));
-      }
-      
+      console.log('📝 Adding transaction to history...');
       addTransaction({
         hash: txHash,
         status: 'pending',
@@ -622,101 +634,38 @@ export const HelloMilestoneDemo = () => {
       let result;
       
       if (useRealTrustlessWork) {
-        // Use real Trustless Work integration
-        result = await initializeRealEscrow(payload);
+        console.log('🔗 Using real Trustless Work mode...');
         
-        // Use Freighter's direct API for simpler transaction handling
-        if (typeof window !== 'undefined' && (window as any).freighter) {
-          console.log('🖊️ Using Freighter direct API for transaction...');
+        // Set up automatic completion timeout (3 seconds for better demo flow)
+        console.log('⏰ Setting up auto-completion timeout...');
+        const timeout = setTimeout(() => {
+          console.log('⏰ Auto-completion timeout triggered!');
+          updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Transaction auto-completed for smooth demo experience');
+          addToast({
+            type: 'success',
+            title: '⚡ Auto-Confirmed',
+            message: 'Transaction confirmed automatically for better demo flow!',
+            duration: 4000,
+          });
+        }, 3000); // Reduced to 3 seconds for faster demo flow
+        
+        setTransactionTimeouts(prev => ({ ...prev, [txHash]: timeout }));
+
+        try {
+          console.log('🔄 Calling initializeRealEscrow...');
+          result = await initializeRealEscrow(payload);
+          console.log('✅ initializeRealEscrow result:', result);
           
-          try {
-            const freighter = (window as any).freighter;
-            
-            // Create a simple payment transaction using Freighter's API
-            const transactionParams = {
-              destination: 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF', // Null account for demo
-              amount: '0.0000001', // Minimal XLM amount
-              memo: `TW-Demo:${payload.escrowType}`,
-              timeout: 300,
-            };
-            
-            console.log('💫 Creating transaction with Freighter...');
-            
-            // Show transaction creation toast
-            addToast({
-              type: 'info',
-              title: '🔨 Creating Transaction',
-              message: 'Building transaction with Freighter...',
-              icon: '🔨',
-              duration: 3000,
-            });
-            
-            // Freighter doesn't have signAndSubmitTransaction, let's use the correct API
-            // First, try to sign a transaction
-            console.log('🖊️ Requesting Freighter to sign transaction...');
-            
-            // Create a simple transaction for Freighter to sign
-            const signResult = await freighter.signTransaction(
-              // Create a basic payment transaction XDR
-              'AAAAAgAAAABYcvkXBRbMFRNJP2vPcqFtdqN8xFqHbzx2pJUWDKZqpwAAAGQAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAEAAAABAAAAAgAAAAEAAAADAAAABAAAAAUAAAAG',
-              {
-                networkPassphrase: 'Test SDF Network ; September 2015',
-                accountToSign: walletData.publicKey,
-              }
-            );
-            
-            console.log('🎉 Transaction signed successfully:', signResult);
-            
-            // For demo purposes, consider signing successful as transaction successful
-            if (signResult) {
-              // Transaction successful - update status and allow progression
-              updateTransactionStatusAndCheckCompletion(txHash, 'success', `Real transaction signed and simulated! Demo escrow created.`);
-              
-              // Set contract data
-              setContractId(result.contractId);
-              setEscrowData(result.escrow);
-              setDemoStarted(true);
-              
-              // Enhanced success toast
-              addToast({
-                type: 'success',
-                title: '🎉 Real Transaction Successful!',
-                message: `Escrow contract created with Freighter signature!`,
-                icon: '🎉',
-                duration: 7000,
-              });
-              
-              // Trigger scroll to top animation for better UX
-              setTimeout(() => {
-                scrollToTop();
-              }, 1500);
-            } else {
-              throw new Error('Transaction signing failed or was cancelled');
-            }
-            
-          } catch (freighterError) {
-            console.error('Freighter transaction failed:', freighterError);
-            
-            // If Freighter fails, fall back to mock success for demo purposes
-            console.log('🔄 Falling back to demo mode due to Freighter error');
-            updateTransactionStatusAndCheckCompletion(txHash, 'success', `Demo transaction completed (Freighter unavailable)`);
-            
-            setContractId(result.contractId);
-            setEscrowData(result.escrow);
-            setDemoStarted(true);
-            
-            addToast({
-              type: 'success',
-              title: '✅ Demo Transaction Completed',
-              message: 'Transaction simulated successfully (Freighter not available)',
-              icon: '✅',
-              duration: 7000,
-            });
-          }
-        } else {
-          console.log('🔄 Freighter not available, using demo mode');
-          // Freighter not available, simulate success
-          updateTransactionStatusAndCheckCompletion(txHash, 'success', `Demo transaction completed (Freighter not available)`);
+          // Simplified success path - just mark as successful
+          console.log('✅ Marking transaction as successful immediately...');
+          clearTimeout(timeout); // Clear the auto timeout since we succeeded
+          setTransactionTimeouts(prev => {
+            const newTimeouts = { ...prev };
+            delete newTimeouts[txHash];
+            return newTimeouts;
+          });
+          
+          updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Real escrow contract created successfully!');
           
           setContractId(result.contractId);
           setEscrowData(result.escrow);
@@ -724,15 +673,65 @@ export const HelloMilestoneDemo = () => {
           
           addToast({
             type: 'success',
-            title: '✅ Demo Transaction Completed',
-            message: 'Transaction simulated successfully',
+            title: '🎉 Real Escrow Contract Created!',
+            message: `Contract ID: ${result.contractId.slice(0, 12)}... | Amount: 10 USDC`,
+            icon: '🎉',
+            duration: 7000,
+          });
+          
+          // Trigger scroll to top animation for better UX
+          setTimeout(() => {
+            scrollToTop();
+          }, 1500);
+          
+        } catch (realEscrowError) {
+          console.error('❌ Real escrow initialization failed:', realEscrowError);
+          
+          // Clear timeout and fall back to demo mode
+          clearTimeout(timeout);
+          setTransactionTimeouts(prev => {
+            const newTimeouts = { ...prev };
+            delete newTimeouts[txHash];
+            return newTimeouts;
+          });
+          
+          // Create a fallback result for demo purposes
+          result = {
+            contractId: `demo_contract_${Date.now()}`,
+            escrow: {
+              status: 'initialized',
+              amount: '10000000',
+              buyer: walletData.publicKey,
+              seller: walletData.publicKey,
+            }
+          };
+          
+          updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Demo escrow created (real blockchain unavailable)');
+          
+          setContractId(result.contractId);
+          setEscrowData(result.escrow);
+          setDemoStarted(true);
+          
+          addToast({
+            type: 'success',
+            title: '✅ Demo Escrow Created',
+            message: 'Transaction simulated successfully (blockchain unavailable)',
             icon: '✅',
             duration: 7000,
           });
+          
+          // Trigger scroll to top animation for better UX
+          setTimeout(() => {
+            scrollToTop();
+          }, 1500);
         }
+        
       } else {
+        console.log('🧪 Using mock mode...');
         // Use mock implementation - immediate success
         result = await initializeEscrow(payload);
+        console.log('✅ Mock escrow result:', result);
+        
         updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Mock escrow contract created successfully!');
         
         setContractId(result.contractId);
@@ -754,7 +753,11 @@ export const HelloMilestoneDemo = () => {
         }, 1500);
       }
       
+      console.log('✅ handleInitializeEscrow completed successfully');
+      
     } catch (error) {
+      console.error('❌ handleInitializeEscrow failed:', error);
+      
       // Find the pending transaction hash for this step
       const pendingTxHash = pendingTransactions['initialize'];
       
@@ -763,7 +766,7 @@ export const HelloMilestoneDemo = () => {
         updateTransactionStatusAndCheckCompletion(pendingTxHash, 'failed', `Failed to initialize escrow: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } else {
         // Create new failed transaction record
-        const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const txHash = `init_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         addTransaction({
           hash: txHash,
           status: 'failed',
@@ -786,7 +789,6 @@ export const HelloMilestoneDemo = () => {
 
       // Hide process explanation on error
       setShowProcessExplanation(false);
-      console.error('Failed to initialize escrow:', error);
     }
   }
 
@@ -1385,78 +1387,142 @@ export const HelloMilestoneDemo = () => {
             </div>
           </div>
           
-          {/* Debug Tools - Only show in real mode */}
-          {useRealTrustlessWork && isConnected && (
+          {/* Debug Tools - Show for all modes when connected */}
+          {isConnected && (
             <div className="mb-4 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg">
               <h4 className="font-semibold text-purple-300 mb-2">🔧 Debug Tools</h4>
               <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={async () => {
-                    const result = await testStellarSDK();
-                    addToast({
-                      type: result.success ? 'success' : 'error',
-                      title: result.success ? '✅ SDK Test Passed' : '❌ SDK Test Failed',
-                      message: result.message,
-                      duration: 5000,
-                    });
-                  }}
-                  className="px-3 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-sm hover:bg-purple-500/30"
-                >
-                  Test Stellar SDK
-                </button>
-                <button
-                  onClick={async () => {
-                    if (walletData?.publicKey) {
-                      try {
-                        // Use simple fetch API to check account
-                        const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${walletData.publicKey}`);
-                        if (response.ok) {
-                          const accountData = await response.json();
-                          const xlmBalance = accountData.balances.find((b: any) => b.asset_type === 'native');
-                          addToast({
-                            type: 'success',
-                            title: '✅ Account Found',
-                            message: `Balance: ${xlmBalance?.balance || '0'} XLM`,
-                            duration: 5000,
-                          });
-                        } else {
-                          addToast({
-                            type: 'warning',
-                            title: '❌ Account Not Found',
-                            message: 'Account needs funding at friendbot.stellar.org',
-                            duration: 8000,
-                          });
-                        }
-                      } catch (error) {
-                        addToast({
-                          type: 'error',
-                          title: '❌ Check Failed',
-                          message: 'Unable to check account status',
-                          duration: 5000,
-                        });
-                      }
-                    }
-                  }}
-                  className="px-3 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-sm hover:bg-purple-500/30"
-                >
-                  Check Account Status
-                </button>
+                {/* Clear Demo State Button */}
                 <button
                   onClick={() => {
-                    if (walletData?.publicKey) {
-                      window.open(`https://friendbot.stellar.org/?addr=${walletData.publicKey}`, '_blank');
-                      addToast({
-                        type: 'info',
-                        title: '🚰 Friendbot Opened',
-                        message: 'Fund your account and try the demo again!',
-                        duration: 5000,
-                      });
-                    }
+                    console.log('🔧 Clearing demo state...');
+                    setCurrentStep(0);
+                    setContractId('');
+                    setEscrowData(null);
+                    setMilestoneStatus('pending');
+                    setDemoStarted(false);
+                    setPendingTransactions({});
+                    setTransactionStatuses({});
+                    setTransactionDetails({});
+                    setShowProcessExplanation(false);
+                    setAutoCompleteCountdown({});
+                    
+                    // Clear any pending timeouts
+                    Object.values(transactionTimeouts).forEach(timeout => {
+                      if (timeout) clearTimeout(timeout);
+                    });
+                    setTransactionTimeouts({});
+                    
+                    addToast({
+                      type: 'info',
+                      title: '🔧 Debug: State Cleared',
+                      message: 'All demo state has been reset for debugging',
+                      duration: 3000,
+                    });
                   }}
-                  className="px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-sm hover:bg-blue-500/30"
+                  className="px-3 py-1 bg-orange-500/20 border border-orange-400/30 text-orange-200 rounded text-sm hover:bg-orange-500/30"
                 >
-                  Fund Account
+                  Clear Demo State
                 </button>
+                
+                {/* Show Current State Button */}
+                <button
+                  onClick={() => {
+                    const debugState = {
+                      currentStep,
+                      contractId,
+                      demoStarted,
+                      useRealTrustlessWork,
+                      pendingTransactions,
+                      transactionStatuses,
+                      isConnected,
+                      walletConnected: !!walletData?.publicKey,
+                      networkValidation
+                    };
+                    console.log('🔧 Current demo state:', debugState);
+                    addToast({
+                      type: 'info',
+                      title: '🔧 Debug: State Logged',
+                      message: 'Check browser console for full state details',
+                      duration: 3000,
+                    });
+                  }}
+                  className="px-3 py-1 bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 rounded text-sm hover:bg-cyan-500/30"
+                >
+                  Log Current State
+                </button>
+
+                {useRealTrustlessWork && (
+                  <>
+                    <button
+                      onClick={async () => {
+                        const result = await testStellarSDK();
+                        addToast({
+                          type: result.success ? 'success' : 'error',
+                          title: result.success ? '✅ SDK Test Passed' : '❌ SDK Test Failed',
+                          message: result.message,
+                          duration: 5000,
+                        });
+                      }}
+                      className="px-3 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-sm hover:bg-purple-500/30"
+                    >
+                      Test Stellar SDK
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (walletData?.publicKey) {
+                          try {
+                            // Use simple fetch API to check account
+                            const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${walletData.publicKey}`);
+                            if (response.ok) {
+                              const accountData = await response.json();
+                              const xlmBalance = accountData.balances.find((b: any) => b.asset_type === 'native');
+                              addToast({
+                                type: 'success',
+                                title: '✅ Account Found',
+                                message: `Balance: ${xlmBalance?.balance || '0'} XLM`,
+                                duration: 5000,
+                              });
+                            } else {
+                              addToast({
+                                type: 'warning',
+                                title: '❌ Account Not Found',
+                                message: 'Account needs funding at friendbot.stellar.org',
+                                duration: 8000,
+                              });
+                            }
+                          } catch (error) {
+                            addToast({
+                              type: 'error',
+                              title: '❌ Check Failed',
+                              message: 'Unable to check account status',
+                              duration: 5000,
+                            });
+                          }
+                        }
+                      }}
+                      className="px-3 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-sm hover:bg-purple-500/30"
+                    >
+                      Check Account Status
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (walletData?.publicKey) {
+                          window.open(`https://friendbot.stellar.org/?addr=${walletData.publicKey}`, '_blank');
+                          addToast({
+                            type: 'info',
+                            title: '🚰 Friendbot Opened',
+                            message: 'Fund your account and try the demo again!',
+                            duration: 5000,
+                          });
+                        }
+                      }}
+                      className="px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-sm hover:bg-blue-500/30"
+                    >
+                      Fund Account
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
