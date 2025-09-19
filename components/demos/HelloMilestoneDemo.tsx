@@ -656,28 +656,125 @@ export const HelloMilestoneDemo = () => {
           result = await initializeRealEscrow(payload);
           console.log('✅ initializeRealEscrow result:', result);
           
-          // Simplified success path - just mark as successful
-          console.log('✅ Marking transaction as successful immediately...');
-          clearTimeout(timeout); // Clear the auto timeout since we succeeded
-          setTransactionTimeouts(prev => {
-            const newTimeouts = { ...prev };
-            delete newTimeouts[txHash];
-            return newTimeouts;
-          });
-          
-          updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Real escrow contract created successfully!');
-          
-          setContractId(result.contractId);
-          setEscrowData(result.escrow);
-          setDemoStarted(true);
-          
-          addToast({
-            type: 'success',
-            title: '🎉 Real Escrow Contract Created!',
-            message: `Contract ID: ${result.contractId.slice(0, 12)}... | Amount: 10 USDC`,
-            icon: '🎉',
-            duration: 7000,
-          });
+          // Now create and sign a REAL Stellar transaction using Freighter
+          if (typeof window !== 'undefined' && (window as any).freighter && result.transaction) {
+            console.log('🖊️ Creating real Stellar transaction with Freighter...');
+            
+            try {
+              const freighter = (window as any).freighter;
+              
+              addToast({
+                type: 'info',
+                title: '🔨 Creating Real Transaction',
+                message: 'Please approve the transaction in your Freighter wallet...',
+                icon: '🔨',
+                duration: 5000,
+              });
+              
+              // Use the real XDR from the initializeRealEscrow result
+              console.log('🖊️ Signing transaction XDR:', result.transaction.xdr.slice(0, 50) + '...');
+              
+              const signedTransaction = await freighter.signTransaction(result.transaction.xdr, {
+                networkPassphrase: 'Test SDF Network ; September 2015',
+                accountToSign: walletData.publicKey,
+              });
+              
+              console.log('✅ Transaction signed successfully!');
+              
+              // Submit the signed transaction to the Stellar network
+              const StellarSDK = await import('@stellar/stellar-sdk');
+              const server = new StellarSDK.Horizon.Server('https://horizon-testnet.stellar.org');
+              
+              console.log('📡 Submitting transaction to Stellar network...');
+              const transactionResult = await server.submitTransaction(StellarSDK.TransactionBuilder.fromXDR(signedTransaction, 'Test SDF Network ; September 2015'));
+              
+              console.log('🎉 Real transaction submitted successfully!', transactionResult);
+              
+              // Update with the REAL transaction hash
+              const realTxHash = transactionResult.hash;
+              console.log('🔗 Real transaction hash:', realTxHash);
+              
+              // Update transaction details with real hash
+              setTransactionDetails(prev => ({
+                ...prev,
+                [txHash]: {
+                  ...prev[txHash],
+                  hash: realTxHash,
+                  explorerUrl: `https://stellar.expert/explorer/testnet/tx/${realTxHash}`,
+                  stellarExpertUrl: `https://stellar.expert/explorer/testnet/tx/${realTxHash}`,
+                }
+              }));
+              
+              // Clear timeout and mark as successful
+              clearTimeout(timeout);
+              setTransactionTimeouts(prev => {
+                const newTimeouts = { ...prev };
+                delete newTimeouts[txHash];
+                return newTimeouts;
+              });
+              
+              updateTransactionStatusAndCheckCompletion(txHash, 'success', `Real blockchain transaction completed! Hash: ${realTxHash}`);
+              
+              // Clear from pending transactions
+              setPendingTransactions(prev => {
+                const newPending = { ...prev };
+                delete newPending['initialize'];
+                return newPending;
+              });
+              
+              setContractId(result.contractId);
+              setEscrowData(result.escrow);
+              setDemoStarted(true);
+              
+              // Force step progression for initialization
+              console.log('🚀 Forcing step progression to step 1 (fund escrow)');
+              setCurrentStep(1);
+              
+              addToast({
+                type: 'success',
+                title: '🎉 Real Blockchain Transaction Completed!',
+                message: `Transaction hash: ${realTxHash.slice(0, 12)}...${realTxHash.slice(-12)}`,
+                icon: '🎉',
+                duration: 10000,
+              });
+              
+            } catch (freighterError) {
+              console.error('❌ Freighter transaction failed:', freighterError);
+              
+              // Clear timeout and fall back to demo mode
+              clearTimeout(timeout);
+              setTransactionTimeouts(prev => {
+                const newTimeouts = { ...prev };
+                delete newTimeouts[txHash];
+                return newTimeouts;
+              });
+              
+              // Show specific error message
+              let errorMessage = 'Unknown error occurred';
+              if (freighterError instanceof Error) {
+                errorMessage = freighterError.message;
+                if (errorMessage.includes('User declined')) {
+                  errorMessage = 'Transaction was cancelled by user';
+                } else if (errorMessage.includes('insufficient')) {
+                  errorMessage = 'Insufficient account balance. Please fund your account at friendbot.stellar.org';
+                }
+              }
+              
+              addToast({
+                type: 'error',
+                title: '❌ Real Transaction Failed',
+                message: errorMessage,
+                icon: '❌',
+                duration: 8000,
+              });
+              
+              // Don't progress - let user try again or switch to mock mode
+              throw freighterError;
+            }
+          } else {
+            console.log('⚠️ Freighter not available or no transaction XDR, falling back...');
+            throw new Error('Freighter wallet not available or transaction creation failed');
+          }
           
         } catch (realEscrowError) {
           console.error('❌ Real escrow initialization failed:', realEscrowError);
@@ -707,6 +804,17 @@ export const HelloMilestoneDemo = () => {
           setEscrowData(result.escrow);
           setDemoStarted(true);
           
+          // Clear from pending transactions
+          setPendingTransactions(prev => {
+            const newPending = { ...prev };
+            delete newPending['initialize'];
+            return newPending;
+          });
+          
+          // Force step progression for initialization fallback
+          console.log('🚀 Forcing step progression to step 1 (fund escrow) - fallback mode');
+          setCurrentStep(1);
+          
           addToast({
             type: 'success',
             title: '✅ Demo Escrow Created',
@@ -727,6 +835,17 @@ export const HelloMilestoneDemo = () => {
         setContractId(result.contractId);
         setEscrowData(result.escrow);
         setDemoStarted(true);
+        
+        // Clear from pending transactions
+        setPendingTransactions(prev => {
+          const newPending = { ...prev };
+          delete newPending['initialize'];
+          return newPending;
+        });
+        
+        // Force step progression for mock mode
+        console.log('🚀 Forcing step progression to step 1 (fund escrow) - mock mode');
+        setCurrentStep(1);
         
         // Enhanced success toast
         addToast({
