@@ -47,7 +47,8 @@ export const ImmersiveDemoModal = ({
     wouldRecommend: true,
   });
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
-  const [showTransactionHistory, setShowTransactionHistory] = useState(false);
+  const [showTransactionHistory, setShowTransactionHistory] = useState(true); // Always show by default
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
 
   // Get transactions for this demo
   const demoTransactions = getTransactionsByDemo(demoId);
@@ -69,10 +70,25 @@ export const ImmersiveDemoModal = ({
     }
   }, [currentStep, startTime, estimatedTime]);
 
+  // Keyboard support for ESC key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        handleCloseClick();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, currentStep]);
+
   const handleStartDemo = () => {
     setCurrentStep('demo');
     setStartTime(new Date());
     setProgress(0);
+    setShowTransactionHistory(true); // Ensure transaction sidebar is always visible
 
     // Open wallet sidebar for better UX
     setTimeout(() => {
@@ -86,8 +102,8 @@ export const ImmersiveDemoModal = ({
     addToast({
       type: 'success',
       title: '🚀 Demo Started!',
-      message: `You're now in immersive mode. Wallet sidebar opened for transaction tracking!`,
-      duration: 3000,
+      message: `You're now in immersive mode. Transaction sidebar is always visible for real-time tracking!`,
+      duration: 4000,
     });
   };
 
@@ -98,6 +114,31 @@ export const ImmersiveDemoModal = ({
       title: '🎉 Demo Completed!',
       message: 'Please share your feedback to help us improve!',
       duration: 5000,
+    });
+  };
+
+  const handleCloseClick = () => {
+    if (currentStep === 'demo') {
+      // Show confirmation dialog during demo
+      setShowCloseConfirmation(true);
+    } else {
+      // Direct close for warning and feedback screens
+      handleCloseModal();
+    }
+  };
+
+  const handleCloseModal = () => {
+    onClose();
+    setCurrentStep('warning');
+    setProgress(0);
+    setStartTime(null);
+    setElapsedTime(0);
+    setShowCloseConfirmation(false);
+    setFeedback({
+      rating: 0,
+      comment: '',
+      difficulty: 'medium',
+      wouldRecommend: true,
     });
   };
 
@@ -223,7 +264,7 @@ export const ImmersiveDemoModal = ({
               </div>
             </div>
 
-            {/* Progress Bar and Transaction History Toggle */}
+            {/* Progress Bar and Transaction Status */}
             {currentStep === 'demo' && (
               <div className='flex items-center space-x-4'>
                 <div className='flex items-center space-x-3'>
@@ -237,25 +278,25 @@ export const ImmersiveDemoModal = ({
                   <div className='text-sm text-white/70'>{Math.round(progress)}%</div>
                 </div>
 
-                {/* Transaction History Toggle */}
-                <button
-                  onClick={() => setShowTransactionHistory(!showTransactionHistory)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    showTransactionHistory
-                      ? 'bg-brand-500 text-white'
-                      : 'bg-white/10 text-white/70 hover:bg-white/20'
-                  }`}
-                >
-                  📊 Transactions ({demoTransactions.length})
-                </button>
+                {/* Transaction Status Indicator */}
+                <div className='flex items-center space-x-2 px-3 py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg'>
+                  <div className='w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
+                  <span className='text-sm font-medium text-green-300'>
+                    📊 Live Transactions ({demoTransactions.length})
+                  </span>
+                </div>
               </div>
             )}
 
             {/* Close Button */}
             <button
-              onClick={onClose}
-              className='text-white/70 hover:text-white transition-colors'
-              disabled={currentStep === 'demo'}
+              onClick={handleCloseClick}
+              className={`transition-colors p-2 rounded-lg ${
+                currentStep === 'demo' 
+                  ? 'text-white/70 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-400/30' 
+                  : 'text-white/70 hover:text-white'
+              }`}
+              title={currentStep === 'demo' ? 'Exit demo (will ask for confirmation)' : 'Close modal'}
             >
               <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
@@ -272,7 +313,7 @@ export const ImmersiveDemoModal = ({
         {/* Content */}
         <div className='flex flex-1 overflow-hidden'>
           {/* Main Content */}
-          <div className={`p-6 overflow-y-auto ${showTransactionHistory ? 'flex-1' : 'w-full'}`}>
+          <div className={`p-6 overflow-y-auto ${currentStep === 'demo' ? 'flex-1' : 'w-full'}`}>
             {currentStep === 'warning' && (
               <div className='text-center space-y-6'>
                 <div className='text-6xl mb-4'>⚠️</div>
@@ -301,7 +342,11 @@ export const ImmersiveDemoModal = ({
                     </li>
                     <li className='flex items-center space-x-2'>
                       <span className='text-brand-400'>🔐</span>
-                      <span>Wallet sidebar will open for transaction tracking</span>
+                      <span>Wallet sidebar will open for additional tracking</span>
+                    </li>
+                    <li className='flex items-center space-x-2'>
+                      <span className='text-brand-400'>📊</span>
+                      <span>Transaction sidebar always visible with blockchain links</span>
                     </li>
                     <li className='flex items-center space-x-2'>
                       <span className='text-brand-400'>🔔</span>
@@ -339,14 +384,14 @@ export const ImmersiveDemoModal = ({
 
             {currentStep === 'demo' && (
               <div className='space-y-4'>
-                {/* Wallet Sidebar Info */}
-                <div className='bg-brand-500/10 border border-brand-400/30 rounded-xl p-4'>
+                {/* Transaction Tracking Info */}
+                <div className='bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl p-4'>
                   <div className='flex items-center space-x-3'>
-                    <span className='text-2xl'>🔐</span>
+                    <span className='text-2xl'>📊</span>
                     <div>
-                      <h4 className='text-brand-300 font-semibold'>Wallet Sidebar Active</h4>
+                      <h4 className='text-green-300 font-semibold'>Live Transaction Tracking</h4>
                       <p className='text-white/70 text-sm'>
-                        Check the right sidebar for transaction history and wallet status
+                        Watch your transactions appear in real-time on the right sidebar with direct blockchain explorer links
                       </p>
                     </div>
                   </div>
@@ -491,30 +536,22 @@ export const ImmersiveDemoModal = ({
             )}
           </div>
 
-          {/* Transaction History Sidebar */}
-          {showTransactionHistory && currentStep === 'demo' && (
+          {/* Transaction History Sidebar - Always visible in demo mode */}
+          {currentStep === 'demo' && (
             <div className='w-80 bg-gradient-to-b from-neutral-800/50 to-neutral-900/50 border-l border-brand-400/30 flex flex-col'>
               {/* Sidebar Header */}
               <div className='p-4 border-b border-brand-400/20 bg-gradient-to-r from-brand-500/10 to-accent-500/10'>
-                <div className='flex items-center justify-between'>
-                  <h3 className='text-lg font-semibold text-white'>Transaction History</h3>
-                  <button
-                    onClick={() => setShowTransactionHistory(false)}
-                    className='text-white/70 hover:text-white transition-colors'
-                  >
-                    <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M6 18L18 6M6 6l12 12'
-                      />
-                    </svg>
-                  </button>
+                <div className='flex items-center space-x-3'>
+                  <div className='w-3 h-3 bg-green-400 rounded-full animate-pulse'></div>
+                  <div>
+                    <h3 className='text-lg font-semibold text-white flex items-center space-x-2'>
+                      <span>📊 Live Transactions</span>
+                    </h3>
+                    <p className='text-sm text-green-300 mt-1'>
+                      Real-time blockchain tracking • Always visible
+                    </p>
+                  </div>
                 </div>
-                <p className='text-sm text-white/60 mt-1'>
-                  Real-time transaction tracking for this demo
-                </p>
               </div>
 
               {/* Transaction List */}
@@ -560,21 +597,60 @@ export const ImmersiveDemoModal = ({
                               {transaction.amount} {transaction.asset || 'XLM'}
                             </p>
                           )}
-                          <div className='flex items-center mt-2'>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                transaction.status === 'success'
-                                  ? 'bg-green-500/20 text-green-300'
-                                  : transaction.status === 'failed'
-                                    ? 'bg-red-500/20 text-red-300'
-                                    : 'bg-yellow-500/20 text-yellow-300'
-                              }`}
-                            >
-                              {transaction.status}
-                            </span>
-                            <span className='text-xs text-white/50 ml-2 font-mono'>
-                              {transaction.hash.slice(0, 8)}...
-                            </span>
+                          <div className='flex items-center justify-between mt-2'>
+                            <div className='flex items-center space-x-2'>
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  transaction.status === 'success'
+                                    ? 'bg-green-500/20 text-green-300'
+                                    : transaction.status === 'failed'
+                                      ? 'bg-red-500/20 text-red-300'
+                                      : 'bg-yellow-500/20 text-yellow-300'
+                                }`}
+                              >
+                                {transaction.status}
+                              </span>
+                              <span className='text-xs text-white/50 font-mono'>
+                                {transaction.hash.slice(0, 8)}...
+                              </span>
+                            </div>
+                            
+                            {/* Explorer Links for successful transactions */}
+                            {transaction.status === 'success' && !transaction.hash.startsWith('mock_') && (
+                              <div className='flex space-x-1'>
+                                <button
+                                  onClick={() => {
+                                    const explorerUrl = `https://stellar.expert/explorer/testnet/tx/${transaction.hash}`;
+                                    window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+                                    addToast({
+                                      type: 'info',
+                                      title: '🌐 Opening Explorer',
+                                      message: 'Viewing transaction on Stellar Expert',
+                                      duration: 2000,
+                                    });
+                                  }}
+                                  className="px-1.5 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-xs hover:bg-purple-500/30 transition-all duration-300"
+                                  title="View on Stellar Expert"
+                                >
+                                  🌐
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(transaction.hash);
+                                    addToast({
+                                      type: 'success',
+                                      title: '📋 Hash Copied',
+                                      message: 'Transaction hash copied!',
+                                      duration: 2000,
+                                    });
+                                  }}
+                                  className="px-1.5 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-xs hover:bg-blue-500/30 transition-all duration-300"
+                                  title="Copy transaction hash"
+                                >
+                                  📋
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -585,14 +661,71 @@ export const ImmersiveDemoModal = ({
 
               {/* Sidebar Footer */}
               <div className='p-4 border-t border-brand-400/20 bg-gradient-to-r from-neutral-800/50 to-neutral-900/50'>
-                <div className='text-xs text-white/50 text-center'>
-                  <p>💡 Transactions are tracked in real-time</p>
-                  <p className='mt-1'>Total: {demoTransactions.length} transactions</p>
+                <div className='text-xs text-white/50 space-y-2'>
+                  <div className='flex items-center justify-between'>
+                    <span>💡 Real-time tracking</span>
+                    <span className='font-mono'>{demoTransactions.length} txns</span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>🌐 Explorer links</span>
+                    <span className='text-green-400'>Available</span>
+                  </div>
+                  <div className='text-center mt-2 pt-2 border-t border-white/10'>
+                    <p className='text-green-300 font-medium'>Always visible during demo</p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Close Confirmation Dialog */}
+        {showCloseConfirmation && (
+          <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 border border-red-400/30 rounded-2xl shadow-2xl max-w-md w-full p-6">
+              <div className="text-center space-y-4">
+                <div className="text-4xl">⚠️</div>
+                <h3 className="text-xl font-bold text-white">Exit Demo?</h3>
+                <p className="text-white/70 text-sm leading-relaxed">
+                  You're currently in the middle of a demo. If you exit now, your progress will be lost and you'll need to start over.
+                </p>
+                
+                {/* Progress indicator */}
+                {progress > 0 && (
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="text-xs text-white/60 mb-2">Current Progress</div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-brand-500 to-accent-500 transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-white/60 mt-1">{Math.round(progress)}% complete</div>
+                  </div>
+                )}
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowCloseConfirmation(false)}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    Continue Demo
+                  </button>
+                  <button
+                    onClick={handleCloseModal}
+                    className="flex-1 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 hover:border-red-400/50 text-red-300 hover:text-red-200 font-semibold rounded-lg transition-all duration-300"
+                  >
+                    Exit Anyway
+                  </button>
+                </div>
+                
+                <p className="text-xs text-white/50">
+                  💡 You can always restart the demo later from the demos page
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
