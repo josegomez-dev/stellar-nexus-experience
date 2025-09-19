@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useToast } from '@/contexts/ToastContext';
 import { stellarConfig } from '@/lib/wallet-config';
@@ -28,6 +29,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     isFreighterAvailable,
     openWalletModal,
   } = useGlobalWallet();
+  const { account } = useAccount(); // Get account to check if user exists
   const { getRecentTransactions, transactions } = useTransactionHistory();
   const { addToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -100,17 +102,27 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     };
   }, [isOpen, onToggle]);
 
-  // Auto-show Web3 modal when sidebar opens for the first time
+  // Auto-show Web3 modal when sidebar opens for the first time (only for new users without accounts)
   useEffect(() => {
-    if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable) {
-      const timer = setTimeout(() => {
-        setShowWeb3Modal(true);
-        setHasShownWeb3Modal(true);
-      }, 500); // Small delay to let sidebar animation complete
+    if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable && !account) {
+      // Check if user has seen onboarding before
+      const hasSeenOnboardingBefore = typeof window !== 'undefined' 
+        ? localStorage.getItem('hasSeenOnboarding') === 'true'
+        : false;
+      
+      // Only show for completely new users
+      if (!hasSeenOnboardingBefore) {
+        const timer = setTimeout(() => {
+          setShowWeb3Modal(true);
+          setHasShownWeb3Modal(true);
+        }, 500); // Small delay to let sidebar animation complete
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      } else {
+        setHasShownWeb3Modal(true);
+      }
     }
-  }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable]);
+  }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable, account]);
 
   // Track if user manually opened the sidebar (to prevent auto-close conflicts)
   const [userOpened, setUserOpened] = useState(false);

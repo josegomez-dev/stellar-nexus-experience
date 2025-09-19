@@ -28,11 +28,9 @@ import { ToastContainer } from '@/components/ui/Toast';
 import { AuthBanner } from '@/components/ui/AuthBanner';
 import { AuthModal } from '@/components/ui/AuthModal';
 import { UserProfile } from '@/components/ui/UserProfile';
-import { BugfenderTestPanel } from '@/components/ui/BugfenderTestPanel';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
-import { logPageVisit, logDemoAction } from '@/lib/bugfender';
 
 // Demo Selection Component
 interface Demo {
@@ -365,16 +363,7 @@ const DemoSelector = ({
                         onClick={e => {
                           e.stopPropagation();
                           if (isConnected) {
-                            logDemoAction(demo.id, 'demo_launched', { 
-                              demoTitle: demo.title,
-                              isConnected 
-                            });
                             setShowImmersiveDemo(true);
-                          } else {
-                            logDemoAction(demo.id, 'demo_launch_failed', { 
-                              reason: 'wallet_not_connected',
-                              demoTitle: demo.title 
-                            });
                           }
                         }}
                         disabled={!isConnected}
@@ -445,10 +434,6 @@ function DemosPageContent() {
   const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
 
-  // Log page visit
-  useEffect(() => {
-    logPageVisit('Demos Page', '/demos');
-  }, []);
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -1321,8 +1306,6 @@ function DemosPageContent() {
       {/* Account Status Indicator */}
       <AccountStatusIndicator />
 
-      {/* Bugfender Test Panel (Development Only) */}
-      <BugfenderTestPanel />
     </EscrowProvider>
   );
 }

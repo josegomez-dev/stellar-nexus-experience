@@ -7,7 +7,6 @@ import { useGlobalWallet } from './WalletContext';
 import { useToast } from './ToastContext';
 import { useBadgeAnimation } from './BadgeAnimationContext';
 import { AVAILABLE_BADGES } from '@/lib/badge-config';
-import { logInfo, logError, logWarning, setAccountInfo, setUserInfo } from '@/lib/bugfender';
 
 interface AccountContextType {
   account: UserAccount | null;
@@ -55,14 +54,14 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   // Load account when wallet connects
   useEffect(() => {
     if (isConnected && walletData?.publicKey) {
-      logInfo('Wallet connected, loading account', {
+      console.log('Wallet connected, loading account', {
         publicKey: walletData.publicKey.substring(0, 8) + '...',
         network: walletData.network
       });
-      setUserInfo(walletData.publicKey, walletData.network);
+      // User info set (Bugfender removed)
       loadAccount();
     } else {
-      logInfo('Wallet disconnected, clearing account data');
+      console.log('Wallet disconnected, clearing account data');
       setAccount(null);
       setPointsTransactions([]);
     }
@@ -75,14 +74,14 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     setError(null);
     
     try {
-      logInfo('Loading account for wallet', { publicKey: walletData.publicKey.substring(0, 8) + '...' });
+      console.log('Loading account for wallet', { publicKey: walletData.publicKey.substring(0, 8) + '...' });
       
       // Try to find existing account
       let userAccount = await accountService.getAccountByWallet(walletData.publicKey);
       
       if (!userAccount) {
         // Account doesn't exist, create one automatically
-        logInfo('No existing account found, creating new account automatically');
+        console.log('No existing account found, creating new account automatically');
         
         addToast({
           type: 'info',
@@ -91,7 +90,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
           duration: 3000,
         });
         
-        logInfo('Auto-creating account for new wallet connection');
+        console.log('Auto-creating account for new wallet connection');
         
         await createAccountInternal();
       } else {
@@ -99,20 +98,20 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         await accountService.updateLastLogin(userAccount.id);
         userAccount.lastLoginAt = new Date() as any; // Update local state
         
-        logInfo('Existing account found and loaded', {
+        console.log('Existing account found and loaded', {
           accountId: userAccount.id.substring(0, 8) + '...',
           points: userAccount.profile.totalPoints,
           level: userAccount.profile.level
         });
         
         setAccount(userAccount);
-        setAccountInfo(userAccount.id, userAccount.profile.totalPoints, userAccount.profile.level);
+        // Account info set (Bugfender removed)
         
         // Load points transactions
         const transactions = await accountService.getPointsTransactions(userAccount.id);
         setPointsTransactions(transactions);
         
-        logInfo('Points transactions loaded', { count: transactions.length });
+        console.log('Points transactions loaded', { count: transactions.length });
         
         // Welcome back message
         addToast({
@@ -124,7 +123,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       }
     } catch (err) {
       console.error('Error loading account:', err);
-      logError('Failed to load account', err);
+      console.error('Failed to load account', err);
       setError(err instanceof Error ? err.message : 'Failed to load account');
     } finally {
       setLoading(false);
@@ -134,11 +133,11 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   const createAccountInternal = async () => {
     if (!walletData?.publicKey || !walletData?.network) {
       const error = 'Wallet not connected';
-      logError('Account creation failed - wallet not connected', { walletData });
+      console.error('Account creation failed - wallet not connected', { walletData });
       throw new Error(error);
     }
     
-    logInfo('Starting account creation', {
+    console.log('Starting account creation', {
       publicKey: walletData.publicKey.substring(0, 8) + '...',
       network: walletData.network
     });
@@ -147,7 +146,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     setError(null);
     
     try {
-      logInfo('Calling account service to create account');
+      console.log('Calling account service to create account');
       
       // Add timeout to prevent hanging
       const accountCreationPromise = accountService.createAccount(
@@ -162,17 +161,17 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       
       const newAccount = await Promise.race([accountCreationPromise, timeoutPromise]) as UserAccount;
       
-      logInfo('Account created successfully', {
+      console.log('Account created successfully', {
         accountId: newAccount.id.substring(0, 8) + '...',
         points: newAccount.profile.totalPoints,
         level: newAccount.profile.level
       });
       
       setAccount(newAccount);
-      setAccountInfo(newAccount.id, newAccount.profile.totalPoints, newAccount.profile.level);
+      // Account info set (Bugfender removed)
       
       // Load initial points transactions with timeout
-      logInfo('Loading initial points transactions');
+      console.log('Loading initial points transactions');
       try {
         const transactionPromise = accountService.getPointsTransactions(newAccount.id);
         const transactionTimeoutPromise = new Promise((_, reject) => {
@@ -180,14 +179,14 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         });
         
         const transactions = await Promise.race([transactionPromise, transactionTimeoutPromise]) as PointsTransaction[];
-        logInfo('Points transactions loaded successfully', { count: transactions.length });
+        console.log('Points transactions loaded successfully', { count: transactions.length });
         setPointsTransactions(transactions);
       } catch (transactionError) {
-        logWarning('Could not load points transactions', transactionError);
+        console.warn('Could not load points transactions', transactionError);
         setPointsTransactions([]);
       }
       
-      logInfo('Account creation completed successfully');
+      console.log('Account creation completed successfully');
       
       // Success message for new account
       addToast({
@@ -220,7 +219,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         }
       }
       
-      logError('Account creation failed', {
+      console.error('Account creation failed', {
         error: errorMessage,
         originalError: err instanceof Error ? err.message : err,
         stack: err instanceof Error ? err.stack : undefined
@@ -266,7 +265,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     if (!account) throw new Error('No account found');
     
     try {
-      logInfo(`Starting demo: ${demoId}`, { 
+      console.log(`Starting demo: ${demoId}`, { 
         accountId: account.id.substring(0, 8) + '...',
         demoId 
       });
@@ -287,9 +286,9 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         };
       });
       
-      logInfo(`Demo started successfully: ${demoId}`);
+      console.log(`Demo started successfully: ${demoId}`);
     } catch (err) {
-      logError(`Failed to start demo: ${demoId}`, err);
+      console.error(`Failed to start demo: ${demoId}`, err);
       throw err;
     }
   };
@@ -298,7 +297,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     if (!account) throw new Error('No account found');
     
     try {
-      logInfo(`Completing demo: ${demoId}`, { 
+      console.log(`Completing demo: ${demoId}`, { 
         accountId: account.id.substring(0, 8) + '...',
         demoId,
         score 
@@ -371,14 +370,14 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
           }
         }
       
-      logInfo(`Demo completed successfully: ${demoId}`, { 
+      console.log(`Demo completed successfully: ${demoId}`, { 
         score,
         pointsEarned,
         newTransactionCount: transactions.length 
       });
       
     } catch (err) {
-      logError(`Failed to complete demo: ${demoId}`, err);
+      console.error(`Failed to complete demo: ${demoId}`, err);
       addToast({ 
         type: 'error', 
         title: 'Demo Completion Failed', 
