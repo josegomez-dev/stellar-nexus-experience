@@ -1,18 +1,20 @@
 'use client';
 
+import { loadStellarSDK, getStellarServer, isStellarSDKAvailable } from './stellar-sdk-loader';
+
 // Simple Stellar SDK test to verify functionality
 export const testStellarSDK = async () => {
   try {
     console.log('🧪 Testing Stellar SDK functionality...');
     
-    let StellarSDK: any;
-    try {
-      StellarSDK = await import('@stellar/stellar-sdk');
-      console.log('✅ Using @stellar/stellar-sdk');
-    } catch {
-      StellarSDK = await import('stellar-sdk');
-      console.log('✅ Using stellar-sdk (legacy)');
+    if (!isStellarSDKAvailable()) {
+      return {
+        success: false,
+        message: 'Stellar SDK not available in this environment'
+      };
     }
+    
+    const StellarSDK = await loadStellarSDK();
     
     const { Server, Keypair, Networks } = StellarSDK;
     
@@ -20,8 +22,8 @@ export const testStellarSDK = async () => {
     const testKeypair = Keypair.random();
     console.log('✅ Keypair generation works:', testKeypair.publicKey());
     
-    // Test 2: Connect to Horizon
-    const server = new Server('https://horizon-testnet.stellar.org');
+    // Test 2: Connect to Horizon using optimized loader
+    const server = await getStellarServer('https://horizon-testnet.stellar.org');
     console.log('✅ Server connection created');
     
     // Test 3: Check network passphrase
@@ -56,7 +58,7 @@ export const testAccountLoading = async (publicKey: string) => {
     }
     
     const { Server } = StellarSDK;
-    const server = Server.default ? new Server.default('https://horizon-testnet.stellar.org') : new Server('https://horizon-testnet.stellar.org');
+    const server = await getStellarServer('https://horizon-testnet.stellar.org');
     
     const account = await server.loadAccount(publicKey);
     console.log('✅ Account loaded:', {

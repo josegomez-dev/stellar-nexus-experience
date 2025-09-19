@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
+import { loadStellarSDK, getStellarServer, isStellarSDKAvailable } from './stellar-sdk-loader';
 
 // Real Trustless Work Integration Types
 export interface RealInitializePayload {
@@ -59,18 +60,14 @@ const createEscrowTransactionXDR = async (payload: RealInitializePayload, wallet
     console.log('🔨 Creating real Stellar transaction for wallet:', walletPublicKey);
     
     // Import Stellar SDK dynamically to avoid SSR issues
-    let StellarSDK: any;
-    try {
-      // Try the new package first
-      StellarSDK = await import('@stellar/stellar-sdk');
-    } catch {
-      // Fallback to old package if new one isn't available
-      StellarSDK = await import('stellar-sdk');
+    if (!isStellarSDKAvailable()) {
+      throw new Error('Stellar SDK not available in this environment');
     }
     
-    const { Server, Keypair, TransactionBuilder, Operation, Networks, Asset } = StellarSDK;
+    const StellarSDK = await loadStellarSDK();
+    const { Keypair, TransactionBuilder, Operation, Networks, Asset } = StellarSDK;
     
-    const server = new Server.default ? new Server.default('https://horizon-testnet.stellar.org') : new Server('https://horizon-testnet.stellar.org');
+    const server = await getStellarServer('https://horizon-testnet.stellar.org');
     
     // Load the source account (the user's wallet)
     console.log('📡 Loading account from Stellar network...');
