@@ -102,26 +102,30 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     };
   }, [isOpen, onToggle]);
 
-  // Auto-show Web3 modal when sidebar opens for the first time (only for new users without accounts)
+  // Auto-show Web3 modal when sidebar opens for the first time (DISABLED - was annoying)
   useEffect(() => {
-    if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable && !account) {
-      // Check if user has seen onboarding before
-      const hasSeenOnboardingBefore = typeof window !== 'undefined' 
-        ? localStorage.getItem('hasSeenOnboarding') === 'true'
-        : false;
-      
-      // Only show for completely new users
-      if (!hasSeenOnboardingBefore) {
-        const timer = setTimeout(() => {
-          setShowWeb3Modal(true);
-          setHasShownWeb3Modal(true);
-        }, 500); // Small delay to let sidebar animation complete
-
-        return () => clearTimeout(timer);
-      } else {
-        setHasShownWeb3Modal(true);
-      }
-    }
+    // Commented out auto-show logic to prevent annoying popup
+    // if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable && !account) {
+    //   // Check if user has seen onboarding before
+    //   const hasSeenOnboardingBefore = typeof window !== 'undefined' 
+    //     ? localStorage.getItem('hasSeenOnboarding') === 'true'
+    //     : false;
+    //   
+    //   // Only show for completely new users
+    //   if (!hasSeenOnboardingBefore) {
+    //     const timer = setTimeout(() => {
+    //       setShowWeb3Modal(true);
+    //       setHasShownWeb3Modal(true);
+    //     }, 500); // Small delay to let sidebar animation complete
+    //
+    //     return () => clearTimeout(timer);
+    //   } else {
+    //     setHasShownWeb3Modal(true);
+    //   }
+    // }
+    
+    // Just mark as shown to prevent any future auto-show attempts
+    setHasShownWeb3Modal(true);
   }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable, account]);
 
   // Track if user manually opened the sidebar (to prevent auto-close conflicts)
