@@ -14,6 +14,7 @@ interface ImmersiveDemoModalProps {
   demoDescription: string;
   estimatedTime: number; // in minutes
   children: React.ReactNode;
+  onDemoComplete?: (demoId: string, demoName: string, completionTime: number) => void;
 }
 
 interface FeedbackData {
@@ -31,6 +32,7 @@ export const ImmersiveDemoModal = ({
   demoDescription,
   estimatedTime,
   children,
+  onDemoComplete,
 }: ImmersiveDemoModalProps) => {
   const { isConnected } = useGlobalWallet();
   const { addToast } = useToast();
@@ -108,7 +110,18 @@ export const ImmersiveDemoModal = ({
   };
 
   const handleCompleteDemo = () => {
-    setCurrentStep('feedback');
+    const completionTimeMinutes = Math.round(elapsedTime / 60);
+    
+    // Call the external feedback handler if provided
+    if (onDemoComplete) {
+      onDemoComplete(demoId, demoTitle, completionTimeMinutes);
+      // Close the demo modal after completion
+      handleCloseModal();
+    } else {
+      // Fallback to internal feedback system
+      setCurrentStep('feedback');
+    }
+    
     addToast({
       type: 'success',
       title: '🎉 Demo Completed!',

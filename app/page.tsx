@@ -21,6 +21,9 @@ import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo';
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo';
+import { useDemoStats } from '@/hooks/useDemoStats';
+import { DemoFeedbackModal } from '@/components/ui/DemoFeedbackModal';
+import { initializeDemoStats } from '@/lib/demo-stats-initializer';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/ImmersiveDemoModal';
 import { TechTreeModal } from '@/components/ui/TechTreeModal';
@@ -54,92 +57,23 @@ const DemoSelector = ({
   isConnected: boolean;
 }) => {
   const { getCompletedDemos } = useAccount();
-  // Clap system with localStorage persistence
-  const [demoClaps, setDemoClaps] = useState<Record<string, number>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('demoClaps');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': 24,
-            'milestone-voting': 18,
-            'dispute-resolution': 12,
-            'micro-marketplace': 31,
-          };
-    }
-    return {
-      'hello-milestone': 24,
-      'milestone-voting': 18,
-      'dispute-resolution': 12,
-      'micro-marketplace': 31,
-    };
-  });
-  const [userClapped, setUserClapped] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('userClapped');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': false,
-            'milestone-voting': false,
-            'dispute-resolution': false,
-            'micro-marketplace': false,
-          };
-    }
-    return {
-      'hello-milestone': false,
-      'milestone-voting': false,
-      'dispute-resolution': false,
-      'micro-marketplace': false,
-    };
-  });
-
-  // Simulated completion counts for demos
-  const [demoCompletions, setDemoCompletions] = useState<Record<string, number>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('demoCompletions');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': 42,
-            'milestone-voting': 28,
-            'dispute-resolution': 19,
-            'micro-marketplace': 35,
-          };
-    }
-    return {
-      'hello-milestone': 42,
-      'milestone-voting': 28,
-      'dispute-resolution': 19,
-      'micro-marketplace': 35,
-    };
-  });
-
-  const handleClap = (demoId: string) => {
-    if (userClapped[demoId]) return; // User already clapped
-
-    const newClaps = { ...demoClaps, [demoId]: demoClaps[demoId] + 1 };
-    const newUserClapped = { ...userClapped, [demoId]: true };
-
-    setDemoClaps(newClaps);
-    setUserClapped(newUserClapped);
-
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demoClaps', JSON.stringify(newClaps));
-      localStorage.setItem('userClapped', JSON.stringify(newUserClapped));
-    }
-  };
+  const { demoStats, clapDemo } = useDemoStats();
 
   const getClapStats = (demoId: string) => {
-    const claps = demoClaps[demoId];
-    const hasClapped = userClapped[demoId];
-    const completions = demoCompletions[demoId];
+    const stats = demoStats[demoId];
+    
+    if (!stats) {
+      return {
+        claps: 0,
+        hasClapped: false,
+        completions: 0,
+      };
+    }
 
     return {
-      claps: claps,
-      hasClapped: hasClapped,
-      completions: completions,
+      claps: stats.totalClaps,
+      hasClapped: stats.hasUserClapped,
+      completions: stats.totalCompletions,
     };
   };
 
@@ -265,15 +199,23 @@ const DemoSelector = ({
                             <button
                               onClick={e => {
                                 e.stopPropagation();
-                                handleClap(demo.id);
+                                clapDemo(demo.id, demo.title);
                               }}
-                              disabled={stats.hasClapped}
+                              disabled={stats.hasClapped || !isConnected}
                               className={`w-full transition-all duration-200 hover:scale-105 ${
                                 stats.hasClapped
                                   ? 'text-emerald-400 cursor-not-allowed'
+                                  : !isConnected
+                                  ? 'text-gray-500 cursor-not-allowed'
                                   : 'text-emerald-400 hover:text-emerald-300'
                               }`}
-                              title={stats.hasClapped ? 'Already clapped!' : 'Clap for this demo!'}
+                              title={
+                                stats.hasClapped 
+                                  ? 'Already clapped!' 
+                                  : !isConnected 
+                                  ? 'Connect wallet to clap!' 
+                                  : 'Clap for this demo!'
+                              }
                             >
                               <div className='text-lg font-bold'>
                                 {stats.hasClapped ? '✓' : '✓'}
@@ -433,11 +375,20 @@ function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
+  const { submitFeedback } = useDemoStats();
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+  
+  // Feedback modal state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackDemoData, setFeedbackDemoData] = useState<{
+    demoId: string;
+    demoName: string;
+    completionTime: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(() => {
     // Check if this is the first time loading the page
     if (typeof window !== 'undefined') {
@@ -454,6 +405,13 @@ function HomePageContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
+
+  // Initialize demo stats on app load
+  useEffect(() => {
+    initializeDemoStats().catch(error => {
+      console.error('Failed to initialize demo stats:', error);
+    });
+  }, []);
 
   // Preloader effect - only on first load
   useEffect(() => {
@@ -524,6 +482,29 @@ function HomePageContent() {
 
   const handleUserProfileClick = () => {
     setShowUserProfile(true);
+  };
+
+  // Handle demo completion and show feedback modal
+  const handleDemoComplete = (demoId: string, demoName: string, completionTime: number = 5) => {
+    setFeedbackDemoData({
+      demoId,
+      demoName,
+      completionTime,
+    });
+    setShowFeedbackModal(true);
+  };
+
+  // Handle feedback submission
+  const handleFeedbackSubmit = async (feedback: any) => {
+    await submitFeedback(feedback);
+    setShowFeedbackModal(false);
+    setFeedbackDemoData(null);
+  };
+
+  // Close feedback modal
+  const handleFeedbackClose = () => {
+    setShowFeedbackModal(false);
+    setFeedbackDemoData(null);
   };
 
   return (
@@ -1021,6 +1002,7 @@ function HomePageContent() {
           demoTitle='1. Baby Steps to Riches'
           demoDescription='Basic Escrow Flow Demo'
           estimatedTime={1}
+          onDemoComplete={handleDemoComplete}
         >
           <HelloMilestoneDemo />
         </ImmersiveDemoModal>
@@ -1041,6 +1023,18 @@ function HomePageContent() {
 
       {/* Account Status Indicator */}
       <AccountStatusIndicator />
+
+      {/* Demo Feedback Modal */}
+      {showFeedbackModal && feedbackDemoData && (
+        <DemoFeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={handleFeedbackClose}
+          onSubmit={handleFeedbackSubmit}
+          demoId={feedbackDemoData.demoId}
+          demoName={feedbackDemoData.demoName}
+          completionTime={feedbackDemoData.completionTime}
+        />
+      )}
 
     </EscrowProvider>
   );

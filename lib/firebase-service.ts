@@ -26,6 +26,9 @@ import {
   UserBadge,
   Transaction,
   LeaderboardEntry,
+  DemoStats,
+  DemoClap,
+  DemoFeedback,
   COLLECTIONS,
 } from './firebase-types';
 
@@ -354,5 +357,263 @@ export const firebaseUtils = {
     const currentLevel = this.calculateLevel(totalXp);
     const nextLevelXp = currentLevel * 100;
     return nextLevelXp - totalXp;
+  },
+};
+
+// Demo Stats Operations
+export const demoStatsService = {
+  // Get demo stats by demo ID
+  async getDemoStats(demoId: string): Promise<DemoStats | null> {
+    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const statsSnap = await getDoc(statsRef);
+    
+    if (statsSnap.exists()) {
+      return convertTimestamps({ id: statsSnap.id, ...statsSnap.data() }) as DemoStats;
+    }
+    return null;
+  },
+
+  // Get all demo stats
+  async getAllDemoStats(): Promise<DemoStats[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_STATS),
+      orderBy('totalCompletions', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoStats[];
+  },
+
+  // Initialize demo stats (create if not exists)
+  async initializeDemoStats(demoId: string, demoName: string): Promise<void> {
+    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const statsSnap = await getDoc(statsRef);
+    
+    if (!statsSnap.exists()) {
+      await setDoc(statsRef, {
+        id: demoId,
+        demoId,
+        demoName,
+        totalCompletions: 0,
+        totalClaps: 0,
+        averageRating: 0,
+        totalRatings: 0,
+        averageCompletionTime: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+
+  // Increment demo completion count
+  async incrementCompletion(demoId: string, completionTime: number): Promise<void> {
+    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const statsSnap = await getDoc(statsRef);
+    
+    if (statsSnap.exists()) {
+      const currentStats = statsSnap.data() as DemoStats;
+      const newTotalCompletions = currentStats.totalCompletions + 1;
+      const newAverageTime = ((currentStats.averageCompletionTime * currentStats.totalCompletions) + completionTime) / newTotalCompletions;
+      
+      await updateDoc(statsRef, {
+        totalCompletions: newTotalCompletions,
+        averageCompletionTime: newAverageTime,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+
+  // Increment demo clap count
+  async incrementClaps(demoId: string): Promise<void> {
+    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const statsSnap = await getDoc(statsRef);
+    
+    if (statsSnap.exists()) {
+      const currentStats = statsSnap.data() as DemoStats;
+      await updateDoc(statsRef, {
+        totalClaps: currentStats.totalClaps + 1,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+
+  // Update demo rating
+  async updateRating(demoId: string, newRating: number): Promise<void> {
+    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const statsSnap = await getDoc(statsRef);
+    
+    if (statsSnap.exists()) {
+      const currentStats = statsSnap.data() as DemoStats;
+      const newTotalRatings = currentStats.totalRatings + 1;
+      const newAverageRating = ((currentStats.averageRating * currentStats.totalRatings) + newRating) / newTotalRatings;
+      
+      await updateDoc(statsRef, {
+        averageRating: newAverageRating,
+        totalRatings: newTotalRatings,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+};
+
+// Demo Claps Operations
+export const demoClapService = {
+  // Add clap for demo
+  async addClap(userId: string, demoId: string): Promise<void> {
+    const clapId = `${userId}_${demoId}`;
+    const clapRef = doc(db, COLLECTIONS.DEMO_CLAPS, clapId);
+    
+    // Check if user already clapped
+    const clapSnap = await getDoc(clapRef);
+    if (clapSnap.exists()) {
+      throw new Error('User has already clapped for this demo');
+    }
+    
+    // Add clap record
+    await setDoc(clapRef, {
+      id: clapId,
+      userId,
+      demoId,
+      createdAt: serverTimestamp(),
+    });
+    
+    // Increment clap count in demo stats
+    await demoStatsService.incrementClaps(demoId);
+  },
+
+  // Check if user has clapped for demo
+  async hasUserClapped(userId: string, demoId: string): Promise<boolean> {
+    const clapId = `${userId}_${demoId}`;
+    const clapRef = doc(db, COLLECTIONS.DEMO_CLAPS, clapId);
+    const clapSnap = await getDoc(clapRef);
+    
+    return clapSnap.exists();
+  },
+
+  // Get all claps for a demo
+  async getDemoClaps(demoId: string): Promise<DemoClap[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_CLAPS),
+      where('demoId', '==', demoId),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoClap[];
+  },
+
+  // Get user's claps
+  async getUserClaps(userId: string): Promise<DemoClap[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_CLAPS),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoClap[];
+  },
+};
+
+// Demo Feedback Operations
+export const demoFeedbackService = {
+  // Submit feedback for demo
+  async submitFeedback(feedback: Partial<DemoFeedback>): Promise<string> {
+    const feedbackRef = await addDoc(collection(db, COLLECTIONS.DEMO_FEEDBACK), {
+      ...feedback,
+      createdAt: serverTimestamp(),
+    });
+    
+    // Update demo rating in stats
+    if (feedback.rating && feedback.demoId) {
+      await demoStatsService.updateRating(feedback.demoId, feedback.rating);
+    }
+    
+    return feedbackRef.id;
+  },
+
+  // Get feedback for a demo
+  async getDemoFeedback(demoId: string, limitCount: number = 50): Promise<DemoFeedback[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_FEEDBACK),
+      where('demoId', '==', demoId),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoFeedback[];
+  },
+
+  // Get user's feedback
+  async getUserFeedback(userId: string): Promise<DemoFeedback[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_FEEDBACK),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoFeedback[];
+  },
+
+  // Check if user has submitted feedback for demo
+  async hasUserSubmittedFeedback(userId: string, demoId: string): Promise<boolean> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_FEEDBACK),
+      where('userId', '==', userId),
+      where('demoId', '==', demoId),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return !querySnapshot.empty;
+  },
+
+  // Get feedback statistics for a demo
+  async getFeedbackStats(demoId: string): Promise<{
+    totalFeedback: number;
+    averageRating: number;
+    difficultyBreakdown: Record<string, number>;
+    recommendationRate: number;
+  }> {
+    const feedback = await this.getDemoFeedback(demoId, 1000); // Get more for stats
+    
+    if (feedback.length === 0) {
+      return {
+        totalFeedback: 0,
+        averageRating: 0,
+        difficultyBreakdown: {},
+        recommendationRate: 0,
+      };
+    }
+    
+    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
+    const averageRating = totalRating / feedback.length;
+    
+    const difficultyBreakdown = feedback.reduce((acc, f) => {
+      acc[f.difficulty] = (acc[f.difficulty] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const recommendCount = feedback.filter(f => f.wouldRecommend).length;
+    const recommendationRate = (recommendCount / feedback.length) * 100;
+    
+    return {
+      totalFeedback: feedback.length,
+      averageRating,
+      difficultyBreakdown,
+      recommendationRate,
+    };
   },
 };

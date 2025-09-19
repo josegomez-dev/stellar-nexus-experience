@@ -110,6 +110,41 @@ export interface LeaderboardEntry {
   lastUpdated: Date;
 }
 
+export interface DemoStats {
+  id: string; // demoId
+  demoId: string;
+  demoName: string;
+  totalCompletions: number;
+  totalClaps: number;
+  averageRating: number;
+  totalRatings: number;
+  averageCompletionTime: number; // in minutes
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DemoClap {
+  id: string;
+  userId: string; // Wallet address
+  demoId: string;
+  createdAt: Date;
+}
+
+export interface DemoFeedback {
+  id: string;
+  userId: string; // Wallet address
+  demoId: string;
+  demoName: string;
+  rating: number; // 1-5 stars
+  feedback: string;
+  completionTime: number; // in minutes
+  difficulty: 'very_easy' | 'easy' | 'medium' | 'hard' | 'very_hard';
+  wouldRecommend: boolean;
+  mostHelpfulFeature?: string;
+  suggestions?: string;
+  createdAt: Date;
+}
+
 // Collection names
 export const COLLECTIONS = {
   USERS: 'users',
@@ -118,6 +153,9 @@ export const COLLECTIONS = {
   USER_BADGES: 'user_badges',
   TRANSACTIONS: 'transactions',
   LEADERBOARD: 'leaderboard',
+  DEMO_STATS: 'demo_stats',
+  DEMO_CLAPS: 'demo_claps',
+  DEMO_FEEDBACK: 'demo_feedback',
 } as const;
 
 // Firestore document references
