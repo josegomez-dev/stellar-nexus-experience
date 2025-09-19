@@ -85,9 +85,9 @@ export const Header = () => {
 
 
             {/* Network Indicator */}
-            <div className='hidden sm:flex items-center'>
+            {/* <div className='hidden sm:flex items-center'>
               <NetworkIndicator className='scale-90' showSwitchButton={true} />
-            </div>
+            </div> */}
 
             {/* User Dropdown */}
             <UserDropdown />
