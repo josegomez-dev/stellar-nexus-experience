@@ -679,11 +679,6 @@ export const HelloMilestoneDemo = () => {
             duration: 7000,
           });
           
-          // Trigger scroll to top animation for better UX
-          setTimeout(() => {
-            scrollToTop();
-          }, 1500);
-          
         } catch (realEscrowError) {
           console.error('❌ Real escrow initialization failed:', realEscrowError);
           
@@ -719,11 +714,6 @@ export const HelloMilestoneDemo = () => {
             icon: '✅',
             duration: 7000,
           });
-          
-          // Trigger scroll to top animation for better UX
-          setTimeout(() => {
-            scrollToTop();
-          }, 1500);
         }
         
       } else {
@@ -746,11 +736,6 @@ export const HelloMilestoneDemo = () => {
           icon: '🔒',
           duration: 7000,
         });
-        
-        // Trigger scroll to top animation for better UX
-        setTimeout(() => {
-          scrollToTop();
-        }, 1500);
       }
       
       console.log('✅ handleInitializeEscrow completed successfully');
