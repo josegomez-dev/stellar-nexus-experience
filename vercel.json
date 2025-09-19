@@ -1,4 +1,5 @@
 {
+  "name": "stellar-nexus-experience",
   "buildCommand": "npm run build -- --no-lint",
   "outputDirectory": ".next",
   "framework": "nextjs",
