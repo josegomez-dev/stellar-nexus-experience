@@ -8,6 +8,8 @@ import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
 import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
+import { DemoCompletionHistory } from '@/components/ui/DemoCompletionHistory';
+import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
 import Image from 'next/image';
 import {
   useInitializeEscrow,
@@ -44,11 +46,13 @@ export const HelloMilestoneDemo = () => {
 
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
+  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [milestoneStatus, setMilestoneStatus] = useState<'pending' | 'completed'>('pending');
   const [demoStarted, setDemoStarted] = useState(false);
+  const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
   
   // New state for enhanced features
   const [showProcessExplanation, setShowProcessExplanation] = useState(false);
@@ -89,10 +93,16 @@ export const HelloMilestoneDemo = () => {
   // Helper function to create explorer URLs
   const createExplorerUrls = (txHash: string) => {
     if (useRealTrustlessWork && !txHash.startsWith('mock_')) {
+      // Determine network-specific URLs based on wallet data
+      const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+      const networkSuffix = isTestnet ? 'testnet' : 'public';
+      
       return {
-        explorerUrl: `https://stellar.expert/explorer/testnet/tx/${txHash}`,
-        stellarExpertUrl: `https://stellar.expert/explorer/testnet/tx/${txHash}`,
-        horizonUrl: `https://horizon-testnet.stellar.org/transactions/${txHash}`
+        explorerUrl: `https://stellar.expert/explorer/${networkSuffix}/tx/${txHash}`,
+        stellarExpertUrl: `https://stellar.expert/explorer/${networkSuffix}/tx/${txHash}`,
+        horizonUrl: isTestnet 
+          ? `https://horizon-testnet.stellar.org/transactions/${txHash}`
+          : `https://horizon.stellar.org/transactions/${txHash}`
       };
     }
     return {
@@ -107,6 +117,12 @@ export const HelloMilestoneDemo = () => {
   const isCompleted = demoProgress?.status === 'completed';
   const previousScore = demoProgress?.score || 0;
   const pointsEarned = demoProgress?.pointsEarned || 0;
+  
+  // Get completion history data
+  const demoHistory = getDemoHistory('hello-milestone');
+  const totalPointsEarned = getTotalPointsEarned('hello-milestone');
+  const bestScore = getBestScore('hello-milestone');
+  const completionCount = getCompletionCount('hello-milestone');
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
@@ -496,7 +512,42 @@ export const HelloMilestoneDemo = () => {
       // Complete the demo with a good score
       const completeThisDemo = async () => {
         try {
-          await completeDemo('hello-milestone', 85); // 85% score for completing the demo
+          // Calculate completion time
+          const completionTime = demoStartTime ? Math.round((Date.now() - demoStartTime) / 1000) : 0;
+          
+          // Calculate score based on performance (85% base + bonuses)
+          let score = 85;
+          if (completionTime < 300) score += 10; // Bonus for quick completion
+          if (useRealTrustlessWork) score += 5; // Bonus for using real blockchain
+          score = Math.min(100, score); // Cap at 100%
+          
+          // Check if this is first completion
+          const isFirstCompletion = completionCount === 0;
+          
+          // Calculate points earned
+          const basePoints = 100;
+          const scoreMultiplier = Math.max(0.5, score / 100);
+          let pointsEarned = Math.round(basePoints * scoreMultiplier);
+          
+          // Give reduced points for replays (25% of original)
+          if (!isFirstCompletion) {
+            pointsEarned = Math.round(pointsEarned * 0.25);
+          }
+          
+          // Add to completion history
+          addCompletion({
+            demoId: 'hello-milestone',
+            demoName: 'Baby Steps to Riches',
+            score,
+            pointsEarned,
+            completionTime,
+            isFirstCompletion,
+            network: walletData?.network || 'TESTNET',
+            walletAddress: walletData?.publicKey || '',
+          });
+          
+          // Complete the demo in the account system
+          await completeDemo('hello-milestone', score);
         } catch (error) {
           console.error('Failed to complete demo:', error);
         }
@@ -512,7 +563,7 @@ export const HelloMilestoneDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, completeDemo]);
+  }, [currentStep, completeDemo, demoStartTime, useRealTrustlessWork, completionCount, addCompletion]);
 
   async function handleInitializeEscrow() {
     console.log('🚀 Starting handleInitializeEscrow...');
@@ -694,14 +745,17 @@ export const HelloMilestoneDemo = () => {
               const realTxHash = transactionResult.hash;
               console.log('🔗 Real transaction hash:', realTxHash);
               
+              // Create proper explorer URLs for the real transaction
+              const realUrls = createExplorerUrls(realTxHash);
+              
               // Update transaction details with real hash
               setTransactionDetails(prev => ({
                 ...prev,
                 [txHash]: {
                   ...prev[txHash],
                   hash: realTxHash,
-                  explorerUrl: `https://stellar.expert/explorer/testnet/tx/${realTxHash}`,
-                  stellarExpertUrl: `https://stellar.expert/explorer/testnet/tx/${realTxHash}`,
+                  explorerUrl: realUrls.explorerUrl,
+                  stellarExpertUrl: realUrls.stellarExpertUrl,
                 }
               }));
               
@@ -725,6 +779,7 @@ export const HelloMilestoneDemo = () => {
               setContractId(result.contractId);
               setEscrowData(result.escrow);
               setDemoStarted(true);
+              setDemoStartTime(Date.now());
               
               // Force step progression for initialization
               console.log('🚀 Forcing step progression to step 1 (fund escrow)');
@@ -803,6 +858,7 @@ export const HelloMilestoneDemo = () => {
           setContractId(result.contractId);
           setEscrowData(result.escrow);
           setDemoStarted(true);
+          setDemoStartTime(Date.now());
           
           // Clear from pending transactions
           setPendingTransactions(prev => {
@@ -835,6 +891,7 @@ export const HelloMilestoneDemo = () => {
         setContractId(result.contractId);
         setEscrowData(result.escrow);
         setDemoStarted(true);
+        setDemoStartTime(Date.now());
         
         // Clear from pending transactions
         setPendingTransactions(prev => {
@@ -1349,6 +1406,7 @@ export const HelloMilestoneDemo = () => {
     setEscrowData(null);
     setMilestoneStatus('pending');
     setDemoStarted(false);
+    setDemoStartTime(null);
 
     // Show reset toast
     addToast({
@@ -1535,7 +1593,9 @@ export const HelloMilestoneDemo = () => {
                     {/* View on Explorer Button */}
                     <button
                       onClick={() => {
-                        const explorerUrl = `https://stellar.expert/explorer/testnet/account/${walletData.publicKey}`;
+                        const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+                        const networkSuffix = isTestnet ? 'testnet' : 'public';
+                        const explorerUrl = `https://stellar.expert/explorer/${networkSuffix}/account/${walletData.publicKey}`;
                         window.open(explorerUrl, '_blank', 'noopener,noreferrer');
                         addToast({
                           type: 'info',
@@ -1602,16 +1662,26 @@ export const HelloMilestoneDemo = () => {
                 <span className='text-2xl'>🏆</span>
                 <h3 className='text-green-300 font-semibold text-lg'>Demo Completed!</h3>
               </div>
-              <div className='flex items-center justify-center space-x-6 text-sm'>
-                <div className='text-green-200'>
-                  <span className='text-green-300 font-medium'>Score:</span> {previousScore}%
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3'>
+                <div className='text-green-200 text-center'>
+                  <div className='text-green-300 font-medium'>Latest Score</div>
+                  <div className='text-lg font-semibold'>{previousScore}%</div>
                 </div>
-                <div className='text-green-200'>
-                  <span className='text-green-300 font-medium'>Points Earned:</span> {pointsEarned}
+                <div className='text-green-200 text-center'>
+                  <div className='text-green-300 font-medium'>Best Score</div>
+                  <div className='text-lg font-semibold'>{bestScore}%</div>
+                </div>
+                <div className='text-green-200 text-center'>
+                  <div className='text-green-300 font-medium'>Total Points</div>
+                  <div className='text-lg font-semibold text-yellow-400'>{totalPointsEarned}</div>
+                </div>
+                <div className='text-green-200 text-center'>
+                  <div className='text-green-300 font-medium'>Completions</div>
+                  <div className='text-lg font-semibold'>{completionCount}</div>
                 </div>
               </div>
-              <p className='text-green-200 text-sm mt-2'>
-                🎮 You can replay this demo anytime to earn more points!
+              <p className='text-green-200 text-sm text-center'>
+                🎮 You can replay this demo anytime to earn more points and improve your score!
               </p>
             </div>
           )}
@@ -1741,8 +1811,8 @@ export const HelloMilestoneDemo = () => {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => {
-                                const explorerUrl = `https://stellar.expert/explorer/testnet/tx/${pendingTransactions['initialize']}`;
-                                window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+                                const urls = createExplorerUrls(pendingTransactions['initialize']);
+                                window.open(urls.stellarExpertUrl, '_blank', 'noopener,noreferrer');
                                 addToast({
                                   type: 'info',
                                   title: '🌐 Opening Stellar Expert',
@@ -1756,8 +1826,8 @@ export const HelloMilestoneDemo = () => {
                             </button>
                             <button
                               onClick={() => {
-                                const horizonUrl = `https://horizon-testnet.stellar.org/transactions/${pendingTransactions['initialize']}`;
-                                window.open(horizonUrl, '_blank', 'noopener,noreferrer');
+                                const urls = createExplorerUrls(pendingTransactions['initialize']);
+                                window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
                                 addToast({
                                   type: 'info',
                                   title: '🔍 Opening Horizon API',
@@ -2097,7 +2167,8 @@ export const HelloMilestoneDemo = () => {
                       
                       <button
                         onClick={() => {
-                          window.open(`https://horizon-testnet.stellar.org/transactions/${tx.hash}`, '_blank', 'noopener,noreferrer');
+                          const urls = createExplorerUrls(tx.hash);
+                          window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
                           addToast({
                             type: 'info',
                             title: '🔍 Opening Horizon API',
@@ -2227,6 +2298,13 @@ export const HelloMilestoneDemo = () => {
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
+
+        {/* Completion History */}
+        <DemoCompletionHistory 
+          demoId="hello-milestone" 
+          demoName="Baby Steps to Riches"
+          className="mb-8"
+        />
 
         {/* Demo Instructions */}
         <div className='mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg'>

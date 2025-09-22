@@ -101,7 +101,10 @@ export const EscrowInitializer = () => {
   };
 
   const getStellarViewerUrl = (contractId: string) => {
-    return `https://stellar.expert/explorer/testnet/contract/${contractId}`;
+    // Determine network-specific URL based on wallet data
+    const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+    const networkSuffix = isTestnet ? 'testnet' : 'public';
+    return `https://stellar.expert/explorer/${networkSuffix}/contract/${contractId}`;
   };
 
   if (!isConnected) {

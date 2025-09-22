@@ -2,9 +2,11 @@
 
 import { useEscrowContext } from '@/contexts/EscrowContext';
 import { MultiReleaseEscrow } from '@/contexts/EscrowContext';
+import { useGlobalWallet } from '@/contexts/WalletContext';
 
 export const EscrowDisplay = () => {
   const { escrowData } = useEscrowContext();
+  const { walletData } = useGlobalWallet();
 
   if (!escrowData) {
     return null;
@@ -175,7 +177,11 @@ export const EscrowDisplay = () => {
       {/* Stellar Viewer Link */}
       <div className='mt-6 text-center'>
         <a
-          href={`https://stellar.expert/explorer/testnet/contract/${escrowData.contractId}`}
+          href={(() => {
+            const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+            const networkSuffix = isTestnet ? 'testnet' : 'public';
+            return `https://stellar.expert/explorer/${networkSuffix}/contract/${escrowData.contractId}`;
+          })()}
           target='_blank'
           rel='noopener noreferrer'
           className='inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors'
