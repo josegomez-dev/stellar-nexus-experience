@@ -734,31 +734,21 @@ function HomePageContent() {
                     )}
                   </button>
 
-                  <div className="relative">
-                    <a
-                      href='#'
-                      onClick={e => e.preventDefault()}
-                      className="px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 relative bg-gradient-to-r from-gray-600/20 to-gray-700/20 text-gray-400 border-gray-600/30 cursor-not-allowed blur-[0.5px] opacity-70 border-2"
-                      title="Coming Soon - Web3 Playground under development"
-                    >
-                      <span>Nexus Web3 Playground</span>
-                      <span className='text-xl'>
-                        <Image
-                          src='/images/icons/console.png'
-                          alt='Nexus Web3 Playground'
-                          width={50}
-                          height={20}
-                        />
-                      </span>
-                    </a>
-                    
-                    {/* Coming Soon Badge */}
-                    <div className='absolute -top-2 -right-2 z-10'>
-                      <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-pulse border-2 border-white'>
-                        🚧 Coming Soon
-                      </div>
-                    </div>
-                  </div>
+                  <a
+                    href='/mini-games'
+                    className="px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
+                    title="Explore the Nexus Web3 Playground"
+                  >
+                    <span>Nexus Web3 Playground</span>
+                    <span className='text-xl'>
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Nexus Web3 Playground'
+                        width={50}
+                        height={20}
+                      />
+                    </span>
+                  </a>
                 </div>
               </div>
 

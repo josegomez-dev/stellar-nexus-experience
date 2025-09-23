@@ -36,6 +36,62 @@ export const Header = () => {
             </div>
           </div>
 
+          {/* Desktop Navigation */}
+          <nav className='hidden md:flex items-center space-x-6'>
+            <a
+              href='/demos'
+              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            >
+              <Image
+                src='/images/icons/demos.png'
+                alt='Demos'
+                width={20}
+                height={20}
+                className='w-5 h-5'
+              />
+              <span>Demos</span>
+            </a>
+            <a
+              href='/mini-games'
+              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            >
+              <Image
+                src='/images/icons/store.png'
+                alt='Store'
+                width={20}
+                height={20}
+                className='w-5 h-5'
+              />
+              <span>Store</span>
+            </a>
+            <a
+              href='/mini-games'
+              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            >
+              <Image
+                src='/images/icons/console.png'
+                alt='Nexus Web3 Playground'
+                width={20}
+                height={20}
+                className='w-5 h-5'
+              />
+              <span>Nexus Web3 Playground</span>
+            </a>
+            <a
+              href='/docs'
+              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            >
+              <Image
+                src='/images/icons/docs.png'
+                alt='Docs'
+                width={20}
+                height={20}
+                className='w-5 h-5'
+              />
+              <span>Docs</span>
+            </a>
+          </nav>
+
           {/* Header Controls */}
           <div className='flex items-center space-x-4'>
             {/* Account Status - Show when connected */}
@@ -140,19 +196,19 @@ export const Header = () => {
               </div>
             </a>
             <a
-              href='/mini-games/web3-basics-adventure'
+              href='/mini-games'
               className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
               onClick={() => setIsMenuOpen(false)}
             >
               <div className='flex items-center space-x-2'>
                 <Image
                   src='/images/icons/console.png'
-                  alt='Console'
+                  alt='Nexus Web3 Playground'
                   width={20}
                   height={20}
                   className='w-5 h-5'
                 />
-                <span>Console</span>
+                <span>Nexus Web3 Playground</span>
               </div>
             </a>
 
