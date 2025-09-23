@@ -56,19 +56,6 @@ export const Header = () => {
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
               <Image
-                src='/images/icons/store.png'
-                alt='Store'
-                width={20}
-                height={20}
-                className='w-5 h-5'
-              />
-              <span>Store</span>
-            </a>
-            <a
-              href='/mini-games'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
-            >
-              <Image
                 src='/images/icons/console.png'
                 alt='Nexus Web3 Playground'
                 width={20}
@@ -177,22 +164,6 @@ export const Header = () => {
                   className='w-5 h-5'
                 />
                 <span>Demos</span>
-              </div>
-            </a>
-            <a
-              href='/mini-games'
-              className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/store.png'
-                  alt='Store'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5'
-                />
-                <span>Store</span>
               </div>
             </a>
             <a

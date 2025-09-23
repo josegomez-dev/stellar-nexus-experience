@@ -1013,31 +1013,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               </div>
             )}
 
-            {/* Store Button */}
-            <div className="relative">
-              <div
-                className='p-3 bg-gray-500/30 rounded-lg shadow-lg relative cursor-not-allowed blur-[1px] opacity-70'
-                title='Coming Soon - Web3 Playground Store under development'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/console.png'
-                    alt='Store'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5'
-                  />
-                  <span className='text-sm font-medium hidden lg:block text-gray-400'>Store</span>
-                </div>
-              </div>
-              
-              {/* Coming Soon Badge */}
-              <div className='absolute -top-2 -right-2 z-10'>
-                <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-0.5 rounded-full font-bold text-xs shadow-lg animate-pulse border border-white'>
-                  🚧 Coming Soon
-                </div>
-              </div>
-            </div>
           </>
         )}
       </div>
