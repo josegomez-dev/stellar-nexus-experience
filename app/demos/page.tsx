@@ -47,11 +47,13 @@ const DemoSelector = ({
   setActiveDemo,
   setShowImmersiveDemo,
   isConnected,
+  demos,
 }: {
   activeDemo: string;
   setActiveDemo: (demo: string) => void;
-  setShowImmersiveDemo: (show: boolean) => void;
+  setShowImmersiveDemo: (demoId: string) => void;
   isConnected: boolean;
+  demos: any[];
 }) => {
   const { getCompletedDemos } = useAccount();
   const { demoStats, clapDemo, isLoading: statsLoading } = useDemoStats();
@@ -81,53 +83,6 @@ const DemoSelector = ({
   const handleArticleClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer');
   };
-
-  const demos = [
-    {
-      id: 'hello-milestone',
-      title: '1. Baby Steps to Riches',
-      subtitle: 'Basic Escrow Flow Demo',
-      description:
-        'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
-      icon: '/images/demos/babysteps.png',
-      color: 'from-brand-500 to-brand-400',
-      isReady: true,
-      multiStakeholderRequired: false,
-    },
-    {
-      id: 'milestone-voting',
-      title: '2. Democracy in Action',
-      subtitle: 'Multi-Stakeholder Approval System',
-      description:
-        'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
-      icon: '/images/demos/democracyinaction.png',
-      color: 'from-success-500 to-success-400',
-      isReady: false,
-      multiStakeholderRequired: true,
-    },
-    {
-      id: 'dispute-resolution',
-      title: '3. Drama Queen Escrow',
-      subtitle: 'Dispute Resolution & Arbitration',
-      description:
-        'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
-      icon: '/images/demos/drama.png',
-      color: 'from-warning-500 to-warning-400',
-      isReady: false,
-      multiStakeholderRequired: false,
-    },
-    {
-      id: 'micro-marketplace',
-      title: '4. Gig Economy Madness',
-      subtitle: 'Micro-Task Marketplace',
-      description:
-        'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
-      icon: '/images/demos/economy.png',
-      color: 'from-accent-500 to-accent-400',
-      isReady: false,
-      multiStakeholderRequired: false,
-    },
-  ];
 
   return (
     <div className='space-y-8'>
@@ -298,7 +253,7 @@ const DemoSelector = ({
                         onClick={e => {
                           e.stopPropagation();
                           if (isConnected) {
-                            setShowImmersiveDemo(true);
+                            setShowImmersiveDemo(demo.id);
                           }
                         }}
                         disabled={!isConnected}
@@ -369,6 +324,53 @@ function DemosPageContent() {
   const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
 
+  const demos = [
+    {
+      id: 'hello-milestone',
+      title: '1. Baby Steps to Riches',
+      subtitle: 'Basic Escrow Flow Demo',
+      description:
+        'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
+      icon: '/images/demos/babysteps.png',
+      color: 'from-brand-500 to-brand-400',
+      isReady: true,
+      multiStakeholderRequired: false,
+    },
+    {
+      id: 'milestone-voting',
+      title: '2. Democracy in Action',
+      subtitle: 'Multi-Stakeholder Approval System',
+      description:
+        'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
+      icon: '/images/demos/democracyinaction.png',
+      color: 'from-success-500 to-success-400',
+      isReady: false,
+      multiStakeholderRequired: true,
+    },
+    {
+      id: 'dispute-resolution',
+      title: '3. Drama Queen Escrow',
+      subtitle: 'Dispute Resolution & Arbitration',
+      description:
+        'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
+      icon: '/images/demos/drama.png',
+      color: 'from-warning-500 to-warning-400',
+      isReady: true,
+      multiStakeholderRequired: false,
+    },
+    {
+      id: 'micro-marketplace',
+      title: '4. Gig Economy Madness',
+      subtitle: 'Micro-Task Marketplace',
+      description:
+        'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
+      icon: '/images/demos/economy.png',
+      color: 'from-accent-500 to-accent-400',
+      isReady: false,
+      multiStakeholderRequired: false,
+    },
+  ];
+
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -382,7 +384,7 @@ function DemosPageContent() {
     return true;
   });
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
+  const [showImmersiveDemo, setShowImmersiveDemo] = useState<string | null>(null);
   const [showTechTree, setShowTechTree] = useState(false);
 
   // Authentication modals
@@ -729,12 +731,13 @@ function DemosPageContent() {
 
           <section className=' mx-auto px-4'>
             <div className=' mx-auto'>
-              <DemoSelector
-                activeDemo={activeDemo}
-                setActiveDemo={setActiveDemo}
-                setShowImmersiveDemo={setShowImmersiveDemo}
-                isConnected={isConnected}
-              />
+                <DemoSelector
+                  activeDemo={activeDemo}
+                  setActiveDemo={setActiveDemo}
+                  setShowImmersiveDemo={setShowImmersiveDemo}
+                  isConnected={isConnected}
+                  demos={demos}
+                />
             </div>
           </section>
 
@@ -950,14 +953,15 @@ function DemosPageContent() {
       {/* Immersive Demo Modal */}
       {showImmersiveDemo && (
         <ImmersiveDemoModal
-          isOpen={showImmersiveDemo}
-          onClose={() => setShowImmersiveDemo(false)}
-          demoId='hello-milestone'
-          demoTitle='1. Baby Steps to Riches'
-          demoDescription='Basic Escrow Flow Demo'
+          isOpen={!!showImmersiveDemo}
+          onClose={() => setShowImmersiveDemo(null)}
+          demoId={showImmersiveDemo}
+          demoTitle={demos.find(d => d.id === showImmersiveDemo)?.title || 'Demo'}
+          demoDescription={demos.find(d => d.id === showImmersiveDemo)?.subtitle || 'Demo Description'}
           estimatedTime={1}
         >
-          <HelloMilestoneDemo />
+          {showImmersiveDemo === 'hello-milestone' && <HelloMilestoneDemo />}
+          {showImmersiveDemo === 'dispute-resolution' && <DisputeResolutionDemo />}
         </ImmersiveDemoModal>
       )}
 

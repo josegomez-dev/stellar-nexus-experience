@@ -13,6 +13,8 @@ import {
 } from '@/lib/mock-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 import { useToast } from '@/contexts/ToastContext';
+import { useDemoStats } from '@/hooks/useDemoStats';
+import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
 import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
 import Image from 'next/image';
 
@@ -42,6 +44,8 @@ interface Milestone {
 export const DisputeResolutionDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
+  const { markDemoComplete } = useDemoStats();
+  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client');
@@ -58,6 +62,7 @@ export const DisputeResolutionDemo = () => {
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
+  const [useRealTrustlessWork, setUseRealTrustlessWork] = useState(true); // Toggle for real vs mock
 
   // Hooks
   const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow();
@@ -110,6 +115,53 @@ export const DisputeResolutionDemo = () => {
     if (allReleased) {
       console.log('🎉 Triggering confetti for Dispute Resolution Demo!');
       setShowConfetti(true);
+      
+      // Complete the demo in Firebase
+      const completeDemo = async () => {
+        try {
+          const completionTime = 5; // Estimated completion time in minutes
+          const score = 95; // High score for completing dispute resolution
+          const completionHistory = getDemoHistory('dispute-resolution');
+          const isFirstCompletion = completionHistory.length === 0;
+          
+          // Calculate points earned
+          const basePoints = 150; // Higher base points for dispute resolution
+          const scoreMultiplier = score / 100;
+          let pointsEarned = Math.round(basePoints * scoreMultiplier);
+          
+          // Give reduced points for replays (25% of original)
+          if (!isFirstCompletion) {
+            pointsEarned = Math.round(pointsEarned * 0.25);
+          }
+          
+          // Add to completion history
+          addCompletion({
+            demoId: 'dispute-resolution',
+            demoName: 'Drama Queen Escrow',
+            score,
+            pointsEarned,
+            completionTime,
+            isFirstCompletion,
+            network: walletData?.network || 'TESTNET',
+            walletAddress: walletData?.publicKey || '',
+          });
+          
+          // Mark demo complete in Firebase stats
+          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTime);
+          
+          addToast({
+            type: 'success',
+            title: 'Demo Completed!',
+            message: `Completed Drama Queen Escrow! Earned ${pointsEarned} points! 🎉`,
+          });
+        } catch (error) {
+          console.error('Failed to complete demo:', error);
+        }
+      };
+      
+      // Complete demo after a short delay
+      setTimeout(completeDemo, 2000);
+      
       // Hide confetti after animation
       const timer = setTimeout(() => {
         console.log('🎉 Hiding confetti for Dispute Resolution Demo');
@@ -117,7 +169,7 @@ export const DisputeResolutionDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [milestones]);
+  }, [milestones, addCompletion, markDemoComplete, getDemoHistory, walletData, addToast]);
 
   async function handleInitializeEscrow() {
     if (!walletData) {
@@ -126,6 +178,26 @@ export const DisputeResolutionDemo = () => {
         title: '🔗 Wallet Connection Required',
         message: 'Please connect your Stellar wallet to initialize dispute resolution escrow',
         duration: 5000,
+      });
+      return;
+    }
+
+    if (!useRealTrustlessWork) {
+      // Mock initialization
+      const mockContractId = `mock_contract_${Date.now()}`;
+      setContractId(mockContractId);
+      setEscrowData({
+        contractId: mockContractId,
+        client: walletData.publicKey,
+        worker: 'worker_wallet_address',
+        totalAmount: '1000',
+        milestones: milestones,
+      });
+      
+      addToast({
+        type: 'success',
+        title: 'Mock Escrow Initialized',
+        message: 'Mock escrow contract created successfully!',
       });
       return;
     }
@@ -572,19 +644,41 @@ export const DisputeResolutionDemo = () => {
 
   return (
     <div className='max-w-6xl mx-auto relative'>
-      {/* Coming Soon Badge */}
+      {/* Real Blockchain Toggle */}
       <div className='absolute top-4 right-4 z-50'>
-        <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse'>
-          🚧 Coming Soon
+        <button
+          onClick={() => setUseRealTrustlessWork(!useRealTrustlessWork)}
+          className={`px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-all duration-300 ${
+            useRealTrustlessWork
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+              : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black'
+          }`}
+        >
+          <span className="font-semibold">Real Blockchain</span>
+          {useRealTrustlessWork && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          )}
+        </button>
+        <div className="mt-2 text-center">
+          <div className={`text-xs font-medium ${
+            useRealTrustlessWork ? 'text-green-300' : 'text-yellow-300'
+          }`}>
+            {useRealTrustlessWork ? '🔗 Real Blockchain Mode' : '🧪 Mock Demo Mode'}
+          </div>
+          <div className={`text-xs ${
+            useRealTrustlessWork ? 'text-green-200' : 'text-yellow-200'
+          }`}>
+            {useRealTrustlessWork 
+              ? 'Live Stellar transactions' 
+              : 'Simulated transactions'}
+          </div>
         </div>
       </div>
 
-      {/* Blurred Content Overlay */}
+      {/* Main Content */}
       <div className='bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8 relative'>
-        <div className='absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10'></div>
-
-        {/* Content with reduced opacity */}
-        <div className='relative z-20 opacity-30 pointer-events-none'>
+        {/* Content */}
+        <div className='relative z-10'>
           <div className='text-center mb-8'>
             <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500 mb-4'>
               ⚖️ Dispute Resolution Demo
