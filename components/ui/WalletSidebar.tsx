@@ -971,50 +971,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           </>
         )}
 
-        {/* Navigation Buttons - Matching Main Menu - Always show but with different states */}
-        {!isOpen && (
-          <>
-            {/* Demos Button */}
-            {isConnected ? (
-              <a
-                href='/demos'
-                className='p-3 bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 group'
-                title='Demos'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/demos.png'
-                    alt='Demos'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5 group-hover:animate-bounce'
-                  />
-                  <span className='text-sm font-medium hidden lg:block'>Demos</span>
-                </div>
-              </a>
-            ) : (
-              <div
-                className='p-3 bg-gray-500/30 rounded-lg shadow-lg relative cursor-not-allowed blur-[1px] opacity-70'
-                title='Connect wallet to access Demos'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/demos.png'
-                    alt='Demos'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5'
-                  />
-                  <span className='text-sm font-medium hidden lg:block text-gray-400'>Demos</span>
-                  <div className='absolute top-1 right-1'>
-                    <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </>
-        )}
       </div>
 
       {/* Wallet Connection Banner */}

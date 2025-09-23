@@ -30,7 +30,7 @@ import { AuthModal } from '@/components/ui/AuthModal';
 import { UserProfile } from '@/components/ui/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
-import { nexusCodex } from '@/lib/newsData';
+import { useDemoStats } from '@/hooks/useDemoStats';
 
 // Demo Selection Component
 interface Demo {
@@ -54,92 +54,27 @@ const DemoSelector = ({
   isConnected: boolean;
 }) => {
   const { getCompletedDemos } = useAccount();
-  // Clap system with localStorage persistence
-  const [demoClaps, setDemoClaps] = useState<Record<string, number>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('demoClaps');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': 24,
-            'milestone-voting': 18,
-            'dispute-resolution': 12,
-            'micro-marketplace': 31,
-          };
-    }
-    return {
-      'hello-milestone': 24,
-      'milestone-voting': 18,
-      'dispute-resolution': 12,
-      'micro-marketplace': 31,
-    };
-  });
-  const [userClapped, setUserClapped] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('userClapped');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': false,
-            'milestone-voting': false,
-            'dispute-resolution': false,
-            'micro-marketplace': false,
-          };
-    }
-    return {
-      'hello-milestone': false,
-      'milestone-voting': false,
-      'dispute-resolution': false,
-      'micro-marketplace': false,
-    };
-  });
+  const { demoStats, clapDemo, isLoading: statsLoading } = useDemoStats();
 
-  // Simulated completion counts for demos
-  const [demoCompletions, setDemoCompletions] = useState<Record<string, number>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('demoCompletions');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            'hello-milestone': 42,
-            'milestone-voting': 28,
-            'dispute-resolution': 19,
-            'micro-marketplace': 35,
-          };
-    }
-    return {
-      'hello-milestone': 42,
-      'milestone-voting': 28,
-      'dispute-resolution': 19,
-      'micro-marketplace': 35,
-    };
-  });
-
-  const handleClap = (demoId: string) => {
-    if (userClapped[demoId]) return; // User already clapped
-
-    const newClaps = { ...demoClaps, [demoId]: demoClaps[demoId] + 1 };
-    const newUserClapped = { ...userClapped, [demoId]: true };
-
-    setDemoClaps(newClaps);
-    setUserClapped(newUserClapped);
-
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('demoClaps', JSON.stringify(newClaps));
-      localStorage.setItem('userClapped', JSON.stringify(newUserClapped));
-    }
+  const handleClap = async (demoId: string) => {
+    const demoName = demos.find(d => d.id === demoId)?.title || demoId;
+    await clapDemo(demoId, demoName);
   };
 
   const getClapStats = (demoId: string) => {
-    const claps = demoClaps[demoId];
-    const hasClapped = userClapped[demoId];
-    const completions = demoCompletions[demoId];
+    const stats = demoStats[demoId];
+    if (!stats) {
+      return {
+        claps: 0,
+        hasClapped: false,
+        completions: 0,
+      };
+    }
 
     return {
-      claps: claps,
-      hasClapped: hasClapped,
-      completions: completions,
+      claps: stats.totalClaps,
+      hasClapped: stats.hasUserClapped,
+      completions: stats.totalCompletions,
     };
   };
 

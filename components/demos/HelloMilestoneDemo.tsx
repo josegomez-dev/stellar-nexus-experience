@@ -9,6 +9,7 @@ import { useTransactionHistory } from '@/contexts/TransactionContext';
 import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
 import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
 import { DemoCompletionHistory } from '@/components/ui/DemoCompletionHistory';
+import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
 import Image from 'next/image';
 import {
@@ -47,6 +48,7 @@ export const HelloMilestoneDemo = () => {
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
+  const { markDemoComplete } = useDemoStats();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -548,6 +550,9 @@ export const HelloMilestoneDemo = () => {
           
           // Complete the demo in the account system
           await completeDemo('hello-milestone', score);
+          
+          // Mark demo complete in Firebase stats
+          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTime);
         } catch (error) {
           console.error('Failed to complete demo:', error);
         }
