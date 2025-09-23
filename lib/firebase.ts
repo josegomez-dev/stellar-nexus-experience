@@ -15,14 +15,6 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-80T26CG9PM"
 };
 
-// Initialize Firebase
-console.log('🔥 Initializing Firebase...');
-console.log('Firebase config:', {
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
-  hasApiKey: !!firebaseConfig.apiKey
-});
-
 const app = initializeApp(firebaseConfig);
 console.log('✅ Firebase app initialized');
 

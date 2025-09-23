@@ -8,9 +8,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
-import { EscrowProvider } from '@/contexts/EscrowContext';
-import { WalletProvider } from '@/contexts/WalletContext';
-import { AccountProvider } from '@/contexts/AccountContext';
 import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
 import Image from 'next/image';
@@ -236,10 +233,7 @@ export default function GamePage() {
   }));
 
   return (
-    <WalletProvider>
-      <AccountProvider>
-        <EscrowProvider>
-        <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
+    <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
           {/* Epic Arcade Machine Background */}
           <div className='absolute inset-0'>
             {/* CRT Scan Lines Effect */}
@@ -494,8 +488,5 @@ export default function GamePage() {
 
           <Footer />
         </div>
-        </EscrowProvider>
-      </AccountProvider>
-    </WalletProvider>
   );
 }
