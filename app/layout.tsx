@@ -4,8 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { config } from '@/lib/config';
 import { suppressHydrationWarning } from '@/lib/suppress-hydration';
-// WalletProvider will be added when using the actual Stellar Wallets Kit
-// TrustlessWorkProvider will be added when the actual package is available
+import { Providers } from '@/components/Providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang='en' className='scroll-smooth'>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

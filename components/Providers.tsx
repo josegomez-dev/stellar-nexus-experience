@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { BadgeAnimationProvider } from '@/contexts/BadgeAnimationContext';
+import { WalletProvider } from '@/contexts/WalletContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 
 interface ProvidersProps {
@@ -15,9 +16,11 @@ export const Providers = ({ children }: ProvidersProps) => {
     <TransactionProvider>
       <ToastProvider>
         <BadgeAnimationProvider>
-          <AccountProvider>
-            {children}
-          </AccountProvider>
+          <WalletProvider>
+            <AccountProvider>
+              {children}
+            </AccountProvider>
+          </WalletProvider>
         </BadgeAnimationProvider>
       </ToastProvider>
     </TransactionProvider>
