@@ -43,7 +43,57 @@ interface Demo {
   description: string;
   icon: string;
   color: string;
+  isReady: boolean;
+  multiStakeholderRequired: boolean;
 }
+
+// Demo configurations
+const demos: Demo[] = [
+  {
+    id: 'hello-milestone',
+    title: '1. Baby Steps to Riches',
+    subtitle: 'Basic Escrow Flow Demo',
+    description:
+      'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
+    icon: '/images/demos/babysteps.png',
+    color: 'from-brand-500 to-brand-400',
+    isReady: true,
+    multiStakeholderRequired: false,
+  },
+  {
+    id: 'milestone-voting',
+    title: '2. Democracy in Action',
+    subtitle: 'Multi-Stakeholder Approval System',
+    description:
+      'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
+    icon: '/images/demos/democracyinaction.png',
+    color: 'from-success-500 to-success-400',
+    isReady: false,
+    multiStakeholderRequired: true,
+  },
+  {
+    id: 'dispute-resolution',
+    title: '3. Drama Queen Escrow',
+    subtitle: 'Dispute Resolution & Arbitration',
+    description:
+      'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
+    icon: '/images/demos/drama.png',
+    color: 'from-warning-500 to-warning-400',
+    isReady: true,
+    multiStakeholderRequired: false,
+  },
+  {
+    id: 'micro-marketplace',
+    title: '4. Gig Economy Madness',
+    subtitle: 'Micro-Task Marketplace',
+    description:
+      'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
+    icon: '/images/demos/economy.png',
+    color: 'from-accent-500 to-accent-400',
+    isReady: false,
+    multiStakeholderRequired: false,
+  },
+];
 
 const DemoSelector = ({
   activeDemo,
@@ -81,52 +131,6 @@ const DemoSelector = ({
     window.open(link, '_blank', 'noopener,noreferrer');
   };
 
-  const demos = [
-    {
-      id: 'hello-milestone',
-      title: '1. Baby Steps to Riches',
-      subtitle: 'Basic Escrow Flow Demo',
-      description:
-        'Simple escrow flow with automatic milestone completion. Learn the fundamentals of trustless work: initialize escrow, fund it, complete milestones, approve work, and automatically release funds.',
-      icon: '/images/demos/babysteps.png',
-      color: 'from-brand-500 to-brand-400',
-      isReady: true,
-      multiStakeholderRequired: false,
-    },
-    {
-      id: 'milestone-voting',
-      title: '2. Democracy in Action',
-      subtitle: 'Multi-Stakeholder Approval System',
-      description:
-        'Multi-stakeholder approval system where multiple reviewers must approve milestones before funds are released. Perfect for complex projects requiring multiple sign-offs.',
-      icon: '/images/demos/democracyinaction.png',
-      color: 'from-success-500 to-success-400',
-      isReady: false,
-      multiStakeholderRequired: true,
-    },
-    {
-      id: 'dispute-resolution',
-      title: '3. Drama Queen Escrow',
-      subtitle: 'Dispute Resolution & Arbitration',
-      description:
-        'Arbitration drama - who will win the trust battle? Experience the full dispute resolution workflow: raise disputes, present evidence, and let arbitrators decide the outcome.',
-      icon: '/images/demos/drama.png',
-      color: 'from-warning-500 to-warning-400',
-      isReady: false,
-      multiStakeholderRequired: false,
-    },
-    {
-      id: 'micro-marketplace',
-      title: '4. Gig Economy Madness',
-      subtitle: 'Micro-Task Marketplace',
-      description:
-        'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
-      icon: '/images/demos/economy.png',
-      color: 'from-accent-500 to-accent-400',
-      isReady: false,
-      multiStakeholderRequired: false,
-    },
-  ];
 
   return (
     <div className='space-y-8'>
@@ -988,13 +992,16 @@ function HomePageContent() {
         <ImmersiveDemoModal
           isOpen={showImmersiveDemo}
           onClose={() => setShowImmersiveDemo(false)}
-          demoId='hello-milestone'
-          demoTitle='1. Baby Steps to Riches'
-          demoDescription='Basic Escrow Flow Demo'
-          estimatedTime={1}
+          demoId={activeDemo}
+          demoTitle={demos.find(d => d.id === activeDemo)?.title || 'Demo'}
+          demoDescription={demos.find(d => d.id === activeDemo)?.subtitle || 'Demo Description'}
+          estimatedTime={activeDemo === 'hello-milestone' ? 1 : activeDemo === 'dispute-resolution' ? 3 : 2}
           onDemoComplete={handleDemoComplete}
         >
-          <HelloMilestoneDemo />
+          {activeDemo === 'hello-milestone' && <HelloMilestoneDemo />}
+          {activeDemo === 'dispute-resolution' && <DisputeResolutionDemo />}
+          {activeDemo === 'milestone-voting' && <MilestoneVotingDemo />}
+          {activeDemo === 'micro-marketplace' && <MicroTaskMarketplaceDemo />}
         </ImmersiveDemoModal>
       )}
 

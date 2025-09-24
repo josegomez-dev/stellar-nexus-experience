@@ -688,15 +688,7 @@ export const DisputeResolutionDemo = () => {
             </p>
           </div>
 
-          {/* Coming Soon Message */}
-          <div className='text-center py-20'>
-            <div className='text-6xl mb-6'>🚧</div>
-            <h3 className='text-2xl font-bold text-white mb-4'>Coming Soon!</h3>
-            <p className='text-white/70 text-lg max-w-md mx-auto'>
-              The Dispute Resolution Demo is currently under development. This feature will provide
-              arbitration and conflict resolution for escrow disputes.
-            </p>
-          </div>
+          {/* Main Demo Content */}
 
           {/* Role Selection */}
           <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
