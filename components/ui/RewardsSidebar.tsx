@@ -17,6 +17,8 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   const [activeTab, setActiveTab] = useState<
     'overview' | 'badges' | 'transactions' | 'leaderboard'
   >('overview');
+  const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
+  const [isExtraBadgesCollapsed, setIsExtraBadgesCollapsed] = useState(false);
 
   // Helper functions for badge styling
   const getRarityColor = (rarity: string) => {
@@ -160,43 +162,67 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
           {/* Main Achievements Section */}
           <div className='space-y-3'>
-            <div className='flex items-center space-x-2 mb-3'>
+            <div 
+              className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
+              onClick={() => setIsMainAchievementsCollapsed(!isMainAchievementsCollapsed)}
+            >
               <div className='w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full'></div>
               <h3 className='text-lg font-semibold text-white'>Main Achievements</h3>
               <div className='bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-2 py-1 rounded-full text-xs text-blue-300 border border-blue-400/30'>
                 {mainEarnedCount} / {mainBadges.length}
               </div>
+              <div className='ml-auto'>
+                {isMainAchievementsCollapsed ? (
+                  <span className='text-gray-400 text-lg'>▶</span>
+                ) : (
+                  <span className='text-gray-400 text-lg'>▼</span>
+                )}
+              </div>
             </div>
 
-            <div className='space-y-2'>
-              {mainBadges.map(badge => (
-                <div key={badge.id} className='relative'>
-                  <Badge3D badge={badge} size='sm' compact={true} />
-                  {/* Main Achievement Indicator */}
-                  <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
-                </div>
-              ))}
-            </div>
+            {!isMainAchievementsCollapsed && (
+              <div className='space-y-2'>
+                {mainBadges.map(badge => (
+                  <div key={badge.id} className='relative'>
+                    <Badge3D badge={badge} size='sm' compact={true} />
+                    {/* Main Achievement Indicator */}
+                    <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Extra Badges Section */}
           {extraBadges.length > 0 && (
             <div className='space-y-3'>
-              <div className='flex items-center space-x-2 mb-3'>
+              <div 
+                className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
+                onClick={() => setIsExtraBadgesCollapsed(!isExtraBadgesCollapsed)}
+              >
                 <div className='w-2 h-2 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full'></div>
                 <h3 className='text-lg font-semibold text-white'>Extra Badges</h3>
                 <div className='bg-gradient-to-r from-gray-500/20 to-gray-600/20 px-2 py-1 rounded-full text-xs text-gray-300 border border-gray-400/30'>
                   {extraBadges.filter(badge => badge.isEarned).length} / {extraBadges.length}
                 </div>
+                <div className='ml-auto'>
+                  {isExtraBadgesCollapsed ? (
+                    <span className='text-gray-400 text-lg'>▶</span>
+                  ) : (
+                    <span className='text-gray-400 text-lg'>▼</span>
+                  )}
+                </div>
               </div>
 
-              <div className='space-y-2 max-h-64 overflow-y-auto'>
-                {extraBadges.map(badge => (
-                  <div key={badge.id} className='opacity-80 hover:opacity-100 transition-opacity'>
-                    <Badge3D badge={badge} size='sm' compact={true} />
-                  </div>
-                ))}
-              </div>
+              {!isExtraBadgesCollapsed && (
+                <div className='space-y-2 max-h-64 overflow-y-auto'>
+                  {extraBadges.map(badge => (
+                    <div key={badge.id} className='opacity-80 hover:opacity-100 transition-opacity'>
+                      <Badge3D badge={badge} size='sm' compact={true} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
