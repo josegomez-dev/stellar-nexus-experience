@@ -5,15 +5,13 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { UserAvatar } from './UserAvatar';
-import { ProfileUpdateModal } from '../modals/ProfileUpdateModal';
-import { userService } from '@/lib/firebase-service';
-import { useToast } from '@/contexts/ToastContext';
+import { ProfileUpdateModal } from '@/components/ui/modals/ProfileUpdateModal';
+import { generateFunnyName } from '@/lib/funny-name-generator';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
   const { isConnected, walletData, disconnect, connect, isFreighterAvailable } = useGlobalWallet();
   const { isAuthenticated, user, getUserStats } = useAuth();
-  const { addToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -35,19 +33,14 @@ export const UserDropdown = () => {
   // Generate display name from wallet address or user data
   const generateDisplayName = (address: string) => {
     if (!address) return 'Guest User';
-    const last8 = address.slice(-8);
-    const word1 = last8.slice(0, 4);
-    const word2 = last8.slice(4, 8);
-    return `${word1.charAt(0).toUpperCase()}${word1.slice(1)} ${word2.charAt(0).toUpperCase()}${word2.slice(1)}`;
+    // Use funny name generator for more engaging names
+    return generateFunnyName(address);
   };
 
-  // Use custom display name if available, otherwise fallback to generated name
   const displayName = 
-    isAuthenticated && user?.displayName 
-      ? user.displayName 
-      : isAuthenticated && user 
-        ? user.username 
-        : generateDisplayName(walletData?.publicKey || '');
+    isAuthenticated && user 
+      ? (user.customName || user.username) 
+      : generateDisplayName(walletData?.publicKey || '');
   const stats = getUserStats();
 
   const handleDisconnect = () => {
@@ -65,32 +58,6 @@ export const UserDropdown = () => {
   const handleUserProfile = () => {
     setShowProfileModal(true);
     setIsOpen(false);
-  };
-
-  const handleProfileSave = async (name: string, avatarSeed: number) => {
-    if (!walletData?.publicKey) return;
-    
-    try {
-      await userService.updateUserProfile(walletData.publicKey, {
-        displayName: name,
-        avatarSeed: avatarSeed,
-      });
-      
-      addToast({
-        type: 'success',
-        title: '🎉 Profile Updated!',
-        message: 'Your profile has been saved successfully',
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      addToast({
-        type: 'error',
-        title: '❌ Update Failed',
-        message: 'Failed to save your profile. Please try again.',
-        duration: 3000,
-      });
-    }
   };
 
   return (
@@ -239,12 +206,9 @@ export const UserDropdown = () => {
       )}
 
       {/* Profile Update Modal */}
-      <ProfileUpdateModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        currentName={user?.displayName || user?.username || ''}
-        currentAvatarSeed={user?.avatarSeed}
-        onSave={handleProfileSave}
+      <ProfileUpdateModal 
+        isOpen={showProfileModal} 
+        onClose={() => setShowProfileModal(false)} 
       />
     </div>
   );

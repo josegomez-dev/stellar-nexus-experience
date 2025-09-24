@@ -8,11 +8,10 @@ export interface User {
   id: string;
   walletAddress: string;
   username?: string;
-  displayName?: string; // Custom display name from name generator
-  avatar?: string;
-  avatarSeed?: number; // Seed for consistent avatar generation
-  avatarStyle?: 'default' | 'web3' | 'stellar' | 'minimal' | 'vibrant'; // Avatar style preference - updated
+  customName?: string; // User's custom display name
+  avatarSeed?: string; // Seed for generating consistent avatar
   email?: string;
+  avatar?: string;
   createdAt: string;
   lastLoginAt: string;
   demoProgress: DemoProgress;

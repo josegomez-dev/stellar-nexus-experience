@@ -3,9 +3,8 @@
 export interface UserProfile {
   id: string; // Wallet address
   username: string;
-  displayName?: string; // Custom display name from name generator
-  avatarSeed?: number; // Seed for consistent avatar generation
-  avatarStyle?: 'default' | 'web3' | 'stellar' | 'minimal' | 'vibrant'; // Avatar style preference
+  customName?: string; // User's custom display name
+  avatarSeed?: string; // Seed for generating consistent avatar
   email?: string;
   walletAddress: string;
   walletType: 'freighter' | 'albedo' | 'rabet' | 'lobstr' | 'manual';

@@ -2,7 +2,7 @@
 
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
-import RandomPixelAvatar, { AvatarStyles } from '../avatar/RandomPixelAvatar';
+import { PixelArtAvatar } from '@/components/ui/avatar/PixelArtAvatar';
 
 interface UserAvatarProps {
   onClick?: () => void;
@@ -14,60 +14,31 @@ export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvat
   const { isConnected, walletData } = useGlobalWallet();
   const { user } = useAuth();
 
-  // Generate initials from a two-word name (using wallet address as fallback)
-  const generateInitials = (address: string) => {
-    if (!address) return 'GU'; // Guest User
-    // Use the last 8 characters to create a two-word name
-    const last8 = address.slice(-8);
-    const word1 = last8.slice(0, 4);
-    const word2 = last8.slice(4, 8);
-    return `${word1.charAt(0).toUpperCase()}${word2.charAt(0).toUpperCase()}`;
-  };
-
-  const initials = generateInitials(walletData?.publicKey || '');
+  // Use custom avatar seed if available, otherwise fall back to wallet address
+  const avatarSeed = user?.avatarSeed || walletData?.publicKey || 'default';
 
   const sizeClasses = {
-    sm: 'w-8 h-8 text-sm',
-    md: 'w-10 h-10 text-base',
-    lg: 'w-12 h-12 text-lg',
-  };
-
-  const pixelSizes = {
     sm: 32,
     md: 40,
     lg: 48,
   };
 
-  // Use custom avatar if user has one, otherwise fallback to initials
-  const hasCustomAvatar = user?.avatarSeed !== undefined;
-  const avatarStyle = user?.avatarStyle || 'default';
+  const pixelSize = sizeClasses[size];
 
   return (
     <div className='relative'>
-      {hasCustomAvatar ? (
-        <div
-          onClick={onClick}
-          className={`${sizeClasses[size]} rounded-full cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden ${
-            onClick ? 'hover:ring-2 hover:ring-white/20' : ''
-          }`}
-        >
-          <RandomPixelAvatar
-            size={pixelSizes[size]}
-            seed={user.avatarSeed}
-            {...AvatarStyles[avatarStyle as keyof typeof AvatarStyles]}
-            className="w-full h-full"
-          />
-        </div>
-      ) : (
-        <div
-          onClick={onClick}
-          className={`${sizeClasses[size]} bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-            onClick ? 'hover:from-cyan-600 hover:to-purple-600' : ''
-          }`}
-        >
-          {initials}
-        </div>
-      )}
+      <div
+        onClick={onClick}
+        className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+          onClick ? 'hover:shadow-2xl' : ''
+        }`}
+      >
+        <PixelArtAvatar 
+          seed={avatarSeed} 
+          size={pixelSize} 
+          className='rounded-lg border-2 border-white/20 hover:border-white/40 transition-colors'
+        />
+      </div>
       {showStatus && isConnected && (
         <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center'>
           <span className='text-xs'>✓</span>

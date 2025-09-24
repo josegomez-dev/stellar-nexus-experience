@@ -1,67 +1,89 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import RandomPixelAvatar, { AvatarStyles } from './RandomPixelAvatar';
-import { generateFunnyName, generateNameOptions, generateStellarName, generateWeb3Name, generateTrustlessName } from '@/lib/name-generator';
+import { useState, useEffect } from 'react';
+import { PixelArtAvatar, generateAvatarConfig } from '@/components/ui/avatar/PixelArtAvatar';
+import { generateFunnyName, generateNameOptions, generateCategoryName } from '@/lib/funny-name-generator';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface ProfileUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentName?: string;
-  currentAvatarSeed?: number;
-  onSave: (name: string, avatarSeed: number) => Promise<void>;
 }
 
-export const ProfileUpdateModal: React.FC<ProfileUpdateModalProps> = ({
-  isOpen,
-  onClose,
-  currentName = '',
-  currentAvatarSeed,
-  onSave,
-}) => {
-  const [name, setName] = useState(currentName);
-  const [avatarSeed, setAvatarSeed] = useState(currentAvatarSeed || Math.floor(Math.random() * 1000000));
+export const ProfileUpdateModal = ({ isOpen, onClose }: ProfileUpdateModalProps) => {
+  const { user, updateUser } = useAuth();
+  const { addToast } = useToast();
+  
+  const [customName, setCustomName] = useState(user?.customName || '');
+  const [avatarSeed, setAvatarSeed] = useState(user?.avatarSeed || user?.walletAddress || 'default');
   const [nameOptions, setNameOptions] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState<keyof typeof AvatarStyles>('default');
 
+  // Generate name options when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setName(currentName);
-      setAvatarSeed(currentAvatarSeed || Math.floor(Math.random() * 1000000));
-      setNameOptions(generateNameOptions(6));
+    if (isOpen && user?.walletAddress) {
+      const options = generateNameOptions(user.walletAddress, 8);
+      setNameOptions(options);
     }
-  }, [isOpen, currentName, currentAvatarSeed]);
+  }, [isOpen, user?.walletAddress]);
 
-  const handleGenerateName = () => {
-    setNameOptions(generateNameOptions(6));
+  // Generate new avatar seed
+  const generateNewAvatar = () => {
+    const newSeed = Date.now().toString() + Math.random().toString();
+    setAvatarSeed(newSeed);
   };
 
-  const handleGenerateStellarName = () => {
-    setNameOptions([generateStellarName(), ...generateNameOptions(5)]);
+  // Generate new name options
+  const generateNewNames = () => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      const options = generateNameOptions(avatarSeed, 8);
+      setNameOptions(options);
+      setIsGenerating(false);
+    }, 500);
   };
 
-  const handleGenerateWeb3Name = () => {
-    setNameOptions([generateWeb3Name(), ...generateNameOptions(5)]);
+  // Generate name from specific category
+  const generateCategoryNames = (category: 'web3' | 'stellar' | 'trustless' | 'tech' | 'creative') => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      const options = Array.from({ length: 8 }, (_, i) => 
+        generateCategoryName(avatarSeed + i.toString(), category)
+      );
+      setNameOptions(options);
+      setIsGenerating(false);
+    }, 500);
   };
 
-  const handleGenerateTrustlessName = () => {
-    setNameOptions([generateTrustlessName(), ...generateNameOptions(5)]);
-  };
-
-  const handleGenerateAvatar = () => {
-    setAvatarSeed(Math.floor(Math.random() * 1000000));
-  };
-
+  // Save profile updates
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!user) return;
     
     setIsSaving(true);
     try {
-      await onSave(name.trim(), avatarSeed);
+      await updateUser({
+        customName: customName.trim() || undefined,
+        avatarSeed: avatarSeed,
+      });
+      
+      addToast({
+        type: 'success',
+        title: '🎉 Profile Updated!',
+        message: 'Your profile has been updated successfully',
+        duration: 3000,
+      });
+      
       onClose();
     } catch (error) {
-      console.error('Failed to save profile:', error);
+      console.error('Error updating profile:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Update Failed',
+        message: 'Failed to update profile. Please try again.',
+        duration: 3000,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -70,183 +92,180 @@ export const ProfileUpdateModal: React.FC<ProfileUpdateModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 max-w-2xl w-full border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-white flex items-center space-x-2">
-            <span className="text-3xl">🎭</span>
+    <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
+      <div className='bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 max-w-2xl w-full border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto'>
+        {/* Header */}
+        <div className='flex items-center justify-between mb-6'>
+          <h3 className='text-2xl font-bold text-white flex items-center space-x-2'>
+            <span className='text-3xl'>🎨</span>
             <span>Customize Your Profile</span>
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className='text-gray-400 hover:text-white transition-colors'
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
             </svg>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Avatar Section */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
-              <span className="text-xl">🖼️</span>
+          <div className='space-y-4'>
+            <h4 className='text-lg font-semibold text-white flex items-center space-x-2'>
+              <span className='text-xl'>👤</span>
               <span>Your Avatar</span>
             </h4>
             
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                <RandomPixelAvatar
-                  size={120}
-                  seed={avatarSeed}
-                  {...AvatarStyles[selectedStyle]}
-                  className="rounded-lg border-2 border-white/20"
-                />
-                <button
-                  onClick={handleGenerateAvatar}
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center text-sm transition-colors"
-                  title="Generate new avatar"
-                >
-                  🔄
-                </button>
+            <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+              <div className='flex items-center justify-center mb-4'>
+                <PixelArtAvatar seed={avatarSeed} size={120} className='rounded-lg' />
               </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">Avatar Style</label>
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(AvatarStyles).map((style) => (
-                    <button
-                      key={style}
-                      onClick={() => setSelectedStyle(style as keyof typeof AvatarStyles)}
-                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-                        selectedStyle === style
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                      }`}
-                    >
-                      {style.charAt(0).toUpperCase() + style.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              
+              <button
+                onClick={generateNewAvatar}
+                className='w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105'
+              >
+                🎲 Generate New Avatar
+              </button>
+              
+              <p className='text-xs text-gray-400 mt-2 text-center'>
+                Each avatar is unique and generated from your seed
+              </p>
             </div>
           </div>
 
           {/* Name Section */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
-              <span className="text-xl">📝</span>
+          <div className='space-y-4'>
+            <h4 className='text-lg font-semibold text-white flex items-center space-x-2'>
+              <span className='text-xl'>🏷️</span>
               <span>Your Name</span>
             </h4>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Custom Name</label>
+            
+            <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-gray-300 mb-2'>
+                  Custom Name
+                </label>
                 <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your custom name..."
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type='text'
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder='Enter your custom name...'
+                  className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Or pick a generated name</label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {nameOptions.map((option, index) => (
+              <div className='mb-4'>
+                <label className='block text-sm font-medium text-gray-300 mb-2'>
+                  Or choose from generated names:
+                </label>
+                
+                {/* Category buttons */}
+                <div className='flex flex-wrap gap-2 mb-3'>
+                  <button
+                    onClick={() => generateCategoryNames('web3')}
+                    className='px-3 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded text-xs hover:bg-blue-500/30 transition-colors'
+                  >
+                    Web3
+                  </button>
+                  <button
+                    onClick={() => generateCategoryNames('stellar')}
+                    className='px-3 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-300 rounded text-xs hover:bg-purple-500/30 transition-colors'
+                  >
+                    Stellar
+                  </button>
+                  <button
+                    onClick={() => generateCategoryNames('trustless')}
+                    className='px-3 py-1 bg-green-500/20 border border-green-400/30 text-green-300 rounded text-xs hover:bg-green-500/30 transition-colors'
+                  >
+                    Trustless
+                  </button>
+                  <button
+                    onClick={() => generateCategoryNames('tech')}
+                    className='px-3 py-1 bg-orange-500/20 border border-orange-400/30 text-orange-300 rounded text-xs hover:bg-orange-500/30 transition-colors'
+                  >
+                    Tech
+                  </button>
+                  <button
+                    onClick={() => generateCategoryNames('creative')}
+                    className='px-3 py-1 bg-pink-500/20 border border-pink-400/30 text-pink-300 rounded text-xs hover:bg-pink-500/30 transition-colors'
+                  >
+                    Creative
+                  </button>
+                </div>
+
+                {/* Name options */}
+                <div className='space-y-2 max-h-32 overflow-y-auto'>
+                  {isGenerating ? (
+                    <div className='text-center py-4'>
+                      <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2'></div>
+                      <p className='text-gray-400 text-sm'>Generating names...</p>
+                    </div>
+                  ) : (
+                    nameOptions.map((name, index) => (
                       <button
                         key={index}
-                        onClick={() => setName(option)}
-                        className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-                          name === option
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                        onClick={() => setCustomName(name)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                          customName === name
+                            ? 'bg-blue-500/30 text-blue-200 border border-blue-400/50'
+                            : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10'
                         }`}
                       >
-                        {option}
+                        {name}
                       </button>
-                    ))}
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <button
-                      onClick={handleGenerateName}
-                      className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors"
-                    >
-                      🎲 Random
-                    </button>
-                    <button
-                      onClick={handleGenerateStellarName}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
-                    >
-                      ⭐ Stellar
-                    </button>
-                    <button
-                      onClick={handleGenerateWeb3Name}
-                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
-                    >
-                      🌐 Web3
-                    </button>
-                    <button
-                      onClick={handleGenerateTrustlessName}
-                      className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm transition-colors"
-                    >
-                      🔒 Trustless
-                    </button>
-                  </div>
+                    ))
+                  )}
                 </div>
+
+                <button
+                  onClick={generateNewNames}
+                  disabled={isGenerating}
+                  className='w-full mt-3 px-3 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:opacity-50 text-white rounded-lg text-sm transition-colors'
+                >
+                  {isGenerating ? 'Generating...' : '🎲 Generate More Names'}
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Preview Section */}
-        <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
-          <h4 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-            <span className="text-xl">👀</span>
+        <div className='mt-6 p-4 bg-white/5 rounded-lg border border-white/10'>
+          <h4 className='text-lg font-semibold text-white mb-3 flex items-center space-x-2'>
+            <span className='text-xl'>👁️</span>
             <span>Preview</span>
           </h4>
-          <div className="flex items-center space-x-4">
-            <RandomPixelAvatar
-              size={60}
-              seed={avatarSeed}
-              {...AvatarStyles[selectedStyle]}
-              className="rounded-lg border border-white/20"
-            />
+          
+          <div className='flex items-center space-x-4'>
+            <PixelArtAvatar seed={avatarSeed} size={64} className='rounded-lg' />
             <div>
-              <p className="text-white font-medium">{name || 'Your Name'}</p>
-              <p className="text-gray-400 text-sm">Stellar Nexus User</p>
+              <h5 className='text-white font-semibold'>
+                {customName || 'Your Custom Name'}
+              </h5>
+              <p className='text-gray-400 text-sm'>
+                {user?.walletAddress?.slice(0, 6)}...{user?.walletAddress?.slice(-4)}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex justify-end space-x-3">
+        <div className='mt-6 flex justify-end space-x-3'>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+            className='px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors'
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            disabled={!name.trim() || isSaving}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+            disabled={isSaving}
+            className='px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-700 disabled:opacity-50 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105'
           >
-            {isSaving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <span>💾</span>
-                <span>Save Profile</span>
-              </>
-            )}
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>

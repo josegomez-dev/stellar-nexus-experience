@@ -88,19 +88,6 @@ export const userService = {
       updatedAt: serverTimestamp(),
     });
   },
-
-  // Update user profile (avatar and display name)
-  async updateUserProfile(walletAddress: string, profileData: {
-    displayName?: string;
-    avatarSeed?: number;
-    avatarStyle?: 'default' | 'web3' | 'stellar' | 'minimal' | 'vibrant';
-  }): Promise<void> {
-    const userRef = doc(db, COLLECTIONS.USERS, walletAddress);
-    await updateDoc(userRef, {
-      ...profileData,
-      updatedAt: serverTimestamp(),
-    });
-  },
 };
 
 // Demo Progress Operations
