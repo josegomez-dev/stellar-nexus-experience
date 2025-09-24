@@ -1,16 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { BadgeConfig } from '@/lib/badge-config';
+import { Badge } from '@/lib/firebase-types';
 import { BadgeEarnedAnimation } from '@/components/ui/badges/BadgeEarnedAnimation';
 
 interface BadgeAnimationState {
-  badge: BadgeConfig;
+  badge: Badge;
   points?: number;
 }
 
 interface BadgeAnimationContextType {
-  showBadgeAnimation: (badge: BadgeConfig, points?: number) => void;
+  showBadgeAnimation: (badge: Badge, points?: number) => void;
   isAnimationVisible: boolean;
 }
 
@@ -37,7 +37,7 @@ export const BadgeAnimationProvider: React.FC<BadgeAnimationProviderProps> = ({ 
   const [animationState, setAnimationState] = useState<BadgeAnimationState | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const showBadgeAnimation = (badge: BadgeConfig, points?: number) => {
+  const showBadgeAnimation = (badge: Badge, points?: number) => {
     setAnimationState({ badge, points });
     setIsVisible(true);
   };

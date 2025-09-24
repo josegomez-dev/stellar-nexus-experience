@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccount } from '@/contexts/AccountContext';
-import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor } from '@/lib/badge-config';
+import { getAllBadges, getBadgeRarityConfig } from '@/lib/badge-config';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import Image from 'next/image';
 
@@ -233,14 +233,15 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
 
                   // Use exact same logic as RewardsSidebar
                   const earnedBadgeNames = account.badges.map(badge => badge.name);
-                  const badgesWithStatus = AVAILABLE_BADGES.map(badge => ({
+                  const availableBadges = getAllBadges();
+                  const badgesWithStatus = availableBadges.map(badge => ({
                     ...badge,
                     isEarned: earnedBadgeNames.includes(badge.name),
                     earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt
                   }));
 
                   const earnedCount = earnedBadgeNames.length;
-                  const totalCount = AVAILABLE_BADGES.length;
+                  const totalCount = availableBadges.length;
 
                   return (
                     <div className='space-y-4'>

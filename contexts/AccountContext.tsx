@@ -6,7 +6,7 @@ import { accountService } from '@/lib/account-service';
 import { useGlobalWallet } from './WalletContext';
 import { useToast } from './ToastContext';
 import { useBadgeAnimation } from './BadgeAnimationContext';
-import { AVAILABLE_BADGES } from '@/lib/badge-config';
+import { getAllBadges } from '@/lib/badge-config';
 
 interface AccountContextType {
   account: UserAccount | null;
@@ -199,7 +199,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       // Show epic badge animation for Trust Guardian badge (client-side only)
       if (typeof window !== 'undefined') {
         setTimeout(() => {
-          const trustGuardianBadge = AVAILABLE_BADGES.find(badge => badge.name === 'Trust Guardian');
+          const trustGuardianBadge = getAllBadges().find(badge => badge.name === 'Trust Guardian');
           if (trustGuardianBadge) {
             showBadgeAnimation(trustGuardianBadge, 50);
           }
@@ -361,7 +361,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
             // Show epic badge animations for newly earned badges (client-side only)
             newBadges.forEach((badge, index) => {
               setTimeout(() => {
-                const badgeConfig = AVAILABLE_BADGES.find(b => b.name === badge.name);
+                const badgeConfig = getAllBadges().find(b => b.name === badge.name);
                 if (badgeConfig) {
                   showBadgeAnimation(badgeConfig, badge.pointsValue);
                 }

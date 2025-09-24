@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { BadgeConfig, rarityStyles } from '@/lib/badge-config';
+import { BADGE_RARITY } from '@/lib/badge-config';
+import { Badge } from '@/lib/firebase-types';
 
 // Badge SVG emblems (reused from Badge3D component)
 const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
@@ -103,11 +104,47 @@ const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
 };
 
 interface BadgeEarnedAnimationProps {
-  badge: BadgeConfig;
+  badge: Badge;
   isVisible: boolean;
   onComplete: () => void;
   points?: number;
 }
+
+// Helper function to get rarity styles based on badge rarity
+const getRarityStyles = (rarity: string) => {
+  switch (rarity) {
+    case 'common':
+      return {
+        ring: 'from-gray-400 to-gray-600',
+        glow: 'shadow-gray-400/20',
+        text: 'text-gray-400'
+      };
+    case 'rare':
+      return {
+        ring: 'from-blue-400 to-blue-600',
+        glow: 'shadow-blue-400/20',
+        text: 'text-blue-400'
+      };
+    case 'epic':
+      return {
+        ring: 'from-purple-400 to-purple-600',
+        glow: 'shadow-purple-400/20',
+        text: 'text-purple-400'
+      };
+    case 'legendary':
+      return {
+        ring: 'from-orange-400 to-orange-600',
+        glow: 'shadow-orange-400/20',
+        text: 'text-orange-400'
+      };
+    default:
+      return {
+        ring: 'from-gray-400 to-gray-600',
+        glow: 'shadow-gray-400/20',
+        text: 'text-gray-400'
+      };
+  }
+};
 
 export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
   badge,
@@ -117,7 +154,7 @@ export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
 }) => {
   const [progress, setProgress] = useState(0);
   const [animationPhase, setAnimationPhase] = useState<'enter' | 'display' | 'exit'>('enter');
-  const { ring, glow, text } = rarityStyles[badge.rarity];
+  const { ring, glow, text } = getRarityStyles(badge.rarity);
 
   useEffect(() => {
     if (!isVisible) {
@@ -247,7 +284,7 @@ export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
               {badge.rarity.toUpperCase()}
             </div>
             <div className="text-2xl font-bold text-green-400">
-              +{points || badge.pointsValue} pts
+              +{points || badge.xpReward} pts
             </div>
           </div>
 

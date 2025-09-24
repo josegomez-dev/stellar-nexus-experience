@@ -482,7 +482,8 @@ class UserTrackingService {
       const suggestions = feedback
         .filter(f => f.suggestions && f.suggestions.length > 0)
         .map(f => f.suggestions)
-        .flat();
+        .flat()
+        .filter((suggestion): suggestion is string => suggestion !== undefined);
 
       return {
         demoId: stats.demoId,

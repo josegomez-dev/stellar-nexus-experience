@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
-import { BadgeConfig, rarityStyles } from "@/lib/badge-config";
+import { BADGE_RARITY } from "@/lib/badge-config";
+import { Badge } from "@/lib/firebase-types";
 
 // Custom hook for 3D tilt effect
 function useTilt() {
@@ -133,15 +134,52 @@ const BadgeEmblem: React.FC<{ id: string; size?: 'sm' | 'md' | 'lg' }> = ({ id, 
 
 // 3D Badge Card Component
 interface Badge3DProps {
-  badge: BadgeConfig & { isEarned?: boolean };
+  badge: Badge & { isEarned?: boolean };
   size?: 'sm' | 'md' | 'lg';
   compact?: boolean;
 }
 
 export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = false }) => {
-  const { ring, glow, text } = rarityStyles[badge.rarity];
+  const rarityConfig = BADGE_RARITY[badge.rarity as keyof typeof BADGE_RARITY] || BADGE_RARITY.common;
   const { ref, transform, onMouseLeave, onMouseMove } = useTilt();
 
+  // Create the required styling variables from BADGE_RARITY
+  const getRarityStyles = (rarity: string) => {
+    switch (rarity) {
+      case 'common':
+        return {
+          ring: 'from-gray-400 to-gray-600',
+          glow: 'shadow-gray-400/20',
+          text: 'text-gray-400'
+        };
+      case 'rare':
+        return {
+          ring: 'from-blue-400 to-blue-600',
+          glow: 'shadow-blue-400/20',
+          text: 'text-blue-400'
+        };
+      case 'epic':
+        return {
+          ring: 'from-purple-400 to-purple-600',
+          glow: 'shadow-purple-400/20',
+          text: 'text-purple-400'
+        };
+      case 'legendary':
+        return {
+          ring: 'from-orange-400 to-orange-600',
+          glow: 'shadow-orange-400/20',
+          text: 'text-orange-400'
+        };
+      default:
+        return {
+          ring: 'from-gray-400 to-gray-600',
+          glow: 'shadow-gray-400/20',
+          text: 'text-gray-400'
+        };
+    }
+  };
+
+  const { ring, glow, text } = getRarityStyles(badge.rarity);
   const rarityLabel = badge.rarity.toUpperCase();
   
   if (compact) {
@@ -158,7 +196,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
                 {badge.name}
               </h4>
               <p className={`text-xs ${badge.isEarned ? 'text-white/60' : 'text-gray-500'}`}>
-                +{badge.pointsValue} pts
+                +{badge.xpReward} pts
               </p>
             </div>
             {!badge.isEarned && (
@@ -225,7 +263,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
         {/* Meta */}
         <div className="relative z-10 mt-4 grid grid-cols-3 gap-2 text-xs text-white/80">
           <div className="rounded-lg bg-white/5 px-2 py-1 border border-white/10">{rarityLabel}</div>
-          <div className="rounded-lg bg-white/5 px-2 py-1 border border-white/10 text-center">{badge.pointsValue} pts</div>
+          <div className="rounded-lg bg-white/5 px-2 py-1 border border-white/10 text-center">{badge.xpReward} pts</div>
           <div className="rounded-lg bg-white/5 px-2 py-1 border border-white/10 text-right capitalize">{badge.category}</div>
         </div>
 
@@ -234,7 +272,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
           <span className="opacity-80">
             {badge.isEarned ? 'Earned: ' : 'Unlock: '}
           </span>
-          <span className="font-medium">{badge.requirement}</span>
+          <span className="font-medium">{badge.requirements[0]?.type || 'Complete demo'}</span>
         </div>
 
         {/* Shine sweep - only for earned badges */}

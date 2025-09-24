@@ -124,6 +124,12 @@ export const ImmersiveDemoModal = ({
   };
 
   const handleCompleteDemo = async () => {
+    // Prevent multiple simultaneous calls
+    if (isCompletingDemo) {
+      console.log('🚫 Demo completion already in progress, ignoring duplicate call');
+      return;
+    }
+    
     try {
       setIsCompletingDemo(true);
       console.log('🎯 Complete Demo button clicked!', { demoId, demoTitle, elapsedTime });

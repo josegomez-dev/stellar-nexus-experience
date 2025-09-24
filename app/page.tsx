@@ -294,7 +294,7 @@ const DemoSelector = ({
                             <div className='text-lg font-bold text-amber-400'>
                               {stats.completions}
                             </div>
-                            <div className='text-xs text-white/60'>TNX #</div>
+                            <div className='text-xs text-white/60'>Completed</div>
                           </div>
                           <div>
                             <button

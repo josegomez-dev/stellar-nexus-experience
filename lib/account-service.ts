@@ -358,11 +358,11 @@ export class AccountService {
         id: uuidv4(),
         name: badgeConfig.name,
         description: badgeConfig.description,
-        imageUrl: badgeConfig.imageUrl || '',
+        imageUrl: badgeConfig.icon || '',
         rarity: badgeConfig.rarity,
         earnedAt: Timestamp.now(),
         demoId,
-        pointsValue: badgeConfig.pointsValue,
+        pointsValue: badgeConfig.xpReward,
       };
 
       console.log(`🏆 Awarding badge: ${badge.name} (${totalCompletedDemos} demos completed)`);
@@ -396,10 +396,10 @@ export class AccountService {
           id: uuidv4(),
           name: stellarBadgeConfig.name,
           description: stellarBadgeConfig.description,
-          imageUrl: stellarBadgeConfig.imageUrl || '',
+          imageUrl: stellarBadgeConfig.icon || '',
           rarity: stellarBadgeConfig.rarity,
           earnedAt: Timestamp.now(),
-          pointsValue: stellarBadgeConfig.pointsValue,
+          pointsValue: stellarBadgeConfig.xpReward,
         };
 
         console.log(`🌟 Awarding Stellar Champion badge! All demos completed.`);

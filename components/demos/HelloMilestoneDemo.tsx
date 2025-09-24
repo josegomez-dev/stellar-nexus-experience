@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useAccount } from '@/contexts/AccountContext';
@@ -55,6 +55,7 @@ export const HelloMilestoneDemo = () => {
   const [milestoneStatus, setMilestoneStatus] = useState<'pending' | 'completed'>('pending');
   const [demoStarted, setDemoStarted] = useState(false);
   const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
+  const completionTriggeredRef = useRef(false);
   
   // New state for enhanced features
   const [showProcessExplanation, setShowProcessExplanation] = useState(false);
@@ -489,8 +490,9 @@ export const HelloMilestoneDemo = () => {
   useEffect(() => {
     console.log('🎉 Hello Milestone Demo - Current step:', currentStep);
 
-    if (currentStep === 5) {
+    if (currentStep === 5 && !completionTriggeredRef.current) {
       console.log('🎉 Triggering confetti for Hello Milestone Demo!');
+      completionTriggeredRef.current = true; // Prevent multiple completions
       setShowConfetti(true);
       
       // Complete the demo with a good score
@@ -547,7 +549,7 @@ export const HelloMilestoneDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, completeDemo, demoStartTime, completionCount, addCompletion]);
+  }, [currentStep, demoStartTime, completionCount, addCompletion]);
 
   async function handleInitializeEscrow() {
     console.log('🚀 Starting handleInitializeEscrow...');
@@ -772,6 +774,7 @@ export const HelloMilestoneDemo = () => {
               setEscrowData(result.escrow);
               setDemoStarted(true);
               setDemoStartTime(Date.now());
+              completionTriggeredRef.current = false; // Reset completion flag for new demo
               
               // Force step progression for initialization
               console.log('🚀 Forcing step progression to step 1 (fund escrow)');
@@ -851,6 +854,7 @@ export const HelloMilestoneDemo = () => {
           setEscrowData(result.escrow);
           setDemoStarted(true);
           setDemoStartTime(Date.now());
+          completionTriggeredRef.current = false; // Reset completion flag for new demo
           
           // Clear from pending transactions
           setPendingTransactions(prev => {
@@ -1923,16 +1927,7 @@ export const HelloMilestoneDemo = () => {
                 </div>
               ))}
             </div>
-            
-            {/* Educational Note */}
-            <div className='mt-4 p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/30 rounded-lg'>
-              <h4 className='font-semibold text-blue-300 mb-2'>🎓 Understanding Blockchain Transactions</h4>
-              <p className='text-blue-200 text-sm leading-relaxed'>
-                Each transaction on the Stellar blockchain is recorded permanently and can be verified by anyone. 
-                The transaction hash is a unique identifier that proves the transaction occurred. 
-                Click the explorer links above to see how your transactions appear on the public blockchain!
-              </p>
-            </div>
+
           </div>
         )}
 
