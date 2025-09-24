@@ -71,15 +71,15 @@ export const UserDropdown = () => {
   };
 
   const handleAutoGenerate = async () => {
-    // if (!walletData?.publicKey) {
-    //   addToast({
-    //     type: 'error',
-    //     title: '❌ No Wallet Connected',
-    //     message: 'Please connect your wallet first',
-    //     duration: 3000,
-    //   });
-    //   return;
-    // }
+    if (!walletData?.publicKey) {
+      addToast({
+        type: 'error',
+        title: '❌ No Wallet Connected',
+        message: 'Please connect your wallet first',
+        duration: 3000,
+      });
+      return;
+    }
 
     setIsGenerating(true);
     try {
@@ -169,7 +169,7 @@ export const UserDropdown = () => {
                       '🎲'
                     )}
                   </span>
-                  <span>{isGenerating ? 'Generating...' : 'Customize Profile Randomly'}</span>
+                  <span>{isGenerating ? 'Generating...' : 'Customize Profile'}</span>
                 </button>
               </div>
             </div>
