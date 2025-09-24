@@ -259,16 +259,48 @@ export const useWallet = (): UseWalletReturn => {
 
       try {
         console.log('Attempting to connect wallet...', walletId ? `to ${walletId}` : '');
+        console.log('Wallet kit status:', { 
+          walletKit: !!walletKit, 
+          globalWalletKit: !!globalWalletKit,
+          isInitializing 
+        });
+
+        // Ensure we have a wallet kit available
+        let currentKit = walletKit || globalWalletKit;
+        
+        // If no kit is available, try to initialize one
+        if (!currentKit && !isInitializing) {
+          console.log('🔄 No wallet kit available, attempting to initialize...');
+          try {
+            const modules = [
+              new FreighterModule(),
+              new AlbedoModule(),
+              new RabetModule(),
+              new LobstrModule(),
+            ];
+
+            currentKit = new StellarWalletsKit({
+              network: WalletNetwork.TESTNET,
+              modules,
+            });
+            
+            globalWalletKit = currentKit;
+            setWalletKit(currentKit);
+            console.log('✅ Wallet kit initialized on demand');
+          } catch (initError) {
+            console.error('Failed to initialize wallet kit:', initError);
+          }
+        }
 
         // Try Stellar Wallets Kit first
-        if (walletKit) {
+        if (currentKit) {
           try {
             // If walletId is provided, set the wallet
             if (walletId) {
-              walletKit.setWallet(walletId);
+              currentKit.setWallet(walletId);
             } else {
               // If no walletId provided, try to use the first available wallet
-              const supportedWallets = await walletKit.getSupportedWallets();
+              const supportedWallets = await currentKit.getSupportedWallets();
               const availableWallet = supportedWallets.find(w => w.isAvailable);
 
               if (!availableWallet) {
@@ -278,19 +310,19 @@ export const useWallet = (): UseWalletReturn => {
               }
 
               console.log('Auto-selecting wallet:', availableWallet.name);
-              walletKit.setWallet(availableWallet.id);
+              currentKit.setWallet(availableWallet.id);
             }
 
             // Get wallet information
-            const addressResponse = await walletKit.getAddress();
-            const networkResponse = await walletKit.getNetwork();
+            const addressResponse = await currentKit.getAddress();
+            const networkResponse = await currentKit.getNetwork();
 
             setCurrentNetwork(networkResponse.network);
 
             const networkConfig = getNetworkConfig(networkResponse.network);
 
             // Get wallet info from the kit's selected module
-            const selectedModule = walletKit['selectedModule'];
+            const selectedModule = currentKit['selectedModule'];
             const connectedWallet = selectedModule
               ? {
                   id: selectedModule.productId,
@@ -491,8 +523,9 @@ export const useWallet = (): UseWalletReturn => {
 
   const disconnect = useCallback(async () => {
     try {
-      if (walletKit) {
-        await walletKit.disconnect();
+      const currentKit = walletKit || globalWalletKit;
+      if (currentKit) {
+        await currentKit.disconnect();
       }
       setWalletData(null);
       console.log('✅ Wallet disconnected');
@@ -503,14 +536,15 @@ export const useWallet = (): UseWalletReturn => {
 
   const signTransaction = useCallback(
     async (xdr: string) => {
-      if (!walletKit || !walletData) {
+      const currentKit = walletKit || globalWalletKit;
+      if (!currentKit || !walletData) {
         throw new Error('Wallet not connected');
       }
 
       try {
         console.log('Signing transaction with wallet...');
 
-        const result = await walletKit.signTransaction(xdr, {
+        const result = await currentKit.signTransaction(xdr, {
           networkPassphrase: walletData.networkPassphrase,
           address: walletData.publicKey,
         });
@@ -585,12 +619,13 @@ export const useWallet = (): UseWalletReturn => {
   );
 
   const getAvailableWallets = useCallback(async () => {
-    if (!walletKit) {
+    const currentKit = walletKit || globalWalletKit;
+    if (!currentKit) {
       return [];
     }
 
     try {
-      const supportedWallets = await walletKit.getSupportedWallets();
+      const supportedWallets = await currentKit.getSupportedWallets();
       return supportedWallets;
     } catch (error) {
       console.error('Error getting available wallets:', error);
@@ -600,7 +635,8 @@ export const useWallet = (): UseWalletReturn => {
 
   // Network detection function
   const detectNetworkChange = useCallback(async () => {
-    if (!walletKit || !walletData) {
+    const currentKit = walletKit || globalWalletKit;
+    if (!currentKit || !walletData) {
       return;
     }
 
@@ -608,7 +644,7 @@ export const useWallet = (): UseWalletReturn => {
       console.log('🔍 Detecting network change...');
 
       // Get current network from wallet kit
-      const networkResponse = await walletKit.getNetwork();
+      const networkResponse = await currentKit.getNetwork();
 
       if (networkResponse.network !== currentNetwork) {
         console.log(`🔄 Network changed from ${currentNetwork} to ${networkResponse.network}`);
@@ -705,12 +741,13 @@ export const useWallet = (): UseWalletReturn => {
 
   // Open wallet modal function
   const openWalletModal = useCallback(async () => {
-    if (!walletKit) {
+    const currentKit = walletKit || globalWalletKit;
+    if (!currentKit) {
       throw new Error('Wallet kit not initialized');
     }
 
     try {
-      await walletKit.openModal({
+      await currentKit.openModal({
         onWalletSelected: async (wallet: ISupportedWallet) => {
           console.log('Wallet selected:', wallet);
           await connect(wallet.id);
