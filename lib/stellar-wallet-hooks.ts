@@ -13,6 +13,10 @@ import {
   ISupportedWallet,
 } from '@creit.tech/stellar-wallets-kit';
 
+// Singleton to prevent multiple initializations
+let globalWalletKit: StellarWalletsKit | null = null;
+let isInitializing = false;
+
 // POC Mode - No Stellar Wallets Kit initialization to avoid custom element conflicts
 const POC_MODE = process.env.NODE_ENV === 'development';
 
@@ -92,7 +96,33 @@ export const useWallet = (): UseWalletReturn => {
   useEffect(() => {
     const initializeWalletKit = async () => {
       try {
+        // Use singleton pattern to prevent multiple initializations
+        if (globalWalletKit) {
+          console.log('♻️ Using existing Stellar Wallets Kit instance');
+          setWalletKit(globalWalletKit);
+          const supportedWallets = await globalWalletKit.getSupportedWallets();
+          setAvailableWallets(supportedWallets);
+          await checkConnectionStatus(globalWalletKit);
+          return;
+        }
+
+        if (isInitializing) {
+          console.log('⏳ Stellar Wallets Kit initialization already in progress...');
+          return;
+        }
+
+        isInitializing = true;
         console.log('🚀 Initializing Stellar Wallets Kit...');
+
+        // Check if custom elements are already defined (prevents HMR issues)
+        const customElementsToCheck = ['stellar-wallets-modal', 'stellar-wallets-button', 'stellar-accounts-selector'];
+        const alreadyDefined = customElementsToCheck.some(name => customElements.get(name));
+        
+        if (alreadyDefined) {
+          console.log('⚠️ Custom elements already defined, skipping initialization to prevent HMR conflicts');
+          isInitializing = false;
+          return;
+        }
 
         // Create wallet modules
         const modules = [
@@ -107,6 +137,9 @@ export const useWallet = (): UseWalletReturn => {
           network: WalletNetwork.TESTNET,
           modules,
         });
+
+        // Store globally to prevent re-initialization
+        globalWalletKit = kit;
 
         setWalletKit(kit);
 
@@ -132,9 +165,11 @@ export const useWallet = (): UseWalletReturn => {
 
         // Check if already connected
         await checkConnectionStatus(kit);
+        isInitializing = false;
       } catch (error) {
         console.error('❌ Failed to initialize Stellar Wallets Kit:', error);
         console.log('🔄 Falling back to direct Freighter API...');
+        isInitializing = false;
 
         // Fallback to direct Freighter detection
         const freighterDetected = typeof window !== 'undefined' && 
@@ -205,6 +240,16 @@ export const useWallet = (): UseWalletReturn => {
     };
 
     initializeWalletKit();
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (walletKit) {
+        console.log('🧹 Cleaning up Stellar Wallets Kit...');
+        // The StellarWalletsKit doesn't have a cleanup method, but we can clear our state
+        setWalletKit(null);
+        setAvailableWallets([]);
+      }
+    };
   }, []);
 
   const connect = useCallback(
