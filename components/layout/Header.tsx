@@ -39,7 +39,7 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
             <a
-              href='/demos'
+              href='/'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
               <Image
@@ -151,7 +151,7 @@ export const Header = () => {
         <div className='md:hidden absolute top-full left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 shadow-xl z-50'>
           <div className='px-2 pt-2 pb-3 space-y-1'>
             <a
-              href='/demos'
+              href='/'
               className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
               onClick={() => setIsMenuOpen(false)}
             >

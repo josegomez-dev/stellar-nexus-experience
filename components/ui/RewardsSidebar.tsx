@@ -112,42 +112,70 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   );
 
   const renderBadges = () => {
-    // Check which badges are earned by the user (match by name since that's how they're stored)
-    const earnedBadgeNames = safeAccount.badges.map((badge: any) => badge.name);
-    const badgesWithStatus = AVAILABLE_BADGES.map((badge: Badge) => ({
-      ...badge,
-      isEarned: earnedBadgeNames.includes(badge.name),
-      earnedAt: safeAccount.badges.find(b => b.name === badge.name)?.earnedAt
-    }));
+    try {
+      console.log('🔍 Debugging renderBadges:', {
+        safeAccount,
+        badges: safeAccount.badges,
+        badgesLength: safeAccount.badges?.length,
+        AVAILABLE_BADGES,
+        availableBadgesLength: AVAILABLE_BADGES?.length
+      });
 
-    const earnedCount = earnedBadgeNames.length;
-    const totalCount = AVAILABLE_BADGES.length;
+      // Check which badges are earned by the user (match by name since that's how they're stored)
+      const earnedBadgeNames = safeAccount.badges?.map((badge: any) => badge.name) || [];
+      const badgesWithStatus = AVAILABLE_BADGES?.map((badge: Badge) => ({
+        ...badge,
+        isEarned: earnedBadgeNames.includes(badge.name),
+        earnedAt: safeAccount.badges?.find(b => b.name === badge.name)?.earnedAt
+      })) || [];
 
-    return (
-      <div className="space-y-4">
-        <div className="text-center mb-4">
-          <div className="text-2xl font-bold text-white">{earnedCount} / {totalCount}</div>
-          <div className="text-sm text-gray-400">Badges Collected</div>
-          <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-            <div 
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${(earnedCount / totalCount) * 100}%` }}
-            />
+      const earnedCount = earnedBadgeNames.length;
+      const totalCount = AVAILABLE_BADGES?.length || 0;
+
+      return (
+        <div className="space-y-4">
+          <div className="text-center mb-4">
+            <div className="text-2xl font-bold text-white">{earnedCount} / {totalCount}</div>
+            <div className="text-sm text-gray-400">Badges Collected</div>
+            <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+              <div 
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${(earnedCount / totalCount) * 100}%` }}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+            {badgesWithStatus.length > 0 ? (
+              badgesWithStatus.map((badge) => (
+                <Badge3D
+                  key={badge.id}
+                  badge={badge}
+                  size="sm"
+                  compact={true}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <div className="text-4xl mb-2">🏆</div>
+                <div className="text-sm">No badges available</div>
+              </div>
+            )}
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-          {badgesWithStatus.map((badge) => (
-            <Badge3D
-              key={badge.id}
-              badge={badge}
-              size="sm"
-              compact={true}
-            />
-          ))}
+      );
+    } catch (error) {
+      console.error('❌ Error in renderBadges:', error);
+      return (
+        <div className="text-center py-8 text-red-400">
+          <div className="text-4xl mb-2">⚠️</div>
+          <div className="text-sm">Error loading badges</div>
+          <div className="text-xs mt-2 text-red-300">
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   };
 
   const renderTransactions = () => (

@@ -530,7 +530,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   >
                     {isConnected ? (
                       <a
-                        href='/demos'
+                        href='/'
                         className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
                           isExpanded ? 'px-3 py-2' : 'px-2 py-2'
                         }`}
@@ -724,7 +724,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                 >
                   {isConnected ? (
                     <a
-                      href='/demos'
+                      href='/'
                       className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
                         isExpanded ? 'px-3 py-2' : 'px-2 py-2'
                       }`}
