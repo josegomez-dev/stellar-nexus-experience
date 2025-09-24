@@ -11,14 +11,15 @@ describe('Basic Test - Verify Setup', () => {
     cy.visit('/demos', { timeout: 30000 });
     cy.get('body').should('be.visible');
     cy.log('✅ Body is visible');
-    
+
     // Check if any demo-related content exists
     cy.get('body').then($body => {
-      const hasDemoContent = $body.find('*').filter((i, el) => {
-        const text = Cypress.$(el).text().toLowerCase();
-        return text.includes('demo') || text.includes('launch') || text.includes('milestone');
-      }).length > 0;
-      
+      const hasDemoContent =
+        $body.find('*').filter((i, el) => {
+          const text = Cypress.$(el).text().toLowerCase();
+          return text.includes('demo') || text.includes('launch') || text.includes('milestone');
+        }).length > 0;
+
       if (hasDemoContent) {
         cy.log('✅ Demo content found on page');
       } else {

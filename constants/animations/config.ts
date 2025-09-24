@@ -8,7 +8,7 @@ export const ANIMATION_CONSTANTS = {
     VERY_SLOW: '1000ms',
     EXTRA_SLOW: '2000ms',
   },
-  
+
   // Animation Easing Functions
   EASING: {
     LINEAR: 'linear',
@@ -18,7 +18,7 @@ export const ANIMATION_CONSTANTS = {
     CUBIC_BEZIER: 'cubic-bezier(0.4, 0, 0.2, 1)',
     BOUNCE: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
   },
-  
+
   // Keyframe Animations
   KEYFRAMES: {
     FADE_IN: {
@@ -63,7 +63,7 @@ export const ANIMATION_CONSTANTS = {
       '100%': { opacity: '0', transform: 'scale(0)' },
     },
   },
-  
+
   // Animation Delays
   DELAY: {
     NONE: '0ms',
@@ -72,7 +72,7 @@ export const ANIMATION_CONSTANTS = {
     LONG: '300ms',
     EXTRA_LONG: '500ms',
   },
-  
+
   // Animation Classes (Tailwind CSS compatible)
   CLASSES: {
     FADE_IN: 'animate-fade-in',

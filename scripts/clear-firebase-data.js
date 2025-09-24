@@ -2,23 +2,31 @@
 
 /**
  * Firebase Data Cleanup Script
- * 
+ *
  * This script clears all Firebase collections for fresh testing.
  * Run with: node scripts/clear-firebase-data.js
  */
 
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs, deleteDoc, doc, writeBatch } = require('firebase/firestore');
+const {
+  getFirestore,
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  writeBatch,
+} = require('firebase/firestore');
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nexus-55966.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nexus-55966",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nexus-55966.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "48419163339",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:48419163339:web:637eadbce2dadb24605f4e",
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-80T26CG9PM"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'nexus-55966.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nexus-55966',
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'nexus-55966.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '48419163339',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:48419163339:web:637eadbce2dadb24605f4e',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-80T26CG9PM',
 };
 
 // Collections to clear
@@ -36,11 +44,11 @@ const COLLECTIONS = {
 
 async function clearCollection(db, collectionName) {
   console.log(`🗑️  Clearing collection: ${collectionName}`);
-  
+
   try {
     const collectionRef = collection(db, collectionName);
     const snapshot = await getDocs(collectionRef);
-    
+
     if (snapshot.empty) {
       console.log(`   ✅ Collection ${collectionName} is already empty`);
       return 0;
@@ -49,7 +57,7 @@ async function clearCollection(db, collectionName) {
     const batch = writeBatch(db);
     let deletedCount = 0;
 
-    snapshot.forEach((docSnapshot) => {
+    snapshot.forEach(docSnapshot => {
       batch.delete(doc(db, collectionName, docSnapshot.id));
       deletedCount++;
     });
@@ -82,7 +90,6 @@ async function clearAllFirebaseData() {
     console.log(`\n🎉 Firebase cleanup completed!`);
     console.log(`📊 Total documents deleted: ${totalDeleted}`);
     console.log(`\n✨ Your Firebase database is now clean and ready for fresh testing!`);
-    
   } catch (error) {
     console.error('❌ Error during Firebase cleanup:', error);
     process.exit(1);
@@ -96,7 +103,7 @@ if (require.main === module) {
       console.log('\n🔚 Script completed successfully');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('💥 Script failed:', error);
       process.exit(1);
     });

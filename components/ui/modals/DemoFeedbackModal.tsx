@@ -30,7 +30,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!feedback.trim()) {
       alert('Please provide your feedback');
       return;
@@ -49,7 +49,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
         mostHelpfulFeature: mostHelpfulFeature.trim() || undefined,
         suggestions: suggestions.trim() || undefined,
       });
-      
+
       // Reset form
       setRating(5);
       setFeedback('');
@@ -57,7 +57,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
       setWouldRecommend(true);
       setMostHelpfulFeature('');
       setSuggestions('');
-      
+
       onClose();
     } catch (err) {
       console.error('Error submitting feedback:', err);
@@ -68,7 +68,11 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
 
   const handleSkip = () => {
     // Allow skipping but show a warning
-    if (confirm('Are you sure you want to skip feedback? Your input helps us improve the demos for everyone!')) {
+    if (
+      confirm(
+        'Are you sure you want to skip feedback? Your input helps us improve the demos for everyone!'
+      )
+    ) {
       onClose();
     }
   };
@@ -82,11 +86,10 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
         <div className='relative p-6 border-b border-white/10'>
           <div className='absolute inset-0 bg-gradient-to-r from-brand-500/10 via-accent-500/10 to-brand-500/10 rounded-t-2xl'></div>
           <div className='relative z-10'>
-            <h2 className='text-2xl font-bold text-white mb-2'>
-              🎉 Demo Completed!
-            </h2>
+            <h2 className='text-2xl font-bold text-white mb-2'>🎉 Demo Completed!</h2>
             <p className='text-brand-200'>
-              Help us improve <span className='font-semibold text-accent-400'>{demoName}</span> with your feedback
+              Help us improve <span className='font-semibold text-accent-400'>{demoName}</span> with
+              your feedback
             </p>
           </div>
         </div>
@@ -99,7 +102,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
               Overall Rating <span className='text-red-400'>*</span>
             </label>
             <div className='flex items-center space-x-2'>
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
                   type='button'
@@ -128,7 +131,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             </label>
             <textarea
               value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
+              onChange={e => setFeedback(e.target.value)}
               placeholder='What did you think about this demo? What worked well? What could be improved?'
               rows={4}
               className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none'
@@ -143,7 +146,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             </label>
             <select
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as DemoFeedback['difficulty'])}
+              onChange={e => setDifficulty(e.target.value as DemoFeedback['difficulty'])}
               className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             >
               <option value='very_easy'>Very Easy</option>
@@ -191,7 +194,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             <input
               type='text'
               value={mostHelpfulFeature}
-              onChange={(e) => setMostHelpfulFeature(e.target.value)}
+              onChange={e => setMostHelpfulFeature(e.target.value)}
               placeholder='e.g., Step-by-step guidance, Interactive examples, Clear explanations...'
               className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
@@ -204,7 +207,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             </label>
             <textarea
               value={suggestions}
-              onChange={(e) => setSuggestions(e.target.value)}
+              onChange={e => setSuggestions(e.target.value)}
               placeholder='Any ideas on how we could make this demo better?'
               rows={3}
               className='w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none'
@@ -238,7 +241,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             >
               Skip for now
             </button>
-            
+
             <div className='flex items-center space-x-3'>
               <button
                 type='button'

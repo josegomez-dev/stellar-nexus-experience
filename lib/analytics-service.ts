@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { db } from './firebase';
 import { COLLECTIONS } from './firebase-types';
 
@@ -64,7 +64,9 @@ export class AnalyticsService {
       // Get demo progress to calculate completion rate
       const progressSnapshot = await getDocs(collection(db, COLLECTIONS.DEMO_PROGRESS));
       const progressData = progressSnapshot.docs.map(doc => doc.data());
-      const completedDemos = progressData.filter(progress => progress.status === 'completed').length;
+      const completedDemos = progressData.filter(
+        progress => progress.status === 'completed'
+      ).length;
       const totalDemoAttempts = progressData.length;
       const completionRate = totalDemoAttempts > 0 ? (completedDemos / totalDemoAttempts) * 100 : 0;
 
@@ -127,15 +129,19 @@ export class AnalyticsService {
         very_hard: 0,
       };
 
-        feedbacks.forEach(feedback => {
-          if (feedback.difficulty && Object.prototype.hasOwnProperty.call(difficultyDistribution, feedback.difficulty)) {
-            difficultyDistribution[feedback.difficulty as keyof typeof difficultyDistribution]++;
-          }
-        });
+      feedbacks.forEach(feedback => {
+        if (
+          feedback.difficulty &&
+          Object.prototype.hasOwnProperty.call(difficultyDistribution, feedback.difficulty)
+        ) {
+          difficultyDistribution[feedback.difficulty as keyof typeof difficultyDistribution]++;
+        }
+      });
 
       // Calculate recommendation rate
       const recommendingUsers = feedbacks.filter(feedback => feedback.wouldRecommend).length;
-      const recommendationRate = feedbacks.length > 0 ? (recommendingUsers / feedbacks.length) * 100 : 0;
+      const recommendationRate =
+        feedbacks.length > 0 ? (recommendingUsers / feedbacks.length) * 100 : 0;
 
       return {
         demoId,
@@ -190,10 +196,10 @@ export class AnalyticsService {
         collection(db, COLLECTIONS.DEMO_FEEDBACK),
         orderBy('rating', 'desc'),
         orderBy('createdAt', 'desc'),
-        limit(limit)
+        firestoreLimit(limit)
       );
       const feedbackSnapshot = await getDocs(feedbackQuery);
-      
+
       return feedbackSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -215,12 +221,14 @@ export class AnalyticsService {
         orderBy('createdAt', 'asc')
       );
       const feedbackSnapshot = await getDocs(feedbackQuery);
-      
+
       // Group feedback by date
       const feedbackByDate: { [key: string]: number } = {};
       feedbackSnapshot.docs.forEach(doc => {
         const data = doc.data();
-        const date = data.createdAt?.toDate?.()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+        const date =
+          data.createdAt?.toDate?.()?.toISOString().split('T')[0] ||
+          new Date().toISOString().split('T')[0];
         feedbackByDate[date] = (feedbackByDate[date] || 0) + 1;
       });
 
@@ -235,3 +243,5 @@ export class AnalyticsService {
     }
   }
 }
+
+export const analyticsService = new AnalyticsService();

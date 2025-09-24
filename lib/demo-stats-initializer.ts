@@ -33,8 +33,8 @@ export const DEMO_CONFIG = [
 export const initializeDemoStats = async (): Promise<void> => {
   try {
     console.log('🔄 Initializing demo stats...');
-    
-    const initPromises = DEMO_CONFIG.map(async (demo) => {
+
+    const initPromises = DEMO_CONFIG.map(async demo => {
       try {
         await demoStatsService.initializeDemoStats(demo.id, demo.name);
         console.log(`✅ Initialized stats for ${demo.name}`);

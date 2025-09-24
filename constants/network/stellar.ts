@@ -4,7 +4,7 @@ export const NETWORKS = {
   MAINNET: 'PUBLIC',
 } as const;
 
-export type NetworkType = typeof NETWORKS[keyof typeof NETWORKS];
+export type NetworkType = (typeof NETWORKS)[keyof typeof NETWORKS];
 
 // Network Passphrases
 export const NETWORK_PASSPHRASES = {

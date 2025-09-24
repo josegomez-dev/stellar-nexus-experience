@@ -7,7 +7,7 @@ export const UI_CONSTANTS = {
     SLOW: 500,
     VERY_SLOW: 1000,
   },
-  
+
   // Z-Index Layers
   Z_INDEX: {
     DROPDOWN: 50,
@@ -16,7 +16,7 @@ export const UI_CONSTANTS = {
     HEADER: 10,
     SIDEBAR: 20,
   },
-  
+
   // Breakpoints (matching Tailwind CSS)
   BREAKPOINTS: {
     SM: 640,
@@ -25,7 +25,7 @@ export const UI_CONSTANTS = {
     XL: 1280,
     '2XL': 1536,
   },
-  
+
   // Component Sizes
   SIZES: {
     AVATAR: {
@@ -40,7 +40,7 @@ export const UI_CONSTANTS = {
       LG: 'px-6 py-3 text-lg',
     },
   },
-  
+
   // Color Schemes
   COLORS: {
     PRIMARY: 'brand',
@@ -50,7 +50,7 @@ export const UI_CONSTANTS = {
     ERROR: 'red',
     INFO: 'blue',
   },
-  
+
   // Spacing Scale
   SPACING: {
     XS: '0.5rem',

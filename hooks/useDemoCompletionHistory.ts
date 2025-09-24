@@ -43,7 +43,7 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       if (typeof window === 'undefined') {
         setCompletionHistory([]);
         return;
@@ -102,7 +102,6 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
       saveHistory(updatedHistory);
 
       // Note: Demo completion notifications are handled by AccountContext.tsx
-
     } catch (err) {
       console.error('Error adding completion:', err);
       setError(err instanceof Error ? err.message : 'Failed to add completion');

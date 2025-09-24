@@ -529,7 +529,7 @@ export const demoFeedbackService = {
     try {
       // Ensure demo stats exist before updating rating
       if (feedback.rating && feedback.demoId) {
-        await demoStatsService.ensureDemoStatsExist(feedback.demoId, feedback.demoName || 'Unknown Demo');
+        await demoStatsService.initializeDemoStats(feedback.demoId, feedback.demoName || 'Unknown Demo');
       }
       
       const feedbackRef = await addDoc(collection(db, COLLECTIONS.DEMO_FEEDBACK), {

@@ -54,11 +54,3 @@ export function useScrollToTop() {
     scrollToTop,
   };
 }
-
-
-
-
-
-
-
-

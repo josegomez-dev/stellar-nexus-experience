@@ -234,259 +234,259 @@ export default function GamePage() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
-          {/* Epic Arcade Machine Background */}
-          <div className='absolute inset-0'>
-            {/* CRT Scan Lines Effect */}
-            <div className='absolute inset-0 opacity-10'>
-              {Array.from({ length: 50 }).map((_, i) => (
-                <div
-                  key={i}
-                  className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'
-                  style={{ top: `${i * 2}%` }}
-                />
-              ))}
+      {/* Epic Arcade Machine Background */}
+      <div className='absolute inset-0'>
+        {/* CRT Scan Lines Effect */}
+        <div className='absolute inset-0 opacity-10'>
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div
+              key={i}
+              className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'
+              style={{ top: `${i * 2}%` }}
+            />
+          ))}
+        </div>
+
+        {/* Floating Arcade Elements */}
+        <div className='absolute top-20 left-10 w-4 h-4 bg-cyan-400 rounded-full animate-ping opacity-60'></div>
+        <div
+          className='absolute top-40 right-20 w-3 h-3 bg-purple-400 rounded-full animate-ping opacity-80'
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div
+          className='absolute bottom-40 left-1/4 w-2 h-2 bg-pink-400 rounded-full animate-ping opacity-70'
+          style={{ animationDelay: '2s' }}
+        ></div>
+
+        {/* Energy Grid */}
+        <div className='absolute inset-0 opacity-20'>
+          <div className='absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'></div>
+          <div className='absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent'></div>
+          <div className='absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-pink-400 to-transparent'></div>
+        </div>
+      </div>
+
+      <Header />
+
+      {/* Main Content */}
+      <main className='relative z-10 pt-20 pb-32'>
+        <div className='container mx-auto px-4'>
+          <div className='max-w-7xl mx-auto'>
+            {/* Retro Arcade Sidebar */}
+            <RetroArcadeSidebar
+              games={sidebarGames}
+              selectedGame={selectedGame}
+              isFullscreen={isFullscreen}
+              onGameSelect={handleGameSelect}
+              onFullscreenToggle={handleFullscreenToggle}
+            />
+
+            {/* Mobile Game Selector Button */}
+            <div className='lg:hidden text-center mb-8'>
+              <button
+                onClick={() => setShowGameSelector(!showGameSelector)}
+                className='px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg'
+              >
+                🎯 Select Game
+              </button>
             </div>
 
-            {/* Floating Arcade Elements */}
-            <div className='absolute top-20 left-10 w-4 h-4 bg-cyan-400 rounded-full animate-ping opacity-60'></div>
-            <div
-              className='absolute top-40 right-20 w-3 h-3 bg-purple-400 rounded-full animate-ping opacity-80'
-              style={{ animationDelay: '1s' }}
-            ></div>
-            <div
-              className='absolute bottom-40 left-1/4 w-2 h-2 bg-pink-400 rounded-full animate-ping opacity-70'
-              style={{ animationDelay: '2s' }}
-            ></div>
-
-            {/* Energy Grid */}
-            <div className='absolute inset-0 opacity-20'>
-              <div className='absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'></div>
-              <div className='absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent'></div>
-              <div className='absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-pink-400 to-transparent'></div>
-            </div>
-          </div>
-
-          <Header />
-
-          {/* Main Content */}
-          <main className='relative z-10 pt-20 pb-32'>
-            <div className='container mx-auto px-4'>
-              <div className='max-w-7xl mx-auto'>
-                {/* Retro Arcade Sidebar */}
-                <RetroArcadeSidebar
-                  games={sidebarGames}
-                  selectedGame={selectedGame}
-                  isFullscreen={isFullscreen}
-                  onGameSelect={handleGameSelect}
-                  onFullscreenToggle={handleFullscreenToggle}
-                />
-
-                {/* Mobile Game Selector Button */}
-                <div className='lg:hidden text-center mb-8'>
-                  <button
-                    onClick={() => setShowGameSelector(!showGameSelector)}
-                    className='px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg'
-                  >
-                    🎯 Select Game
-                  </button>
-                </div>
-
-                {/* Game Selector Modal */}
-                {showGameSelector && (
-                  <div className='fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-                    <div className='bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-white/20 shadow-2xl max-w-4xl w-full p-8 max-h-[80vh] overflow-y-auto'>
-                      <div className='text-center mb-6'>
-                        <h2 className='text-3xl font-bold text-white mb-2'>🎮 Game Library</h2>
-                        <p className='text-white/70'>Select your next adventure</p>
-                      </div>
-
-                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                        {Object.values(gameLibrary || {}).map(gameOption => (
-                          <div
-                            key={gameOption.id}
-                            onClick={() => handleGameSelect(gameOption.id)}
-                            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                              gameOption.id === selectedGame
-                                ? 'border-cyan-400 bg-cyan-500/10'
-                                : 'border-white/20 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-500/5'
-                            }`}
-                          >
-                            <div className='text-center'>
-                              <div className='text-4xl mb-2'>{gameOption.icon}</div>
-                              <h3 className='font-bold text-white mb-1'>{gameOption.title}</h3>
-                              <p className='text-white/70 text-sm mb-2'>{gameOption.subtitle}</p>
-                              <div className='flex items-center justify-center space-x-2 text-xs'>
-                                <span
-                                  className={`px-2 py-1 rounded-full ${
-                                    gameOption.status === 'available'
-                                      ? 'bg-green-500/20 text-green-300'
-                                      : gameOption.status === 'beta'
-                                        ? 'bg-blue-500/20 text-blue-300'
-                                        : 'bg-yellow-500/20 text-yellow-300'
-                                  }`}
-                                >
-                                  {gameOption.status}
-                                </span>
-                                <span className='text-white/60'>⭐ {gameOption.rating}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className='text-center mt-6'>
-                        <button
-                          onClick={() => setShowGameSelector(false)}
-                          className='px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition-all duration-300'
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
+            {/* Game Selector Modal */}
+            {showGameSelector && (
+              <div className='fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
+                <div className='bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-white/20 shadow-2xl max-w-4xl w-full p-8 max-h-[80vh] overflow-y-auto'>
+                  <div className='text-center mb-6'>
+                    <h2 className='text-3xl font-bold text-white mb-2'>🎮 Game Library</h2>
+                    <p className='text-white/70'>Select your next adventure</p>
                   </div>
-                )}
 
-                {/* EPIC XBOX-STYLE LOADING CONSOLE */}
-                <XboxStyleConsole
-                  loadingState={loadingState}
-                  loadingProgress={loadingProgress}
-                  gameTitle={game.title}
-                />
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                    {Object.values(gameLibrary || {}).map(gameOption => (
+                      <div
+                        key={gameOption.id}
+                        onClick={() => handleGameSelect(gameOption.id)}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                          gameOption.id === selectedGame
+                            ? 'border-cyan-400 bg-cyan-500/10'
+                            : 'border-white/20 bg-white/5 hover:border-cyan-400/50 hover:bg-cyan-500/5'
+                        }`}
+                      >
+                        <div className='text-center'>
+                          <div className='text-4xl mb-2'>{gameOption.icon}</div>
+                          <h3 className='font-bold text-white mb-1'>{gameOption.title}</h3>
+                          <p className='text-white/70 text-sm mb-2'>{gameOption.subtitle}</p>
+                          <div className='flex items-center justify-center space-x-2 text-xs'>
+                            <span
+                              className={`px-2 py-1 rounded-full ${
+                                gameOption.status === 'available'
+                                  ? 'bg-green-500/20 text-green-300'
+                                  : gameOption.status === 'beta'
+                                    ? 'bg-blue-500/20 text-blue-300'
+                                    : 'bg-yellow-500/20 text-yellow-300'
+                              }`}
+                            >
+                              {gameOption.status}
+                            </span>
+                            <span className='text-white/60'>⭐ {gameOption.rating}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Game Ready Screen */}
-                {loadingState === 'ready' && (
-                  <div className='space-y-12 mt-10'>
-                    {/* Game Header */}
-                    <div className='text-center'>
-                      {/* <div className="flex justify-center mb-6">
+                  <div className='text-center mt-6'>
+                    <button
+                      onClick={() => setShowGameSelector(false)}
+                      className='px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition-all duration-300'
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* EPIC XBOX-STYLE LOADING CONSOLE */}
+            <XboxStyleConsole
+              loadingState={loadingState}
+              loadingProgress={loadingProgress}
+              gameTitle={game.title}
+            />
+
+            {/* Game Ready Screen */}
+            {loadingState === 'ready' && (
+              <div className='space-y-12 mt-10'>
+                {/* Game Header */}
+                <div className='text-center'>
+                  {/* <div className="flex justify-center mb-6">
                         <div className="text-8xl animate-pulse">{game.icon}</div>
                       </div> */}
 
-                      <h1 className='text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4'>
-                        {game.title}
-                      </h1>
+                  <h1 className='text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4'>
+                    {game.title}
+                  </h1>
 
-                      <h2 className='text-2xl md:text-3xl font-semibold text-white/90 mb-6'>
-                        {game.subtitle}
-                      </h2>
+                  <h2 className='text-2xl md:text-3xl font-semibold text-white/90 mb-6'>
+                    {game.subtitle}
+                  </h2>
 
-                      <p className='text-lg text-white/80 max-w-3xl mx-auto leading-relaxed'>
-                        {game.description}
-                      </p>
-                    </div>
+                  <p className='text-lg text-white/80 max-w-3xl mx-auto leading-relaxed'>
+                    {game.description}
+                  </p>
+                </div>
 
-                    {/* Game Information Grid */}
-                    <div className='grid md:grid-cols-2 gap-8'>
-                      {/* Game Details */}
-                      <div className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'>
-                        <h3 className='text-2xl font-bold text-white mb-6'>🎮 Game Details</h3>
+                {/* Game Information Grid */}
+                <div className='grid md:grid-cols-2 gap-8'>
+                  {/* Game Details */}
+                  <div className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'>
+                    <h3 className='text-2xl font-bold text-white mb-6'>🎮 Game Details</h3>
 
-                        <div className='space-y-4'>
-                          <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                            <span className='text-white/70'>Difficulty:</span>
-                            <span className='text-white font-semibold'>{game.difficulty}</span>
-                          </div>
-
-                          <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                            <span className='text-white/70'>Duration:</span>
-                            <span className='text-white font-semibold'>{game.estimatedTime}</span>
-                          </div>
-
-                          <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                            <span className='text-white/70'>Rewards:</span>
-                            <span className='text-white font-semibold'>{game.rewards}</span>
-                          </div>
-
-                          <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                            <span className='text-white/70'>Players:</span>
-                            <span className='text-white font-semibold'>
-                              {game.currentPlayers.toLocaleString()}
-                            </span>
-                          </div>
-
-                          <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                            <span className='text-white/70'>Rating:</span>
-                            <span className='text-white font-semibold'>⭐ {game.rating}</span>
-                          </div>
-                        </div>
+                    <div className='space-y-4'>
+                      <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
+                        <span className='text-white/70'>Difficulty:</span>
+                        <span className='text-white font-semibold'>{game.difficulty}</span>
                       </div>
 
-                      {/* Technologies & Features */}
-                      <div className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'>
-                        <h3 className='text-2xl font-bold text-white mb-6'>⚡ Technologies</h3>
-
-                        <div className='space-y-4'>
-                          <div>
-                            <h4 className='text-white/80 font-semibold mb-2'>Core Technologies:</h4>
-                            <div className='flex flex-wrap gap-2'>
-                              {game.technologies.map((tech, index) => (
-                                <span
-                                  key={index}
-                                  className='px-3 py-1 bg-cyan-500/20 text-cyan-300 text-sm rounded-full border border-cyan-400/30'
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div>
-                            <h4 className='text-white/80 font-semibold mb-2'>Key Features:</h4>
-                            <div className='flex flex-wrap gap-2'>
-                              {game.features.map((feature, index) => (
-                                <span
-                                  key={index}
-                                  className='px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full border border-purple-400/30'
-                                >
-                                  {feature}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
+                      <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
+                        <span className='text-white/70'>Duration:</span>
+                        <span className='text-white font-semibold'>{game.estimatedTime}</span>
                       </div>
-                    </div>
 
-                    {/* Development Team */}
-                    <div
-                      className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'
-                      style={{ marginBottom: '-100px' }}
-                    >
-                      <h3 className='text-2xl font-bold text-white mb-6 text-center'>
-                        👨‍💻 Development Team
-                      </h3>
+                      <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
+                        <span className='text-white/70'>Rewards:</span>
+                        <span className='text-white font-semibold'>{game.rewards}</span>
+                      </div>
 
-                      <div className='grid md:grid-cols-3 gap-6'>
-                        {game.developers.map((dev, index) => (
-                          <div
-                            key={index}
-                            className='text-center p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-cyan-400/30 transition-all duration-300'
-                          >
-                            <div className='w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden border-2 border-cyan-400/30'>
-                              <Image
-                                src={dev.avatar}
-                                alt={dev.name}
-                                width={64}
-                                height={64}
-                                className='w-full h-full object-cover'
-                              />
-                            </div>
-                            <h4 className='text-white font-semibold mb-2'>{dev.name}</h4>
-                            <p className='text-cyan-300 text-sm'>{dev.role}</p>
-                          </div>
-                        ))}
+                      <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
+                        <span className='text-white/70'>Players:</span>
+                        <span className='text-white font-semibold'>
+                          {game.currentPlayers.toLocaleString()}
+                        </span>
+                      </div>
+
+                      <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
+                        <span className='text-white/70'>Rating:</span>
+                        <span className='text-white font-semibold'>⭐ {game.rating}</span>
                       </div>
                     </div>
                   </div>
-                )}
+
+                  {/* Technologies & Features */}
+                  <div className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'>
+                    <h3 className='text-2xl font-bold text-white mb-6'>⚡ Technologies</h3>
+
+                    <div className='space-y-4'>
+                      <div>
+                        <h4 className='text-white/80 font-semibold mb-2'>Core Technologies:</h4>
+                        <div className='flex flex-wrap gap-2'>
+                          {game.technologies.map((tech, index) => (
+                            <span
+                              key={index}
+                              className='px-3 py-1 bg-cyan-500/20 text-cyan-300 text-sm rounded-full border border-cyan-400/30'
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className='text-white/80 font-semibold mb-2'>Key Features:</h4>
+                        <div className='flex flex-wrap gap-2'>
+                          {game.features.map((feature, index) => (
+                            <span
+                              key={index}
+                              className='px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full border border-purple-400/30'
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Development Team */}
+                <div
+                  className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8'
+                  style={{ marginBottom: '-100px' }}
+                >
+                  <h3 className='text-2xl font-bold text-white mb-6 text-center'>
+                    👨‍💻 Development Team
+                  </h3>
+
+                  <div className='grid md:grid-cols-3 gap-6'>
+                    {game.developers.map((dev, index) => (
+                      <div
+                        key={index}
+                        className='text-center p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-cyan-400/30 transition-all duration-300'
+                      >
+                        <div className='w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden border-2 border-cyan-400/30'>
+                          <Image
+                            src={dev.avatar}
+                            alt={dev.name}
+                            width={64}
+                            height={64}
+                            className='w-full h-full object-cover'
+                          />
+                        </div>
+                        <h4 className='text-white font-semibold mb-2'>{dev.name}</h4>
+                        <p className='text-cyan-300 text-sm'>{dev.role}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </main>
-
-          {/* Nexus Prime */}
-          <NexusPrime currentPage='mini-games' />
-
-          <Footer />
+            )}
+          </div>
         </div>
+      </main>
+
+      {/* Nexus Prime */}
+      <NexusPrime currentPage='mini-games' />
+
+      <Footer />
+    </div>
   );
 }

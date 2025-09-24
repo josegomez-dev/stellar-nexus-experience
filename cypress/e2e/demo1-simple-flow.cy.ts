@@ -1,5 +1,6 @@
 describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
-  const TEST_WALLET_ADDRESS = 'GABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+  const TEST_WALLET_ADDRESS =
+    'GABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
 
   beforeEach(() => {
     cy.visit('/demos');
@@ -21,7 +22,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button[title*="Connect"]',
       'button:contains("🔐")',
       'button:contains("Wallet")',
-      'button:contains("Connect")'
+      'button:contains("Connect")',
     ]).then($el => {
       if ($el.is(':visible')) {
         cy.wrap($el).click({ force: true });
@@ -40,7 +41,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'input[placeholder*="Stellar"]',
       'input[placeholder*="address"]',
       'input[placeholder*="G..."]',
-      'input[type="text"]'
+      'input[type="text"]',
     ]).humanType(TEST_WALLET_ADDRESS);
     cy.slowDown(1000);
 
@@ -48,7 +49,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
     cy.findElement([
       'button:contains("Connect")',
       'button:contains("Manual")',
-      'button:contains("Address")'
+      'button:contains("Address")',
     ]).click({ force: true });
     cy.waitForAnimation(3000);
     cy.log('✅ Connected wallet with manual address');
@@ -60,13 +61,13 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       '[data-testid="demo-card"]',
       '.card',
       'div:contains("Baby Steps")',
-      'div:contains("Hello Milestone")'
+      'div:contains("Hello Milestone")',
     ]).within(() => {
       cy.findElement([
         'button:contains("LAUNCH")',
         'button:contains("Launch")',
         'button:contains("Start")',
-        'button:contains("Demo")'
+        'button:contains("Demo")',
       ]).click({ force: true });
     });
     cy.waitForAnimation(3000);
@@ -78,7 +79,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Start Demo")',
       'button:contains("Begin")',
       'button:contains("Start")',
-      'button:contains("Launch")'
+      'button:contains("Launch")',
     ]).click({ force: true });
     cy.waitForAnimation(3000);
     cy.log('✅ Started demo in immersive modal');
@@ -95,7 +96,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Initialize")',
       'button:contains("Create")',
       'button:contains("Setup")',
-      '.initialize-escrow-button'
+      '.initialize-escrow-button',
     ]).click({ force: true });
     cy.waitForAnimation(4000);
     cy.pauseAndLog('Initialize Escrow step completed. Press SPACE to continue...');
@@ -105,7 +106,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Fund")',
       'button:contains("Deposit")',
       'button:contains("Add Funds")',
-      '.fund-escrow-button'
+      '.fund-escrow-button',
     ]).click({ force: true });
     cy.waitForAnimation(4000);
     cy.pauseAndLog('Fund Escrow step completed. Press SPACE to continue...');
@@ -115,7 +116,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Complete")',
       'button:contains("Finish")',
       'button:contains("Done")',
-      '.complete-milestone-button'
+      '.complete-milestone-button',
     ]).click({ force: true });
     cy.waitForAnimation(4000);
     cy.pauseAndLog('Complete Milestone step completed. Press SPACE to continue...');
@@ -125,7 +126,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Approve")',
       'button:contains("Accept")',
       'button:contains("Confirm")',
-      '.approve-milestone-button'
+      '.approve-milestone-button',
     ]).click({ force: true });
     cy.waitForAnimation(4000);
     cy.pauseAndLog('Approve Milestone step completed. Press SPACE to continue...');
@@ -135,7 +136,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Release")',
       'button:contains("Withdraw")',
       'button:contains("Transfer")',
-      '.release-funds-button'
+      '.release-funds-button',
     ]).click({ force: true });
     cy.waitForAnimation(4000);
     cy.pauseAndLog('Release Funds step completed. Press SPACE to continue...');
@@ -150,7 +151,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'h2:contains("Completed")',
       'h3:contains("Completed")',
       'div:contains("Successfully")',
-      'div:contains("Funds Released")'
+      'div:contains("Funds Released")',
     ]).then(() => {
       cy.log('✅ Demo completion detected');
     });
@@ -165,7 +166,7 @@ describe('Demo 1 - Simple Flow (Slow & Visible)', () => {
       'button:contains("Finish Demo")',
       'button:contains("Done")',
       'button:contains("Close")',
-      'button:contains("Submit")'
+      'button:contains("Submit")',
     ]).click({ force: true });
     cy.waitForAnimation(2000);
     cy.log('✅ Clicked final completion button');

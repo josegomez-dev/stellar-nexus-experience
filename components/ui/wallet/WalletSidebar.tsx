@@ -107,10 +107,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     // Commented out auto-show logic to prevent annoying popup
     // if (isOpen && !isConnected && !hasShownWeb3Modal && !isFreighterAvailable && !account) {
     //   // Check if user has seen onboarding before
-    //   const hasSeenOnboardingBefore = typeof window !== 'undefined' 
+    //   const hasSeenOnboardingBefore = typeof window !== 'undefined'
     //     ? localStorage.getItem('hasSeenOnboarding') === 'true'
     //     : false;
-    //   
+    //
     //   // Only show for completely new users
     //   if (!hasSeenOnboardingBefore) {
     //     const timer = setTimeout(() => {
@@ -123,7 +123,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     //     setHasShownWeb3Modal(true);
     //   }
     // }
-    
+
     // Just mark as shown to prevent any future auto-show attempts
     setHasShownWeb3Modal(true);
   }, [isOpen, isConnected, hasShownWeb3Modal, isFreighterAvailable, account]);
@@ -303,7 +303,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </p>
                 </div>
               )}
-              
 
               <div className={`space-y-3 ${!isExpanded ? 'space-y-2' : ''}`}>
                 {/* Freighter Connect Button */}
@@ -367,11 +366,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </button>
                 )}
 
-
                 {/* Multi-Wallet Button */}
                 {isExpanded && (
                   <div className='space-y-2'>
-                    
                     <button
                       onClick={async () => {
                         setIsConnecting(true);
@@ -394,10 +391,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     >
                       {isConnecting ? '🔄 Opening...' : '🎯 Multi-Wallet'}
                     </button>
-                    
                   </div>
                 )}
-               
+
                 {/* Manual Address Input */}
                 {isExpanded && (
                   <div className='space-y-2'>
@@ -546,7 +542,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       >
                         <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
                         <div className='absolute top-1 right-1'>
-                          <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                          <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>
+                            🔒
+                          </span>
                         </div>
                       </div>
                     )}
@@ -575,43 +573,41 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </Tooltip>
                 </div>
               </div>
-<br />
-<hr />
-<br />
-               {/* Web3 Help Button */}
- {isExpanded && !isFreighterAvailable && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setShowFreighterGuide(true)}
-                      className='w-full p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 text-orange-200 rounded-lg transition-all duration-300 hover:from-orange-500/30 hover:to-red-500/30 hover:border-orange-400/50'
-                    >
-                      <div className='flex items-center justify-center space-x-2'>
-                        <span className='text-lg'>🔗</span>
-                        <span className='text-sm font-medium'>Install Freighter Wallet</span>
-                      </div>
-                    </button>
-                    
-                    <button
-                      onClick={() => setShowWeb3Modal(true)}
-                      className='w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
-                    >
-                      <div className='flex items-center justify-center space-x-2'>
-                        <div className='bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'>
-                          <img
-                            src='/images/character/nexus-prime-chat.png'
-                            className='rounded-full '
-                            alt='STELLAR NEXUS'
-                            width={50}
-                            height={50}
-                          />
-                        </div>
-                        <span className='text-sm font-medium'>New to Web3? Start Here!</span>
-                      </div>
-                    </button>
-                  </div>
-                )}
+              <br />
+              <hr />
+              <br />
+              {/* Web3 Help Button */}
+              {isExpanded && !isFreighterAvailable && (
+                <div className='space-y-2'>
+                  <button
+                    onClick={() => setShowFreighterGuide(true)}
+                    className='w-full p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 text-orange-200 rounded-lg transition-all duration-300 hover:from-orange-500/30 hover:to-red-500/30 hover:border-orange-400/50'
+                  >
+                    <div className='flex items-center justify-center space-x-2'>
+                      <span className='text-lg'>🔗</span>
+                      <span className='text-sm font-medium'>Install Freighter Wallet</span>
+                    </div>
+                  </button>
 
-
+                  <button
+                    onClick={() => setShowWeb3Modal(true)}
+                    className='w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
+                  >
+                    <div className='flex items-center justify-center space-x-2'>
+                      <div className='bg-transparent flex items-center justify-center border-2 border-white/20 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'>
+                        <img
+                          src='/images/character/nexus-prime-chat.png'
+                          className='rounded-full '
+                          alt='STELLAR NEXUS'
+                          width={50}
+                          height={50}
+                        />
+                      </div>
+                      <span className='text-sm font-medium'>New to Web3? Start Here!</span>
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* Network Info - Only show when expanded */}
               {isExpanded && (
@@ -753,7 +749,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         className='w-5 h-5'
                       />
                       <div className='absolute top-1 right-1'>
-                        <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>🔒</span>
+                        <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>
+                          🔒
+                        </span>
                       </div>
                     </div>
                   )}
@@ -954,7 +952,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
             </button>
           </>
         )}
-
       </div>
 
       {/* Wallet Connection Banner */}
@@ -1060,9 +1057,12 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
       {/* Web3 Onboarding Modal */}
       <Web3OnboardingModal isOpen={showWeb3Modal} onClose={() => setShowWeb3Modal(false)} />
-      
+
       {/* Freighter Installation Guide */}
-      <FreighterInstallationGuide isOpen={showFreighterGuide} onClose={() => setShowFreighterGuide(false)} />
+      <FreighterInstallationGuide
+        isOpen={showFreighterGuide}
+        onClose={() => setShowFreighterGuide(false)}
+      />
     </>
   );
 };

@@ -3,7 +3,7 @@ import { Badge } from './firebase-types';
 
 export const BADGE_CONFIG: Record<string, Badge> = {
   // Welcome and Onboarding Badges
-  'welcome_explorer': {
+  welcome_explorer: {
     id: 'welcome_explorer',
     name: 'Welcome Explorer',
     description: 'Joined the Nexus Experience community',
@@ -15,14 +15,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 1,
-        description: 'Create account and connect wallet'
-      }
+        description: 'Create account and connect wallet',
+      },
     ],
     createdAt: new Date(),
   },
 
   // Demo Completion Badges
-  'first_demo': {
+  first_demo: {
     id: 'first_demo',
     name: 'First Steps',
     description: 'Completed your first demo',
@@ -34,13 +34,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete any demo'
-      }
+        description: 'Complete any demo',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'demo_master': {
+  demo_master: {
     id: 'demo_master',
     name: 'Demo Master',
     description: 'Completed all available demos',
@@ -52,8 +52,8 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 4,
-        description: 'Complete all 4 demos'
-      }
+        description: 'Complete all 4 demos',
+      },
     ],
     createdAt: new Date(),
   },
@@ -71,8 +71,8 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Micro Task Marketplace demo'
-      }
+        description: 'Complete Micro Task Marketplace demo',
+      },
     ],
     createdAt: new Date(),
   },
@@ -89,8 +89,8 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Dispute Resolution demo'
-      }
+        description: 'Complete Dispute Resolution demo',
+      },
     ],
     createdAt: new Date(),
   },
@@ -107,8 +107,8 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Micro Task Marketplace demo'
-      }
+        description: 'Complete Micro Task Marketplace demo',
+      },
     ],
     createdAt: new Date(),
   },
@@ -125,14 +125,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 3,
-        description: 'Complete demos 1, 3, and 4'
-      }
+        description: 'Complete demos 1, 3, and 4',
+      },
     ],
     createdAt: new Date(),
   },
 
   // Level-Based Badges
-  'level_5_explorer': {
+  level_5_explorer: {
     id: 'level_5_explorer',
     name: 'Level 5 Explorer',
     description: 'Reached level 5 through active participation',
@@ -144,13 +144,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 400,
-        description: 'Reach level 5 (400+ XP)'
-      }
+        description: 'Reach level 5 (400+ XP)',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'level_10_veteran': {
+  level_10_veteran: {
     id: 'level_10_veteran',
     name: 'Level 10 Veteran',
     description: 'Became a true veteran of the platform',
@@ -162,13 +162,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 900,
-        description: 'Reach level 10 (900+ XP)'
-      }
+        description: 'Reach level 10 (900+ XP)',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'level_20_legend': {
+  level_20_legend: {
     id: 'level_20_legend',
     name: 'Level 20 Legend',
     description: 'Achieved legendary status on the platform',
@@ -180,14 +180,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 1900,
-        description: 'Reach level 20 (1900+ XP)'
-      }
+        description: 'Reach level 20 (1900+ XP)',
+      },
     ],
     createdAt: new Date(),
   },
 
   // XP Milestone Badges
-  'xp_collector': {
+  xp_collector: {
     id: 'xp_collector',
     name: 'XP Collector',
     description: 'Collected 500+ experience points',
@@ -199,13 +199,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 500,
-        description: 'Accumulate 500+ XP'
-      }
+        description: 'Accumulate 500+ XP',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'xp_master': {
+  xp_master: {
     id: 'xp_master',
     name: 'XP Master',
     description: 'Mastered the art of earning experience',
@@ -217,13 +217,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 1000,
-        description: 'Accumulate 1000+ XP'
-      }
+        description: 'Accumulate 1000+ XP',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'xp_legend': {
+  xp_legend: {
     id: 'xp_legend',
     name: 'XP Legend',
     description: 'Became a legend through massive XP accumulation',
@@ -235,14 +235,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'xp_threshold',
         value: 2000,
-        description: 'Accumulate 2000+ XP'
-      }
+        description: 'Accumulate 2000+ XP',
+      },
     ],
     createdAt: new Date(),
   },
 
   // Engagement Badges
-  'feedback_champion': {
+  feedback_champion: {
     id: 'feedback_champion',
     name: 'Feedback Champion',
     description: 'Provided valuable feedback on multiple demos',
@@ -254,13 +254,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 3,
-        description: 'Submit feedback for 3+ demos'
-      }
+        description: 'Submit feedback for 3+ demos',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'clap_enthusiast': {
+  clap_enthusiast: {
     id: 'clap_enthusiast',
     name: 'Clap Enthusiast',
     description: 'Showed appreciation for great demos',
@@ -272,13 +272,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 5,
-        description: 'Clap for 5+ demos'
-      }
+        description: 'Clap for 5+ demos',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'streak_master': {
+  streak_master: {
     id: 'streak_master',
     name: 'Streak Master',
     description: 'Maintained activity for 7 consecutive days',
@@ -290,14 +290,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'streak',
         value: 7,
-        description: 'Maintain 7-day activity streak'
-      }
+        description: 'Maintain 7-day activity streak',
+      },
     ],
     createdAt: new Date(),
   },
 
   // Special Badges
-  'early_adopter': {
+  early_adopter: {
     id: 'early_adopter',
     name: 'Early Adopter',
     description: 'One of the first users on the platform',
@@ -309,13 +309,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 1,
-        description: 'Join in the first 100 users'
-      }
+        description: 'Join in the first 100 users',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'bug_hunter': {
+  bug_hunter: {
     id: 'bug_hunter',
     name: 'Bug Hunter',
     description: 'Helped improve the platform by reporting issues',
@@ -327,13 +327,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 1,
-        description: 'Report a significant bug or issue'
-      }
+        description: 'Report a significant bug or issue',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'community_helper': {
+  community_helper: {
     id: 'community_helper',
     name: 'Community Helper',
     description: 'Helped other users and contributed to the community',
@@ -345,14 +345,14 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 1,
-        description: 'Make significant community contributions'
-      }
+        description: 'Make significant community contributions',
+      },
     ],
     createdAt: new Date(),
   },
 
   // Time-Based Badges
-  'speed_demon': {
+  speed_demon: {
     id: 'speed_demon',
     name: 'Speed Demon',
     description: 'Completed a demo in record time',
@@ -364,13 +364,13 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'custom',
         value: 1,
-        description: 'Complete a demo in under 2 minutes'
-      }
+        description: 'Complete a demo in under 2 minutes',
+      },
     ],
     createdAt: new Date(),
   },
 
-  'marathon_runner': {
+  marathon_runner: {
     id: 'marathon_runner',
     name: 'Marathon Runner',
     description: 'Spent over 2 hours learning on the platform',
@@ -382,8 +382,8 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'time_spent',
         value: 120,
-        description: 'Spend 120+ minutes on the platform'
-      }
+        description: 'Spend 120+ minutes on the platform',
+      },
     ],
     createdAt: new Date(),
   },

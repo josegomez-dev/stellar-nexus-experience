@@ -22,8 +22,10 @@ export const useBadgeAnimation = () => {
     // During SSR or if provider is missing, return a no-op function
     return {
       showBadgeAnimation: () => {
-        console.warn('useBadgeAnimation: BadgeAnimationProvider not found, badge animation skipped');
-      }
+        console.warn(
+          'useBadgeAnimation: BadgeAnimationProvider not found, badge animation skipped'
+        );
+      },
     };
   }
   return context;
@@ -50,14 +52,14 @@ export const BadgeAnimationProvider: React.FC<BadgeAnimationProviderProps> = ({ 
   };
 
   return (
-    <BadgeAnimationContext.Provider 
-      value={{ 
-        showBadgeAnimation, 
-        isAnimationVisible: isVisible 
+    <BadgeAnimationContext.Provider
+      value={{
+        showBadgeAnimation,
+        isAnimationVisible: isVisible,
       }}
     >
       {children}
-      
+
       {/* Badge Animation Overlay */}
       {animationState && (
         <BadgeEarnedAnimation

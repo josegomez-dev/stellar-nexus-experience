@@ -5,14 +5,14 @@ export const API_ENDPOINTS = {
     TESTNET: 'https://horizon-testnet.stellar.org',
     MAINNET: 'https://horizon.stellar.org',
   },
-  
+
   // Stellar Expert Explorer URLs
   STELLAR_EXPERT: {
     BASE_URL: 'https://stellar.expert/explorer',
     TESTNET_SUFFIX: 'testnet',
     MAINNET_SUFFIX: 'public',
   },
-  
+
   // External Services
   EXTERNAL: {
     FREIGHTER_APP: 'https://freighter.app',
@@ -27,8 +27,8 @@ export const API_ENDPOINTS = {
 // API Response Timeouts
 export const API_TIMEOUTS = {
   DEFAULT: 30000, // 30 seconds
-  QUICK: 5000,   // 5 seconds
-  LONG: 60000,   // 60 seconds
+  QUICK: 5000, // 5 seconds
+  LONG: 60000, // 60 seconds
 } as const;
 
 // API Retry Configuration

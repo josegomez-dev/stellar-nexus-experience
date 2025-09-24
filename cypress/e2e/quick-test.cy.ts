@@ -3,7 +3,7 @@ describe('Quick Test - Verify Fixes', () => {
     cy.visit('/demos', { timeout: 30000 });
     cy.get('h1', { timeout: 10000 }).should('be.visible');
     cy.log('✅ Demos page loaded successfully');
-    
+
     // Test finding wallet button without hover issues
     cy.get('body').then($body => {
       const walletSelectors = [
@@ -11,7 +11,7 @@ describe('Quick Test - Verify Fixes', () => {
         'button[title*="Connect"]',
         'button:contains("🔐")',
         'button:contains("Wallet")',
-        'button:contains("Connect")'
+        'button:contains("Connect")',
       ];
 
       let foundButton = false;
@@ -41,7 +41,7 @@ describe('Quick Test - Verify Fixes', () => {
         '[data-testid="demo-card"]',
         '.card',
         'div:contains("Baby Steps")',
-        'div:contains("Hello Milestone")'
+        'div:contains("Hello Milestone")',
       ];
 
       let foundDemo = false;

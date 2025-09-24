@@ -7,20 +7,26 @@ export default defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     viewportWidth: 1280,
     viewportHeight: 720,
-    video: true,
+    video: false, // Disable video for CI
     screenshotOnRunFailure: true,
-    // Slower timeouts for better visibility
-    defaultCommandTimeout: 20000,
-    requestTimeout: 20000,
-    responseTimeout: 20000,
-    pageLoadTimeout: 60000,
-    // Slow down test execution for visibility
-    execTimeout: 120000,
-    taskTimeout: 120000,
-    // Additional timeout settings
-    videoCompression: 32,
+    // Optimized timeouts for CI
+    defaultCommandTimeout: 10000,
+    requestTimeout: 10000,
+    responseTimeout: 10000,
+    pageLoadTimeout: 30000,
+    execTimeout: 60000,
+    taskTimeout: 60000,
+    // CI-friendly settings
+    videoCompression: false,
+    chromeWebSecurity: false,
     setupNodeEvents(on, config) {
       // implement node event listeners here
+      on('task', {
+        log(message) {
+          console.log(message);
+          return null;
+        },
+      });
     },
   },
   component: {

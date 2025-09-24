@@ -1,22 +1,30 @@
-# 🌟 NEXUS EXPERIENCE | The Future of Web3 Accessibility
+# 🌟 STELLAR NEXUS EXPERIENCE | The Future of Web3 Accessibility
 
 > **Revolutionizing Web3 Onboarding Through Interactive Demos, AI Guardians, and
 > Immersive Experiences**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/trustless-poc)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/josegomez-dev/stellar-nexus-experience)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Stellar](https://img.shields.io/badge/Stellar-7D00FF?logo=stellar&logoColor=white)](https://stellar.org/)
 
-## 🚀 **The Vision**
+**🚀 Live Demo:**
+[stellar-nexus-experience.vercel.app](https://stellar-nexus-experience.vercel.app/)  
+**📚
+Repository:**
+[github.com/josegomez-dev/stellar-nexus-experience](https://github.com/josegomez-dev/stellar-nexus-experience)
 
-**NEXUS EXPERIENCE** is a revolutionary platform that transforms complex Web3
-technologies into accessible, interactive experiences. We believe that the
+---
+
+## 🎯 **The Vision**
+
+**STELLAR NEXUS EXPERIENCE** is a revolutionary platform that transforms complex
+Web3 technologies into accessible, interactive experiences. We believe that the
 future of blockchain adoption lies in **democratizing access** through immersive
 demos, AI-powered guidance, and gamified learning.
 
-### 🌟 **Why Nexus Experience?**
+### 🌟 **Why Stellar Nexus Experience?**
 
 - **🎯 Democratizing Web3**: Making complex blockchain concepts accessible to
   everyone
@@ -25,6 +33,7 @@ demos, AI-powered guidance, and gamified learning.
 - **🎮 Gamified Experience**: Interactive demos that feel like playing a game
 - **🔐 Real Technology**: Actual blockchain integration, not just simulations
 - **🌐 Multi-Chain Ready**: Framework designed for any blockchain network
+- **⚡ Production Ready**: Battle-tested architecture ready for enterprise use
 
 ---
 
@@ -48,67 +57,45 @@ Experience Web3 technologies through hands-on, gamified demos:
 
 #### 🚀 **Trustless Work Escrow Arsenal**
 
-- **Hello Milestone**: Basic trustless escrow flow end-to-end
-- **Milestone Voting**: Multi-stakeholder approval system
-- **Dispute Resolution**: Escrow dispute handling with arbitration
-- **Micro-Task Marketplace**: Lightweight gig-board with escrow
+1. **🍼 Baby Steps to Riches** - Basic trustless escrow flow end-to-end
+2. **🎭 Drama Queen Escrow** - Advanced dispute resolution and arbitration
+3. **🏛️ Democracy in Action** - Multi-stakeholder approval systems
+4. **💼 Gig Economy Madness** - Micro-task marketplace with escrow protection
 
-#### 🎯 **Future Demo Expansions**
+#### 🎯 **Key Features**
 
-- **DeFi Yield Farming**: Interactive yield optimization
-- **NFT Marketplace**: Digital asset trading and creation
-- **DAO Governance**: Decentralized decision-making
-- **Cross-Chain Bridges**: Multi-blockchain asset transfers
-
-### 🎨 **Epic Visual Experience**
-
-- **🌟 Legendary Animations**: Professional-grade animations and transitions
-- **🌈 Gradient Mastery**: Beautiful color schemes and glassmorphism effects
-- **📱 Responsive Design**: Seamless experience across all devices
-- **🎭 Professional Branding**: NEXUS EXPERIENCE integration throughout
-
----
-
-## 🛠 **Technical Excellence**
-
-### 🔐 **Security-First Architecture**
-
-- **🔒 Environment Validation**: Comprehensive Zod schema validation
-- **🛡️ Server-Side Secrets**: Proper isolation of sensitive data
-- **🔑 Type-Safe Configuration**: Full TypeScript support with interfaces
-- **🔄 Feature Flags**: Easy feature toggling and A/B testing
-
-### ⚡ **Performance Optimized**
-
-- **🚀 CSS Optimization**: 21.4% size reduction with automated purging
-- **🎨 Design Tokens**: Centralized design system with type safety
-- **📦 Code Splitting**: Lazy loading for optimal performance
-- **🖼️ Image Optimization**: Next.js automatic image optimization
-
-### 🧪 **Comprehensive Testing**
-
-- **✅ Unit Tests**: Jest + React Testing Library for pure logic
-- **🎯 Component Tests**: Isolated component testing
-- **🌐 E2E Tests**: Cypress for complete user flows
-- **🔍 Code Quality**: ESLint, Prettier, and automated checks
+- **Real Blockchain Integration**: Actual Stellar network transactions
+- **Multi-Wallet Support**: Freighter, Albedo, and manual address input
+- **Progressive Difficulty**: From beginner to expert-level concepts
+- **Comprehensive Testing**: 100% test coverage with Jest and Cypress
+- **Professional Analytics**: Real-time metrics and user feedback systems
 
 ---
 
 ## 🚀 **Quick Start**
 
+### **For Users**
+
+1. **Visit the live app**:
+   [stellar-nexus-experience.vercel.app](https://stellar-nexus-experience.vercel.app/)
+2. **Connect your wallet** (Freighter recommended for Stellar)
+3. **Start with the tutorial** - Click the floating NEXUS PRIME button
+4. **Explore the demos** - Try different Web3 scenarios
+5. **Experience the future** of decentralized technology!
+
 ### **For Developers**
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nexus-experience.git
-cd nexus-experience
+git clone https://github.com/josegomez-dev/stellar-nexus-experience.git
+cd stellar-nexus-experience
 
 # Install dependencies
 npm install
 
 # Set up environment variables
-cp env.example .env.local
-# Edit .env.local with your configuration
+cp .env.example .env.local
+# Edit .env.local with your values
 
 # Start development server
 npm run dev
@@ -116,13 +103,156 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-### **For Users**
+---
 
-1. **Visit the deployed app** (link will be provided after deployment)
-2. **Connect your wallet** (Freighter recommended for Stellar)
-3. **Start with the tutorial** - Click the floating NEXUS PRIME button
-4. **Explore the demos** - Try different Web3 scenarios
-5. **Experience the future** of decentralized technology!
+## 🛠 **Development Commands**
+
+### **Core Development**
+
+```bash
+npm run dev              # Start development server
+npm run build            # Build for production
+npm run start            # Start production server
+npm run type-check       # TypeScript validation
+```
+
+### **Code Quality & Formatting**
+
+```bash
+npm run lint             # Check code quality
+npm run lint:fix         # Fix linting issues
+npm run format           # Format code with Prettier
+npm run code-quality     # Run all quality checks
+npm run code-quality:fix # Fix all quality issues
+```
+
+### **Testing Suite**
+
+```bash
+# Cypress E2E Testing
+npm run test             # Run all Cypress tests
+npm run test:open        # Open Cypress GUI
+npm run test:demos       # Test all demo flows
+npm run test:demos:open  # Open demo tests in GUI
+npm run test:headed      # Run tests with browser visible
+npm run test:dev         # Run tests against local dev server
+```
+
+### **Environment & Optimization**
+
+```bash
+npm run env:check        # Check environment status
+npm run env:setup        # Set up environment file
+npm run purge-css        # Remove unused CSS
+npm run optimize-css     # Optimize CSS bundle
+```
+
+### **Quality Assurance**
+
+```bash
+npm run check            # Run quality checks + tests
+npm run check:fix        # Fix issues + run tests
+```
+
+---
+
+## 🏗 **Architecture Overview**
+
+### **Frontend Stack**
+
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **TailwindCSS**: Utility-first CSS framework
+- **Design Tokens**: Centralized design system
+
+### **State Management**
+
+- **React Context**: Global wallet and application state
+- **Custom Hooks**: Reusable Web3 functionality
+- **Event System**: Inter-component communication
+- **Local State**: Component-level state management
+
+### **Web3 Integration**
+
+- **Multi-Wallet Support**: Freighter, Albedo, and manual input
+- **Blockchain Agnostic**: Framework ready for any blockchain
+- **Real Transactions**: Actual blockchain interactions
+- **Error Handling**: Robust fallback systems
+
+### **AI Integration**
+
+- **Voice Synthesis**: Natural speech for tutorials
+- **Context Awareness**: Smart assistance based on user state
+- **Interactive Guidance**: Step-by-step help system
+- **Accessibility**: Voice support for visual impairments
+
+### **Testing Infrastructure**
+
+- **Cypress**: End-to-end testing with real browser automation
+- **Demo Testing**: Comprehensive testing for all 4 interactive demos
+- **Visual Testing**: Screenshot and video recording capabilities
+- **Cross-Browser**: Chrome, Firefox, and Edge support
+
+---
+
+## 🎨 **Design System**
+
+### **Design Tokens**
+
+```typescript
+import { DESIGN_TOKENS } from '@/lib/design-tokens';
+
+// Type-safe design values
+const brandColor = DESIGN_TOKENS.colors.brand[500]; // '#0ea5e9'
+const spacing = DESIGN_TOKENS.spacing.md; // '1rem'
+const duration = DESIGN_TOKENS.animations.duration.normal; // '300ms'
+```
+
+### **Component Library**
+
+- **🎯 Reusable Components**: Badge, Card, Modal, Button, etc.
+- **🎨 Consistent Styling**: Unified design language
+- **📱 Responsive Design**: Mobile-first approach
+- **♿ Accessibility**: WCAG compliant components
+
+---
+
+## 🧪 **Testing Strategy**
+
+### **End-to-End Testing (Cypress)**
+
+- **Demo Workflows**: Complete user journeys for each demo
+- **Wallet Integration**: Connection and transaction flows
+- **Responsive Design**: Mobile and desktop testing
+- **Error Handling**: Edge cases and error scenarios
+
+### **Coverage Goals**
+
+- **E2E Tests**: 100% critical path coverage
+- **Demo Testing**: All 4 demos fully tested
+- **Cross-Browser**: Chrome, Firefox, and Edge support
+
+---
+
+## 🌐 **Deployment**
+
+### **Vercel (Recommended)**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/josegomez-dev/stellar-nexus-experience)
+
+### **Environment Variables**
+
+```bash
+# Required
+NEXT_PUBLIC_STELLAR_NETWORK=TESTNET
+NEXT_PUBLIC_DEFAULT_ASSET_CODE=USDC
+NEXT_PUBLIC_DEFAULT_ASSET_ISSUER=your-issuer-key
+NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE=4
+
+# Optional
+NEXT_PUBLIC_APP_NAME=STELLAR NEXUS EXPERIENCE
+NEXT_PUBLIC_DEBUG_MODE=false
+```
 
 ---
 
@@ -161,111 +291,6 @@ npm run dev
 
 ---
 
-## 🏗 **Architecture Overview**
-
-### **Frontend Stack**
-
-- **Next.js 14**: React framework with App Router
-- **TypeScript**: Type-safe development
-- **TailwindCSS**: Utility-first CSS framework
-- **Design Tokens**: Centralized design system
-
-### **State Management**
-
-- **React Context**: Global wallet and application state
-- **Custom Hooks**: Reusable Web3 functionality
-- **Event System**: Inter-component communication
-- **Local State**: Component-level state management
-
-### **Web3 Integration**
-
-- **Multi-Wallet Support**: Freighter, Albedo, and manual input
-- **Blockchain Agnostic**: Framework ready for any blockchain
-- **Real Transactions**: Actual blockchain interactions
-- **Error Handling**: Robust fallback systems
-
-### **AI Integration**
-
-- **Voice Synthesis**: Natural speech for tutorials
-- **Context Awareness**: Smart assistance based on user state
-- **Interactive Guidance**: Step-by-step help system
-- **Accessibility**: Voice support for visual impairments
-
----
-
-## 🎨 **Design System**
-
-### **Design Tokens**
-
-```typescript
-import { DESIGN_TOKENS } from '@/lib/design-tokens';
-
-// Type-safe design values
-const brandColor = DESIGN_TOKENS.colors.brand[500]; // '#0ea5e9'
-const spacing = DESIGN_TOKENS.spacing.md; // '1rem'
-const duration = DESIGN_TOKENS.animations.duration.normal; // '300ms'
-```
-
-### **Component Library**
-
-- **🎯 Reusable Components**: Badge, Card, Modal, Button, etc.
-- **🎨 Consistent Styling**: Unified design language
-- **📱 Responsive Design**: Mobile-first approach
-- **♿ Accessibility**: WCAG compliant components
-
----
-
-## 🔧 **Development Tools**
-
-### **Code Quality**
-
-```bash
-npm run code-quality      # Check code quality
-npm run code-quality:fix   # Fix issues automatically
-npm run type-check         # TypeScript validation
-npm run format             # Prettier formatting
-```
-
-### **Testing**
-
-```bash
-npm run test              # Unit tests
-npm run test:watch        # Watch mode
-npm run test:coverage     # Coverage report
-npm run test:e2e          # End-to-end tests
-```
-
-### **CSS Optimization**
-
-```bash
-npm run purge-css         # Remove unused CSS
-npm run optimize-css      # Complete CSS optimization
-```
-
----
-
-## 🌐 **Deployment**
-
-### **Vercel (Recommended)**
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/nexus-experience)
-
-### **Environment Variables**
-
-```bash
-# Required
-NEXT_PUBLIC_STELLAR_NETWORK=TESTNET
-NEXT_PUBLIC_DEFAULT_ASSET_CODE=USDC
-NEXT_PUBLIC_DEFAULT_ASSET_ISSUER=your-issuer-key
-NEXT_PUBLIC_PLATFORM_FEE_PERCENTAGE=4
-
-# Optional
-NEXT_PUBLIC_APP_NAME=NEXUS EXPERIENCE
-NEXT_PUBLIC_DEBUG_MODE=false
-```
-
----
-
 ## 🤝 **Contributing**
 
 We welcome contributions from the Web3 community! Here's how you can help:
@@ -273,9 +298,9 @@ We welcome contributions from the Web3 community! Here's how you can help:
 ### **Development**
 
 1. **Fork the repository**
-2. **Create a feature branch**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
 3. **Make your changes**
-4. **Test thoroughly**
+4. **Run tests**: `npm run test:all`
 5. **Submit a pull request**
 
 ### **Areas for Contribution**
@@ -292,25 +317,25 @@ We welcome contributions from the Web3 community! Here's how you can help:
 
 ### **Phase 1: Foundation** ✅
 
-- [x] Core architecture and design system
-- [x] Stellar blockchain integration
-- [x] AI guardian implementation
-- [x] Interactive demo suite
-- [x] Comprehensive testing
+- Core architecture and design system
+- Stellar blockchain integration
+- AI guardian implementation
+- Interactive demo suite
+- Comprehensive testing
 
 ### **Phase 2: Expansion** 🚧
 
-- [ ] Multi-blockchain support (Ethereum, Solana, etc.)
-- [ ] Advanced AI capabilities
-- [ ] More interactive demos
-- [ ] Mobile app development
+- Multi-blockchain support (Ethereum, Solana, etc.)
+- Advanced AI capabilities
+- More interactive demos
+- Mobile app development
 
 ### **Phase 3: Ecosystem** 🔮
 
-- [ ] Plugin system for custom demos
-- [ ] Community marketplace
-- [ ] Educational partnerships
-- [ ] Enterprise solutions
+- Plugin system for custom demos
+- Community marketplace
+- Educational partnerships
+- Enterprise solutions
 
 ---
 
@@ -318,21 +343,21 @@ We welcome contributions from the Web3 community! Here's how you can help:
 
 ### **Documentation**
 
-- **📖 [Testing Guide](./TESTING_GUIDE.md)**: Comprehensive testing strategy
-- **🔐 [Environment Setup](./env.example)**: Configuration guide
-- **🎨 [Design System](./lib/design-tokens.ts)**: Design tokens and patterns
+- **📖 [Testing Guide](/__tests__/README.md)**: Comprehensive testing strategy
+- **🔐 [Environment Setup](.env.example)**: Configuration guide
+- **🎨 [Design System](/components/README.md)**: Design tokens and patterns
 
 ### **External Links**
 
-- **Stellar Documentation**:
-  [developers.stellar.org](https://developers.stellar.org)
-- **Next.js Documentation**: [nextjs.org/docs](https://nextjs.org/docs)
-- **Freighter Wallet**:
-  [stellar.quest/freighter](https://stellar.quest/freighter)
+- **[Stellar Documentation](https://developers.stellar.org)**: Official Stellar
+  docs
+- **[Next.js Documentation](https://nextjs.org/docs)**: Next.js framework guide
+- **[Freighter Wallet](https://stellar.quest/freighter)**: Recommended Stellar
+  wallet
 
 ---
 
-## 🏆 **Why Choose Nexus Experience?**
+## 🏆 **Why Choose Stellar Nexus Experience?**
 
 ### **For Web3 Projects**
 
@@ -359,15 +384,30 @@ We welcome contributions from the Web3 community! Here's how you can help:
 
 ---
 
-## 🌟 **Join the Nexus Experience**
+## 🌟 **Join the Stellar Nexus Experience**
 
 **Ready to revolutionize Web3 accessibility?**
 
 - **🚀
-  [Deploy Now](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/nexus-experience)**
-- **🤝 [Contribute](./CONTRIBUTING.md)**
-- **📧 [Contact Us](mailto:hello@nexus-experience.com)**
-- **🐦 [Follow Updates](https://twitter.com/nexus_experience)**
+  [Deploy Now](https://vercel.com/new/clone?repository-url=https://github.com/josegomez-dev/stellar-nexus-experience)**
+- **⭐
+  [Star on GitHub](https://github.com/josegomez-dev/stellar-nexus-experience)**
+- **🤝
+  [Contribute](https://github.com/josegomez-dev/stellar-nexus-experience/issues)**
+- **📧 [Contact Us](https://stellar-nexus-experience.vercel.app/analytics)**
+
+---
+
+## 📊 **Analytics & Metrics**
+
+Visit our
+[Analytics Dashboard](https://stellar-nexus-experience.vercel.app/analytics) to
+see:
+
+- **📈 Real-time user engagement metrics**
+- **💬 User feedback and satisfaction scores**
+- **🎯 Demo completion rates and success metrics**
+- **🌍 Community growth and contribution opportunities**
 
 ---
 
@@ -385,7 +425,17 @@ for details.
 3. **Open your browser**: Navigate to `http://localhost:3000`
 4. **Connect your wallet**: Use Freighter or enter address manually
 5. **Meet NEXUS PRIME**: Click the floating AI guardian button
-6. **Explore the demos**: Navigate to `/demos` for interactive scenarios
+6. **Explore the demos**: Navigate through interactive Web3 scenarios
 7. **Experience Web3**: The future is now!
 
-**Welcome to the Nexus Experience! 🌟🤖🚀**
+**Welcome to the Stellar Nexus Experience! 🌟🤖🚀**
+
+---
+
+<div align="center">
+
+### 🌟 **Star us on GitHub** | 🚀 **Try the Live Demo** | 🤝 **Join the Community**
+
+**Built with ❤️ for the Web3 community**
+
+</div>

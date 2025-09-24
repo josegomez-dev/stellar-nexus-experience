@@ -1,24 +1,30 @@
 // Comprehensive user tracking service for analytics, leaderboards, and progress
-import { 
-  userService, 
-  demoProgressService, 
-  badgeService, 
+import {
+  userService,
+  demoProgressService,
+  badgeService,
   leaderboardService,
   demoStatsService,
   demoClapService,
   demoFeedbackService,
-  firebaseUtils 
+  firebaseUtils,
 } from './firebase-service';
-import { 
-  UserProfile, 
-  DemoProgress, 
-  LeaderboardEntry, 
+import {
+  UserProfile,
+  DemoProgress,
+  LeaderboardEntry,
   DemoFeedback,
-  UserBadge 
+  UserBadge,
 } from './firebase-types';
 
 export interface TrackingEvent {
-  type: 'demo_started' | 'demo_completed' | 'demo_clapped' | 'feedback_submitted' | 'badge_earned' | 'transaction_completed';
+  type:
+    | 'demo_started'
+    | 'demo_completed'
+    | 'demo_clapped'
+    | 'feedback_submitted'
+    | 'badge_earned'
+    | 'transaction_completed';
   userId: string;
   demoId?: string;
   demoName?: string;
@@ -69,10 +75,15 @@ class UserTrackingService {
   /**
    * Create user account when wallet connects (automatically called)
    */
-  async createUserAccount(walletAddress: string, username: string, walletType: string, walletName: string): Promise<void> {
+  async createUserAccount(
+    walletAddress: string,
+    username: string,
+    walletType: string,
+    walletName: string
+  ): Promise<void> {
     try {
       console.log(`🔐 Creating user account for ${walletAddress}`);
-      
+
       // Check if user already exists
       const existingUser = await userService.getUserByWalletAddress(walletAddress);
       if (existingUser) {
@@ -86,10 +97,10 @@ class UserTrackingService {
 
       // Initialize new user with default stats
       await firebaseUtils.initializeUser(walletAddress, username, walletType, walletName);
-      
+
       // Add welcome badge
       await this.awardBadge(walletAddress, 'welcome_explorer');
-      
+
       // Track account creation
       await this.trackEvent({
         type: 'demo_started', // Using demo_started as generic user action
@@ -145,19 +156,19 @@ class UserTrackingService {
    * Track demo completion
    */
   async trackDemoCompletion(
-    userId: string, 
-    demoId: string, 
-    demoName: string, 
+    userId: string,
+    demoId: string,
+    demoName: string,
     completionTime: number,
     score?: number
   ): Promise<void> {
     try {
       console.log(`🎯 Starting demo completion tracking for ${demoName} by ${userId}`);
-      
+
       // Calculate XP based on demo complexity and completion time
       const xpReward = this.calculateDemoXp(demoId, completionTime, score);
       console.log(`💰 Calculated XP reward: ${xpReward} for demo ${demoId}`);
-      
+
       // Update demo progress
       console.log('📝 Updating demo progress...');
       await demoProgressService.createOrUpdateProgress({
@@ -303,7 +314,7 @@ class UserTrackingService {
 
       // Award XP based on feedback quality
       const feedbackXp = this.calculateFeedbackXp(feedback.rating, feedback.comment.length);
-      
+
       const user = await userService.getUserByWalletAddress(userId);
       if (user) {
         const newStats = {
@@ -324,11 +335,11 @@ class UserTrackingService {
         userId,
         demoId,
         demoName,
-        metadata: { 
-          rating: feedback.rating, 
+        metadata: {
+          rating: feedback.rating,
           difficulty: feedback.difficulty,
           wouldRecommend: feedback.wouldRecommend,
-          feedbackXp 
+          feedbackXp,
         },
         timestamp: new Date(),
       });
@@ -447,7 +458,7 @@ class UserTrackingService {
 
       const rank = await leaderboardService.getUserRank(userId);
       const demoProgress = await demoProgressService.getUserDemoProgress(userId);
-      
+
       const totalAttempts = demoProgress.length;
       const completedAttempts = demoProgress.filter(p => p.status === 'completed').length;
       const completionRate = totalAttempts > 0 ? (completedAttempts / totalAttempts) * 100 : 0;
@@ -492,7 +503,10 @@ class UserTrackingService {
         totalClaps: stats.totalClaps,
         averageRating: stats.averageRating,
         averageCompletionTime: stats.averageCompletionTime,
-        completionRate: stats.totalCompletions > 0 ? (stats.totalCompletions / (stats.totalCompletions * 1.2)) * 100 : 0, // Estimate
+        completionRate:
+          stats.totalCompletions > 0
+            ? (stats.totalCompletions / (stats.totalCompletions * 1.2)) * 100
+            : 0, // Estimate
         userFeedback: {
           positive: positiveFeedback,
           negative: negativeFeedback,
@@ -509,7 +523,7 @@ class UserTrackingService {
 
   private async trackEvent(event: TrackingEvent): Promise<void> {
     this.eventQueue.push(event);
-    
+
     // Flush immediately if queue is full
     if (this.eventQueue.length >= this.BATCH_SIZE) {
       await this.flushEvents();
@@ -525,7 +539,7 @@ class UserTrackingService {
     try {
       // Here you could send events to analytics service, external tracking, etc.
       console.log(`📊 Flushing ${events.length} tracking events`);
-      
+
       // For now, just log the events
       events.forEach(event => {
         console.log(`📈 Event: ${event.type} - ${event.userId}`, event.metadata);
@@ -556,7 +570,7 @@ class UserTrackingService {
     };
 
     const base = baseXp[demoId as keyof typeof baseXp] || 50;
-    const timeBonus = Math.max(0, 20 - (completionTime / 60)); // Bonus for fast completion
+    const timeBonus = Math.max(0, 20 - completionTime / 60); // Bonus for fast completion
     const scoreBonus = score ? score * 0.5 : 0;
 
     return Math.round(base + timeBonus + scoreBonus);
@@ -570,17 +584,17 @@ class UserTrackingService {
 
   private getBadgeXp(badgeId: string): number {
     const badgeXp = {
-      'welcome_explorer': 10,
-      'first_demo': 25,
-      'demo_master': 100,
-      'escrow_beginner': 30,
-      'democracy_champion': 40,
-      'dispute_resolver': 50,
-      'gig_economy_expert': 35,
-      'level_5_explorer': 75,
-      'level_10_veteran': 150,
-      'xp_collector': 50,
-      'xp_master': 100,
+      welcome_explorer: 10,
+      first_demo: 25,
+      demo_master: 100,
+      escrow_beginner: 30,
+      democracy_champion: 40,
+      dispute_resolver: 50,
+      gig_economy_expert: 35,
+      level_5_explorer: 75,
+      level_10_veteran: 150,
+      xp_collector: 50,
+      xp_master: 100,
     };
     return badgeXp[badgeId as keyof typeof badgeXp] || 10;
   }

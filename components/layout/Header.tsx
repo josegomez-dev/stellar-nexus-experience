@@ -70,23 +70,23 @@ export const Header = () => {
           <div className='flex items-center space-x-4'>
             {/* Account Status - Show when connected */}
             {isConnected && (
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 {account ? (
                   <>
                     {/* Account Info */}
-                    <div className="hidden sm:flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
-                      <span className="text-xs text-white/70">Points:</span>
-                      <span className="text-sm font-semibold text-green-400">
+                    <div className='hidden sm:flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
+                      <span className='text-xs text-white/70'>Points:</span>
+                      <span className='text-sm font-semibold text-green-400'>
                         {account.profile.totalPoints}
                       </span>
-                      <span className="text-xs text-white/70">Level:</span>
-                      <span className="text-sm font-semibold text-blue-400">
+                      <span className='text-xs text-white/70'>Level:</span>
+                      <span className='text-sm font-semibold text-blue-400'>
                         {account.profile.level}
                       </span>
                     </div>
-                    
+
                     {/* Rewards Button */}
-                    <Tooltip content="View Rewards & Progress">
+                    <Tooltip content='View Rewards & Progress'>
                       <button
                         onClick={() => setIsRewardsOpen(true)}
                         className='relative p-2 text-white/80 hover:text-white transition-colors'
@@ -101,18 +101,17 @@ export const Header = () => {
                     </Tooltip>
                   </>
                 ) : loading ? (
-                  <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="text-xs text-white/70">Setting up account...</span>
+                  <div className='flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    <span className='text-xs text-white/70'>Setting up account...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1">
-                    <span className="text-xs text-white/70">No account</span>
+                  <div className='flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
+                    <span className='text-xs text-white/70'>No account</span>
                   </div>
                 )}
               </div>
             )}
-
 
             {/* Network Indicator */}
             {/* <div className='hidden sm:flex items-center'>
@@ -201,10 +200,7 @@ export const Header = () => {
       )}
 
       {/* Rewards Sidebar */}
-      <RewardsSidebar 
-        isOpen={isRewardsOpen} 
-        onClose={() => setIsRewardsOpen(false)} 
-      />
+      <RewardsSidebar isOpen={isRewardsOpen} onClose={() => setIsRewardsOpen(false)} />
     </header>
   );
 };

@@ -263,7 +263,7 @@ export const MicroTaskMarketplaceDemo = () => {
 
       // Add pending transaction
       const txHash = `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       addTransaction({
         hash: txHash,
         status: 'pending',
@@ -311,7 +311,6 @@ export const MicroTaskMarketplaceDemo = () => {
       );
       setTasks(updatedTasks);
 
-
       addToast({
         type: 'success',
         title: '✅ Task Accepted!',
@@ -326,10 +325,10 @@ export const MicroTaskMarketplaceDemo = () => {
       await handleFundEscrow(result.contractId, task.budget);
     } catch (error) {
       console.error('Failed to accept task:', error);
-      
+
       // Update transaction status to failed
       const txHash = `failed_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       addTransaction({
         hash: txHash,
         status: 'failed',
@@ -339,7 +338,7 @@ export const MicroTaskMarketplaceDemo = () => {
         amount: '0 USDC',
         asset: 'USDC',
       });
-      
+
       addToast({
         type: 'error',
         title: '❌ Task Acceptance Failed',
@@ -676,7 +675,6 @@ export const MicroTaskMarketplaceDemo = () => {
           <p className='text-white/80 text-lg'>
             Lightweight gig-board with escrow functionality for micro-tasks
           </p>
-
 
           {/* Wallet Connection Required Message */}
           {!isConnected && (
@@ -1089,9 +1087,7 @@ export const MicroTaskMarketplaceDemo = () => {
         {hooks.error && (
           <div className='p-4 bg-red-500/20 border border-red-400/30 rounded-lg'>
             <h4 className='font-semibold text-red-300 mb-2'>Error Occurred</h4>
-            <p className='text-red-200 text-sm'>
-              {hooks.error?.message}
-            </p>
+            <p className='text-red-200 text-sm'>{hooks.error?.message}</p>
           </div>
         )}
 

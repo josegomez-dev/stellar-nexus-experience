@@ -44,7 +44,7 @@ export interface UserAccount {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   lastLoginAt: Timestamp;
-  
+
   // Profile information
   profile: {
     username?: string;
@@ -55,7 +55,7 @@ export interface UserAccount {
     totalPoints: number;
     experience: number;
   };
-  
+
   // Demo progress
   demos: {
     demo1: DemoProgress;
@@ -67,11 +67,11 @@ export interface UserAccount {
     demo4: DemoProgress;
     'micro-task-marketplace': DemoProgress;
   };
-  
+
   // Rewards and badges
   badges: NFTBadge[];
   rewards: Reward[];
-  
+
   // Statistics
   stats: {
     totalDemosCompleted: number;
@@ -80,7 +80,7 @@ export interface UserAccount {
     streakDays: number;
     lastActiveDate: string; // YYYY-MM-DD format
   };
-  
+
   // Settings
   settings: {
     notifications: boolean;
@@ -128,5 +128,3 @@ export interface Achievement {
   maxProgress: number;
   pointsReward: number;
 }
-
-

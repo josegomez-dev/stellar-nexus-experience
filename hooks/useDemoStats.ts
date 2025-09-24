@@ -63,21 +63,21 @@ export const useDemoStats = (): UseDemoStatsReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const statsPromises = DEMO_LIST.map(async (demo) => {
+
+      const statsPromises = DEMO_LIST.map(async demo => {
         try {
           // Initialize demo stats if they don't exist
           await demoStatsService.initializeDemoStats(demo.id, demo.name);
-          
+
           // Get demo stats
           const stats = await demoStatsService.getDemoStats(demo.id);
-          
+
           // Check if user has clapped (only if wallet is connected)
           let hasUserClapped = false;
           if (isConnected && walletData?.publicKey) {
             hasUserClapped = await demoClapService.hasUserClapped(walletData.publicKey, demo.id);
           }
-          
+
           return {
             demoId: demo.id,
             data: {
@@ -104,12 +104,12 @@ export const useDemoStats = (): UseDemoStatsReturn => {
       });
 
       const results = await Promise.all(statsPromises);
-      
+
       const newStats: Record<string, DemoStatsData> = {};
       results.forEach(result => {
         newStats[result.demoId] = result.data;
       });
-      
+
       setDemoStats(newStats);
     } catch (err) {
       console.error('Error loading demo stats:', err);
@@ -143,7 +143,7 @@ export const useDemoStats = (): UseDemoStatsReturn => {
 
     try {
       await demoClapService.addClap(walletData.publicKey, demoId);
-      
+
       // Update local state
       setDemoStats(prev => ({
         ...prev,
@@ -153,7 +153,7 @@ export const useDemoStats = (): UseDemoStatsReturn => {
           hasUserClapped: true,
         },
       }));
-      
+
       addToast({
         type: 'success',
         title: 'Clapped!',
@@ -212,24 +212,24 @@ export const useDemoStats = (): UseDemoStatsReturn => {
       };
 
       console.log('🚀 Submitting feedback:', feedbackData);
-      
+
       // Test Firebase connection first
       console.log('🔥 Testing Firebase connection...');
-      
+
       const result = await demoFeedbackService.submitFeedback(feedbackData);
       console.log('✅ Feedback submitted successfully:', result);
-      
+
       addToast({
         type: 'success',
         title: 'Feedback Submitted! 🎉',
         message: 'Thank you for your valuable feedback!',
       });
-      
+
       // Refresh stats to get updated rating
       await refreshStats();
     } catch (err) {
       console.error('❌ Error submitting feedback:', err);
-      
+
       // More detailed error logging
       if (err instanceof Error) {
         console.error('Error details:', {
@@ -238,7 +238,7 @@ export const useDemoStats = (): UseDemoStatsReturn => {
           stack: err.stack,
         });
       }
-      
+
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit feedback';
       addToast({
         type: 'error',
@@ -249,7 +249,11 @@ export const useDemoStats = (): UseDemoStatsReturn => {
   };
 
   // Mark demo as complete
-  const markDemoComplete = async (demoId: string, demoName: string, completionTime: number): Promise<void> => {
+  const markDemoComplete = async (
+    demoId: string,
+    demoName: string,
+    completionTime: number
+  ): Promise<void> => {
     if (!isConnected || !walletData?.publicKey) {
       return;
     }
@@ -271,7 +275,7 @@ export const useDemoStats = (): UseDemoStatsReturn => {
 
       // Increment completion count in stats
       await demoStatsService.incrementCompletion(demoId, completionTime);
-      
+
       // Update local state
       setDemoStats(prev => ({
         ...prev,

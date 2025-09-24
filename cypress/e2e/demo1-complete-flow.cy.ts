@@ -1,5 +1,6 @@
 describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
-  const TEST_WALLET_ADDRESS = 'GABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+  const TEST_WALLET_ADDRESS =
+    'GABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
 
   beforeEach(() => {
     cy.visit('/demos');
@@ -25,7 +26,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Wallet")',
         'button:contains("Connect")',
         '[data-testid="wallet-button"]',
-        '.wallet-button'
+        '.wallet-button',
       ];
 
       let walletButton = null;
@@ -57,7 +58,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'input[placeholder*="Stellar"]',
         'input[placeholder*="address"]',
         'input[placeholder*="G..."]',
-        'input[type="text"]'
+        'input[type="text"]',
       ];
 
       let foundInput = false;
@@ -66,13 +67,13 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
           cy.log(`✅ Found input with selector: ${selector}`);
           cy.get(selector).type(TEST_WALLET_ADDRESS, { force: true, delay: 100 });
           cy.wait(1000);
-          
+
           // Look for connect button
           const connectSelectors = [
             'button:contains("Connect")',
             'button:contains("Manual")',
             'button:contains("Address")',
-            'button[type="submit"]'
+            'button[type="submit"]',
           ];
 
           for (const connectSelector of connectSelectors) {
@@ -89,7 +90,9 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
       }
 
       if (!foundInput) {
-        cy.log('ℹ️ Manual input not found - wallet may already be connected or using different method');
+        cy.log(
+          'ℹ️ Manual input not found - wallet may already be connected or using different method'
+        );
       }
     });
 
@@ -102,7 +105,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         '[data-testid="demo-card"]',
         '.card',
         'div:contains("Baby Steps")',
-        'div:contains("Hello Milestone")'
+        'div:contains("Hello Milestone")',
       ];
 
       let demoCard = null;
@@ -122,7 +125,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
             'button:contains("Launch")',
             'button:contains("Start")',
             'button:contains("Demo")',
-            'button[type="button"]'
+            'button[type="button"]',
           ];
 
           for (const launchSelector of launchSelectors) {
@@ -136,7 +139,10 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         });
       } else {
         cy.log('⚠️ Demo card not found - trying to click any demo-related button');
-        cy.get('button').contains(/demo|launch|start/i).first().click({ force: true });
+        cy.get('button')
+          .contains(/demo|launch|start/i)
+          .first()
+          .click({ force: true });
         cy.wait(2000);
       }
     });
@@ -150,7 +156,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Start")',
         'button:contains("Launch")',
         '.start-demo-button',
-        '[data-testid="start-demo"]'
+        '[data-testid="start-demo"]',
       ];
 
       for (const selector of startSelectors) {
@@ -169,7 +175,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
 
     // Step 7: Execute escrow steps with improved selectors and longer waits
     cy.log('🔍 Looking for escrow step buttons...');
-    
+
     // Step 7a: Initialize Escrow
     cy.get('body').then($body => {
       const initSelectors = [
@@ -178,7 +184,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Setup")',
         '.initialize-escrow-button',
         '[data-step="initialize"]',
-        'button[data-testid*="initialize"]'
+        'button[data-testid*="initialize"]',
       ];
 
       for (const selector of initSelectors) {
@@ -201,7 +207,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Add Funds")',
         '.fund-escrow-button',
         '[data-step="fund"]',
-        'button[data-testid*="fund"]'
+        'button[data-testid*="fund"]',
       ];
 
       for (const selector of fundSelectors) {
@@ -224,7 +230,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Done")',
         '.complete-milestone-button',
         '[data-step="complete"]',
-        'button[data-testid*="complete"]'
+        'button[data-testid*="complete"]',
       ];
 
       for (const selector of completeSelectors) {
@@ -247,7 +253,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Confirm")',
         '.approve-milestone-button',
         '[data-step="approve"]',
-        'button[data-testid*="approve"]'
+        'button[data-testid*="approve"]',
       ];
 
       for (const selector of approveSelectors) {
@@ -270,7 +276,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Transfer")',
         '.release-funds-button',
         '[data-step="release"]',
-        'button[data-testid*="release"]'
+        'button[data-testid*="release"]',
       ];
 
       for (const selector of releaseSelectors) {
@@ -298,7 +304,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'div:contains("Successfully")',
         'div:contains("Funds Released")',
         '.completion-message',
-        '[data-testid="completion"]'
+        '[data-testid="completion"]',
       ];
 
       let foundCompletion = false;
@@ -328,7 +334,7 @@ describe('Demo 1 - Complete Flow (Slow & Visible)', () => {
         'button:contains("Close")',
         'button:contains("Submit")',
         '.complete-demo-button',
-        '[data-testid="complete-demo"]'
+        '[data-testid="complete-demo"]',
       ];
 
       for (const selector of finalSelectors) {

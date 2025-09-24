@@ -11,9 +11,7 @@ import {
   useStartDispute as useMockStartDispute,
   useResolveDispute as useMockResolveDispute,
 } from '@/lib/mock-trustless-work';
-import {
-  useRealInitializeEscrow,
-} from '@/lib/real-trustless-work';
+import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -50,7 +48,8 @@ export const DisputeResolutionDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
-  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
+  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
+    useDemoCompletionHistory();
   const { completeDemo: completeDemoInAccount } = useAccount();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -131,15 +130,15 @@ export const DisputeResolutionDemo = () => {
       console.log('🎉 Triggering confetti for Dispute Resolution Demo!');
       setShowConfetti(true);
       setIsCompleted(true); // Mark as completed to prevent multiple executions
-      
+
       // Complete the demo using the centralized account system
       const completeDemo = async () => {
         try {
           const score = 95; // High score for completing dispute resolution
-          
+
           // Use the centralized account system for completion
           await completeDemoInAccount('dispute-resolution', score);
-          
+
           console.log('✅ Dispute Resolution Demo completed successfully');
         } catch (error) {
           console.error('❌ Failed to complete Dispute Resolution Demo:', error);
@@ -151,10 +150,10 @@ export const DisputeResolutionDemo = () => {
           });
         }
       };
-      
+
       // Complete demo after a short delay
       setTimeout(completeDemo, 2000);
-      
+
       // Hide confetti after animation
       const timer = setTimeout(() => {
         console.log('🎉 Hiding confetti for Dispute Resolution Demo');
@@ -210,9 +209,9 @@ export const DisputeResolutionDemo = () => {
       const result = await hooks.initializeEscrow.initializeEscrow(payload);
       setContractId(result.contractId);
       setEscrowData(result.escrow);
-      
+
       updateTransaction(txHash, 'success', 'Dispute resolution escrow initialized successfully');
-      
+
       addToast({
         type: 'success',
         title: 'Escrow Initialized!',
@@ -229,7 +228,7 @@ export const DisputeResolutionDemo = () => {
         type: 'escrow',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Initialization Failed',
@@ -271,9 +270,9 @@ export const DisputeResolutionDemo = () => {
 
       const result = await hooks.fundEscrow.fundEscrow(payload);
       setEscrowData(result.escrow);
-      
+
       updateTransaction(txHash, 'success', 'Dispute resolution escrow funded with 10 USDC');
-      
+
       addToast({
         type: 'success',
         title: 'Escrow Funded!',
@@ -290,7 +289,7 @@ export const DisputeResolutionDemo = () => {
         type: 'fund',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Funding Failed',
@@ -344,7 +343,11 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      updateTransaction(txHash, 'success', `Milestone "${milestone?.title}" completed successfully`);
+      updateTransaction(
+        txHash,
+        'success',
+        `Milestone "${milestone?.title}" completed successfully`
+      );
 
       addToast({
         type: 'success',
@@ -363,7 +366,7 @@ export const DisputeResolutionDemo = () => {
         type: 'milestone',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Completion Failed',
@@ -438,7 +441,7 @@ export const DisputeResolutionDemo = () => {
         type: 'approve',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Approval Failed',
@@ -511,7 +514,11 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      updateTransaction(txHash, 'success', `Dispute raised for "${milestone?.title}" - awaiting arbitrator resolution`);
+      updateTransaction(
+        txHash,
+        'success',
+        `Dispute raised for "${milestone?.title}" - awaiting arbitrator resolution`
+      );
 
       addToast({
         type: 'warning',
@@ -530,7 +537,7 @@ export const DisputeResolutionDemo = () => {
         type: 'dispute',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Dispute Failed',
@@ -618,7 +625,11 @@ export const DisputeResolutionDemo = () => {
       });
       setMilestones(updatedMilestones);
 
-      updateTransaction(txHash, 'success', `Dispute for "${milestone?.title}" resolved: ${resolution}`);
+      updateTransaction(
+        txHash,
+        'success',
+        `Dispute for "${milestone?.title}" resolved: ${resolution}`
+      );
 
       addToast({
         type: 'success',
@@ -641,7 +652,7 @@ export const DisputeResolutionDemo = () => {
         type: 'dispute',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Resolution Failed',
@@ -713,7 +724,7 @@ export const DisputeResolutionDemo = () => {
         type: 'release',
         demoId: 'dispute-resolution',
       });
-      
+
       addToast({
         type: 'error',
         title: 'Release Failed',
@@ -781,7 +792,6 @@ export const DisputeResolutionDemo = () => {
 
   return (
     <div className='max-w-6xl mx-auto relative'>
-
       {/* Main Content */}
       <div className='bg-gradient-to-br from-warning-500/20 to-warning-600/20 backdrop-blur-sm border border-warning-400/30 rounded-xl shadow-2xl p-8 relative'>
         {/* Content */}
@@ -820,7 +830,6 @@ export const DisputeResolutionDemo = () => {
             <p className='text-sm text-white/60 mt-3'>
               Current role: <span className='text-warning-300 capitalize'>{currentRole}</span>
             </p>
-            
           </div>
 
           {/* Demo Setup */}
@@ -884,7 +893,9 @@ export const DisputeResolutionDemo = () => {
                   disabled={!isConnected || hooks.initializeEscrow.isLoading}
                   className='px-8 py-3 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  {hooks.initializeEscrow.isLoading ? 'Initializing...' : 'Initialize Dispute Resolution Escrow'}
+                  {hooks.initializeEscrow.isLoading
+                    ? 'Initializing...'
+                    : 'Initialize Dispute Resolution Escrow'}
                 </button>
               </div>
             </div>

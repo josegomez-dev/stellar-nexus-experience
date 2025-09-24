@@ -1,36 +1,36 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  addDoc, 
-  query, 
-  where, 
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  addDoc,
+  query,
+  where,
   getDocs,
   orderBy,
   limit,
   Timestamp,
   serverTimestamp,
   increment,
-  arrayUnion
+  arrayUnion,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  UserAccount, 
-  DemoProgress, 
-  NFTBadge, 
-  Reward, 
+import {
+  UserAccount,
+  DemoProgress,
+  NFTBadge,
+  Reward,
   PointsTransaction,
-  Achievement 
+  Achievement,
 } from '@/types/account';
 import { getBadgeById } from './badge-config';
 import { demoStatsService } from './firebase-service';
 
 export class AccountService {
   private static instance: AccountService;
-  
+
   public static getInstance(): AccountService {
     if (!AccountService.instance) {
       AccountService.instance = new AccountService();
@@ -39,15 +39,19 @@ export class AccountService {
   }
 
   // Create new account
-  async createAccount(walletAddress: string, publicKey: string, network: string): Promise<UserAccount> {
+  async createAccount(
+    walletAddress: string,
+    publicKey: string,
+    network: string
+  ): Promise<UserAccount> {
     console.log('🔄 AccountService: Creating account...');
     console.log('Parameters:', { walletAddress, publicKey, network });
-    
+
     const accountId = uuidv4();
     console.log('Generated UUID:', accountId);
-    
+
     const now = Timestamp.now();
-    
+
     const newAccount: UserAccount = {
       id: accountId,
       walletAddress,
@@ -56,13 +60,13 @@ export class AccountService {
       createdAt: now,
       updatedAt: now,
       lastLoginAt: now,
-      
+
       profile: {
         level: 1,
         totalPoints: 150, // Account creation bonus (100) + Trust Guardian (50)
         experience: 150, // Experience points (same as points for now)
       },
-      
+
       demos: {
         demo1: {
           demoId: 'demo1',
@@ -121,7 +125,7 @@ export class AccountService {
           pointsEarned: 0,
         },
       },
-      
+
       badges: [
         // Award Welcome Explorer badge for account creation
         {
@@ -132,10 +136,10 @@ export class AccountService {
           rarity: 'common' as const,
           earnedAt: now,
           pointsValue: 10,
-        }
+        },
       ],
       rewards: [],
-      
+
       stats: {
         totalDemosCompleted: 0,
         totalPointsEarned: 110, // Account creation bonus (100) + Welcome Explorer (10)
@@ -143,7 +147,7 @@ export class AccountService {
         streakDays: 1, // Start with 1 day streak
         lastActiveDate: new Date().toISOString().split('T')[0],
       },
-      
+
       settings: {
         notifications: true,
         publicProfile: false,
@@ -153,23 +157,22 @@ export class AccountService {
 
     console.log('📝 Saving account to Firestore...');
     console.log('Account data:', newAccount);
-    
+
     try {
       await setDoc(doc(db, 'accounts', accountId), newAccount);
       console.log('✅ Account saved to Firestore successfully!');
-      
+
       // Log the account creation and badge rewards
       console.log('💰 Adding account creation bonus...');
       await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
       console.log('✅ Account creation bonus added!');
-      
+
       console.log('🏆 Adding Welcome Explorer badge reward...');
       await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
       console.log('✅ Welcome Explorer badge reward added!');
-      
+
       console.log('🎉 Account creation completed!');
       return newAccount;
-      
     } catch (error) {
       console.error('❌ Error saving to Firestore:', error);
       throw error;
@@ -181,11 +184,11 @@ export class AccountService {
     const accountsRef = collection(db, 'accounts');
     const q = query(accountsRef, where('walletAddress', '==', walletAddress));
     const querySnapshot = await getDocs(q);
-    
+
     if (querySnapshot.empty) {
       return null;
     }
-    
+
     return querySnapshot.docs[0].data() as UserAccount;
   }
 
@@ -193,11 +196,11 @@ export class AccountService {
   async getAccountById(accountId: string): Promise<UserAccount | null> {
     const docRef = doc(db, 'accounts', accountId);
     const docSnap = await getDoc(docRef);
-    
+
     if (!docSnap.exists()) {
       return null;
     }
-    
+
     return docSnap.data() as UserAccount;
   }
 
@@ -235,12 +238,12 @@ export class AccountService {
     // Get current account state to check if this is first completion
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
-    
+
     const currentDemo = account.demos[demoId as keyof typeof account.demos];
     const isFirstCompletion = currentDemo?.status !== 'completed';
-    
+
     const pointsEarned = this.calculateDemoPoints(demoId, score, isFirstCompletion);
-    
+
     const updateData: any = {
       [`demos.${demoId}.status`]: 'completed',
       [`demos.${demoId}.completedAt`]: serverTimestamp(),
@@ -262,12 +265,12 @@ export class AccountService {
 
     // Log points transaction (only if not already completed to prevent duplicates)
     if (isFirstCompletion || !currentDemo?.pointsEarned) {
-      const transactionReason = isFirstCompletion 
-        ? `Completed ${demoId}` 
+      const transactionReason = isFirstCompletion
+        ? `Completed ${demoId}`
         : `Replay bonus for ${demoId}`;
       await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
     }
-    
+
     // Update demo stats (always increment completion count)
     try {
       await demoStatsService.incrementCompletion(demoId, 0); // completionTime not critical for stats
@@ -285,7 +288,11 @@ export class AccountService {
   }
 
   // Calculate demo points based on demo and score
-  private calculateDemoPoints(demoId: string, score: number, isFirstCompletion: boolean = true): number {
+  private calculateDemoPoints(
+    demoId: string,
+    score: number,
+    isFirstCompletion: boolean = true
+  ): number {
     const basePoints = {
       demo1: 100,
       'hello-milestone': 100,
@@ -296,17 +303,17 @@ export class AccountService {
       demo4: 250,
       'micro-task-marketplace': 250,
     };
-    
+
     const base = basePoints[demoId as keyof typeof basePoints] || 100;
     const scoreMultiplier = Math.max(0.5, score / 100); // Minimum 50% points
-    
+
     let points = Math.round(base * scoreMultiplier);
-    
+
     // Give reduced points for replays (25% of original)
     if (!isFirstCompletion) {
       points = Math.round(points * 0.25);
     }
-    
+
     return points;
   }
 
@@ -324,36 +331,44 @@ export class AccountService {
   }
 
   // Check and award badges based on demo completion order
-  private async checkAndAwardBadges(accountId: string, demoId: string, score: number): Promise<void> {
+  private async checkAndAwardBadges(
+    accountId: string,
+    demoId: string,
+    score: number
+  ): Promise<void> {
     // Get the account to check current state
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
     const earnedBadgeNames = account.badges.map(b => b.name);
-    
+
     // Check specific demo completions for badge awarding
     const completedDemos = this.getCompletedDemos(account);
-    
+
     // Award badges based on specific demo completions
     await this.awardDemoBadge(accountId, demoId, earnedBadgeNames);
-    
+
     // Check for Nexus Master badge (completing demos 1, 3, and 4)
     await this.checkNexusMasterBadge(accountId, earnedBadgeNames);
   }
 
   // Award badge for specific demo completion
-  private async awardDemoBadge(accountId: string, demoId: string, earnedBadgeNames: string[]): Promise<void> {
+  private async awardDemoBadge(
+    accountId: string,
+    demoId: string,
+    earnedBadgeNames: string[]
+  ): Promise<void> {
     let badgeId: string | null = null;
-    
+
     // Map demo IDs to badge IDs based on user requirements:
     // Demo 1 (Micro Task Marketplace) → Escrow Expert
-    // Demo 3 (Dispute Resolution) → Trust Guardian  
+    // Demo 3 (Dispute Resolution) → Trust Guardian
     // Demo 4 (Micro Task Marketplace) → Stellar Champion
     switch (demoId) {
-      case 'micro-task-marketplace':
+      case 'micro-task-marketplace': {
         // This could be demo 1 or demo 4, we need to check which one
         const accountDoc = await getDoc(doc(db, 'accounts', accountId));
         const account = accountDoc.data() as UserAccount;
-        
+
         // If demo1 is completed, this is demo 1 (Escrow Expert)
         if (account.demos.demo1?.status === 'completed') {
           badgeId = 'escrow-expert';
@@ -363,6 +378,7 @@ export class AccountService {
           badgeId = 'stellar-champion';
         }
         break;
+      }
       case 'dispute-resolution':
         badgeId = 'trust-guardian';
         break;
@@ -376,14 +392,14 @@ export class AccountService {
         badgeId = 'stellar-champion';
         break;
     }
-    
+
     if (!badgeId) {
       console.log(`No badge configured for demo: ${demoId}`);
       return;
     }
-    
+
     const badgeConfig = getBadgeById(badgeId);
-    
+
     if (!badgeConfig) {
       console.log(`Badge config not found for: ${badgeId}`);
       return;
@@ -412,17 +428,26 @@ export class AccountService {
   }
 
   // Check if user deserves Nexus Master badge (completing demos 1, 3, and 4)
-  private async checkNexusMasterBadge(accountId: string, earnedBadgeNames: string[]): Promise<void> {
+  private async checkNexusMasterBadge(
+    accountId: string,
+    earnedBadgeNames: string[]
+  ): Promise<void> {
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
-    
+
     // Check if demos 1, 3, and 4 are completed
-    const demo1Completed = account.demos.demo1?.status === 'completed' || account.demos['micro-task-marketplace']?.status === 'completed';
-    const demo3Completed = account.demos.demo3?.status === 'completed' || account.demos['dispute-resolution']?.status === 'completed';
-    const demo4Completed = account.demos.demo4?.status === 'completed' || account.demos['micro-task-marketplace']?.status === 'completed';
-    
+    const demo1Completed =
+      account.demos.demo1?.status === 'completed' ||
+      account.demos['micro-task-marketplace']?.status === 'completed';
+    const demo3Completed =
+      account.demos.demo3?.status === 'completed' ||
+      account.demos['dispute-resolution']?.status === 'completed';
+    const demo4Completed =
+      account.demos.demo4?.status === 'completed' ||
+      account.demos['micro-task-marketplace']?.status === 'completed';
+
     const hasRequiredDemos = demo1Completed && demo3Completed && demo4Completed;
-    
+
     if (hasRequiredDemos && !earnedBadgeNames.includes('Nexus Master')) {
       const nexusBadgeConfig = getBadgeById('nexus-master');
       if (nexusBadgeConfig) {
@@ -445,13 +470,13 @@ export class AccountService {
   // Helper method to get completed demos
   private getCompletedDemos(account: UserAccount): string[] {
     const completed: string[] = [];
-    
+
     Object.entries(account.demos).forEach(([demoId, demo]) => {
       if (demo.status === 'completed') {
         completed.push(demoId);
       }
     });
-    
+
     return completed;
   }
 
@@ -459,16 +484,16 @@ export class AccountService {
   private async checkStellarChampionBadge(accountId: string): Promise<void> {
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
-    
+
     const earnedBadgeNames = account.badges.map(b => b.name);
-    
+
     // Check if all 4 demos are completed
     const mainDemoProgress = this.getMainDemoCompletionCount(account);
     const allDemosCompleted = mainDemoProgress.completed === 4;
-    
+
     // TODO: Add invite friend check when invite system is implemented
     const hasInvitedFriend = true; // For now, award when all demos are completed
-    
+
     if (allDemosCompleted && hasInvitedFriend && !earnedBadgeNames.includes('Stellar Champion')) {
       const stellarBadgeConfig = getBadgeById('stellar-champion');
       if (stellarBadgeConfig) {
@@ -495,7 +520,7 @@ export class AccountService {
       demo2: 'demo3',
       demo3: 'demo4',
     };
-    
+
     const nextDemo = nextDemoMap[completedDemoId];
     if (nextDemo) {
       const accountRef = doc(db, 'accounts', accountId);
@@ -508,7 +533,7 @@ export class AccountService {
 
   // Log points transaction
   async logPointsTransaction(
-    userId: string, 
+    userId: string,
     type: 'earn' | 'spend' | 'bonus' | 'penalty',
     amount: number,
     reason: string,
@@ -516,7 +541,7 @@ export class AccountService {
   ): Promise<void> {
     console.log('💰 Logging points transaction:', { userId, type, amount, reason, demoId });
     console.log('🔍 Stack trace for points transaction creation:', new Error().stack);
-    
+
     // Create transaction object, only including demoId if it's defined
     const transaction: PointsTransaction = {
       id: uuidv4(),
@@ -526,12 +551,12 @@ export class AccountService {
       reason,
       timestamp: Timestamp.now(),
     };
-    
+
     // Only add demoId if it's defined (not undefined)
     if (demoId !== undefined && demoId !== null) {
       transaction.demoId = demoId;
     }
-    
+
     try {
       console.log('📝 Adding transaction document to Firestore...');
       console.log('Transaction data being saved:', transaction);
@@ -543,14 +568,17 @@ export class AccountService {
       console.error('Firebase error details:', {
         code: (error as any)?.code,
         message: (error as any)?.message,
-        details: error
+        details: error,
       });
       throw error;
     }
   }
 
   // Get points transactions for user
-  async getPointsTransactions(userId: string, limitCount: number = 50): Promise<PointsTransaction[]> {
+  async getPointsTransactions(
+    userId: string,
+    limitCount: number = 50
+  ): Promise<PointsTransaction[]> {
     const transactionsRef = collection(db, 'pointsTransactions');
     const q = query(
       transactionsRef,
@@ -558,7 +586,7 @@ export class AccountService {
       orderBy('timestamp', 'desc'),
       limit(limitCount)
     );
-    
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data() as PointsTransaction);
   }
@@ -566,18 +594,17 @@ export class AccountService {
   // Get leaderboard
   async getLeaderboard(limitCount: number = 10): Promise<UserAccount[]> {
     const accountsRef = collection(db, 'accounts');
-    const q = query(
-      accountsRef,
-      orderBy('profile.totalPoints', 'desc'),
-      limit(limitCount)
-    );
-    
+    const q = query(accountsRef, orderBy('profile.totalPoints', 'desc'), limit(limitCount));
+
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data() as UserAccount);
   }
 
   // Update profile
-  async updateProfile(accountId: string, profileUpdates: Partial<UserAccount['profile']>): Promise<void> {
+  async updateProfile(
+    accountId: string,
+    profileUpdates: Partial<UserAccount['profile']>
+  ): Promise<void> {
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
       profile: profileUpdates,
@@ -586,7 +613,10 @@ export class AccountService {
   }
 
   // Update settings
-  async updateSettings(accountId: string, settingsUpdates: Partial<UserAccount['settings']>): Promise<void> {
+  async updateSettings(
+    accountId: string,
+    settingsUpdates: Partial<UserAccount['settings']>
+  ): Promise<void> {
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
       settings: settingsUpdates,
@@ -595,20 +625,24 @@ export class AccountService {
   }
 
   // Get main demo completion count (only the 4 main demos)
-  getMainDemoCompletionCount(account: UserAccount): { completed: number, total: number } {
-    const mainDemos = ['hello-milestone', 'milestone-voting', 'dispute-resolution', 'micro-task-marketplace'];
-    
-    const completedCount = mainDemos.filter(demoId => 
-      account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
+  getMainDemoCompletionCount(account: UserAccount): { completed: number; total: number } {
+    const mainDemos = [
+      'hello-milestone',
+      'milestone-voting',
+      'dispute-resolution',
+      'micro-task-marketplace',
+    ];
+
+    const completedCount = mainDemos.filter(
+      demoId => account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
     ).length;
-    
+
     return {
       completed: completedCount,
-      total: 4
+      total: 4,
     };
   }
 }
 
 // Export singleton instance
 export const accountService = AccountService.getInstance();
-

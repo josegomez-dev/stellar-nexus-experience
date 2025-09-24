@@ -111,7 +111,7 @@ const DemoSelector = ({
 
   const getClapStats = (demoId: string) => {
     const stats = demoStats[demoId];
-    
+
     if (!stats) {
       return {
         claps: 0,
@@ -134,31 +134,31 @@ const DemoSelector = ({
         return {
           gradient: 'from-brand-500 via-brand-400 to-brand-600',
           hoverGradient: 'hover:from-brand-600 hover:via-brand-500 hover:to-brand-700',
-          shadow: 'hover:shadow-brand-500/50'
+          shadow: 'hover:shadow-brand-500/50',
         };
       case 'from-success-500 to-success-400':
         return {
           gradient: 'from-success-500 via-success-400 to-success-600',
           hoverGradient: 'hover:from-success-600 hover:via-success-500 hover:to-success-700',
-          shadow: 'hover:shadow-success-500/50'
+          shadow: 'hover:shadow-success-500/50',
         };
       case 'from-warning-500 to-warning-400':
         return {
           gradient: 'from-warning-500 via-warning-400 to-warning-600',
           hoverGradient: 'hover:from-warning-600 hover:via-warning-500 hover:to-warning-700',
-          shadow: 'hover:shadow-warning-500/50'
+          shadow: 'hover:shadow-warning-500/50',
         };
       case 'from-accent-500 to-accent-400':
         return {
           gradient: 'from-accent-500 via-accent-400 to-accent-600',
           hoverGradient: 'hover:from-accent-600 hover:via-accent-500 hover:to-accent-700',
-          shadow: 'hover:shadow-accent-500/50'
+          shadow: 'hover:shadow-accent-500/50',
         };
       default:
         return {
           gradient: 'from-brand-500 via-accent-500 to-brand-400',
           hoverGradient: 'hover:from-brand-600 hover:via-accent-600 hover:to-brand-500',
-          shadow: 'hover:shadow-brand-500/50'
+          shadow: 'hover:shadow-brand-500/50',
         };
     }
   };
@@ -175,40 +175,43 @@ const DemoSelector = ({
           titleColor: 'text-brand-200',
           hoverTitleColor: 'group-hover:text-brand-100',
           shadow: 'shadow-brand-500/20',
-          hoverShadow: 'hover:shadow-brand-500/30'
+          hoverShadow: 'hover:shadow-brand-500/30',
         };
       case 'from-success-500 to-success-400':
         return {
           background: 'bg-gradient-to-br from-success-500/15 via-success-400/10 to-success-600/15',
-          hoverBackground: 'hover:from-success-500/20 hover:via-success-400/15 hover:to-success-600/20',
+          hoverBackground:
+            'hover:from-success-500/20 hover:via-success-400/15 hover:to-success-600/20',
           border: 'border-success-400/30',
           hoverBorder: 'hover:border-success-400/50',
           titleColor: 'text-success-200',
           hoverTitleColor: 'group-hover:text-success-100',
           shadow: 'shadow-success-500/20',
-          hoverShadow: 'hover:shadow-success-500/30'
+          hoverShadow: 'hover:shadow-success-500/30',
         };
       case 'from-warning-500 to-warning-400':
         return {
           background: 'bg-gradient-to-br from-warning-500/15 via-warning-400/10 to-warning-600/15',
-          hoverBackground: 'hover:from-warning-500/20 hover:via-warning-400/15 hover:to-warning-600/20',
+          hoverBackground:
+            'hover:from-warning-500/20 hover:via-warning-400/15 hover:to-warning-600/20',
           border: 'border-warning-400/30',
           hoverBorder: 'hover:border-warning-400/50',
           titleColor: 'text-warning-200',
           hoverTitleColor: 'group-hover:text-warning-100',
           shadow: 'shadow-warning-500/20',
-          hoverShadow: 'hover:shadow-warning-500/30'
+          hoverShadow: 'hover:shadow-warning-500/30',
         };
       case 'from-accent-500 to-accent-400':
         return {
           background: 'bg-gradient-to-br from-accent-500/15 via-accent-400/10 to-accent-600/15',
-          hoverBackground: 'hover:from-accent-500/20 hover:via-accent-400/15 hover:to-accent-600/20',
+          hoverBackground:
+            'hover:from-accent-500/20 hover:via-accent-400/15 hover:to-accent-600/20',
           border: 'border-accent-400/30',
           hoverBorder: 'hover:border-accent-400/50',
           titleColor: 'text-accent-200',
           hoverTitleColor: 'group-hover:text-accent-100',
           shadow: 'shadow-accent-500/20',
-          hoverShadow: 'hover:shadow-accent-500/30'
+          hoverShadow: 'hover:shadow-accent-500/30',
         };
       default:
         return {
@@ -219,7 +222,7 @@ const DemoSelector = ({
           titleColor: 'text-white',
           hoverTitleColor: 'group-hover:text-brand-200',
           shadow: '',
-          hoverShadow: ''
+          hoverShadow: '',
         };
     }
   };
@@ -228,7 +231,6 @@ const DemoSelector = ({
     window.open(link, '_blank', 'noopener,noreferrer');
   };
 
-
   return (
     <div className='space-y-8'>
       {/* Demo Cards */}
@@ -236,7 +238,7 @@ const DemoSelector = ({
         {demos.map(demo => {
           const completedDemos = getCompletedDemos();
           const isCompleted = completedDemos.includes(demo.id);
-          
+
           return (
             <div
               key={demo.id}
@@ -244,8 +246,8 @@ const DemoSelector = ({
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : isCompleted
-                  ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20'
-                  : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
+                    ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20'
+                    : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
             >
@@ -307,15 +309,15 @@ const DemoSelector = ({
                                 stats.hasClapped
                                   ? 'text-emerald-400 cursor-not-allowed'
                                   : !isConnected
-                                  ? 'text-gray-500 cursor-not-allowed'
-                                  : 'text-emerald-400 hover:text-emerald-300'
+                                    ? 'text-gray-500 cursor-not-allowed'
+                                    : 'text-emerald-400 hover:text-emerald-300'
                               }`}
                               title={
-                                stats.hasClapped 
-                                  ? 'Already clapped!' 
-                                  : !isConnected 
-                                  ? 'Connect wallet to clap!' 
-                                  : 'Clap for this demo!'
+                                stats.hasClapped
+                                  ? 'Already clapped!'
+                                  : !isConnected
+                                    ? 'Connect wallet to clap!'
+                                    : 'Clap for this demo!'
                               }
                             >
                               <div className='text-lg font-bold'>
@@ -356,12 +358,16 @@ const DemoSelector = ({
                   </div>
 
                   {/* Demo Title with Enhanced Styling */}
-                  <h3 className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color).titleColor} ${getDemoCardColors(demo.color).hoverTitleColor}`}>
+                  <h3
+                    className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color).titleColor} ${getDemoCardColors(demo.color).hoverTitleColor}`}
+                  >
                     {demo.title}
                   </h3>
                 </div>
 
-                <h4 className={`font-semibold mb-3 text-left text-sm uppercase tracking-wide ${getDemoCardColors(demo.color).titleColor.replace('200', '300')}`}>
+                <h4
+                  className={`font-semibold mb-3 text-left text-sm uppercase tracking-wide ${getDemoCardColors(demo.color).titleColor.replace('200', '300')}`}
+                >
                   {demo.subtitle}
                 </h4>
                 <p
@@ -421,18 +427,18 @@ const DemoSelector = ({
                         <div className='flex items-center'>
                           <div className='flex flex-col'>
                             <span className='text-lg font-bold'>
-                              {!isConnected 
-                                ? 'CONNECT WALLET' 
-                                : isCompleted 
-                                ? 'PLAY AGAIN' 
-                                : 'LAUNCH DEMO'}
+                              {!isConnected
+                                ? 'CONNECT WALLET'
+                                : isCompleted
+                                  ? 'PLAY AGAIN'
+                                  : 'LAUNCH DEMO'}
                             </span>
                             <span className='text-xs opacity-80'>
-                              {!isConnected 
+                              {!isConnected
                                 ? 'Required to launch demo'
-                                : isCompleted 
-                                ? 'Replay and earn bonus points!' 
-                                : 'Prepare for AWESOMENESS!'}
+                                : isCompleted
+                                  ? 'Replay and earn bonus points!'
+                                  : 'Prepare for AWESOMENESS!'}
                             </span>
                           </div>
                         </div>
@@ -484,7 +490,7 @@ function HomePageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
-  
+
   // Feedback modal state
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackDemoData, setFeedbackDemoData] = useState<{
@@ -597,14 +603,18 @@ function HomePageContent() {
   };
 
   // Handle demo completion and show feedback modal
-  const handleDemoComplete = async (demoId: string, demoName: string, completionTime: number = 5) => {
+  const handleDemoComplete = async (
+    demoId: string,
+    demoName: string,
+    completionTime: number = 5
+  ) => {
     // Mark demo as complete in Firebase
     try {
       await markDemoComplete(demoId, demoName, completionTime);
     } catch (error) {
       console.error('Failed to mark demo as complete:', error);
     }
-    
+
     setFeedbackDemoData({
       demoId,
       demoName,
@@ -834,8 +844,8 @@ function HomePageContent() {
                   <button
                     onClick={() => setShowTechTree(true)}
                     disabled={false}
-                    className="px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
-                    title="Explore the Trustless Work Tech Tree"
+                    className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                    title='Explore the Trustless Work Tech Tree'
                   >
                     <span>Trustless Work Tech Tree</span>
                     <span className='text-xl'>
@@ -855,8 +865,8 @@ function HomePageContent() {
 
                   <a
                     href='/mini-games'
-                    className="px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40"
-                    title="Explore the Nexus Web3 Playground"
+                    className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                    title='Explore the Nexus Web3 Playground'
                   >
                     <span>Nexus Web3 Playground</span>
                     <span className='text-xl'>
@@ -879,8 +889,6 @@ function HomePageContent() {
               </div>
             </div>
           </section>
-
-
 
           <section className=' mx-auto px-4'>
             <div className=' mx-auto'>
@@ -1110,7 +1118,9 @@ function HomePageContent() {
           demoId={activeDemo}
           demoTitle={demos.find(d => d.id === activeDemo)?.title || 'Demo'}
           demoDescription={demos.find(d => d.id === activeDemo)?.subtitle || 'Demo Description'}
-          estimatedTime={activeDemo === 'hello-milestone' ? 1 : activeDemo === 'dispute-resolution' ? 3 : 2}
+          estimatedTime={
+            activeDemo === 'hello-milestone' ? 1 : activeDemo === 'dispute-resolution' ? 3 : 2
+          }
           demoColor={demos.find(d => d.id === activeDemo)?.color || 'from-brand-500 to-brand-400'}
           onDemoComplete={handleDemoComplete}
         >
@@ -1148,7 +1158,6 @@ function HomePageContent() {
           completionTime={feedbackDemoData.completionTime}
         />
       )}
-
     </EscrowProvider>
   );
 }

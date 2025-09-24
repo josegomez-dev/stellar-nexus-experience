@@ -6,7 +6,7 @@ export const WALLET_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
-export type WalletType = typeof WALLET_TYPES[keyof typeof WALLET_TYPES];
+export type WalletType = (typeof WALLET_TYPES)[keyof typeof WALLET_TYPES];
 
 // Supported Wallet Information
 export const SUPPORTED_WALLETS = [
@@ -44,7 +44,7 @@ export const WALLET_STATES = {
   ERROR: 'error',
 } as const;
 
-export type WalletState = typeof WALLET_STATES[keyof typeof WALLET_STATES];
+export type WalletState = (typeof WALLET_STATES)[keyof typeof WALLET_STATES];
 
 // Wallet Error Messages
 export const WALLET_ERRORS = {

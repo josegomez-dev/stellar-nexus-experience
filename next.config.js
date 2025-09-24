@@ -4,14 +4,14 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   generateEtags: false,
-  
+
   // Webpack configuration to suppress Stellar SDK warnings and optimize build
   webpack: (config, { dev, isServer }) => {
     // Suppress critical dependency warnings from stellar-sdk and related packages
     config.module.exprContextCritical = false;
     config.module.unknownContextCritical = false;
     config.module.wrappedContextCritical = false;
-    
+
     // Add fallbacks for Node.js modules that aren't available in the browser
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -60,7 +60,7 @@ const nextConfig = {
 
     return config;
   },
-  
+
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['stellar-sdk', '@stellar/stellar-sdk'],

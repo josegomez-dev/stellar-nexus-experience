@@ -25,12 +25,12 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const quickFeedbackOptions = [
-    "Great demo! 🎉",
-    "Easy to follow 👍",
-    "Very helpful 💡",
-    "Could be clearer 🤔",
-    "Too complex 😅",
-    "Needs more examples 📚"
+    'Great demo! 🎉',
+    'Easy to follow 👍',
+    'Very helpful 💡',
+    'Could be clearer 🤔',
+    'Too complex 😅',
+    'Needs more examples 📚',
   ];
 
   const handleQuickFeedback = (option: string) => {
@@ -39,19 +39,19 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setIsSubmitting(true);
     try {
       await onSubmit({
         demoId,
         demoName,
         rating,
-        feedback: feedback.trim() || "No specific feedback provided",
+        feedback: feedback.trim() || 'No specific feedback provided',
         completionTime,
         difficulty: 'medium', // Default
         wouldRecommend: rating >= 4, // Auto-determine based on rating
       });
-      
+
       onClose();
     } catch (err) {
       console.error('Error submitting feedback:', err);
@@ -74,9 +74,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
         <div className='relative p-6 border-b border-white/10'>
           <div className='absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 rounded-t-2xl'></div>
           <div className='relative z-10 text-center'>
-            <h2 className='text-2xl font-bold text-white mb-2'>
-              🎉 Demo Complete!
-            </h2>
+            <h2 className='text-2xl font-bold text-white mb-2'>🎉 Demo Complete!</h2>
             <p className='text-gray-300 text-sm'>
               Quick feedback on <span className='font-semibold text-blue-400'>{demoName}</span>
             </p>
@@ -87,11 +85,9 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
         <form onSubmit={handleSubmit} className='p-6 space-y-4'>
           {/* Rating */}
           <div className='text-center'>
-            <label className='block text-sm font-medium text-white mb-3'>
-              How was it? ⭐
-            </label>
+            <label className='block text-sm font-medium text-white mb-3'>How was it? ⭐</label>
             <div className='flex justify-center items-center space-x-2'>
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
                   type='button'
@@ -119,7 +115,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
               Quick thoughts (optional):
             </label>
             <div className='grid grid-cols-2 gap-2 mb-3'>
-              {quickFeedbackOptions.map((option) => (
+              {quickFeedbackOptions.map(option => (
                 <button
                   key={option}
                   type='button'
@@ -134,11 +130,11 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
                 </button>
               ))}
             </div>
-            
+
             {/* Custom feedback */}
             <textarea
               value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
+              onChange={e => setFeedback(e.target.value)}
               placeholder='Or write your own thoughts...'
               rows={2}
               className='w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm'
@@ -162,7 +158,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
             >
               Skip
             </button>
-            
+
             <button
               type='submit'
               disabled={isSubmitting}

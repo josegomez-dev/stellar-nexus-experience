@@ -17,24 +17,24 @@ export interface BadgeConfig {
 // Rarity styles for 3D badge rendering
 export const RARITY_STYLES: Record<BadgeRarity, { ring: string; glow: string; text: string }> = {
   common: {
-    ring: "from-slate-200/70 via-slate-400/70 to-slate-300/70",
-    glow: "shadow-[0_0_40px_-8px_rgba(148,163,184,0.45)]",
-    text: "text-slate-200",
+    ring: 'from-slate-200/70 via-slate-400/70 to-slate-300/70',
+    glow: 'shadow-[0_0_40px_-8px_rgba(148,163,184,0.45)]',
+    text: 'text-slate-200',
   },
   rare: {
-    ring: "from-sky-200 via-cyan-300 to-sky-400",
-    glow: "shadow-[0_0_50px_-6px_rgba(56,189,248,0.55)]",
-    text: "text-sky-100",
+    ring: 'from-sky-200 via-cyan-300 to-sky-400',
+    glow: 'shadow-[0_0_50px_-6px_rgba(56,189,248,0.55)]',
+    text: 'text-sky-100',
   },
   epic: {
-    ring: "from-fuchsia-200 via-violet-300 to-indigo-300",
-    glow: "shadow-[0_0_60px_-6px_rgba(168,85,247,0.6)]",
-    text: "text-fuchsia-100",
+    ring: 'from-fuchsia-200 via-violet-300 to-indigo-300',
+    glow: 'shadow-[0_0_60px_-6px_rgba(168,85,247,0.6)]',
+    text: 'text-fuchsia-100',
   },
   legendary: {
-    ring: "from-amber-200 via-yellow-300 to-orange-300",
-    glow: "shadow-[0_0_70px_-4px_rgba(251,191,36,0.65)]",
-    text: "text-amber-100",
+    ring: 'from-amber-200 via-yellow-300 to-orange-300',
+    glow: 'shadow-[0_0_70px_-4px_rgba(251,191,36,0.65)]',
+    text: 'text-amber-100',
   },
 };
 

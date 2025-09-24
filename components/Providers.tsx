@@ -19,9 +19,7 @@ export const Providers = ({ children }: ProvidersProps) => {
         <BadgeAnimationProvider>
           <WalletProvider>
             <AuthProvider>
-              <AccountProvider>
-                {children}
-              </AccountProvider>
+              <AccountProvider>{children}</AccountProvider>
             </AuthProvider>
           </WalletProvider>
         </BadgeAnimationProvider>
