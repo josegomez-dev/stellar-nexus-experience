@@ -662,7 +662,7 @@ export const DisputeResolutionDemo = () => {
     }
   }
 
-  async function handleReleaseFunds(milestoneId: string) {
+  async function handleReleaseAllFunds() {
     if (!walletData) {
       addToast({
         type: 'warning',
@@ -674,53 +674,67 @@ export const DisputeResolutionDemo = () => {
     }
     if (!contractId) return;
 
-    try {
-      // Set loading state for this specific milestone
-      setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
+    // Check if all milestones are approved
+    const allApproved = milestones.every(m => m.status === 'approved');
+    if (!allApproved) {
+      addToast({
+        type: 'warning',
+        title: '⚠️ Not Ready',
+        message: 'All milestones must be approved before releasing funds',
+        duration: 5000,
+      });
+      return;
+    }
 
-      const milestone = milestones.find(m => m.id === milestoneId);
-      const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    try {
+      // Set loading state for all milestones
+      setMilestoneLoadingStates(prev => {
+        const newState = { ...prev };
+        milestones.forEach(m => {
+          newState[m.id] = true;
+        });
+        return newState;
+      });
+
+      const txHash = `release_all_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: `Releasing funds for "${milestone?.title}"...`,
+        message: 'Releasing all funds...',
         type: 'release',
         demoId: 'dispute-resolution',
-        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        amount: milestones.reduce((total, m) => total + (parseInt(m.amount) / 100000), 0).toFixed(1),
         asset: 'USDC',
       });
 
       const payload = {
         contractId,
-        milestoneId,
-        releaseMode: 'multi-release',
+        milestoneIds: milestones.map(m => m.id),
+        releaseMode: 'single-release', // Changed to single release
       };
 
       const result = await hooks.releaseFunds.releaseFunds(payload);
       setEscrowData(result.escrow);
 
-      // Update milestone status
-      const updatedMilestones = milestones.map(m =>
-        m.id === milestoneId ? { ...m, status: 'released' as const } : m
-      );
+      // Update all milestone statuses to released
+      const updatedMilestones = milestones.map(m => ({ ...m, status: 'released' as const }));
       setMilestones(updatedMilestones);
 
-      updateTransaction(txHash, 'success', `Funds released for "${milestone?.title}" successfully`);
+      updateTransaction(txHash, 'success', 'All funds released successfully');
 
       addToast({
         type: 'success',
-        title: 'Funds Released!',
-        message: `${milestone?.title} funds have been successfully released.`,
+        title: '💰 All Funds Released!',
+        message: 'All milestone funds have been released successfully',
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to release funds:', error);
-      const milestone = milestones.find(m => m.id === milestoneId);
-      const txHash = `release_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.error('Failed to release all funds:', error);
+      const txHash = `release_all_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
         hash: txHash,
         status: 'failed',
-        message: `Failed to release funds for "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to release all funds: ${error instanceof Error ? error.message : 'Unknown error'}`,
         type: 'release',
         demoId: 'dispute-resolution',
       });
@@ -728,12 +742,18 @@ export const DisputeResolutionDemo = () => {
       addToast({
         type: 'error',
         title: 'Release Failed',
-        message: 'Failed to release funds for the milestone.',
+        message: 'Failed to release all funds. Please try again.',
         duration: 5000,
       });
     } finally {
-      // Clear loading state for this specific milestone
-      setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: false }));
+      // Clear loading state for all milestones
+      setMilestoneLoadingStates(prev => {
+        const newState = { ...prev };
+        milestones.forEach(m => {
+          newState[m.id] = false;
+        });
+        return newState;
+      });
     }
   }
 
@@ -783,10 +803,10 @@ export const DisputeResolutionDemo = () => {
     }
   };
 
-  const canReleaseMilestone = (milestone: Milestone) => {
+  const canReleaseAllFunds = () => {
     return (
-      milestone.status === 'approved' &&
-      !disputes.some(d => d.milestoneId === milestone.id && d.status === 'open')
+      milestones.every(m => m.status === 'approved') &&
+      !disputes.some(d => d.status === 'open')
     );
   };
 
@@ -1006,18 +1026,6 @@ export const DisputeResolutionDemo = () => {
                           </div>
                         )}
 
-                        {/* Release Funds */}
-                        {canReleaseMilestone(milestone) && (
-                          <button
-                            onClick={() => handleReleaseFunds(milestone.id)}
-                            disabled={milestoneLoadingStates[milestone.id]}
-                            className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
-                          >
-                            {milestoneLoadingStates[milestone.id]
-                              ? 'Releasing...'
-                              : 'Release Funds'}
-                          </button>
-                        )}
                       </div>
                     </div>
 
@@ -1143,6 +1151,57 @@ export const DisputeResolutionDemo = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Release All Funds Button */}
+          {contractId && escrowData?.metadata?.funded && !milestones.every(m => m.status === 'released') && (
+            <div className='mb-8 p-6 bg-gradient-to-r from-warning-500/20 to-warning-600/20 border border-warning-400/30 rounded-lg text-center'>
+              <h3 className='text-xl font-semibold text-warning-300 mb-4'>💰 Release All Funds</h3>
+              <p className='text-warning-200 mb-4'>
+                {canReleaseAllFunds() 
+                  ? 'All milestones have been approved and disputes resolved. Ready to release all funds!'
+                  : 'Complete all milestones and resolve any disputes to release funds.'
+                }
+              </p>
+              
+              {/* Milestone Status Summary */}
+              <div className='mb-4 p-4 bg-white/5 rounded-lg'>
+                <h4 className='text-sm font-semibold text-white mb-2'>Milestone Status:</h4>
+                <div className='grid grid-cols-2 gap-2 text-sm'>
+                  {milestones.map(milestone => (
+                    <div key={milestone.id} className='flex items-center justify-between'>
+                      <span className='text-white/70'>{milestone.title}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        milestone.status === 'approved' ? 'bg-green-500/20 text-green-300' :
+                        milestone.status === 'completed' ? 'bg-blue-500/20 text-blue-300' :
+                        milestone.status === 'pending' ? 'bg-gray-500/20 text-gray-300' :
+                        milestone.status === 'released' ? 'bg-purple-500/20 text-purple-300' :
+                        'bg-red-500/20 text-red-300'
+                      }`}>
+                        {milestone.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleReleaseAllFunds}
+                disabled={!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)}
+                className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 ${
+                  canReleaseAllFunds()
+                    ? 'bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white border-warning-400 hover:border-warning-300 hover:scale-105 hover:shadow-warning-500/50'
+                    : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                }`}
+              >
+                {Object.values(milestoneLoadingStates).some(loading => loading) 
+                  ? 'Releasing All Funds...' 
+                  : canReleaseAllFunds() 
+                    ? '🚀 Release All Funds' 
+                    : '⏳ Complete All Milestones First'
+                }
+              </button>
             </div>
           )}
 
