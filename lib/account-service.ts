@@ -259,11 +259,13 @@ export class AccountService {
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, updateData);
 
-    // Log points transaction
-    const transactionReason = isFirstCompletion 
-      ? `Completed ${demoId}` 
-      : `Replay bonus for ${demoId}`;
-    await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
+    // Log points transaction (only if not already completed to prevent duplicates)
+    if (isFirstCompletion || !currentDemo?.pointsEarned) {
+      const transactionReason = isFirstCompletion 
+        ? `Completed ${demoId}` 
+        : `Replay bonus for ${demoId}`;
+      await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
+    }
     
     // Only check for badge rewards on first completion
     if (isFirstCompletion) {
@@ -433,6 +435,7 @@ export class AccountService {
     demoId?: string
   ): Promise<void> {
     console.log('💰 Logging points transaction:', { userId, type, amount, reason, demoId });
+    console.log('🔍 Stack trace for points transaction creation:', new Error().stack);
     
     // Create transaction object, only including demoId if it's defined
     const transaction: PointsTransaction = {

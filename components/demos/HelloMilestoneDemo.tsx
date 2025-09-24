@@ -49,7 +49,6 @@ export const HelloMilestoneDemo = () => {
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
-  const { markDemoComplete } = useDemoStats();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -521,11 +520,8 @@ export const HelloMilestoneDemo = () => {
             walletAddress: walletData?.publicKey || '',
           });
           
-          // Complete the demo in the account system
+          // Complete the demo in the account system (this handles points transactions)
           await completeDemo('hello-milestone', score);
-          
-          // Mark demo complete in Firebase stats
-          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTime);
         } catch (error) {
           console.error('Failed to complete demo:', error);
         }

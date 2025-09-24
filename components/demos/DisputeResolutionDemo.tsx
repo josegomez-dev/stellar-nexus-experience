@@ -49,7 +49,6 @@ export const DisputeResolutionDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
-  const { markDemoComplete } = useDemoStats();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -158,8 +157,7 @@ export const DisputeResolutionDemo = () => {
             walletAddress: walletData?.publicKey || '',
           });
           
-          // Mark demo complete in Firebase stats
-          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTime);
+          // Demo completion is handled by the account system via completeDemo
           
           addToast({
             type: 'success',
@@ -181,7 +179,7 @@ export const DisputeResolutionDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [milestones, addCompletion, markDemoComplete, getDemoHistory, walletData, addToast]);
+  }, [milestones, addCompletion, getDemoHistory, walletData, addToast]);
 
   async function handleInitializeEscrow() {
     if (!walletData) {
