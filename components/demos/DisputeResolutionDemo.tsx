@@ -16,6 +16,7 @@ import {
 } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 import { useToast } from '@/contexts/ToastContext';
+import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
@@ -47,6 +48,7 @@ interface Milestone {
 export const DisputeResolutionDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
+  const { addTransaction, updateTransaction } = useTransactionHistory();
   const { markDemoComplete } = useDemoStats();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
   const [contractId, setContractId] = useState<string>('');
@@ -232,9 +234,23 @@ export const DisputeResolutionDemo = () => {
         },
       };
 
+      const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Initializing dispute resolution escrow...',
+        type: 'escrow',
+        demoId: 'dispute-resolution',
+        amount: '10',
+        asset: 'USDC',
+      });
+
       const result = await hooks.initializeEscrow.initializeEscrow(payload);
       setContractId(result.contractId);
       setEscrowData(result.escrow);
+      
+      updateTransaction(txHash, 'success', 'Dispute resolution escrow initialized successfully');
+      
       addToast({
         type: 'success',
         title: 'Escrow Initialized!',
@@ -243,6 +259,15 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to initialize escrow:', error);
+      const txHash = `init_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to initialize dispute resolution escrow: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'escrow',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Initialization Failed',
@@ -271,8 +296,22 @@ export const DisputeResolutionDemo = () => {
         releaseMode: 'multi-release',
       };
 
+      const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Funding dispute resolution escrow...',
+        type: 'fund',
+        demoId: 'dispute-resolution',
+        amount: '10',
+        asset: 'USDC',
+      });
+
       const result = await hooks.fundEscrow.fundEscrow(payload);
       setEscrowData(result.escrow);
+      
+      updateTransaction(txHash, 'success', 'Dispute resolution escrow funded with 10 USDC');
+      
       addToast({
         type: 'success',
         title: 'Escrow Funded!',
@@ -281,6 +320,15 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to fund escrow:', error);
+      const txHash = `fund_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to fund dispute resolution escrow: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'fund',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Funding Failed',
@@ -306,6 +354,18 @@ export const DisputeResolutionDemo = () => {
       // Set loading state for this specific milestone
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
 
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Completing milestone "${milestone?.title}"...`,
+        type: 'milestone',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
+      });
+
       const payload = {
         contractId,
         milestoneId,
@@ -322,7 +382,8 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      const milestone = milestones.find(m => m.id === milestoneId);
+      updateTransaction(txHash, 'success', `Milestone "${milestone?.title}" completed successfully`);
+
       addToast({
         type: 'success',
         title: 'Milestone Completed!',
@@ -331,6 +392,16 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to complete milestone:', error);
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `complete_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to complete milestone "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'milestone',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Completion Failed',
@@ -359,6 +430,18 @@ export const DisputeResolutionDemo = () => {
       // Set loading state for this specific milestone
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
 
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Approving milestone "${milestone?.title}"...`,
+        type: 'approve',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
+      });
+
       const payload = {
         contractId,
         milestoneId,
@@ -374,7 +457,8 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      const milestone = milestones.find(m => m.id === milestoneId);
+      updateTransaction(txHash, 'success', `Milestone "${milestone?.title}" approved successfully`);
+
       addToast({
         type: 'success',
         title: 'Milestone Approved!',
@@ -383,6 +467,16 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to approve milestone:', error);
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `approve_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to approve milestone "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'approve',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Approval Failed',
@@ -411,6 +505,18 @@ export const DisputeResolutionDemo = () => {
     try {
       // Set loading state for this specific milestone
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
+
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `dispute_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Raising dispute for "${milestone?.title}"...`,
+        type: 'dispute',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
+      });
 
       const payload = {
         contractId,
@@ -443,7 +549,8 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      const milestone = milestones.find(m => m.id === milestoneId);
+      updateTransaction(txHash, 'success', `Dispute raised for "${milestone?.title}" - awaiting arbitrator resolution`);
+
       addToast({
         type: 'warning',
         title: 'Dispute Raised!',
@@ -452,6 +559,16 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to start dispute:', error);
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `dispute_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to raise dispute for "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'dispute',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Dispute Failed',
@@ -482,6 +599,18 @@ export const DisputeResolutionDemo = () => {
     try {
       const dispute = disputes.find(d => d.id === disputeId);
       if (!dispute) return;
+
+      const milestone = milestones.find(m => m.id === dispute.milestoneId);
+      const txHash = `resolve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Resolving dispute for "${milestone?.title}" (${resolution})...`,
+        type: 'dispute',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
+      });
 
       const resolutionReason =
         resolutionReasons[disputeId] || `Resolved by arbitrator: ${resolution}`;
@@ -527,7 +656,8 @@ export const DisputeResolutionDemo = () => {
       });
       setMilestones(updatedMilestones);
 
-      const milestone = milestones.find(m => m.id === dispute.milestoneId);
+      updateTransaction(txHash, 'success', `Dispute for "${milestone?.title}" resolved: ${resolution}`);
+
       addToast({
         type: 'success',
         title: 'Dispute Resolved!',
@@ -539,6 +669,17 @@ export const DisputeResolutionDemo = () => {
       setResolutionReasons(prev => ({ ...prev, [disputeId]: '' }));
     } catch (error) {
       console.error('Failed to resolve dispute:', error);
+      const dispute = disputes.find(d => d.id === disputeId);
+      const milestone = milestones.find(m => m.id === dispute?.milestoneId);
+      const txHash = `resolve_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to resolve dispute for "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'dispute',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Resolution Failed',
@@ -564,6 +705,18 @@ export const DisputeResolutionDemo = () => {
       // Set loading state for this specific milestone
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
 
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Releasing funds for "${milestone?.title}"...`,
+        type: 'release',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
+      });
+
       const payload = {
         contractId,
         milestoneId,
@@ -579,7 +732,8 @@ export const DisputeResolutionDemo = () => {
       );
       setMilestones(updatedMilestones);
 
-      const milestone = milestones.find(m => m.id === milestoneId);
+      updateTransaction(txHash, 'success', `Funds released for "${milestone?.title}" successfully`);
+
       addToast({
         type: 'success',
         title: 'Funds Released!',
@@ -588,6 +742,16 @@ export const DisputeResolutionDemo = () => {
       });
     } catch (error) {
       console.error('Failed to release funds:', error);
+      const milestone = milestones.find(m => m.id === milestoneId);
+      const txHash = `release_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to release funds for "${milestone?.title}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'release',
+        demoId: 'dispute-resolution',
+      });
+      
       addToast({
         type: 'error',
         title: 'Release Failed',
@@ -687,11 +851,11 @@ export const DisputeResolutionDemo = () => {
       </div>
 
       {/* Main Content */}
-      <div className='bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8 relative'>
+      <div className='bg-gradient-to-br from-warning-500/20 to-warning-600/20 backdrop-blur-sm border border-warning-400/30 rounded-xl shadow-2xl p-8 relative'>
         {/* Content */}
         <div className='relative z-10'>
           <div className='text-center mb-8'>
-            <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500 mb-4'>
+            <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-warning-400 to-warning-500 mb-4'>
               ⚖️ Dispute Resolution Demo
             </h2>
             <p className='text-white/80 text-lg'>
@@ -711,7 +875,7 @@ export const DisputeResolutionDemo = () => {
                   onClick={() => setCurrentRole(role)}
                   className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                     currentRole === role
-                      ? 'bg-orange-500/30 border-2 border-orange-400/50 text-orange-200'
+                      ? 'bg-warning-500/30 border-2 border-warning-400/50 text-warning-200'
                       : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                   }`}
                 >
@@ -722,7 +886,7 @@ export const DisputeResolutionDemo = () => {
               ))}
             </div>
             <p className='text-sm text-white/60 mt-3'>
-              Current role: <span className='text-orange-300 capitalize'>{currentRole}</span>
+              Current role: <span className='text-warning-300 capitalize'>{currentRole}</span>
             </p>
           </div>
 
@@ -758,13 +922,13 @@ export const DisputeResolutionDemo = () => {
 
               <div className='grid md:grid-cols-2 gap-6'>
                 <div>
-                  <h4 className='font-semibold text-orange-300 mb-3'>Milestones</h4>
+                  <h4 className='font-semibold text-warning-300 mb-3'>Milestones</h4>
                   <div className='space-y-2'>
                     {milestones.map(milestone => (
                       <div key={milestone.id} className='p-3 bg-white/5 rounded-lg'>
                         <p className='font-medium text-white'>{milestone.title}</p>
                         <p className='text-sm text-white/70'>{milestone.description}</p>
-                        <p className='text-xs text-orange-300 mt-1'>
+                        <p className='text-xs text-warning-300 mt-1'>
                           {(parseInt(milestone.amount) / 100000).toFixed(1)} USDC
                         </p>
                       </div>
@@ -772,7 +936,7 @@ export const DisputeResolutionDemo = () => {
                   </div>
                 </div>
                 <div>
-                  <h4 className='font-semibold text-orange-300 mb-3'>Dispute Flow</h4>
+                  <h4 className='font-semibold text-warning-300 mb-3'>Dispute Flow</h4>
                   <div className='space-y-2 text-sm text-white/70'>
                     <p>• Worker completes milestone</p>
                     <p>• Client can approve or dispute</p>
@@ -785,7 +949,7 @@ export const DisputeResolutionDemo = () => {
                 <button
                   onClick={handleInitializeEscrow}
                   disabled={!isConnected || hooks.initializeEscrow.isLoading}
-                  className='px-8 py-3 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='px-8 py-3 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {hooks.initializeEscrow.isLoading ? 'Initializing...' : 'Initialize Dispute Resolution Escrow'}
                 </button>
@@ -808,17 +972,17 @@ export const DisputeResolutionDemo = () => {
               <div className='grid md:grid-cols-3 gap-4 text-sm'>
                 <div>
                   <p className='text-white/70'>Contract ID:</p>
-                  <p className='font-mono text-orange-300 bg-orange-900/30 px-2 py-1 rounded'>
+                  <p className='font-mono text-warning-300 bg-warning-900/30 px-2 py-1 rounded'>
                     {contractId.slice(0, 20)}...
                   </p>
                 </div>
                 <div>
                   <p className='text-white/70'>Status:</p>
-                  <p className='text-orange-300'>{escrowData?.status || 'Active'}</p>
+                  <p className='text-warning-300'>{escrowData?.status || 'Active'}</p>
                 </div>
                 <div>
                   <p className='text-white/70'>Total Amount:</p>
-                  <p className='text-orange-300'>10 USDC</p>
+                  <p className='text-warning-300'>10 USDC</p>
                 </div>
               </div>
 
@@ -827,7 +991,7 @@ export const DisputeResolutionDemo = () => {
                   <button
                     onClick={handleFundEscrow}
                     disabled={hooks.fundEscrow.isLoading}
-                    className='px-6 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors'
+                    className='px-6 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors'
                   >
                     {hooks.fundEscrow.isLoading ? 'Funding...' : 'Fund Escrow'}
                   </button>
@@ -851,7 +1015,7 @@ export const DisputeResolutionDemo = () => {
                         <h4 className='text-lg font-semibold text-white mb-2'>{milestone.title}</h4>
                         <p className='text-white/70 mb-3'>{milestone.description}</p>
                         <div className='flex items-center space-x-4 text-sm'>
-                          <span className='text-orange-300'>
+                          <span className='text-warning-300'>
                             {(parseInt(milestone.amount) / 100000).toFixed(1)} USDC
                           </span>
                           <span
@@ -867,7 +1031,7 @@ export const DisputeResolutionDemo = () => {
                           <button
                             onClick={() => handleCompleteMilestone(milestone.id)}
                             disabled={milestoneLoadingStates[milestone.id]}
-                            className='px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors block w-full'
+                            className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
                           >
                             {milestoneLoadingStates[milestone.id]
                               ? 'Completing...'
@@ -881,7 +1045,7 @@ export const DisputeResolutionDemo = () => {
                             <button
                               onClick={() => handleApproveMilestone(milestone.id)}
                               disabled={milestoneLoadingStates[milestone.id]}
-                              className='px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors block w-full'
+                              className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
                             >
                               {milestoneLoadingStates[milestone.id] ? 'Approving...' : 'Approve'}
                             </button>
@@ -903,7 +1067,7 @@ export const DisputeResolutionDemo = () => {
                           <button
                             onClick={() => handleReleaseFunds(milestone.id)}
                             disabled={milestoneLoadingStates[milestone.id]}
-                            className='px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors block w-full'
+                            className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
                           >
                             {milestoneLoadingStates[milestone.id]
                               ? 'Releasing...'
@@ -1099,9 +1263,9 @@ export const DisputeResolutionDemo = () => {
           )}
 
           {/* Demo Instructions */}
-          <div className='mt-8 p-6 bg-orange-500/10 border border-orange-400/30 rounded-lg'>
-            <h3 className='text-lg font-semibold text-orange-300 mb-3'>📚 How This Demo Works</h3>
-            <ul className='text-orange-200 text-sm space-y-2'>
+          <div className='mt-8 p-6 bg-warning-500/10 border border-warning-400/30 rounded-lg'>
+            <h3 className='text-lg font-semibold text-warning-300 mb-3'>📚 How This Demo Works</h3>
+            <ul className='text-warning-200 text-sm space-y-2'>
               <li>
                 • <strong>Role-Based Actions:</strong> Switch between client, worker, and arbitrator
                 roles
@@ -1122,7 +1286,7 @@ export const DisputeResolutionDemo = () => {
                 tracking
               </li>
             </ul>
-            <p className='text-orange-200 text-sm mt-3'>
+            <p className='text-warning-200 text-sm mt-3'>
               This demonstrates how complex dispute resolution workflows can be automated on
               Stellar, providing transparency and reducing the need for traditional legal
               intervention.

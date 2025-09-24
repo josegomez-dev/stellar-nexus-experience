@@ -1094,6 +1094,7 @@ function HomePageContent() {
           demoTitle={demos.find(d => d.id === activeDemo)?.title || 'Demo'}
           demoDescription={demos.find(d => d.id === activeDemo)?.subtitle || 'Demo Description'}
           estimatedTime={activeDemo === 'hello-milestone' ? 1 : activeDemo === 'dispute-resolution' ? 3 : 2}
+          demoColor={demos.find(d => d.id === activeDemo)?.color || 'from-brand-500 to-brand-400'}
           onDemoComplete={handleDemoComplete}
         >
           {activeDemo === 'hello-milestone' && <HelloMilestoneDemo />}

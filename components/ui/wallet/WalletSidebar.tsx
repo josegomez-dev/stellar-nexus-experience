@@ -563,23 +563,15 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     }
                     position='bottom'
                   >
-                    <div className="relative">
-                      <div
-                        className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
-                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                        }`}
-                        title='Coming Soon - Web3 Playground under development'
-                      >
-                        <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
-                      </div>
-                      
-                      {/* Coming Soon Badge */}
-                      <div className='absolute -top-1 -right-1 z-10'>
-                        <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-0.5 rounded-full font-bold text-xs shadow-lg animate-pulse border border-white'>
-                          🚧
-                        </div>
-                      </div>
-                    </div>
+                    <button
+                      onClick={redirectToNexusStartersLiveApp}
+                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 relative flex items-center justify-center ${
+                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                      }`}
+                      title='Mini-Games Collection'
+                    >
+                      <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
+                    </button>
                   </Tooltip>
                 </div>
               </div>
@@ -766,29 +758,21 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     </div>
                   )}
 
-                  <div className="relative">
-                    <div
-                      className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                      title={!isExpanded ? 'Coming Soon - Web3 Playground' : 'Coming Soon - Web3 Playground under development'}
-                    >
-                      <Image
-                        src='/images/icons/console.png'
-                        alt='Console'
-                        width={20}
-                        height={20}
-                        className='w-5 h-5'
-                      />
-                    </div>
-                    
-                    {/* Coming Soon Badge */}
-                    <div className='absolute -top-1 -right-1 z-10'>
-                      <div className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-1 py-0.5 rounded-full font-bold text-xs shadow-lg animate-pulse border border-white'>
-                        🚧
-                      </div>
-                    </div>
-                  </div>
+                  <button
+                    onClick={redirectToNexusStartersLiveApp}
+                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 relative flex items-center justify-center ${
+                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
+                    }`}
+                    title={!isExpanded ? 'Mini-Games Collection' : 'Mini-Games Collection'}
+                  >
+                    <Image
+                      src='/images/icons/console.png'
+                      alt='Console'
+                      width={20}
+                      height={20}
+                      className='w-5 h-5'
+                    />
+                  </button>
                 </div>
 
                 <button
