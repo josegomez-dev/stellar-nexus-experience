@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { PixelArtAvatar, generateAvatarConfig } from '@/components/ui/avatar/PixelArtAvatar';
 import { generateFunnyName, generateNameOptions, generateCategoryName } from '@/lib/funny-name-generator';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 
 interface ProfileUpdateModalProps {
@@ -13,21 +14,22 @@ interface ProfileUpdateModalProps {
 
 export const ProfileUpdateModal = ({ isOpen, onClose }: ProfileUpdateModalProps) => {
   const { user, updateUser } = useAuth();
+  const { walletData } = useGlobalWallet();
   const { addToast } = useToast();
   
   const [customName, setCustomName] = useState(user?.customName || '');
-  const [avatarSeed, setAvatarSeed] = useState(user?.avatarSeed || user?.walletAddress || 'default');
+  const [avatarSeed, setAvatarSeed] = useState(user?.avatarSeed || walletData?.publicKey || 'default');
   const [nameOptions, setNameOptions] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Generate name options when modal opens
   useEffect(() => {
-    if (isOpen && user?.walletAddress) {
-      const options = generateNameOptions(user.walletAddress, 8);
+    if (isOpen && walletData?.publicKey) {
+      const options = generateNameOptions(walletData.publicKey, 8);
       setNameOptions(options);
     }
-  }, [isOpen, user?.walletAddress]);
+  }, [isOpen, walletData?.publicKey]);
 
   // Generate new avatar seed
   const generateNewAvatar = () => {
@@ -59,14 +61,34 @@ export const ProfileUpdateModal = ({ isOpen, onClose }: ProfileUpdateModalProps)
 
   // Save profile updates
   const handleSave = async () => {
-    if (!user) return;
+    if (!walletData?.publicKey) {
+      addToast({
+        type: 'error',
+        title: '❌ No Wallet Connected',
+        message: 'Please connect your wallet first',
+        duration: 3000,
+      });
+      return;
+    }
     
     setIsSaving(true);
     try {
-      await updateUser({
-        customName: customName.trim() || undefined,
-        avatarSeed: avatarSeed,
-      });
+      if (user) {
+        // Update existing user
+        await updateUser({
+          customName: customName.trim() || undefined,
+          avatarSeed: avatarSeed,
+        });
+      } else {
+        // Create new user with profile data
+        // For now, we'll store in localStorage until user signs up
+        const profileData = {
+          customName: customName.trim() || undefined,
+          avatarSeed: avatarSeed,
+          walletAddress: walletData.publicKey,
+        };
+        localStorage.setItem(`profile_${walletData.publicKey}`, JSON.stringify(profileData));
+      }
       
       addToast({
         type: 'success',

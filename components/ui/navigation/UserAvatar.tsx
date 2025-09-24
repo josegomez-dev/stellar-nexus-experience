@@ -15,7 +15,25 @@ export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvat
   const { user } = useAuth();
 
   // Use custom avatar seed if available, otherwise fall back to wallet address
-  const avatarSeed = user?.avatarSeed || walletData?.publicKey || 'default';
+  const getAvatarSeed = () => {
+    if (user?.avatarSeed) return user.avatarSeed;
+    if (walletData?.publicKey) {
+      // Check localStorage for profile data
+      try {
+        const profileData = localStorage.getItem(`profile_${walletData.publicKey}`);
+        if (profileData) {
+          const parsed = JSON.parse(profileData);
+          return parsed.avatarSeed || walletData.publicKey;
+        }
+      } catch (error) {
+        console.error('Error reading profile data:', error);
+      }
+      return walletData.publicKey;
+    }
+    return 'default';
+  };
+
+  const avatarSeed = getAvatarSeed();
 
   const sizeClasses = {
     sm: 32,

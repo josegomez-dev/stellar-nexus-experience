@@ -40,7 +40,21 @@ export const UserDropdown = () => {
   const displayName = 
     isAuthenticated && user 
       ? (user.customName || user.username) 
-      : generateDisplayName(walletData?.publicKey || '');
+      : (() => {
+          // Check localStorage for profile data if wallet is connected
+          if (walletData?.publicKey) {
+            try {
+              const profileData = localStorage.getItem(`profile_${walletData.publicKey}`);
+              if (profileData) {
+                const parsed = JSON.parse(profileData);
+                if (parsed.customName) return parsed.customName;
+              }
+            } catch (error) {
+              console.error('Error reading profile data:', error);
+            }
+          }
+          return generateDisplayName(walletData?.publicKey || '');
+        })();
   const stats = getUserStats();
 
   const handleDisconnect = () => {
@@ -115,15 +129,13 @@ export const UserDropdown = () => {
           <div className='relative z-10 p-2'>
             {isConnected ? (
               <>
-                {isAuthenticated && (
-                  <button
-                    onClick={handleUserProfile}
-                    className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-                  >
-                    <span className='text-lg'>👤</span>
-                    <span>View Profile</span>
-                  </button>
-                )}
+                <button
+                  onClick={handleUserProfile}
+                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+                >
+                  <span className='text-lg'>🎨</span>
+                  <span>Customize Profile</span>
+                </button>
 
                 <a
                   href='/'
