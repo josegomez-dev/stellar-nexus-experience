@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { useAccount } from '@/contexts/AccountContext';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 import {
@@ -42,6 +43,7 @@ export const MicroTaskMarketplaceDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
+  const { completeDemo: completeDemoInAccount } = useAccount();
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({
@@ -106,6 +108,30 @@ export const MicroTaskMarketplaceDemo = () => {
     if (demoCompleted) {
       console.log('🎉 Triggering confetti for Micro Task Marketplace Demo!');
       setShowConfetti(true);
+
+      // Complete the demo using the centralized account system
+      const completeDemo = async () => {
+        try {
+          const score = 90; // High score for completing micro task marketplace
+
+          // Use the centralized account system for completion
+          await completeDemoInAccount('micro-marketplace', score);
+
+          console.log('✅ Micro Task Marketplace Demo completed successfully');
+        } catch (error) {
+          console.error('❌ Failed to complete Micro Task Marketplace Demo:', error);
+          addToast({
+            type: 'error',
+            title: '❌ Demo Completion Failed',
+            message: 'Failed to complete demo. Please try again.',
+            duration: 5000,
+          });
+        }
+      };
+
+      // Complete demo after a short delay
+      setTimeout(completeDemo, 2000);
+
       // Hide confetti after animation
       const timer = setTimeout(() => {
         console.log('🎉 Hiding confetti for Micro Task Marketplace Demo');
@@ -113,7 +139,7 @@ export const MicroTaskMarketplaceDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [completedTasks, postedTasks]);
+  }, [completedTasks, postedTasks, completeDemoInAccount, addToast]);
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
