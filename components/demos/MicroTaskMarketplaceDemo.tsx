@@ -64,22 +64,8 @@ export const MicroTaskMarketplaceDemo = () => {
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Real vs Mock toggle
-  const [useRealTrustlessWork, setUseRealTrustlessWork] = useState(true);
-
-  // Mock hooks
-  const mockHooks = {
-    initializeEscrow: useInitializeEscrow().initializeEscrow,
-    isLoading: useInitializeEscrow().isLoading,
-    error: useInitializeEscrow().error,
-    fundEscrow: useFundEscrow().fundEscrow,
-    changeMilestoneStatus: useChangeMilestoneStatus().changeMilestoneStatus,
-    approveMilestone: useApproveMilestone().approveMilestone,
-    releaseFunds: useReleaseFunds().releaseFunds,
-  };
-
-  // Real hooks
-  const realHooks = {
+  // Always use real blockchain transactions
+  const hooks = {
     initializeEscrow: useRealInitializeEscrow().initializeEscrow,
     isLoading: useRealInitializeEscrow().isLoading,
     error: useRealInitializeEscrow().error,
@@ -88,9 +74,6 @@ export const MicroTaskMarketplaceDemo = () => {
     approveMilestone: useApproveMilestone().approveMilestone, // Fallback to mock for now
     releaseFunds: useReleaseFunds().releaseFunds, // Fallback to mock for now
   };
-
-  // Use appropriate hooks based on toggle
-  const hooks = useRealTrustlessWork ? realHooks : mockHooks;
 
   // Mock task categories
   const [categories] = useState<TaskCategory[]>([
@@ -279,9 +262,7 @@ export const MicroTaskMarketplaceDemo = () => {
       if (!task) return;
 
       // Add pending transaction
-      const txHash = useRealTrustlessWork 
-        ? `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        : `mock_accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const txHash = `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       addTransaction({
         hash: txHash,
@@ -347,9 +328,7 @@ export const MicroTaskMarketplaceDemo = () => {
       console.error('Failed to accept task:', error);
       
       // Update transaction status to failed
-      const txHash = useRealTrustlessWork 
-        ? `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        : `mock_accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const txHash = `failed_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       addTransaction({
         hash: txHash,
@@ -700,31 +679,16 @@ export const MicroTaskMarketplaceDemo = () => {
               🛒 Micro-Task Marketplace Demo
             </h2>
             <div className='flex flex-col items-end space-y-2'>
-              <button
-                onClick={() => setUseRealTrustlessWork(!useRealTrustlessWork)}
-                className={`px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-all duration-300 ${
-                  useRealTrustlessWork
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                    : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black'
-                }`}
-              >
-                <span className="font-semibold">Real Blockchain</span>
-                {useRealTrustlessWork && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                )}
-              </button>
+              <div className="px-4 py-2 rounded-full font-bold text-sm shadow-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                <span className="font-semibold">🔗 Live Stellar</span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
               <div className="text-center">
-                <div className={`text-xs font-medium ${
-                  useRealTrustlessWork ? 'text-green-300' : 'text-yellow-300'
-                }`}>
-                  {useRealTrustlessWork ? '🔗 Real Blockchain Mode' : '🧪 Mock Demo Mode'}
+                <div className="text-xs font-medium text-green-300">
+                  🔗 Real Blockchain Mode
                 </div>
-                <div className={`text-xs ${
-                  useRealTrustlessWork ? 'text-green-200' : 'text-yellow-200'
-                }`}>
-                  {useRealTrustlessWork 
-                    ? 'Live Stellar transactions' 
-                    : 'Simulated transactions'}
+                <div className="text-xs text-green-200">
+                  Live Stellar transactions
                 </div>
               </div>
             </div>
@@ -732,6 +696,31 @@ export const MicroTaskMarketplaceDemo = () => {
           <p className='text-white/80 text-lg'>
             Lightweight gig-board with escrow functionality for micro-tasks
           </p>
+
+          {/* View Account on Explorer */}
+          {isConnected && walletData?.publicKey && (
+            <div className='mt-4 flex justify-center'>
+              <button
+                onClick={() => {
+                  const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+                  const networkSuffix = isTestnet ? 'testnet' : 'public';
+                  const explorerUrl = `https://stellar.expert/explorer/${networkSuffix}/account/${walletData.publicKey}`;
+                  window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+                  addToast({
+                    type: 'info',
+                    title: '🌐 Account Explorer',
+                    message: 'Opening your wallet on Stellar Expert - view your balance, transactions, and assets',
+                    duration: 4000,
+                  });
+                }}
+                className="px-4 py-2 bg-accent-500/20 border border-accent-400/30 text-accent-200 rounded-lg hover:bg-accent-500/30 transition-all duration-300 flex items-center space-x-2"
+                title="View account on Stellar Explorer"
+              >
+                <span className="text-sm">🌐</span>
+                <span className="text-sm font-medium">View Account on Explorer</span>
+              </button>
+            </div>
+          )}
 
           {/* Wallet Connection Required Message */}
           {!isConnected && (

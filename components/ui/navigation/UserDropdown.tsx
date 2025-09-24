@@ -155,14 +155,6 @@ export const UserDropdown = () => {
 
                 <hr />
 
-                <button
-                  onClick={copyWalletAddress}
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-                >
-                  <span className='text-lg'>📋</span>
-                  <span>Copy Address</span>
-                </button>
-
                 <a
                   href='/docs'
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'

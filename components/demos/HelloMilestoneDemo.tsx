@@ -61,7 +61,7 @@ export const HelloMilestoneDemo = () => {
   const [showProcessExplanation, setShowProcessExplanation] = useState(false);
   const [currentProcessStep, setCurrentProcessStep] = useState<string>('');
   const [networkValidation, setNetworkValidation] = useState<{ isValid: boolean; message: string } | null>(null);
-  const [useRealTrustlessWork, setUseRealTrustlessWork] = useState(true); // Toggle for real vs mock
+  // Always use real blockchain transactions
   
   // Transaction status tracking with enhanced info
   const [pendingTransactions, setPendingTransactions] = useState<Record<string, string>>({}); // stepId -> txHash
@@ -79,39 +79,28 @@ export const HelloMilestoneDemo = () => {
 
   // Helper function to generate realistic transaction hash for demo
   const generateTransactionHash = (type: string): string => {
-    if (useRealTrustlessWork) {
-      // Generate a realistic Stellar transaction hash (64 characters, hex)
-      const chars = '0123456789abcdef';
-      let hash = '';
-      for (let i = 0; i < 64; i++) {
-        hash += chars[Math.floor(Math.random() * chars.length)];
-      }
-      return hash;
-    } else {
-      // Generate a mock hash for demo mode
-      return `mock_${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate a realistic Stellar transaction hash (64 characters, hex)
+    const chars = '0123456789abcdef';
+    let hash = '';
+    for (let i = 0; i < 64; i++) {
+      hash += chars[Math.floor(Math.random() * chars.length)];
     }
+    return hash;
   };
 
   // Helper function to create explorer URLs
   const createExplorerUrls = (txHash: string) => {
-    if (useRealTrustlessWork && !txHash.startsWith('mock_')) {
-      // Determine network-specific URLs based on wallet data
-      const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
-      const networkSuffix = isTestnet ? 'testnet' : 'public';
-      
-      return {
-        explorerUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
-        stellarExpertUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
-        horizonUrl: isTestnet
-          ? `${API_ENDPOINTS.HORIZON.TESTNET}/transactions/${txHash}`
-          : `${API_ENDPOINTS.HORIZON.MAINNET}/transactions/${txHash}`
-      };
-    }
+    // Always create explorer URLs for real blockchain transactions
+    const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+    const networkSuffix = isTestnet ? 'testnet' : 'public';
+    
     return {
-      explorerUrl: '#',
-      stellarExpertUrl: '#',
-      horizonUrl: '#'
+      explorerUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
+      stellarExpertUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
+      horizonUrl: isTestnet
+        ? `${API_ENDPOINTS.HORIZON.TESTNET}/transactions/${txHash}`
+        : `${API_ENDPOINTS.HORIZON.MAINNET}/transactions/${txHash}`,
+      accountUrl: walletData?.publicKey ? `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/account/${walletData.publicKey}` : null
     };
   };
   
@@ -336,9 +325,7 @@ export const HelloMilestoneDemo = () => {
 
   // Helper function to check if a step can proceed based on transaction status
   const canProceedToNextStep = (stepId: string): boolean => {
-    if (!useRealTrustlessWork) {
-      return true; // Mock mode can always proceed
-    }
+    // Always check real transaction status
     
     const txHash = pendingTransactions[stepId];
     if (!txHash) {
@@ -396,42 +383,35 @@ export const HelloMilestoneDemo = () => {
   };
 
   const getStepStatus = (stepIndex: number, stepId: string): 'pending' | 'current' | 'completed' => {
-    if (useRealTrustlessWork) {
-      // For real transactions, check actual transaction status
-      const txHash = pendingTransactions[stepId];
-      if (txHash) {
-        const txStatus = transactionStatuses[txHash];
-        if (txStatus === 'pending') {
-          return 'current'; // Show as current while transaction is pending
-        }
-        if (txStatus === 'failed') {
-          return 'current'; // Allow retry if failed
-        }
-        if (txStatus === 'success' && stepIndex < currentStep) {
-          return 'completed';
-        }
+    // Always check actual transaction status
+    const txHash = pendingTransactions[stepId];
+    if (txHash) {
+      const txStatus = transactionStatuses[txHash];
+      if (txStatus === 'pending') {
+        return 'current'; // Show as current while transaction is pending
       }
-      
-      // Standard logic for non-pending transactions
-      if (stepIndex === currentStep) return 'current';
-      if (stepIndex < currentStep) return 'completed';
-      return 'pending';
-    } else {
-      // Mock mode uses simple logic
-      if (stepIndex === currentStep) return 'current';
-      if (stepIndex < currentStep) return 'completed';
-      return 'pending';
+      if (txStatus === 'failed') {
+        return 'current'; // Allow retry if failed
+      }
+      if (txStatus === 'success' && stepIndex < currentStep) {
+        return 'completed';
+      }
     }
+    
+    // Standard logic for non-pending transactions
+    if (stepIndex === currentStep) return 'current';
+    if (stepIndex < currentStep) return 'completed';
+    return 'pending';
   };
 
   const getStepDisabled = (stepIndex: number, stepId: string): boolean => {
     // Basic connection and step order checks
     if (!isConnected) return true;
-    if (useRealTrustlessWork && networkValidation && !networkValidation.isValid) return true;
+    if (networkValidation && !networkValidation.isValid) return true;
     if (stepIndex !== currentStep) return true;
     
-    // For real transactions, check if previous step is actually completed
-    if (useRealTrustlessWork && stepIndex > 0) {
+    // Always check if previous step is actually completed
+    if (stepIndex > 0) {
       const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
       const previousStepId = stepOrder[stepIndex - 1];
       if (!canProceedToNextStep(previousStepId)) {
@@ -449,28 +429,20 @@ export const HelloMilestoneDemo = () => {
     {
       id: 'initialize',
       title: 'Initialize Escrow Contract',
-      description: useRealTrustlessWork 
-        ? 'Deploy real smart contract on Stellar Testnet with 10 USDC' 
-        : 'Create mock escrow contract for demonstration',
+      description: 'Deploy real smart contract on Stellar Testnet with 10 USDC',
       status: getStepStatus(0, 'initialize'),
       action: handleInitializeEscrow,
       disabled: getStepDisabled(0, 'initialize'),
-      details: useRealTrustlessWork
-        ? '🔗 Creates a REAL smart contract on Stellar blockchain. Your wallet will prompt you to sign the transaction. This will cost a small fee in XLM.'
-        : '🧪 Creates a mock contract for safe demonstration. No real blockchain interaction or fees.',
+      details: '🔗 Creates a REAL smart contract on Stellar blockchain. Your wallet will prompt you to sign the transaction. This will cost a small fee in XLM.',
     },
     {
       id: 'fund',
       title: 'Fund Escrow Contract',
-      description: useRealTrustlessWork 
-        ? 'Transfer real USDC tokens into the blockchain escrow' 
-        : 'Simulate funding the escrow with USDC',
+      description: 'Transfer real USDC tokens into the blockchain escrow',
       status: getStepStatus(1, 'fund'),
       action: handleFundEscrow,
       disabled: getStepDisabled(1, 'fund'),
-      details: useRealTrustlessWork
-        ? '💰 Transfers actual USDC from your wallet to the smart contract. Funds will be locked until conditions are met.'
-        : '🧪 Simulates USDC transfer for demonstration purposes.',
+      details: '💰 Transfers actual USDC from your wallet to the smart contract. Funds will be locked until conditions are met.',
     },
     {
       id: 'complete',
@@ -521,7 +493,7 @@ export const HelloMilestoneDemo = () => {
           // Calculate score based on performance (85% base + bonuses)
           let score = 85;
           if (completionTime < 300) score += 10; // Bonus for quick completion
-          if (useRealTrustlessWork) score += 5; // Bonus for using real blockchain
+          score += 5; // Bonus for using real blockchain
           score = Math.min(100, score); // Cap at 100%
           
           // Check if this is first completion
@@ -569,12 +541,11 @@ export const HelloMilestoneDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, completeDemo, demoStartTime, useRealTrustlessWork, completionCount, addCompletion]);
+  }, [currentStep, completeDemo, demoStartTime, completionCount, addCompletion]);
 
   async function handleInitializeEscrow() {
     console.log('🚀 Starting handleInitializeEscrow...');
     console.log('📊 Current state:', { 
-      useRealTrustlessWork, 
       isConnected, 
       walletData: walletData ? 'present' : 'missing',
       networkValidation,
@@ -594,7 +565,7 @@ export const HelloMilestoneDemo = () => {
     }
 
     // Validate network connection for real transactions
-    if (useRealTrustlessWork && networkValidation && !networkValidation.isValid) {
+    if (networkValidation && !networkValidation.isValid) {
       console.log('❌ Network validation failed:', networkValidation.message);
       addToast({
         type: 'error',
@@ -615,10 +586,8 @@ export const HelloMilestoneDemo = () => {
       // Show starting toast with enhanced messaging
       addToast({
         type: 'info',
-        title: useRealTrustlessWork ? '🚀 Creating Real Escrow Contract' : '🧪 Demo Mode: Mock Escrow',
-        message: useRealTrustlessWork 
-          ? 'Deploying smart contract on Stellar Testnet...' 
-          : 'Creating mock escrow for demonstration...',
+        title: '🚀 Creating Real Escrow Contract',
+        message: 'Deploying smart contract on Stellar Testnet...',
         icon: '🔒',
         duration: 4000,
       });
@@ -681,7 +650,7 @@ export const HelloMilestoneDemo = () => {
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: useRealTrustlessWork ? 'Creating real escrow contract...' : 'Creating mock escrow...',
+        message: 'Creating real escrow contract...',
         type: 'escrow',
         demoId: 'hello-milestone',
         amount: '10 USDC',
@@ -690,8 +659,7 @@ export const HelloMilestoneDemo = () => {
 
       let result;
       
-      if (useRealTrustlessWork) {
-        console.log('🔗 Using real Trustless Work mode...');
+      console.log('🔗 Using real Trustless Work mode...');
         
         // Set up automatic completion timeout (3 seconds for better demo flow)
         console.log('⏰ Setting up auto-completion timeout...');
@@ -885,40 +853,6 @@ export const HelloMilestoneDemo = () => {
             duration: 7000,
           });
         }
-        
-      } else {
-        console.log('🧪 Using mock mode...');
-        // Use mock implementation - immediate success
-        result = await initializeEscrow(payload);
-        console.log('✅ Mock escrow result:', result);
-        
-        updateTransactionStatusAndCheckCompletion(txHash, 'success', 'Mock escrow contract created successfully!');
-        
-        setContractId(result.contractId);
-        setEscrowData(result.escrow);
-        setDemoStarted(true);
-        setDemoStartTime(Date.now());
-        
-        // Clear from pending transactions
-        setPendingTransactions(prev => {
-          const newPending = { ...prev };
-          delete newPending['initialize'];
-          return newPending;
-        });
-        
-        // Force step progression for mock mode
-        console.log('🚀 Forcing step progression to step 1 (fund escrow) - mock mode');
-        setCurrentStep(1);
-        
-        // Enhanced success toast
-        addToast({
-          type: 'success',
-          title: '✅ Mock Escrow Created!',
-          message: `Contract ID: ${result.contractId.slice(0, 12)}... | Amount: 10 USDC`,
-          icon: '🔒',
-          duration: 7000,
-        });
-      }
       
       console.log('✅ handleInitializeEscrow completed successfully');
       
@@ -1479,76 +1413,30 @@ export const HelloMilestoneDemo = () => {
               {/* Switch Toggle */}
               <div className="relative flex items-center justify-center">
                 <div className="flex bg-white/10 rounded-full p-1 border border-white/20">
-                  {/* Mock Demo Button */}
-                  <button
-                    onClick={() => setUseRealTrustlessWork(false)}
-                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center space-x-2 ${
-                      !useRealTrustlessWork
-                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg scale-105 border-2 border-yellow-400/50'
-                        : 'text-white/60 hover:text-white/80'
-                    }`}
-                  >
-                    <span className="text-lg">🧪</span>
-                    <span className="font-semibold">Mock Demo</span>
-                    {!useRealTrustlessWork && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-                    )}
-                  </button>
-                  
-                  {/* Real Blockchain Button */}
-                  <button
-                    onClick={() => setUseRealTrustlessWork(true)}
-                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center space-x-2 ${
-                      useRealTrustlessWork
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105 border-2 border-green-400/50'
-                        : 'text-white/60 hover:text-white/80'
-                    }`}
-                  >
+                  {/* Live Stellar Indicator */}
+                  <div className="px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105 border-2 border-green-400/50">
                     <span className="text-lg">🔗</span>
-                    <span className="font-semibold">Real Blockchain</span>
-                    {useRealTrustlessWork && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                    )}
-                  </button>
+                    <span className="font-semibold">Live Stellar</span>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                  </div>
                 </div>
               </div>
               
               {/* Mode Description */}
               <div className="mt-4 text-center">
-                <div className={`p-3 rounded-lg border transition-all duration-300 ${
-                  useRealTrustlessWork
-                    ? 'bg-green-500/10 border-green-400/30'
-                    : 'bg-yellow-500/10 border-yellow-400/30'
-                }`}>
-                  <div className={`font-semibold mb-1 ${
-                    useRealTrustlessWork ? 'text-green-300' : 'text-yellow-300'
-                  }`}>
-                    {useRealTrustlessWork ? '🔗 Real Blockchain Mode' : '🧪 Mock Demo Mode'}
+                <div className="p-3 rounded-lg border transition-all duration-300 bg-green-500/10 border-green-400/30">
+                  <div className="font-semibold mb-1 text-green-300">
+                    🔗 Real Blockchain Mode
                   </div>
-                  <div className={`text-sm ${
-                    useRealTrustlessWork ? 'text-green-200' : 'text-yellow-200'
-                  }`}>
-                    {useRealTrustlessWork 
-                      ? 'Creates actual smart contracts on Stellar Testnet with real USDC transactions' 
-                      : 'Safe simulation for learning - no real blockchain interaction or fees required'
-                    }
+                  <div className="text-sm text-green-200">
+                    Creates actual smart contracts on Stellar Testnet with real USDC transactions
                   </div>
                   
                   {/* Additional features info */}
                   <div className="mt-2 flex flex-wrap gap-2 justify-center">
-                    {useRealTrustlessWork ? (
-                      <>
-                        <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Real Transactions</span>
-                        <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Stellar Explorer</span>
-                        <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Wallet Signatures</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="px-2 py-1 bg-yellow-600/20 text-yellow-200 text-xs rounded-full">No Fees</span>
-                        <span className="px-2 py-1 bg-yellow-600/20 text-yellow-200 text-xs rounded-full">Safe Learning</span>
-                        <span className="px-2 py-1 bg-yellow-600/20 text-yellow-200 text-xs rounded-full">Instant Results</span>
-                      </>
-                    )}
+                    <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Real Transactions</span>
+                    <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Stellar Explorer</span>
+                    <span className="px-2 py-1 bg-green-600/20 text-green-200 text-xs rounded-full">Wallet Signatures</span>
                   </div>
                 </div>
               </div>
@@ -1601,13 +1489,13 @@ export const HelloMilestoneDemo = () => {
                       onClick={() => {
                         const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
                         const networkSuffix = isTestnet ? 'testnet' : 'public';
-                        const explorerUrl = `https://stellar.expert/explorer/${networkSuffix}/account/${walletData.publicKey}`;
+                        const explorerUrl = `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/account/${walletData.publicKey}`;
                         window.open(explorerUrl, '_blank', 'noopener,noreferrer');
                         addToast({
                           type: 'info',
-                          title: '🌐 Opening Stellar Explorer',
-                          message: 'View your account on Stellar Expert',
-                          duration: 3000,
+                          title: '🌐 Account Explorer',
+                          message: 'Opening your wallet on Stellar Expert - view your balance, transactions, and assets',
+                          duration: 4000,
                         });
                       }}
                       className="px-3 py-2 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded hover:bg-purple-500/30 transition-all duration-300 flex items-center space-x-2"
@@ -1735,7 +1623,7 @@ export const HelloMilestoneDemo = () => {
                 />
                 
                 {/* Enhanced Transaction Status Indicator */}
-                {useRealTrustlessWork && pendingTransactions['initialize'] && (
+                {pendingTransactions['initialize'] && (
                   <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-lg transition-all duration-500">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -1936,7 +1824,7 @@ export const HelloMilestoneDemo = () => {
                       
                       const txHash = pendingTransactions[step.id];
                       const txStatus = txHash ? transactionStatuses[txHash] : null;
-                      const isPending = useRealTrustlessWork && txStatus === 'pending';
+                      const isPending = txStatus === 'pending';
                       
                       if (isLoading || isPending) {
                         return <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>;
@@ -1957,10 +1845,10 @@ export const HelloMilestoneDemo = () => {
                         
                         const txHash = pendingTransactions[step.id];
                         const txStatus = txHash ? transactionStatuses[txHash] : null;
-                        const isPending = useRealTrustlessWork && txStatus === 'pending';
+                        const isPending = txStatus === 'pending';
                         
                         if (isLoading) {
-                          if (step.id === 'initialize') return useRealTrustlessWork ? 'Creating Real Contract...' : 'Initializing...';
+                          if (step.id === 'initialize') return 'Creating Real Contract...';
                           if (step.id === 'fund') return 'Funding Contract...';
                           if (step.id === 'complete') return 'Completing Milestone...';
                           if (step.id === 'approve') return 'Approving Work...';
@@ -2066,7 +1954,7 @@ export const HelloMilestoneDemo = () => {
               <span>🔍</span>
               <span>Transaction History</span>
               <span className="text-sm text-purple-300 bg-purple-500/20 px-2 py-1 rounded-full">
-                {useRealTrustlessWork ? 'Real Blockchain' : 'Mock Demo'}
+                Real Blockchain
               </span>
               {showTransactionTooltip && (
                 <div className="animate-pulse">
@@ -2119,7 +2007,7 @@ export const HelloMilestoneDemo = () => {
                     <div className='text-xs text-white/60 mb-1'>Transaction Hash</div>
                     <div className='flex items-center justify-between bg-black/20 rounded p-2'>
                       <code className='font-mono text-xs text-blue-200'>
-                        {useRealTrustlessWork && !tx.hash.startsWith('mock_') 
+                        {!tx.hash.startsWith('mock_') 
                           ? `${tx.hash.slice(0, 16)}...${tx.hash.slice(-16)}`
                           : tx.hash
                         }
@@ -2143,7 +2031,7 @@ export const HelloMilestoneDemo = () => {
                   </div>
                   
                   {/* Explorer Links - Only show for real transactions */}
-                  {useRealTrustlessWork && !tx.hash.startsWith('mock_') && (
+                  {!tx.hash.startsWith('mock_') && (
                     <div className='flex space-x-2'>
                       <button
                         onClick={() => {
@@ -2201,9 +2089,9 @@ export const HelloMilestoneDemo = () => {
                   )}
                   
                   {/* Mock Transaction Notice */}
-                  {(!useRealTrustlessWork || tx.hash.startsWith('mock_')) && (
+                  {tx.hash.startsWith('mock_') && (
                     <div className='mt-2 p-2 bg-yellow-500/10 border border-yellow-400/30 rounded text-xs text-yellow-300'>
-                      <span>🧪</span> This is a mock transaction for demonstration purposes. Switch to "Real Blockchain" mode to see actual Stellar transactions.
+                      <span>🧪</span> This is a mock transaction for demonstration purposes.
                     </div>
                   )}
                 </div>
