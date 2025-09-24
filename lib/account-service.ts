@@ -26,6 +26,7 @@ import {
   Achievement,
 } from '@/types/account';
 import { getBadgeById } from './badge-config';
+import { badgeService, demoProgressService, userService } from './firebase-service';
 import { demoStatsService } from './firebase-service';
 
 export class AccountService {
@@ -279,12 +280,44 @@ export class AccountService {
       // Don't throw error - stats update failure shouldn't break demo completion
     }
 
+    // Also update Firebase demo progress for consistency
+    try {
+      const demoName = this.getDemoName(demoId);
+      await demoProgressService.createOrUpdateProgress({
+        userId: accountId,
+        demoId,
+        demoName,
+        status: 'completed',
+        completedAt: new Date(),
+        score,
+      });
+      console.log(`✅ Demo completion also tracked in Firebase: ${demoId}`);
+    } catch (firebaseError) {
+      console.error(`⚠️ Failed to track demo completion in Firebase: ${demoId}`, firebaseError);
+      // Don't throw error - Account Service is the primary system
+    }
+
     // Only check for badge rewards on first completion
     if (isFirstCompletion) {
       await this.checkAndAwardBadges(accountId, demoId, score);
       // Unlock next demo if applicable
       await this.unlockNextDemo(accountId, demoId);
     }
+  }
+
+  // Get demo name by demo ID
+  private getDemoName(demoId: string): string {
+    const demoNames: Record<string, string> = {
+      'hello-milestone': 'Baby Steps to Riches',
+      'milestone-voting': 'Democracy in Action',
+      'dispute-resolution': 'Drama Queen Escrow',
+      'micro-task-marketplace': 'Gig Economy Madness',
+      'demo1': 'Baby Steps to Riches',
+      'demo2': 'Democracy in Action',
+      'demo3': 'Drama Queen Escrow',
+      'demo4': 'Gig Economy Madness',
+    };
+    return demoNames[demoId] || 'Unknown Demo';
   }
 
   // Calculate demo points based on demo and score
@@ -319,12 +352,27 @@ export class AccountService {
 
   // Award badge
   async awardBadge(accountId: string, badge: NFTBadge): Promise<void> {
+    console.log(`🏆 Awarding badge in Account Service: ${badge.name}`, {
+      accountId: accountId.substring(0, 8) + '...',
+      badgeId: badge.id,
+      pointsValue: badge.pointsValue,
+    });
+
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
       badges: arrayUnion(badge), // Add to badges array
       'profile.totalPoints': increment(badge.pointsValue),
       updatedAt: serverTimestamp(),
     });
+
+    // Also award badge in Firebase system for consistency
+    try {
+      await badgeService.awardBadge(accountId, badge.id);
+      console.log(`✅ Badge also awarded in Firebase system: ${badge.name}`);
+    } catch (firebaseError) {
+      console.error(`⚠️ Failed to award badge in Firebase system: ${badge.name}`, firebaseError);
+      // Don't throw error - Account Service badge is the primary system
+    }
 
     // Log points transaction
     await this.logPointsTransaction(accountId, 'earn', badge.pointsValue, `Badge: ${badge.name}`);

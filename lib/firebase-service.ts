@@ -174,6 +174,11 @@ export const badgeService = {
 
   // Award badge to user
   async awardBadge(userId: string, badgeId: string): Promise<void> {
+    console.log(`🏆 Awarding badge in Firebase: ${badgeId} to user: ${userId.substring(0, 8)}...`);
+    
+    // First ensure the badge exists in the badges collection
+    await this.ensureBadgeExists(badgeId);
+    
     const badgeRef = doc(db, COLLECTIONS.USER_BADGES, `${userId}_${badgeId}`);
     await setDoc(badgeRef, {
       userId,
@@ -182,6 +187,33 @@ export const badgeService = {
       progress: 100,
       isCompleted: true,
     });
+    
+    console.log(`✅ Badge awarded in Firebase: ${badgeId}`);
+  },
+
+  // Ensure badge exists in badges collection
+  async ensureBadgeExists(badgeId: string): Promise<void> {
+    const badgeRef = doc(db, COLLECTIONS.BADGES, badgeId);
+    const badgeSnap = await getDoc(badgeRef);
+    
+    if (!badgeSnap.exists()) {
+      console.log(`⚠️ Badge ${badgeId} not found in Firebase, creating from config...`);
+      
+      // Import badge config dynamically to avoid circular dependencies
+      const { BADGE_CONFIG } = await import('./badge-config');
+      const badgeConfig = BADGE_CONFIG[badgeId];
+      
+      if (badgeConfig) {
+        await setDoc(badgeRef, {
+          ...badgeConfig,
+          createdAt: serverTimestamp(),
+        });
+        console.log(`✅ Created badge in Firebase: ${badgeConfig.name}`);
+      } else {
+        console.error(`❌ Badge config not found for: ${badgeId}`);
+        throw new Error(`Badge config not found for: ${badgeId}`);
+      }
+    }
   },
 
   // Update badge progress
