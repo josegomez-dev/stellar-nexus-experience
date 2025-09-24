@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAccount } from '@/contexts/AccountContext';
 import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor } from '@/lib/badge-config';
-import { Badge3D, Badge3DStyles } from '@/components/ui/Badge3D';
+import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import Image from 'next/image';
 
 interface UserProfileProps {

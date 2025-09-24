@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
+import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 import { useToast } from '@/contexts/ToastContext';
 import {

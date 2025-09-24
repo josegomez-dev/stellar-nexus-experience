@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Modal } from './common/Modal';
+import { Modal } from '../common/Modal';
 import Image from 'next/image';
 
 interface FreighterInstallationGuideProps {

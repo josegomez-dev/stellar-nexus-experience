@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
+import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 import {
   useInitializeEscrow,

@@ -5,8 +5,8 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAccount } from '@/contexts/AccountContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
-import { UserDropdown } from '@/components/ui/UserDropdown';
-import { NetworkIndicator } from '@/components/ui/NetworkIndicator';
+import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
+import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
 import Image from 'next/image';
 

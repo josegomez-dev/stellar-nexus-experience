@@ -15,7 +15,7 @@ import { assetConfig } from '@/lib/wallet-config';
 import { useToast } from '@/contexts/ToastContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
-import ConfettiAnimation from '@/components/ui/ConfettiAnimation';
+import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 
 interface Dispute {

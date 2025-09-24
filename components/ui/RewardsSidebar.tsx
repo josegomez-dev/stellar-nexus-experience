@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
 import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor, type BadgeConfig } from '@/lib/badge-config';
-import { Badge3D, Badge3DStyles } from '@/components/ui/Badge3D';
+import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 
 interface RewardsSidebarProps {
   isOpen: boolean;

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { BadgeConfig } from '@/lib/badge-config';
-import { BadgeEarnedAnimation } from '@/components/ui/BadgeEarnedAnimation';
+import { BadgeEarnedAnimation } from '@/components/ui/badges/BadgeEarnedAnimation';
 
 interface BadgeAnimationState {
   badge: BadgeConfig;

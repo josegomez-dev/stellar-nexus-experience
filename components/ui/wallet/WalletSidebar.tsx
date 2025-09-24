@@ -6,9 +6,9 @@ import { useAccount } from '@/contexts/AccountContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useToast } from '@/contexts/ToastContext';
 import { stellarConfig } from '@/lib/wallet-config';
-import { Tooltip } from './Tooltip';
+import { Tooltip } from '../Tooltip';
 import Image from 'next/image';
-import { Web3OnboardingModal } from './Web3OnboardingModal';
+import { Web3OnboardingModal } from '../modals/Web3OnboardingModal';
 import { NetworkIndicator } from './NetworkIndicator';
 import { FreighterInstallationGuide } from './FreighterInstallationGuide';
 
