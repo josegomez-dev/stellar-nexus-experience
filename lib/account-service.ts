@@ -336,10 +336,23 @@ export class AccountService {
     demoId: string,
     score: number
   ): Promise<void> {
+    console.log(`🔍 Checking badges for demo completion: ${demoId}`, {
+      accountId: accountId.substring(0, 8) + '...',
+      score,
+    });
+
     // Get the account to check current state
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
     const earnedBadgeNames = account.badges.map(b => b.name);
+
+    console.log(`📊 Current account state:`, {
+      totalBadges: account.badges.length,
+      earnedBadgeNames,
+      completedDemos: Object.keys(account.demos).filter(demoId => 
+        account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
+      ),
+    });
 
     // Check specific demo completions for badge awarding
     const completedDemos = this.getCompletedDemos(account);
@@ -357,6 +370,11 @@ export class AccountService {
     demoId: string,
     earnedBadgeNames: string[]
   ): Promise<void> {
+    console.log(`🔍 Checking badge eligibility for demo: ${demoId}`, {
+      accountId: accountId.substring(0, 8) + '...',
+      earnedBadgeNames,
+    });
+
     let badgeId: string | null = null;
 
     // Map demo IDs to badge IDs based on user requirements:
@@ -381,12 +399,14 @@ export class AccountService {
       }
       case 'dispute-resolution':
         badgeId = 'trust-guardian';
+        console.log(`✅ Dispute resolution demo completed - awarding trust-guardian badge`);
         break;
       case 'demo1':
         badgeId = 'escrow-expert';
         break;
       case 'demo3':
         badgeId = 'trust-guardian';
+        console.log(`✅ Demo 3 completed - awarding trust-guardian badge`);
         break;
       case 'demo4':
         badgeId = 'stellar-champion';
@@ -394,20 +414,28 @@ export class AccountService {
     }
 
     if (!badgeId) {
-      console.log(`No badge configured for demo: ${demoId}`);
+      console.log(`❌ No badge configured for demo: ${demoId}`);
       return;
     }
+
+    console.log(`🎯 Attempting to award badge: ${badgeId} for demo: ${demoId}`);
 
     const badgeConfig = getBadgeById(badgeId);
 
     if (!badgeConfig) {
-      console.log(`Badge config not found for: ${badgeId}`);
+      console.log(`❌ Badge config not found for: ${badgeId}`);
       return;
     }
 
+    console.log(`✅ Found badge config:`, {
+      id: badgeConfig.id,
+      name: badgeConfig.name,
+      description: badgeConfig.description,
+    });
+
     // Check if badge is already earned
     if (earnedBadgeNames.includes(badgeConfig.name)) {
-      console.log(`Badge ${badgeConfig.name} already earned`);
+      console.log(`⚠️ Badge ${badgeConfig.name} already earned`);
       return;
     }
 
@@ -423,8 +451,20 @@ export class AccountService {
       pointsValue: badgeConfig.xpReward,
     };
 
-    console.log(`🏆 Awarding badge: ${badge.name} for completing ${demoId}`);
-    await this.awardBadge(accountId, badge);
+    console.log(`🏆 Awarding badge: ${badge.name} for completing ${demoId}`, {
+      badgeId: badge.id,
+      badgeName: badge.name,
+      pointsValue: badge.pointsValue,
+      rarity: badge.rarity,
+    });
+    
+    try {
+      await this.awardBadge(accountId, badge);
+      console.log(`✅ Successfully awarded badge: ${badge.name}`);
+    } catch (error) {
+      console.error(`❌ Failed to award badge: ${badge.name}`, error);
+      throw error;
+    }
   }
 
   // Check if user deserves Nexus Master badge (completing demos 1, 3, and 4)
