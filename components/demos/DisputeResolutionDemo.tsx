@@ -51,6 +51,7 @@ export const DisputeResolutionDemo = () => {
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
     useDemoCompletionHistory();
   const { completeDemo: completeDemoInAccount } = useAccount();
+  const { markDemoComplete } = useDemoStats();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client');

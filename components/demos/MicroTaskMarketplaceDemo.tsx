@@ -16,6 +16,7 @@ import {
 } from '@/lib/mock-trustless-work';
 import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
+import { useDemoStats } from '@/hooks/useDemoStats';
 
 interface MicroTask {
   id: string;
@@ -44,6 +45,7 @@ export const MicroTaskMarketplaceDemo = () => {
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
   const { completeDemo: completeDemoInAccount } = useAccount();
+  const { markDemoComplete } = useDemoStats();
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({

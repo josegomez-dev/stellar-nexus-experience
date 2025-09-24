@@ -53,6 +53,7 @@ export const HelloMilestoneDemo = () => {
   const { addTransaction, updateTransaction } = useTransactionHistory();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
     useDemoCompletionHistory();
+  const { markDemoComplete } = useDemoStats();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -616,6 +617,9 @@ export const HelloMilestoneDemo = () => {
 
           // Complete the demo in the account system (this handles points transactions)
           await completeDemo('hello-milestone', score);
+          
+          // Mark demo as complete in Firebase stats
+          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTime);
           
           // Set completion time and show feedback modal
           setDemoCompletionTime(Math.round(completionTime / 60)); // Convert to minutes
@@ -2152,13 +2156,6 @@ export const HelloMilestoneDemo = () => {
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
-
-        {/* Completion History */}
-        <DemoCompletionHistory
-          demoId='hello-milestone'
-          demoName='Baby Steps to Riches'
-          className='mb-8'
-        />
 
         {/* Demo Instructions */}
         <div className='mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg'>
