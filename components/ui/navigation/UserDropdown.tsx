@@ -5,15 +5,16 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { UserAvatar } from './UserAvatar';
-import { ProfileUpdateModal } from '@/components/ui/modals/ProfileUpdateModal';
 import { generateFunnyName } from '@/lib/funny-name-generator';
+import { useToast } from '@/contexts/ToastContext';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
   const { isConnected, walletData, disconnect, connect, isFreighterAvailable } = useGlobalWallet();
-  const { isAuthenticated, user, getUserStats } = useAuth();
+  const { isAuthenticated, user, getUserStats, updateUser } = useAuth();
+  const { addToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -69,9 +70,60 @@ export const UserDropdown = () => {
     }
   };
 
-  const handleUserProfile = () => {
-    setShowProfileModal(true);
-    setIsOpen(false);
+  const handleAutoGenerate = async () => {
+    if (!walletData?.publicKey) {
+      addToast({
+        type: 'error',
+        title: '❌ No Wallet Connected',
+        message: 'Please connect your wallet first',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Generate new funny name
+      const newName = generateFunnyName(walletData.publicKey + Date.now().toString());
+      
+      // Generate new avatar seed
+      const newAvatarSeed = Date.now().toString() + Math.random().toString();
+
+      if (user) {
+        // Update existing user
+        await updateUser({
+          customName: newName,
+          avatarSeed: newAvatarSeed,
+        });
+      } else {
+        // Store in localStorage for non-authenticated users
+        const profileData = {
+          customName: newName,
+          avatarSeed: newAvatarSeed,
+          walletAddress: walletData.publicKey,
+        };
+        localStorage.setItem(`profile_${walletData.publicKey}`, JSON.stringify(profileData));
+      }
+
+      addToast({
+        type: 'success',
+        title: '🎉 Profile Updated!',
+        message: `Your new name is: ${newName}`,
+        duration: 3000,
+      });
+
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Update Failed',
+        message: 'Failed to update profile. Please try again.',
+        duration: 3000,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -130,11 +182,18 @@ export const UserDropdown = () => {
             {isConnected ? (
               <>
                 <button
-                  onClick={handleUserProfile}
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+                  onClick={handleAutoGenerate}
+                  disabled={isGenerating}
+                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  <span className='text-lg'>🎨</span>
-                  <span>Customize Profile</span>
+                  <span className='text-lg'>
+                    {isGenerating ? (
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    ) : (
+                      '🎲'
+                    )}
+                  </span>
+                  <span>{isGenerating ? 'Generating...' : 'Auto Generate Profile'}</span>
                 </button>
 
                 <a
@@ -216,12 +275,6 @@ export const UserDropdown = () => {
           </div>
         </div>
       )}
-
-      {/* Profile Update Modal */}
-      <ProfileUpdateModal 
-        isOpen={showProfileModal} 
-        onClose={() => setShowProfileModal(false)} 
-      />
     </div>
   );
 };

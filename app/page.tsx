@@ -499,8 +499,7 @@ const DemoSelector = ({
                           <p className={`${getDemoBadgeColors(demo.color).descriptionColor} text-sm`}>{badge.description}</p>
                         </div>
                       </div>
-                      <div className='flex items-center justify-between text-xs'>
-                        <span className={`${getDemoBadgeColors(demo.color).descriptionColor}`}>Rarity: {badge.rarity}</span>
+                      <div className='flex items-center justify-center text-xs'>
                         <span className={`${getDemoBadgeColors(demo.color).descriptionColor}`}>+{badge.xpReward} XP</span>
                       </div>
                     </div>
@@ -533,6 +532,22 @@ const DemoSelector = ({
                             Earned: {badge.name} (+{badge.xpReward} XP)
                           </div>
                         )}
+                        
+                        {/* Do Again Link */}
+                        <div className='mt-4'>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (isConnected) {
+                                setActiveDemo(demo.id);
+                                setShowImmersiveDemo(true);
+                              }
+                            }}
+                            className={`text-sm font-semibold hover:underline transition-all duration-200 ${getDemoBadgeColors(demo.color).titleColor} hover:${getDemoBadgeColors(demo.color).titleColor.replace('300', '200')}`}
+                          >
+                            🔄 Do Again to Earn More XP
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       /* Incomplete Demo - Show launch button */
