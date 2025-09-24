@@ -815,10 +815,26 @@ export const ImmersiveDemoModal = ({
                               <span className='text-xs text-white/50 font-mono'>
                                 {transaction.hash.slice(0, 8)}...
                               </span>
+                              {transaction.message.includes('(Simulated for demo)') && (
+                                <span className='text-xs text-yellow-400 bg-yellow-400/20 px-1.5 py-0.5 rounded'>
+                                  🎭 Demo
+                                </span>
+                              )}
                             </div>
                             
-                            {/* Explorer Links for successful transactions */}
-                            {transaction.status === 'success' && !transaction.hash.startsWith('mock_') && (
+                            {/* Explorer Links for successful real transactions only */}
+                            {transaction.status === 'success' && 
+                             !transaction.hash.startsWith('mock_') && 
+                             !transaction.hash.startsWith('init_failed_') &&
+                             !transaction.hash.startsWith('fund_failed_') &&
+                             !transaction.hash.startsWith('complete_failed_') &&
+                             !transaction.hash.startsWith('approve_failed_') &&
+                             !transaction.hash.startsWith('release_failed_') &&
+                             !transaction.hash.startsWith('fund_') &&
+                             !transaction.hash.startsWith('complete_') &&
+                             !transaction.hash.startsWith('approve_') &&
+                             !transaction.hash.startsWith('release_') &&
+                             !transaction.message.includes('(Simulated for demo)') && (
                               <div className='flex space-x-1'>
                                 <button
                                   onClick={() => {

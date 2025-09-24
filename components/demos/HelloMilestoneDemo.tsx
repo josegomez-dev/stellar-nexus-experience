@@ -68,8 +68,8 @@ export const HelloMilestoneDemo = () => {
   const [transactionTimeouts, setTransactionTimeouts] = useState<Record<string, NodeJS.Timeout>>({}); // txHash -> timeout
   const [transactionDetails, setTransactionDetails] = useState<Record<string, {
     hash: string;
-    explorerUrl: string;
-    stellarExpertUrl: string;
+    explorerUrl: string | null;
+    stellarExpertUrl: string | null;
     type: string;
     amount?: string;
     timestamp: number;
@@ -79,6 +79,7 @@ export const HelloMilestoneDemo = () => {
   // Helper function to generate realistic transaction hash for demo
   const generateTransactionHash = (type: string): string => {
     // Generate a realistic Stellar transaction hash (64 characters, hex)
+    // Note: These are simulated hashes for demo purposes - only initialize escrow uses real blockchain
     const chars = '0123456789abcdef';
     let hash = '';
     for (let i = 0; i < 64; i++) {
@@ -88,8 +89,17 @@ export const HelloMilestoneDemo = () => {
   };
 
   // Helper function to create explorer URLs
-  const createExplorerUrls = (txHash: string) => {
-    // Always create explorer URLs for real blockchain transactions
+  const createExplorerUrls = (txHash: string, isRealTransaction: boolean = false) => {
+    // Only create explorer URLs for real blockchain transactions
+    if (!isRealTransaction) {
+      return {
+        explorerUrl: null,
+        stellarExpertUrl: null,
+        horizonUrl: null,
+        accountUrl: walletData?.publicKey ? `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/testnet/account/${walletData.publicKey}` : null
+      };
+    }
+    
     const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
     const networkSuffix = isTestnet ? 'testnet' : 'public';
     
@@ -610,7 +620,7 @@ export const HelloMilestoneDemo = () => {
       console.log('🔗 Creating payload:', payload);
 
       const txHash = generateTransactionHash('initialize');
-      const urls = createExplorerUrls(txHash);
+      const urls = createExplorerUrls(txHash, true); // This will be a real transaction
       
       console.log('📝 Generated transaction hash:', txHash);
       console.log('🌐 Explorer URLs:', urls);
@@ -728,6 +738,18 @@ export const HelloMilestoneDemo = () => {
                   stellarExpertUrl: realUrls.stellarExpertUrl,
                 }
               }));
+              
+              // Update the transaction history with the real hash
+              updateTransaction(txHash, 'success', `Escrow initialized successfully! Real transaction: ${realTxHash}`);
+              addTransaction({
+                hash: realTxHash,
+                status: 'success',
+                message: 'Escrow initialized successfully!',
+                type: 'escrow',
+                demoId: 'hello-milestone',
+                amount: '10 USDC',
+                asset: 'USDC'
+              });
               
               // Clear timeout and mark as successful
               clearTimeout(timeout);
@@ -918,7 +940,7 @@ export const HelloMilestoneDemo = () => {
       };
 
       const txHash = generateTransactionHash('fund');
-      const urls = createExplorerUrls(txHash);
+      const urls = createExplorerUrls(txHash, false); // Simulated transaction
       
       // Track this transaction with enhanced details
       setPendingTransactions(prev => ({ ...prev, 'fund': txHash }));
@@ -939,7 +961,7 @@ export const HelloMilestoneDemo = () => {
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: 'Funding escrow contract...',
+        message: 'Funding escrow contract... (Simulated for demo)',
         type: 'fund',
         demoId: 'hello-milestone',
         amount: '10 USDC',
@@ -1029,7 +1051,7 @@ export const HelloMilestoneDemo = () => {
       };
 
       const txHash = generateTransactionHash('complete');
-      const urls = createExplorerUrls(txHash);
+      const urls = createExplorerUrls(txHash, false); // Simulated transaction
       
       // Track this transaction with enhanced details
       setPendingTransactions(prev => ({ ...prev, 'complete': txHash }));
@@ -1050,7 +1072,7 @@ export const HelloMilestoneDemo = () => {
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: 'Completing milestone...',
+        message: 'Completing milestone... (Simulated for demo)',
         type: 'milestone',
         demoId: 'hello-milestone',
         amount: '5 USDC',
@@ -1140,7 +1162,7 @@ export const HelloMilestoneDemo = () => {
       };
 
       const txHash = generateTransactionHash('approve');
-      const urls = createExplorerUrls(txHash);
+      const urls = createExplorerUrls(txHash, false); // Simulated transaction
       
       // Track this transaction with enhanced details
       setPendingTransactions(prev => ({ ...prev, 'approve': txHash }));
@@ -1161,7 +1183,7 @@ export const HelloMilestoneDemo = () => {
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: 'Approving milestone...',
+        message: 'Approving milestone... (Simulated for demo)',
         type: 'approve',
         demoId: 'hello-milestone',
         amount: '5 USDC',
@@ -1250,7 +1272,7 @@ export const HelloMilestoneDemo = () => {
       };
 
       const txHash = generateTransactionHash('release');
-      const urls = createExplorerUrls(txHash);
+      const urls = createExplorerUrls(txHash, false); // Simulated transaction
       
       // Track this transaction with enhanced details
       setPendingTransactions(prev => ({ ...prev, 'release': txHash }));
@@ -1271,7 +1293,7 @@ export const HelloMilestoneDemo = () => {
       addTransaction({
         hash: txHash,
         status: 'pending',
-        message: 'Releasing funds...',
+        message: 'Releasing funds... (Simulated for demo)',
         type: 'release',
         demoId: 'hello-milestone',
         amount: '5 USDC',
@@ -1502,7 +1524,9 @@ export const HelloMilestoneDemo = () => {
                             <button
                               onClick={() => {
                                 const urls = createExplorerUrls(pendingTransactions['initialize']);
-                                window.open(urls.stellarExpertUrl, '_blank', 'noopener,noreferrer');
+                                if (urls.stellarExpertUrl) {
+                                  window.open(urls.stellarExpertUrl, '_blank', 'noopener,noreferrer');
+                                }
                                 addToast({
                                   type: 'info',
                                   title: '🌐 Opening Stellar Expert',
@@ -1517,7 +1541,9 @@ export const HelloMilestoneDemo = () => {
                             <button
                               onClick={() => {
                                 const urls = createExplorerUrls(pendingTransactions['initialize']);
-                                window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
+                                if (urls.horizonUrl) {
+                                  window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
+                                }
                                 addToast({
                                   type: 'info',
                                   title: '🔍 Opening Horizon API',
@@ -1831,7 +1857,9 @@ export const HelloMilestoneDemo = () => {
                     <div className='flex space-x-2'>
                       <button
                         onClick={() => {
-                          window.open(tx.stellarExpertUrl, '_blank', 'noopener,noreferrer');
+                          if (tx.stellarExpertUrl) {
+                            window.open(tx.stellarExpertUrl, '_blank', 'noopener,noreferrer');
+                          }
                           addToast({
                             type: 'info',
                             title: '🌐 Opening Stellar Expert',
@@ -1858,7 +1886,9 @@ export const HelloMilestoneDemo = () => {
                       <button
                         onClick={() => {
                           const urls = createExplorerUrls(tx.hash);
-                          window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
+                          if (urls.horizonUrl) {
+                            window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
+                          }
                           addToast({
                             type: 'info',
                             title: '🔍 Opening Horizon API',
