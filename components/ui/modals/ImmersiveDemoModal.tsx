@@ -5,6 +5,7 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { userTrackingService } from '@/lib/user-tracking-service';
+import { API_ENDPOINTS } from '@/constants/api';
 import Image from 'next/image';
 
 interface ImmersiveDemoModalProps {
@@ -37,7 +38,7 @@ export const ImmersiveDemoModal = ({
   children,
   onDemoComplete,
 }: ImmersiveDemoModalProps) => {
-  const { isConnected } = useGlobalWallet();
+  const { isConnected, walletData } = useGlobalWallet();
   const { addToast } = useToast();
   const { getTransactionsByDemo } = useTransactionHistory();
 
@@ -431,12 +432,37 @@ export const ImmersiveDemoModal = ({
                   <div className='text-sm text-white/70'>{Math.round(progress)}%</div>
                 </div>
 
-                {/* Transaction Status Indicator */}
-                <div className='flex items-center space-x-2 px-3 py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg'>
-                  <div className='w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
-                  <span className='text-sm font-medium text-green-300'>
-                    📊 Live Transactions ({demoTransactions.length})
-                  </span>
+                {/* Transaction Status Indicator and Account Explorer */}
+                <div className='flex items-center space-x-3'>
+                  <div className='flex items-center space-x-2 px-3 py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg'>
+                    <div className='w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
+                    <span className='text-sm font-medium text-green-300'>
+                      📊 Live Transactions ({demoTransactions.length})
+                    </span>
+                  </div>
+                  
+                  {/* Account Explorer Button */}
+                  {isConnected && walletData?.publicKey && (
+                    <button
+                      onClick={() => {
+                        const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
+                        const networkSuffix = isTestnet ? 'testnet' : 'public';
+                        const explorerUrl = `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/account/${walletData.publicKey}`;
+                        window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+                        addToast({
+                          type: 'info',
+                          title: '🌐 Account Explorer',
+                          message: 'Opening your wallet on Stellar Expert - view your balance, transactions, and assets',
+                          duration: 4000,
+                        });
+                      }}
+                      className="px-3 py-1.5 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded-lg hover:bg-blue-500/30 transition-all duration-300 flex items-center space-x-2"
+                      title="View account on Stellar Explorer"
+                    >
+                      <span className="text-sm">🌐</span>
+                      <span className="text-sm font-medium">Account Explorer</span>
+                    </button>
+                  )}
                 </div>
               </div>
             )}

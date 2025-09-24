@@ -800,21 +800,6 @@ export const DisputeResolutionDemo = () => {
 
   return (
     <div className='max-w-6xl mx-auto relative'>
-      {/* Live Stellar Indicator */}
-      <div className='absolute top-4 right-4 z-50'>
-        <div className="px-4 py-2 rounded-full font-bold text-sm shadow-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-          <span className="font-semibold">🔗 Live Stellar</span>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-        </div>
-        <div className="mt-2 text-center">
-          <div className="text-xs font-medium text-green-300">
-            🔗 Real Blockchain Mode
-          </div>
-          <div className="text-xs text-green-200">
-            Live Stellar transactions
-          </div>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className='bg-gradient-to-br from-warning-500/20 to-warning-600/20 backdrop-blur-sm border border-warning-400/30 rounded-xl shadow-2xl p-8 relative'>
@@ -855,30 +840,6 @@ export const DisputeResolutionDemo = () => {
               Current role: <span className='text-warning-300 capitalize'>{currentRole}</span>
             </p>
             
-            {/* View Account on Explorer */}
-            {walletData?.publicKey && (
-              <div className='mt-4 flex justify-center'>
-                <button
-                  onClick={() => {
-                    const isTestnet = walletData?.network === 'TESTNET' || !walletData?.isMainnet;
-                    const networkSuffix = isTestnet ? 'testnet' : 'public';
-                    const explorerUrl = `https://stellar.expert/explorer/${networkSuffix}/account/${walletData.publicKey}`;
-                    window.open(explorerUrl, '_blank', 'noopener,noreferrer');
-                    addToast({
-                      type: 'info',
-                      title: '🌐 Account Explorer',
-                      message: 'Opening your wallet on Stellar Expert - view your balance, transactions, and assets',
-                      duration: 4000,
-                    });
-                  }}
-                  className="px-4 py-2 bg-warning-500/20 border border-warning-400/30 text-warning-200 rounded-lg hover:bg-warning-500/30 transition-all duration-300 flex items-center space-x-2"
-                  title="View account on Stellar Explorer"
-                >
-                  <span className="text-sm">🌐</span>
-                  <span className="text-sm font-medium">View Account on Explorer</span>
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Demo Setup */}
