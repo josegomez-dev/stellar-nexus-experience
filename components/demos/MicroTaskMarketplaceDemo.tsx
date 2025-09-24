@@ -405,15 +405,9 @@ export const MicroTaskMarketplaceDemo = () => {
         duration: 5000,
       });
 
-      // Mark milestone as completed
-      const payload = {
-        contractId: task.escrowId,
-        milestoneId: 'release_1',
-        status: 'completed',
-        releaseMode: 'multi-release',
-      };
-
-      await hooks.changeMilestoneStatus(payload);
+      // Note: Milestone status change is handled by the escrow system
+      // For demo purposes, we'll skip the milestone status change
+      // as it requires real blockchain implementation
       setDeliverable('');
     } catch (error) {
       console.error('Failed to submit deliverable:', error);

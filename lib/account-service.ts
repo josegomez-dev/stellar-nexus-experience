@@ -26,6 +26,7 @@ import {
   Achievement 
 } from '@/types/account';
 import { getBadgeById } from './badge-config';
+import { demoStatsService } from './firebase-service';
 
 export class AccountService {
   private static instance: AccountService;
@@ -122,22 +123,22 @@ export class AccountService {
       },
       
       badges: [
-        // Award Trust Guardian badge for account creation with 100+ bonus points
+        // Award Welcome Explorer badge for account creation
         {
           id: uuidv4(),
-          name: 'Trust Guardian',
-          description: 'Welcome to the world of trustless work! Your journey begins here.',
-          imageUrl: '/images/badges/placeholder-trust-guardian.svg',
+          name: 'Welcome Explorer',
+          description: 'Joined the Nexus Experience community',
+          imageUrl: '🌟',
           rarity: 'common' as const,
           earnedAt: now,
-          pointsValue: 50,
+          pointsValue: 10,
         }
       ],
       rewards: [],
       
       stats: {
         totalDemosCompleted: 0,
-        totalPointsEarned: 150, // Account creation bonus (100) + Trust Guardian (50)
+        totalPointsEarned: 110, // Account creation bonus (100) + Welcome Explorer (10)
         totalTimeSpent: 0,
         streakDays: 1, // Start with 1 day streak
         lastActiveDate: new Date().toISOString().split('T')[0],
@@ -162,9 +163,9 @@ export class AccountService {
       await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
       console.log('✅ Account creation bonus added!');
       
-      console.log('🏆 Adding Trust Guardian badge reward...');
-      await this.logPointsTransaction(accountId, 'earn', 50, 'Badge: Trust Guardian');
-      console.log('✅ Trust Guardian badge reward added!');
+      console.log('🏆 Adding Welcome Explorer badge reward...');
+      await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
+      console.log('✅ Welcome Explorer badge reward added!');
       
       console.log('🎉 Account creation completed!');
       return newAccount;
@@ -267,6 +268,14 @@ export class AccountService {
       await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
     }
     
+    // Update demo stats (always increment completion count)
+    try {
+      await demoStatsService.incrementCompletion(demoId, 0); // completionTime not critical for stats
+    } catch (error) {
+      console.error('Failed to update demo stats:', error);
+      // Don't throw error - stats update failure shouldn't break demo completion
+    }
+
     // Only check for badge rewards on first completion
     if (isFirstCompletion) {
       await this.checkAndAwardBadges(accountId, demoId, score);
@@ -321,58 +330,129 @@ export class AccountService {
     const account = accountDoc.data() as UserAccount;
     const earnedBadgeNames = account.badges.map(b => b.name);
     
-    // Count how many main demos have been completed (including this one)
-    const mainDemoProgress = this.getMainDemoCompletionCount(account);
-    const totalCompletedDemos = mainDemoProgress.completed;
+    // Check specific demo completions for badge awarding
+    const completedDemos = this.getCompletedDemos(account);
     
-    // Progressive badge awarding based on completion order:
-    // 1st Demo → Escrow Expert
-    // 2nd Demo → Blockchain Pioneer  
-    // 3rd Demo → Dispute Detective
-    // 4th Demo → Gig Economy Guru
-    const progressiveBadges = [
-      'escrow-expert',      // 1st demo completed
-      'blockchain-pioneer', // 2nd demo completed
-      'dispute-detective',  // 3rd demo completed
-      'gig-economy-guru'    // 4th demo completed
-    ];
+    // Award badges based on specific demo completions
+    await this.awardDemoBadge(accountId, demoId, earnedBadgeNames);
     
-    // Award badge based on completion count
-    if (totalCompletedDemos > 0 && totalCompletedDemos <= 4) {
-      const badgeId = progressiveBadges[totalCompletedDemos - 1];
-      const badgeConfig = getBadgeById(badgeId);
-      
-      if (!badgeConfig) {
-        console.log(`Badge config not found for: ${badgeId}`);
-        return;
-      }
+    // Check for Nexus Master badge (completing demos 1, 3, and 4)
+    await this.checkNexusMasterBadge(accountId, earnedBadgeNames);
+  }
 
-      // Check if badge is already earned
-      if (earnedBadgeNames.includes(badgeConfig.name)) {
-        console.log(`Badge ${badgeConfig.name} already earned`);
-        return;
-      }
+  // Award badge for specific demo completion
+  private async awardDemoBadge(accountId: string, demoId: string, earnedBadgeNames: string[]): Promise<void> {
+    let badgeId: string | null = null;
+    
+    // Map demo IDs to badge IDs based on user requirements:
+    // Demo 1 (Micro Task Marketplace) → Escrow Expert
+    // Demo 3 (Dispute Resolution) → Trust Guardian  
+    // Demo 4 (Micro Task Marketplace) → Stellar Champion
+    switch (demoId) {
+      case 'micro-task-marketplace':
+        // This could be demo 1 or demo 4, we need to check which one
+        const accountDoc = await getDoc(doc(db, 'accounts', accountId));
+        const account = accountDoc.data() as UserAccount;
+        
+        // If demo1 is completed, this is demo 1 (Escrow Expert)
+        if (account.demos.demo1?.status === 'completed') {
+          badgeId = 'escrow-expert';
+        }
+        // If demo4 is completed, this is demo 4 (Stellar Champion)
+        else if (account.demos.demo4?.status === 'completed') {
+          badgeId = 'stellar-champion';
+        }
+        break;
+      case 'dispute-resolution':
+        badgeId = 'trust-guardian';
+        break;
+      case 'demo1':
+        badgeId = 'escrow-expert';
+        break;
+      case 'demo3':
+        badgeId = 'trust-guardian';
+        break;
+      case 'demo4':
+        badgeId = 'stellar-champion';
+        break;
+    }
+    
+    if (!badgeId) {
+      console.log(`No badge configured for demo: ${demoId}`);
+      return;
+    }
+    
+    const badgeConfig = getBadgeById(badgeId);
+    
+    if (!badgeConfig) {
+      console.log(`Badge config not found for: ${badgeId}`);
+      return;
+    }
 
-      // Create the badge to award
-      const badge: NFTBadge = {
-        id: uuidv4(),
-        name: badgeConfig.name,
-        description: badgeConfig.description,
-        imageUrl: badgeConfig.icon || '',
-        rarity: badgeConfig.rarity,
-        earnedAt: Timestamp.now(),
-        demoId,
-        pointsValue: badgeConfig.xpReward,
-      };
+    // Check if badge is already earned
+    if (earnedBadgeNames.includes(badgeConfig.name)) {
+      console.log(`Badge ${badgeConfig.name} already earned`);
+      return;
+    }
 
-      console.log(`🏆 Awarding badge: ${badge.name} (${totalCompletedDemos} demos completed)`);
-      await this.awardBadge(accountId, badge);
-      
-      // Check for Stellar Champion badge (all 4 demos completed)
-      if (totalCompletedDemos === 4) {
-        await this.checkStellarChampionBadge(accountId);
+    // Create the badge to award
+    const badge: NFTBadge = {
+      id: uuidv4(),
+      name: badgeConfig.name,
+      description: badgeConfig.description,
+      imageUrl: badgeConfig.icon || '',
+      rarity: badgeConfig.rarity,
+      earnedAt: Timestamp.now(),
+      demoId,
+      pointsValue: badgeConfig.xpReward,
+    };
+
+    console.log(`🏆 Awarding badge: ${badge.name} for completing ${demoId}`);
+    await this.awardBadge(accountId, badge);
+  }
+
+  // Check if user deserves Nexus Master badge (completing demos 1, 3, and 4)
+  private async checkNexusMasterBadge(accountId: string, earnedBadgeNames: string[]): Promise<void> {
+    const accountDoc = await getDoc(doc(db, 'accounts', accountId));
+    const account = accountDoc.data() as UserAccount;
+    
+    // Check if demos 1, 3, and 4 are completed
+    const demo1Completed = account.demos.demo1?.status === 'completed' || account.demos['micro-task-marketplace']?.status === 'completed';
+    const demo3Completed = account.demos.demo3?.status === 'completed' || account.demos['dispute-resolution']?.status === 'completed';
+    const demo4Completed = account.demos.demo4?.status === 'completed' || account.demos['micro-task-marketplace']?.status === 'completed';
+    
+    const hasRequiredDemos = demo1Completed && demo3Completed && demo4Completed;
+    
+    if (hasRequiredDemos && !earnedBadgeNames.includes('Nexus Master')) {
+      const nexusBadgeConfig = getBadgeById('nexus-master');
+      if (nexusBadgeConfig) {
+        const badge: NFTBadge = {
+          id: uuidv4(),
+          name: nexusBadgeConfig.name,
+          description: nexusBadgeConfig.description,
+          imageUrl: nexusBadgeConfig.icon || '',
+          rarity: nexusBadgeConfig.rarity,
+          earnedAt: Timestamp.now(),
+          pointsValue: nexusBadgeConfig.xpReward,
+        };
+
+        console.log(`👑 Awarding Nexus Master badge! Completed demos 1, 3, and 4.`);
+        await this.awardBadge(accountId, badge);
       }
     }
+  }
+
+  // Helper method to get completed demos
+  private getCompletedDemos(account: UserAccount): string[] {
+    const completed: string[] = [];
+    
+    Object.entries(account.demos).forEach(([demoId, demo]) => {
+      if (demo.status === 'completed') {
+        completed.push(demoId);
+      }
+    });
+    
+    return completed;
   }
 
   // Check if user deserves Stellar Champion badge (all 4 demos completed + invite friend)
@@ -531,3 +611,4 @@ export class AccountService {
 
 // Export singleton instance
 export const accountService = AccountService.getInstance();
+

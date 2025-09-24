@@ -15,6 +15,7 @@ import {
   useRealInitializeEscrow,
 } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
+import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
@@ -50,6 +51,7 @@ export const DisputeResolutionDemo = () => {
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } = useDemoCompletionHistory();
+  const { completeDemo: completeDemoInAccount } = useAccount();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client');
@@ -113,6 +115,7 @@ export const DisputeResolutionDemo = () => {
       client: 'client_wallet_address',
     },
   ]);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Trigger confetti when demo is completed
   useEffect(() => {
@@ -123,49 +126,29 @@ export const DisputeResolutionDemo = () => {
       milestones.map(m => ({ id: m.id, status: m.status }))
     );
 
-    if (allReleased) {
+    // Only complete if all milestones are released AND demo hasn't been completed yet
+    if (allReleased && !isCompleted) {
       console.log('🎉 Triggering confetti for Dispute Resolution Demo!');
       setShowConfetti(true);
+      setIsCompleted(true); // Mark as completed to prevent multiple executions
       
-      // Complete the demo in Firebase
+      // Complete the demo using the centralized account system
       const completeDemo = async () => {
         try {
-          const completionTime = 5; // Estimated completion time in minutes
           const score = 95; // High score for completing dispute resolution
-          const completionHistory = getDemoHistory('dispute-resolution');
-          const isFirstCompletion = completionHistory.length === 0;
           
-          // Calculate points earned
-          const basePoints = 150; // Higher base points for dispute resolution
-          const scoreMultiplier = score / 100;
-          let pointsEarned = Math.round(basePoints * scoreMultiplier);
+          // Use the centralized account system for completion
+          await completeDemoInAccount('dispute-resolution', score);
           
-          // Give reduced points for replays (25% of original)
-          if (!isFirstCompletion) {
-            pointsEarned = Math.round(pointsEarned * 0.25);
-          }
-          
-          // Add to completion history
-          addCompletion({
-            demoId: 'dispute-resolution',
-            demoName: 'Drama Queen Escrow',
-            score,
-            pointsEarned,
-            completionTime,
-            isFirstCompletion,
-            network: walletData?.network || 'TESTNET',
-            walletAddress: walletData?.publicKey || '',
-          });
-          
-          // Demo completion is handled by the account system via completeDemo
-          
-          addToast({
-            type: 'success',
-            title: 'Demo Completed!',
-            message: `Completed Drama Queen Escrow! Earned ${pointsEarned} points! 🎉`,
-          });
+          console.log('✅ Dispute Resolution Demo completed successfully');
         } catch (error) {
-          console.error('Failed to complete demo:', error);
+          console.error('❌ Failed to complete Dispute Resolution Demo:', error);
+          addToast({
+            type: 'error',
+            title: '❌ Demo Completion Failed',
+            message: 'Failed to complete demo. Please try again.',
+            duration: 5000,
+          });
         }
       };
       
@@ -179,7 +162,7 @@ export const DisputeResolutionDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [milestones, addCompletion, getDemoHistory, walletData, addToast]);
+  }, [milestones, completeDemoInAccount, walletData, addToast, isCompleted]);
 
   async function handleInitializeEscrow() {
     if (!walletData) {

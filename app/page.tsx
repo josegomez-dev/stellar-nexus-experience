@@ -22,7 +22,7 @@ import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo';
 import { useDemoStats } from '@/hooks/useDemoStats';
-import { DemoFeedbackModal } from '@/components/ui/modals/DemoFeedbackModal';
+import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
 import { initializeDemoStats } from '@/lib/demo-stats-initializer';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/modals/ImmersiveDemoModal';
@@ -107,7 +107,7 @@ const DemoSelector = ({
   isConnected: boolean;
 }) => {
   const { getCompletedDemos } = useAccount();
-  const { demoStats, clapDemo } = useDemoStats();
+  const { demoStats, clapDemo, refreshStats } = useDemoStats();
 
   const getClapStats = (demoId: string) => {
     const stats = demoStats[demoId];
@@ -476,8 +476,9 @@ const DemoSelector = ({
 function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
+  const { account } = useAccount();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
-  const { submitFeedback, markDemoComplete } = useDemoStats();
+  const { submitFeedback, markDemoComplete, refreshStats } = useDemoStats();
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
@@ -570,6 +571,15 @@ function HomePageContent() {
       window.removeEventListener('openUserProfile', handleOpenUserProfile);
     };
   }, []);
+
+  // Refresh demo stats when account changes (after demo completion)
+  useEffect(() => {
+    if (account) {
+      refreshStats().catch(error => {
+        console.error('Failed to refresh demo stats:', error);
+      });
+    }
+  }, [account, refreshStats]);
 
   // Authentication handlers
   const handleSignUpClick = () => {
@@ -1129,7 +1139,7 @@ function HomePageContent() {
 
       {/* Demo Feedback Modal */}
       {showFeedbackModal && feedbackDemoData && (
-        <DemoFeedbackModal
+        <SimpleFeedbackModal
           isOpen={showFeedbackModal}
           onClose={handleFeedbackClose}
           onSubmit={handleFeedbackSubmit}

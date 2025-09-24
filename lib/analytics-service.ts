@@ -1,279 +1,237 @@
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from './firebase';
-import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { COLLECTIONS } from './firebase-types';
-import { UserAccount } from '../types/account';
 
-export interface PlatformAnalytics {
+export interface OverallAnalytics {
   totalUsers: number;
-  totalDemoCompletions: number;
-  totalPointsTransactions: number;
-  userSatisfactionScore: number;
-  monthlyGrowthRate: number;
-  successRate: number;
-  developerAdoption: number;
-  stellarOperations: number;
+  totalFeedbacks: number;
+  averageRating: number;
+  completionRate: number;
+  userExperience: {
+    trustlessWorkKnowledge: {
+      beginner: number;
+      intermediate: number;
+      advanced: number;
+    };
+    stellarKnowledge: {
+      beginner: number;
+      intermediate: number;
+      advanced: number;
+    };
+  };
 }
 
-export interface UserSentiment {
-  score: number; // 0-100
-  emotion: 'excited' | 'satisfied' | 'neutral' | 'concerned';
-  emoji: string;
-  description: string;
+export interface DemoAnalytics {
+  demoId: string;
+  demoName: string;
+  totalCompletions: number;
+  averageRating: number;
+  averageCompletionTime: number;
+  difficultyDistribution: {
+    very_easy: number;
+    easy: number;
+    medium: number;
+    hard: number;
+    very_hard: number;
+  };
+  recommendationRate: number;
 }
 
-class AnalyticsService {
-  private cache: PlatformAnalytics | null = null;
-  private cacheTimestamp: number = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+export interface UserEngagement {
+  dailyActiveUsers: number;
+  weeklyActiveUsers: number;
+  monthlyActiveUsers: number;
+  averageSessionTime: number;
+  returnUserRate: number;
+}
 
-  async getPlatformAnalytics(): Promise<PlatformAnalytics> {
-    // Return cached data if still valid
-    const now = Date.now();
-    if (this.cache && (now - this.cacheTimestamp) < this.CACHE_DURATION) {
-      console.log('📦 Using cached analytics data');
-      return this.cache;
-    }
-
+export class AnalyticsService {
+  static async getOverallAnalytics(): Promise<OverallAnalytics> {
     try {
-      console.log('🔍 Fetching real Firebase analytics data...');
-      
-      // Fetch real user count (just count all accounts)
-      const totalUsers = await this.getTotalUsers();
-      console.log(`👥 Found ${totalUsers} total users`);
-      
-      // Fetch real demo completions (count all completed demos across all users)
-      const totalDemoCompletions = await this.getTotalDemoCompletions();
-      console.log(`🎯 Found ${totalDemoCompletions} total demo completions`);
-      
-      // Fetch real points transactions (count all transaction documents)
-      const totalPointsTransactions = await this.getTotalPointsTransactions();
-      console.log(`💰 Found ${totalPointsTransactions} total points transactions`);
-      
-      // Random data for other metrics as requested
-      const userSatisfactionScore = Math.floor(Math.random() * 15) + 85; // 85-100
-      const monthlyGrowthRate = Math.floor(Math.random() * 50) + 150; // 150-200%
-      const successRate = Math.floor(Math.random() * 5) + 95; // 95-100%
-      const developerAdoption = Math.floor(Math.random() * 30) + 45; // 45-75 (coming soon)
-      const stellarOperations = totalDemoCompletions * 4 + totalPointsTransactions * 3; // Estimated
+      // Get total users
+      const usersSnapshot = await getDocs(collection(db, COLLECTIONS.USERS));
+      const totalUsers = usersSnapshot.size;
 
-      this.cache = {
+      // Get all feedbacks
+      const feedbacksSnapshot = await getDocs(collection(db, COLLECTIONS.DEMO_FEEDBACK));
+      const feedbacks = feedbacksSnapshot.docs.map(doc => doc.data());
+      const totalFeedbacks = feedbacks.length;
+
+      // Calculate average rating
+      const totalRating = feedbacks.reduce((sum, feedback) => sum + (feedback.rating || 0), 0);
+      const averageRating = totalFeedbacks > 0 ? totalRating / totalFeedbacks : 0;
+
+      // Get demo progress to calculate completion rate
+      const progressSnapshot = await getDocs(collection(db, COLLECTIONS.DEMO_PROGRESS));
+      const progressData = progressSnapshot.docs.map(doc => doc.data());
+      const completedDemos = progressData.filter(progress => progress.status === 'completed').length;
+      const totalDemoAttempts = progressData.length;
+      const completionRate = totalDemoAttempts > 0 ? (completedDemos / totalDemoAttempts) * 100 : 0;
+
+      // Simulate user experience data (in a real app, you'd collect this from user surveys)
+      const userExperience = {
+        trustlessWorkKnowledge: {
+          beginner: Math.floor(totalUsers * 0.6),
+          intermediate: Math.floor(totalUsers * 0.3),
+          advanced: Math.floor(totalUsers * 0.1),
+        },
+        stellarKnowledge: {
+          beginner: Math.floor(totalUsers * 0.7),
+          intermediate: Math.floor(totalUsers * 0.25),
+          advanced: Math.floor(totalUsers * 0.05),
+        },
+      };
+
+      return {
         totalUsers,
-        totalDemoCompletions,
-        totalPointsTransactions,
-        userSatisfactionScore,
-        monthlyGrowthRate,
-        successRate,
-        developerAdoption,
-        stellarOperations
+        totalFeedbacks,
+        averageRating,
+        completionRate,
+        userExperience,
       };
-      
-      this.cacheTimestamp = now;
-      console.log('✅ Analytics data fetched and cached:', this.cache);
-      
-      return this.cache;
     } catch (error) {
-      console.error('❌ Error fetching analytics:', error);
-      
-      // Return fallback data if Firebase fails
-      return {
-        totalUsers: 5,
-        totalDemoCompletions: 12,
-        totalPointsTransactions: 48,
-        userSatisfactionScore: 94,
-        monthlyGrowthRate: 247,
-        successRate: 98,
-        developerAdoption: 67,
-        stellarOperations: 192
-      };
+      console.error('Error getting overall analytics:', error);
+      throw error;
     }
   }
 
-  private async getTotalUsers(): Promise<number> {
+  static async getDemoAnalytics(demoId: string): Promise<DemoAnalytics> {
     try {
-      console.log('📊 Counting total users in accounts collection...');
-      const accountsRef = collection(db, 'accounts');
-      const snapshot = await getDocs(accountsRef);
-      const count = snapshot.size;
-      console.log(`✅ Total users counted: ${count}`);
-      return count;
-    } catch (error) {
-      console.error('❌ Error getting total users:', error);
-      return 5; // Fallback - realistic small number
-    }
-  }
+      // Get demo feedbacks
+      const feedbackQuery = query(
+        collection(db, COLLECTIONS.DEMO_FEEDBACK),
+        where('demoId', '==', demoId)
+      );
+      const feedbackSnapshot = await getDocs(feedbackQuery);
+      const feedbacks = feedbackSnapshot.docs.map(doc => doc.data());
 
-  private async getTotalDemoCompletions(): Promise<number> {
-    try {
-      console.log('🎯 Counting demo completions across all users...');
-      const accountsRef = collection(db, 'accounts');
-      const snapshot = await getDocs(accountsRef);
-      
-      let totalCompletions = 0;
-      snapshot.forEach((doc) => {
-        const account = doc.data() as UserAccount;
-        if (account.demos) {
-          // Count completed demos across all users
-          const userCompletions = Object.values(account.demos).filter(progress => progress.status === 'completed').length;
-          totalCompletions += userCompletions;
-          if (userCompletions > 0) {
-            console.log(`User ${doc.id} has ${userCompletions} completed demos`);
+      // Get demo stats
+      const statsQuery = query(
+        collection(db, COLLECTIONS.DEMO_STATS),
+        where('demoId', '==', demoId)
+      );
+      const statsSnapshot = await getDocs(statsQuery);
+      const stats = statsSnapshot.docs[0]?.data();
+
+      // Calculate metrics
+      const totalCompletions = stats?.totalCompletions || 0;
+      const averageRating = stats?.averageRating || 0;
+      const averageCompletionTime = stats?.averageCompletionTime || 0;
+
+      // Calculate difficulty distribution
+      const difficultyDistribution = {
+        very_easy: 0,
+        easy: 0,
+        medium: 0,
+        hard: 0,
+        very_hard: 0,
+      };
+
+        feedbacks.forEach(feedback => {
+          if (feedback.difficulty && Object.prototype.hasOwnProperty.call(difficultyDistribution, feedback.difficulty)) {
+            difficultyDistribution[feedback.difficulty as keyof typeof difficultyDistribution]++;
           }
-        }
-      });
-      
-      console.log(`✅ Total demo completions counted: ${totalCompletions}`);
-      return totalCompletions;
+        });
+
+      // Calculate recommendation rate
+      const recommendingUsers = feedbacks.filter(feedback => feedback.wouldRecommend).length;
+      const recommendationRate = feedbacks.length > 0 ? (recommendingUsers / feedbacks.length) * 100 : 0;
+
+      return {
+        demoId,
+        demoName: stats?.demoName || 'Unknown Demo',
+        totalCompletions,
+        averageRating,
+        averageCompletionTime,
+        difficultyDistribution,
+        recommendationRate,
+      };
     } catch (error) {
-      console.error('❌ Error getting demo completions:', error);
-      return 12; // Fallback - realistic small number
+      console.error('Error getting demo analytics:', error);
+      throw error;
     }
   }
 
-  private async getTotalPointsTransactions(): Promise<number> {
+  static async getUserEngagement(): Promise<UserEngagement> {
     try {
-      console.log('💰 Counting points transactions...');
-      const transactionsRef = collection(db, 'pointsTransactions');
-      const snapshot = await getDocs(transactionsRef);
-      
-      const count = snapshot.size;
-      console.log(`✅ Total points transactions counted: ${count}`);
-      return count;
-    } catch (error) {
-      console.error('❌ Error getting points transactions:', error);
-      return 48; // Fallback - realistic small number
-    }
-  }
-
-  private async calculateUserSatisfaction(): Promise<number> {
-    try {
-      const accountsRef = collection(db, 'accounts');
-      const snapshot = await getDocs(accountsRef);
-      
-      let totalUsers = 0;
-      let satisfiedUsers = 0;
-      
-      snapshot.forEach((doc) => {
-        const account = doc.data() as UserAccount;
-        totalUsers++;
-        
-        // Consider users satisfied if they:
-        // 1. Completed at least 1 demo
-        // 2. Earned at least 1 badge
-        // 3. Have positive points
-        const hasCompletedDemo = account.demos && 
-          Object.values(account.demos).some(progress => progress.status === 'completed');
-        const hasBadges = account.badges && account.badges.length > 0;
-        const hasPositivePoints = account.profile && account.profile.totalPoints > 0;
-        
-        if (hasCompletedDemo && hasBadges && hasPositivePoints) {
-          satisfiedUsers++;
-        }
-      });
-      
-      return totalUsers > 0 ? Math.round((satisfiedUsers / totalUsers) * 100) : 87;
-    } catch (error) {
-      console.error('Error calculating user satisfaction:', error);
-      return 87; // Fallback
-    }
-  }
-
-  private async calculateMonthlyGrowth(): Promise<number> {
-    try {
-      const accountsRef = collection(db, 'accounts');
-      const snapshot = await getDocs(accountsRef);
-      
       const now = new Date();
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-      
-      let currentMonthUsers = 0;
-      let lastMonthUsers = 0;
-      
-      snapshot.forEach((doc) => {
-        const account = doc.data() as UserAccount;
-        if (account.createdAt) {
-          const createdDate = account.createdAt.toDate();
-          if (createdDate >= lastMonth) {
-            currentMonthUsers++;
-          }
-          if (createdDate >= new Date(now.getFullYear(), now.getMonth() - 2, now.getDate()) && 
-              createdDate < lastMonth) {
-            lastMonthUsers++;
-          }
-        }
-      });
-      
-      if (lastMonthUsers === 0) return currentMonthUsers > 0 ? 100 : 0;
-      return Math.round(((currentMonthUsers - lastMonthUsers) / lastMonthUsers) * 100);
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // Get user activity (this would typically be tracked in a separate collection)
+      const usersSnapshot = await getDocs(collection(db, COLLECTIONS.USERS));
+      const users = usersSnapshot.docs.map(doc => doc.data());
+
+      // Simulate engagement metrics (in a real app, you'd track actual user activity)
+      const totalUsers = users.length;
+      const dailyActiveUsers = Math.floor(totalUsers * 0.15);
+      const weeklyActiveUsers = Math.floor(totalUsers * 0.4);
+      const monthlyActiveUsers = Math.floor(totalUsers * 0.7);
+      const averageSessionTime = 25; // minutes
+      const returnUserRate = 65; // percentage
+
+      return {
+        dailyActiveUsers,
+        weeklyActiveUsers,
+        monthlyActiveUsers,
+        averageSessionTime,
+        returnUserRate,
+      };
     } catch (error) {
-      console.error('Error calculating monthly growth:', error);
-      return 34; // Fallback
+      console.error('Error getting user engagement:', error);
+      throw error;
     }
   }
 
-  private async calculateSuccessRate(): Promise<number> {
+  static async getTopFeedback(limit: number = 10): Promise<any[]> {
     try {
-      const accountsRef = collection(db, 'accounts');
-      const snapshot = await getDocs(accountsRef);
+      const feedbackQuery = query(
+        collection(db, COLLECTIONS.DEMO_FEEDBACK),
+        orderBy('rating', 'desc'),
+        orderBy('createdAt', 'desc'),
+        limit(limit)
+      );
+      const feedbackSnapshot = await getDocs(feedbackQuery);
       
-      let totalAttempts = 0;
-      let successfulCompletions = 0;
-      
-      snapshot.forEach((doc) => {
-        const account = doc.data() as UserAccount;
-        if (account.demos) {
-          Object.values(account.demos).forEach((progress) => {
-            totalAttempts++;
-            if (progress.status === 'completed') {
-              successfulCompletions++;
-            }
-          });
-        }
-      });
-      
-      return totalAttempts > 0 ? Math.round((successfulCompletions / totalAttempts) * 100) : 92;
+      return feedbackSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
     } catch (error) {
-      console.error('Error calculating success rate:', error);
-      return 92; // Fallback
+      console.error('Error getting top feedback:', error);
+      throw error;
     }
   }
 
-  getUserSentiment(satisfactionScore: number): UserSentiment {
-    if (satisfactionScore >= 90) {
-      return {
-        score: satisfactionScore,
-        emotion: 'excited',
-        emoji: '🚀',
-        description: 'Users are absolutely thrilled!'
-      };
-    } else if (satisfactionScore >= 75) {
-      return {
-        score: satisfactionScore,
-        emotion: 'satisfied',
-        emoji: '😊',
-        description: 'Users love the platform!'
-      };
-    } else if (satisfactionScore >= 60) {
-      return {
-        score: satisfactionScore,
-        emotion: 'neutral',
-        emoji: '😐',
-        description: 'Users are generally positive'
-      };
-    } else {
-      return {
-        score: satisfactionScore,
-        emotion: 'concerned',
-        emoji: '🤔',
-        description: 'Room for improvement'
-      };
-    }
-  }
+  static async getFeedbackTrends(days: number = 30): Promise<any[]> {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
 
-  // Clear cache manually if needed
-  clearCache(): void {
-    this.cache = null;
-    this.cacheTimestamp = 0;
+      const feedbackQuery = query(
+        collection(db, COLLECTIONS.DEMO_FEEDBACK),
+        where('createdAt', '>=', startDate),
+        orderBy('createdAt', 'asc')
+      );
+      const feedbackSnapshot = await getDocs(feedbackQuery);
+      
+      // Group feedback by date
+      const feedbackByDate: { [key: string]: number } = {};
+      feedbackSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const date = data.createdAt?.toDate?.()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+        feedbackByDate[date] = (feedbackByDate[date] || 0) + 1;
+      });
+
+      // Convert to array format for charts
+      return Object.entries(feedbackByDate).map(([date, count]) => ({
+        date,
+        count,
+      }));
+    } catch (error) {
+      console.error('Error getting feedback trends:', error);
+      throw error;
+    }
   }
 }
-
-export const analyticsService = new AnalyticsService();

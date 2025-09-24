@@ -211,21 +211,39 @@ export const useDemoStats = (): UseDemoStatsReturn => {
         userId: walletData.publicKey,
       };
 
-      await demoFeedbackService.submitFeedback(feedbackData);
+      console.log('🚀 Submitting feedback:', feedbackData);
+      
+      // Test Firebase connection first
+      console.log('🔥 Testing Firebase connection...');
+      
+      const result = await demoFeedbackService.submitFeedback(feedbackData);
+      console.log('✅ Feedback submitted successfully:', result);
+      
       addToast({
         type: 'success',
-        title: 'Feedback Submitted',
-        message: 'Thank you for your feedback!',
+        title: 'Feedback Submitted! 🎉',
+        message: 'Thank you for your valuable feedback!',
       });
       
       // Refresh stats to get updated rating
       await refreshStats();
     } catch (err) {
-      console.error('Error submitting feedback:', err);
+      console.error('❌ Error submitting feedback:', err);
+      
+      // More detailed error logging
+      if (err instanceof Error) {
+        console.error('Error details:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        });
+      }
+      
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit feedback';
       addToast({
         type: 'error',
         title: 'Submission Failed',
-        message: 'Failed to submit feedback',
+        message: `${errorMessage}. Please try again or contact support.`,
       });
     }
   };

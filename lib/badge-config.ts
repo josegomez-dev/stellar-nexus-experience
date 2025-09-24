@@ -58,10 +58,10 @@ export const BADGE_CONFIG: Record<string, Badge> = {
     createdAt: new Date(),
   },
 
-  // Specific Demo Badges
-  'escrow_beginner': {
-    id: 'escrow_beginner',
-    name: 'Escrow Beginner',
+  // Specific Demo Badges - Updated to match user requirements
+  'escrow-expert': {
+    id: 'escrow-expert',
+    name: 'Escrow Expert',
     description: 'Mastered the basic escrow flow',
     icon: '🔒',
     category: 'demo',
@@ -71,33 +71,15 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Baby Steps to Riches demo'
+        description: 'Complete Micro Task Marketplace demo'
       }
     ],
     createdAt: new Date(),
   },
 
-  'democracy_champion': {
-    id: 'democracy_champion',
-    name: 'Democracy Champion',
-    description: 'Navigated multi-stakeholder approval systems',
-    icon: '🗳️',
-    category: 'demo',
-    rarity: 'rare',
-    xpReward: 40,
-    requirements: [
-      {
-        type: 'demo_completion',
-        value: 1,
-        description: 'Complete Democracy in Action demo'
-      }
-    ],
-    createdAt: new Date(),
-  },
-
-  'dispute_resolver': {
-    id: 'dispute_resolver',
-    name: 'Dispute Resolver',
+  'trust-guardian': {
+    id: 'trust-guardian',
+    name: 'Trust Guardian',
     description: 'Resolved conflicts like a true arbitrator',
     icon: '⚖️',
     category: 'demo',
@@ -107,25 +89,43 @@ export const BADGE_CONFIG: Record<string, Badge> = {
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Drama Queen Escrow demo'
+        description: 'Complete Dispute Resolution demo'
       }
     ],
     createdAt: new Date(),
   },
 
-  'gig_economy_expert': {
-    id: 'gig_economy_expert',
-    name: 'Gig Economy Expert',
+  'stellar-champion': {
+    id: 'stellar-champion',
+    name: 'Stellar Champion',
     description: 'Mastered the micro-task marketplace',
     icon: '💼',
     category: 'demo',
-    rarity: 'rare',
-    xpReward: 35,
+    rarity: 'epic',
+    xpReward: 100,
     requirements: [
       {
         type: 'demo_completion',
         value: 1,
-        description: 'Complete Gig Economy Madness demo'
+        description: 'Complete Micro Task Marketplace demo'
+      }
+    ],
+    createdAt: new Date(),
+  },
+
+  'nexus-master': {
+    id: 'nexus-master',
+    name: 'Nexus Master',
+    description: 'Completed all key demos and achieved mastery',
+    icon: '👑',
+    category: 'achievement',
+    rarity: 'legendary',
+    xpReward: 200,
+    requirements: [
+      {
+        type: 'custom',
+        value: 3,
+        description: 'Complete demos 1, 3, and 4'
       }
     ],
     createdAt: new Date(),

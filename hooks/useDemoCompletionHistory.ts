@@ -101,18 +101,7 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
       setCompletionHistory(updatedHistory);
       saveHistory(updatedHistory);
 
-      // Show success toast
-      const toastTitle = record.isFirstCompletion ? '🎉 First Completion!' : '🔄 Demo Replayed!';
-      const toastMessage = record.isFirstCompletion 
-        ? `Earned ${record.pointsEarned} points with ${record.score}% score` 
-        : `Earned ${record.pointsEarned} bonus points (${record.score}% score)`;
-
-      addToast({
-        type: 'success',
-        title: toastTitle,
-        message: toastMessage,
-        duration: 4000,
-      });
+      // Note: Demo completion notifications are handled by AccountContext.tsx
 
     } catch (err) {
       console.error('Error adding completion:', err);

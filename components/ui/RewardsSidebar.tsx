@@ -113,16 +113,31 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   const renderBadges = () => {
     try {
+      // Define main achievement badges
+      const mainBadgeIds = [
+        'welcome_explorer',
+        'escrow-expert', 
+        'trust-guardian',
+        'stellar-champion',
+        'nexus-master'
+      ];
+
       // Check which badges are earned by the user (match by name since that's how they're stored)
       const earnedBadgeNames = safeAccount.badges?.map((badge: any) => badge.name) || [];
       const badgesWithStatus = AVAILABLE_BADGES?.map((badge: Badge) => ({
         ...badge,
         isEarned: earnedBadgeNames.includes(badge.name),
-        earnedAt: safeAccount.badges?.find(b => b.name === badge.name)?.earnedAt
+        earnedAt: safeAccount.badges?.find(b => b.name === badge.name)?.earnedAt,
+        isMainAchievement: mainBadgeIds.includes(badge.id)
       })) || [];
+
+      // Separate main achievements from extra badges
+      const mainBadges = badgesWithStatus.filter(badge => badge.isMainAchievement);
+      const extraBadges = badgesWithStatus.filter(badge => !badge.isMainAchievement);
 
       const earnedCount = earnedBadgeNames.length;
       const totalCount = AVAILABLE_BADGES?.length || 0;
+      const mainEarnedCount = mainBadges.filter(badge => badge.isEarned).length;
 
       return (
         <div className="space-y-4">
@@ -136,23 +151,67 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               />
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-            {badgesWithStatus.length > 0 ? (
-              badgesWithStatus.map((badge) => (
-                <Badge3D
-                  key={badge.id}
-                  badge={badge}
-                  size="sm"
-                  compact={true}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-400">
-                <div className="text-4xl mb-2">🏆</div>
-                <div className="text-sm">No badges available</div>
+
+          {/* Main Achievements Section */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
+              <h3 className="text-lg font-semibold text-white">Main Achievements</h3>
+              <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-2 py-1 rounded-full text-xs text-blue-300 border border-blue-400/30">
+                {mainEarnedCount} / {mainBadges.length}
               </div>
-            )}
+            </div>
+            
+            <div className="space-y-2">
+              {mainBadges.map((badge) => (
+                <div key={badge.id} className="relative">
+                  <Badge3D
+                    badge={badge}
+                    size="sm"
+                    compact={true}
+                  />
+                  {/* Main Achievement Indicator */}
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Extra Badges Section */}
+          {extraBadges.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-2 h-2 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-white">Extra Badges</h3>
+                <div className="bg-gradient-to-r from-gray-500/20 to-gray-600/20 px-2 py-1 rounded-full text-xs text-gray-300 border border-gray-400/30">
+                  {extraBadges.filter(badge => badge.isEarned).length} / {extraBadges.length}
+                </div>
+              </div>
+              
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {extraBadges.map((badge) => (
+                  <div key={badge.id} className="opacity-80 hover:opacity-100 transition-opacity">
+                    <Badge3D
+                      badge={badge}
+                      size="sm"
+                      compact={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Achievement Guide */}
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4">
+            <h4 className="text-sm font-semibold text-blue-300 mb-2">🎯 Achievement Guide</h4>
+            <div className="text-xs text-gray-300 space-y-1">
+              <div>• <span className="text-blue-300">Account Creation</span> → Welcome Explorer</div>
+              <div>• <span className="text-blue-300">Complete Demo 1</span> → Escrow Expert</div>
+              <div>• <span className="text-blue-300">Complete Demo 3</span> → Trust Guardian</div>
+              <div>• <span className="text-blue-300">Complete Demo 4</span> → Stellar Champion</div>
+              <div>• <span className="text-purple-300">Complete Demos 1, 3, 4</span> → Nexus Master</div>
+            </div>
           </div>
         </div>
       );

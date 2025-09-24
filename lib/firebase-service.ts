@@ -373,7 +373,7 @@ export const demoStatsService = {
     return null;
   },
 
-  // Get all demo stats
+  // Get all demo stats (for analytics)
   async getAllDemoStats(): Promise<DemoStats[]> {
     const q = query(
       collection(db, COLLECTIONS.DEMO_STATS),
@@ -385,6 +385,7 @@ export const demoStatsService = {
       convertTimestamps({ id: doc.id, ...doc.data() })
     ) as DemoStats[];
   },
+
 
   // Initialize demo stats (create if not exists)
   async initializeDemoStats(demoId: string, demoName: string): Promise<void> {
@@ -525,17 +526,27 @@ export const demoClapService = {
 export const demoFeedbackService = {
   // Submit feedback for demo
   async submitFeedback(feedback: Partial<DemoFeedback>): Promise<string> {
-    const feedbackRef = await addDoc(collection(db, COLLECTIONS.DEMO_FEEDBACK), {
-      ...feedback,
-      createdAt: serverTimestamp(),
-    });
-    
-    // Update demo rating in stats
-    if (feedback.rating && feedback.demoId) {
-      await demoStatsService.updateRating(feedback.demoId, feedback.rating);
+    try {
+      // Ensure demo stats exist before updating rating
+      if (feedback.rating && feedback.demoId) {
+        await demoStatsService.ensureDemoStatsExist(feedback.demoId, feedback.demoName || 'Unknown Demo');
+      }
+      
+      const feedbackRef = await addDoc(collection(db, COLLECTIONS.DEMO_FEEDBACK), {
+        ...feedback,
+        createdAt: serverTimestamp(),
+      });
+      
+      // Update demo rating in stats
+      if (feedback.rating && feedback.demoId) {
+        await demoStatsService.updateRating(feedback.demoId, feedback.rating);
+      }
+      
+      return feedbackRef.id;
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      throw new Error(`Failed to submit feedback: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    
-    return feedbackRef.id;
   },
 
   // Get feedback for a demo
@@ -558,6 +569,19 @@ export const demoFeedbackService = {
     const q = query(
       collection(db, COLLECTIONS.DEMO_FEEDBACK),
       where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => 
+      convertTimestamps({ id: doc.id, ...doc.data() })
+    ) as DemoFeedback[];
+  },
+
+  // Get all feedback (for analytics)
+  async getAllFeedback(): Promise<DemoFeedback[]> {
+    const q = query(
+      collection(db, COLLECTIONS.DEMO_FEEDBACK),
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);

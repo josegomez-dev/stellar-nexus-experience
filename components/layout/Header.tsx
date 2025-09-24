@@ -64,19 +64,6 @@ export const Header = () => {
               />
               <span>Nexus Web3 Playground</span>
             </a>
-            <a
-              href='/docs'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
-            >
-              <Image
-                src='/images/icons/docs.png'
-                alt='Docs'
-                width={20}
-                height={20}
-                className='w-5 h-5'
-              />
-              <span>Docs</span>
-            </a>
           </nav>
 
           {/* Header Controls */}
@@ -197,6 +184,16 @@ export const Header = () => {
                   className='w-5 h-5'
                 />
                 <span>Docs</span>
+              </div>
+            </a>
+            <a
+              href='/analytics'
+              className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div className='flex items-center space-x-2'>
+                <span className='text-lg'>📊</span>
+                <span>Analytics</span>
               </div>
             </a>
           </div>

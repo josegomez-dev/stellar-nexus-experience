@@ -1407,21 +1407,12 @@ export const HelloMilestoneDemo = () => {
       <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 backdrop-blur-sm border border-brand-400/30 rounded-xl shadow-2xl p-8'>
         <div className='text-center mb-8'>
           <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-300 mb-4'>
-            <TypeWriter
-              text="🚀 Baby Steps to Riches Flow Demo"
-              speed={60}
-              className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-300"
-              showCursor={false}
-            />
+            🚀 Baby Steps to Riches Flow Demo
           </h2>
           <div className="mb-4">
-            <TypeWriter
-              text="Experience the complete trustless escrow flow with real blockchain transactions"
-              speed={40}
-              delay={2000}
-              className="text-white/80 text-lg"
-              showCursor={false}
-            />
+            <p className="text-white/80 text-lg">
+              Experience the complete trustless escrow flow with real blockchain transactions
+            </p>
           </div>
 
 

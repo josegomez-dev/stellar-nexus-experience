@@ -169,13 +169,7 @@ export const ImmersiveDemoModal = ({
         setCurrentStep('feedback');
       }
       
-      console.log('🎉 Showing success toast');
-      addToast({
-        type: 'success',
-        title: '🎉 Demo Completed!',
-        message: 'Please share your feedback to help us improve!',
-        duration: 5000,
-      });
+      console.log('🎉 Demo completed successfully');
       
       console.log('✅ Complete Demo process finished successfully');
     } catch (error) {

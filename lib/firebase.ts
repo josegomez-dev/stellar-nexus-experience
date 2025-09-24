@@ -16,12 +16,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-console.log('✅ Firebase app initialized');
 
 // Initialize Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-console.log('✅ Firestore and Auth initialized');
 
 // Initialize Analytics (only in browser and if supported)
 let analytics: any = null;
