@@ -309,6 +309,7 @@ const DemoSelector = ({
                         onClick={e => {
                           e.stopPropagation();
                           if (isConnected) {
+                            setActiveDemo(demo.id);
                             setShowImmersiveDemo(true);
                           }
                         }}
