@@ -445,91 +445,101 @@ const DemoSelector = ({
                   </p>
                 )}
 
-                {/* Start Demo Button */}
+                {/* Demo Action Section */}
                 <div className='flex flex-col items-center space-y-2'>
                   {demo.isReady ? (
-                    <div className='relative group'>
-                      {/* Epic Background Glow */}
-                      <div className='absolute inset-0 bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse'></div>
-
-                      {/* Floating Particles */}
-                      <div className='absolute inset-0 overflow-hidden rounded-xl'>
-                        <div className='absolute top-2 left-1/4 w-1 h-1 bg-brand-400 rounded-full animate-ping opacity-70'></div>
-                        <div
-                          className='absolute top-4 right-1/3 w-1 h-1 bg-accent-400 rounded-full animate-ping opacity-80'
-                          style={{ animationDelay: '0.5s' }}
-                        ></div>
-                        <div
-                          className='absolute bottom-2 left-1/3 w-1 h-1 bg-brand-300 rounded-full animate-ping opacity-60'
-                          style={{ animationDelay: '1s' }}
-                        ></div>
-                        <div
-                          className='absolute bottom-4 right-1/4 w-1 h-1 bg-accent-300 rounded-full animate-ping opacity-90'
-                          style={{ animationDelay: '1.5s' }}
-                        ></div>
-                      </div>
-
-                      {/* Energy Streams */}
-                      <div className='absolute inset-0 overflow-hidden rounded-xl'>
-                        <div className='absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60'></div>
-                        <div className='absolute right-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70'></div>
-                      </div>
-                      <br />
-
-                      {/* Main Button */}
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          if (isConnected) {
-                            setActiveDemo(demo.id);
-                            setShowImmersiveDemo(true);
-                          }
-                        }}
-                        disabled={!isConnected}
-                        className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform shadow-2xl border-2 text-lg ${
-                          isConnected
-                            ? `hover:scale-110 hover:rotate-1 ${getDemoButtonColors(demo.color).shadow} bg-gradient-to-r ${getDemoButtonColors(demo.color).gradient} ${getDemoButtonColors(demo.color).hoverGradient} text-white border-white/30 hover:border-white/60`
-                            : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed blur-sm opacity-60'
-                        }`}
-                      >
-                        {/* Button Content */}
-                        <div className='flex items-center'>
-                          <div className='flex flex-col'>
-                            <span className='text-lg font-bold'>
-                              {!isConnected
-                                ? 'CONNECT WALLET'
-                                : isCompleted
-                                  ? 'PLAY AGAIN'
-                                  : 'LAUNCH DEMO'}
-                            </span>
-                            <span className='text-xs opacity-80'>
-                              {!isConnected
-                                ? 'Required to launch demo'
-                                : isCompleted
-                                  ? 'Replay and earn bonus points!'
-                                  : 'Prepare for AWESOMENESS!'}
-                            </span>
+                    isCompleted ? (
+                      /* Completed Demo - Show colored text instead of button */
+                      <div className='text-center'>
+                        <div className='text-2xl font-bold text-green-400 mb-2 animate-pulse'>
+                          ✅ COMPLETED
+                        </div>
+                        <div className='text-sm text-green-300/80 font-semibold'>
+                          Demo Successfully Finished!
+                        </div>
+                        {earnedBadge && badge && (
+                          <div className='mt-3 text-xs text-yellow-300/70'>
+                            Earned: {badge.name} (+{badge.xpReward} XP)
                           </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Incomplete Demo - Show launch button */
+                      <div className='relative group'>
+                        {/* Epic Background Glow */}
+                        <div className='absolute inset-0 bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse'></div>
+
+                        {/* Floating Particles */}
+                        <div className='absolute inset-0 overflow-hidden rounded-xl'>
+                          <div className='absolute top-2 left-1/4 w-1 h-1 bg-brand-400 rounded-full animate-ping opacity-70'></div>
+                          <div
+                            className='absolute top-4 right-1/3 w-1 h-1 bg-accent-400 rounded-full animate-ping opacity-80'
+                            style={{ animationDelay: '0.5s' }}
+                          ></div>
+                          <div
+                            className='absolute bottom-2 left-1/3 w-1 h-1 bg-brand-300 rounded-full animate-ping opacity-60'
+                            style={{ animationDelay: '1s' }}
+                          ></div>
+                          <div
+                            className='absolute bottom-4 right-1/4 w-1 h-1 bg-accent-300 rounded-full animate-ping opacity-90'
+                            style={{ animationDelay: '1.5s' }}
+                          ></div>
                         </div>
 
-                        {/* Hover Effects - Only show when connected */}
-                        {isConnected && (
-                          <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-                        )}
-                      </button>
+                        {/* Energy Streams */}
+                        <div className='absolute inset-0 overflow-hidden rounded-xl'>
+                          <div className='absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60'></div>
+                          <div className='absolute right-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70'></div>
+                        </div>
+                        <br />
 
-                      {/* Rotating Nexus Logo */}
-                      <div className='absolute -right-20 bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>
-                        <Image
-                          src='/images/logo/logoicon.png'
-                          alt='Nexus Logo'
-                          width={100}
-                          height={100}
-                          className='animate-spin'
-                          style={{ animationDuration: '2s' }}
-                        />
+                        {/* Main Button */}
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            if (isConnected) {
+                              setActiveDemo(demo.id);
+                              setShowImmersiveDemo(true);
+                            }
+                          }}
+                          disabled={!isConnected}
+                          className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform shadow-2xl border-2 text-lg ${
+                            isConnected
+                              ? `hover:scale-110 hover:rotate-1 ${getDemoButtonColors(demo.color).shadow} bg-gradient-to-r ${getDemoButtonColors(demo.color).gradient} ${getDemoButtonColors(demo.color).hoverGradient} text-white border-white/30 hover:border-white/60`
+                              : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed blur-sm opacity-60'
+                          }`}
+                        >
+                          {/* Button Content */}
+                          <div className='flex items-center'>
+                            <div className='flex flex-col'>
+                              <span className='text-lg font-bold'>
+                                {!isConnected ? 'CONNECT WALLET' : 'LAUNCH DEMO'}
+                              </span>
+                              <span className='text-xs opacity-80'>
+                                {!isConnected ? 'Required to launch demo' : 'Prepare for AWESOMENESS!'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Hover Effects - Only show when connected */}
+                          {isConnected && (
+                            <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                          )}
+                        </button>
+
+                        {/* Rotating Nexus Logo */}
+                        <div className='absolute -right-20 bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>
+                          <Image
+                            src='/images/logo/logoicon.png'
+                            alt='Nexus Logo'
+                            width={100}
+                            height={100}
+                            className='animate-spin'
+                            style={{ animationDuration: '2s' }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )
                   ) : (
                     <button
                       disabled={true}
