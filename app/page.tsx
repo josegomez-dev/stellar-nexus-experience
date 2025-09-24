@@ -127,6 +127,42 @@ const DemoSelector = ({
     };
   };
 
+  const getDemoButtonColors = (demoColor: string) => {
+    // Map demo colors to button gradient colors
+    switch (demoColor) {
+      case 'from-brand-500 to-brand-400':
+        return {
+          gradient: 'from-brand-500 via-brand-400 to-brand-600',
+          hoverGradient: 'hover:from-brand-600 hover:via-brand-500 hover:to-brand-700',
+          shadow: 'hover:shadow-brand-500/50'
+        };
+      case 'from-success-500 to-success-400':
+        return {
+          gradient: 'from-success-500 via-success-400 to-success-600',
+          hoverGradient: 'hover:from-success-600 hover:via-success-500 hover:to-success-700',
+          shadow: 'hover:shadow-success-500/50'
+        };
+      case 'from-warning-500 to-warning-400':
+        return {
+          gradient: 'from-warning-500 via-warning-400 to-warning-600',
+          hoverGradient: 'hover:from-warning-600 hover:via-warning-500 hover:to-warning-700',
+          shadow: 'hover:shadow-warning-500/50'
+        };
+      case 'from-accent-500 to-accent-400':
+        return {
+          gradient: 'from-accent-500 via-accent-400 to-accent-600',
+          hoverGradient: 'hover:from-accent-600 hover:via-accent-500 hover:to-accent-700',
+          shadow: 'hover:shadow-accent-500/50'
+        };
+      default:
+        return {
+          gradient: 'from-brand-500 via-accent-500 to-brand-400',
+          hoverGradient: 'hover:from-brand-600 hover:via-accent-600 hover:to-brand-500',
+          shadow: 'hover:shadow-brand-500/50'
+        };
+    }
+  };
+
   const handleArticleClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer');
   };
@@ -316,7 +352,7 @@ const DemoSelector = ({
                         disabled={!isConnected}
                         className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform shadow-2xl border-2 text-lg ${
                           isConnected
-                            ? 'hover:scale-110 hover:rotate-1 hover:shadow-brand-500/50 bg-gradient-to-r from-brand-500 via-accent-500 to-brand-400 hover:from-brand-600 hover:via-accent-600 hover:to-brand-500 text-white border-white/30 hover:border-white/60'
+                            ? `hover:scale-110 hover:rotate-1 ${getDemoButtonColors(demo.color).shadow} bg-gradient-to-r ${getDemoButtonColors(demo.color).gradient} ${getDemoButtonColors(demo.color).hoverGradient} text-white border-white/30 hover:border-white/60`
                             : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed blur-sm opacity-60'
                         }`}
                       >
