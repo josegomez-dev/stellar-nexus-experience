@@ -116,7 +116,7 @@ const DemoSelector = ({
     const badgeMap: Record<string, string> = {
       'hello-milestone': 'escrow-expert',
       'dispute-resolution': 'trust-guardian',
-      'micro-task-marketplace': 'stellar-champion',
+      'micro-marketplace': 'stellar-champion',
     };
     
     const badgeId = badgeMap[demoId];

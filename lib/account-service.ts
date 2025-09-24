@@ -430,6 +430,10 @@ export class AccountService {
     // Demo 3 (Dispute Resolution) → Trust Guardian
     // Demo 4 (Micro Task Marketplace) → Stellar Champion
     switch (demoId) {
+      case 'micro-marketplace':
+        badgeId = 'stellar-champion';
+        console.log(`✅ Micro marketplace demo completed - awarding stellar-champion badge`);
+        break;
       case 'micro-task-marketplace': {
         // This could be demo 1 or demo 4, we need to check which one
         const accountDoc = await getDoc(doc(db, 'accounts', accountId));
@@ -445,6 +449,10 @@ export class AccountService {
         }
         break;
       }
+      case 'hello-milestone':
+        badgeId = 'escrow-expert';
+        console.log(`✅ Hello milestone demo completed - awarding escrow-expert badge`);
+        break;
       case 'dispute-resolution':
         badgeId = 'trust-guardian';
         console.log(`✅ Dispute resolution demo completed - awarding trust-guardian badge`);
