@@ -163,6 +163,67 @@ const DemoSelector = ({
     }
   };
 
+  const getDemoCardColors = (demoColor: string) => {
+    // Map demo colors to card background and title colors
+    switch (demoColor) {
+      case 'from-brand-500 to-brand-400':
+        return {
+          background: 'bg-gradient-to-br from-brand-500/15 via-brand-400/10 to-brand-600/15',
+          hoverBackground: 'hover:from-brand-500/20 hover:via-brand-400/15 hover:to-brand-600/20',
+          border: 'border-brand-400/30',
+          hoverBorder: 'hover:border-brand-400/50',
+          titleColor: 'text-brand-200',
+          hoverTitleColor: 'group-hover:text-brand-100',
+          shadow: 'shadow-brand-500/20',
+          hoverShadow: 'hover:shadow-brand-500/30'
+        };
+      case 'from-success-500 to-success-400':
+        return {
+          background: 'bg-gradient-to-br from-success-500/15 via-success-400/10 to-success-600/15',
+          hoverBackground: 'hover:from-success-500/20 hover:via-success-400/15 hover:to-success-600/20',
+          border: 'border-success-400/30',
+          hoverBorder: 'hover:border-success-400/50',
+          titleColor: 'text-success-200',
+          hoverTitleColor: 'group-hover:text-success-100',
+          shadow: 'shadow-success-500/20',
+          hoverShadow: 'hover:shadow-success-500/30'
+        };
+      case 'from-warning-500 to-warning-400':
+        return {
+          background: 'bg-gradient-to-br from-warning-500/15 via-warning-400/10 to-warning-600/15',
+          hoverBackground: 'hover:from-warning-500/20 hover:via-warning-400/15 hover:to-warning-600/20',
+          border: 'border-warning-400/30',
+          hoverBorder: 'hover:border-warning-400/50',
+          titleColor: 'text-warning-200',
+          hoverTitleColor: 'group-hover:text-warning-100',
+          shadow: 'shadow-warning-500/20',
+          hoverShadow: 'hover:shadow-warning-500/30'
+        };
+      case 'from-accent-500 to-accent-400':
+        return {
+          background: 'bg-gradient-to-br from-accent-500/15 via-accent-400/10 to-accent-600/15',
+          hoverBackground: 'hover:from-accent-500/20 hover:via-accent-400/15 hover:to-accent-600/20',
+          border: 'border-accent-400/30',
+          hoverBorder: 'hover:border-accent-400/50',
+          titleColor: 'text-accent-200',
+          hoverTitleColor: 'group-hover:text-accent-100',
+          shadow: 'shadow-accent-500/20',
+          hoverShadow: 'hover:shadow-accent-500/30'
+        };
+      default:
+        return {
+          background: 'bg-gradient-to-br from-white/5 to-white/10',
+          hoverBackground: 'hover:from-white/10 hover:to-white/15',
+          border: 'border-white/20',
+          hoverBorder: 'hover:border-white/30',
+          titleColor: 'text-white',
+          hoverTitleColor: 'group-hover:text-brand-200',
+          shadow: '',
+          hoverShadow: ''
+        };
+    }
+  };
+
   const handleArticleClick = (link: string) => {
     window.open(link, '_blank', 'noopener,noreferrer');
   };
@@ -184,7 +245,7 @@ const DemoSelector = ({
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : isCompleted
                   ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20'
-                  : 'border-white/20 bg-gradient-to-br from-white/5 to-white/10 hover:border-white/30 hover:from-white/10 hover:to-white/15'
+                  : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
             >
@@ -295,12 +356,12 @@ const DemoSelector = ({
                   </div>
 
                   {/* Demo Title with Enhanced Styling */}
-                  <h3 className='relative z-10 font-bold text-white text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl group-hover:text-brand-200 transition-all duration-500'>
+                  <h3 className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color).titleColor} ${getDemoCardColors(demo.color).hoverTitleColor}`}>
                     {demo.title}
                   </h3>
                 </div>
 
-                <h4 className='font-semibold text-brand-300 mb-3 text-left text-sm uppercase tracking-wide'>
+                <h4 className={`font-semibold mb-3 text-left text-sm uppercase tracking-wide ${getDemoCardColors(demo.color).titleColor.replace('200', '300')}`}>
                   {demo.subtitle}
                 </h4>
                 <p
