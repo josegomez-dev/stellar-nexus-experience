@@ -35,6 +35,7 @@ import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
+import '@/styles/demo-card-animations.css';
 
 // Demo Selection Component
 interface Demo {
@@ -272,8 +273,8 @@ const DemoSelector = ({
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : isCompleted
-                    ? `border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20 ${
-                        earnedBadge ? 'animate-pulse hover:animate-bounce' : ''
+                    ? `border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20 completed ${
+                        earnedBadge ? 'earned-badge' : ''
                       }`
                     : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
@@ -297,8 +298,8 @@ const DemoSelector = ({
               {demo.isReady && isCompleted && (
                 <div className='absolute top-4 right-4 z-50'>
                   {earnedBadge && badge ? (
-                    <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 animate-pulse'>
-                      <span className='text-lg'>{badge.icon}</span>
+                    <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine'>
+                      <span className='text-lg badge-icon-bounce'>{badge.icon}</span>
                       <span>{badge.name}</span>
                     </div>
                   ) : (
@@ -317,10 +318,10 @@ const DemoSelector = ({
               {/* Floating particles for completed demos with badges */}
               {isCompleted && earnedBadge && (
                 <div className='absolute inset-0 pointer-events-none overflow-hidden'>
-                  <div className='absolute top-4 left-4 w-2 h-2 bg-yellow-400 rounded-full animate-ping opacity-70'></div>
-                  <div className='absolute top-8 right-8 w-1 h-1 bg-orange-400 rounded-full animate-ping opacity-80' style={{ animationDelay: '0.5s' }}></div>
-                  <div className='absolute bottom-8 left-8 w-1 h-1 bg-yellow-300 rounded-full animate-ping opacity-60' style={{ animationDelay: '1s' }}></div>
-                  <div className='absolute bottom-4 right-4 w-2 h-2 bg-orange-300 rounded-full animate-ping opacity-90' style={{ animationDelay: '1.5s' }}></div>
+                  <div className='absolute top-4 left-4 w-2 h-2 bg-yellow-400 rounded-full floating-particle opacity-70'></div>
+                  <div className='absolute top-8 right-8 w-1 h-1 bg-orange-400 rounded-full floating-particle opacity-80'></div>
+                  <div className='absolute bottom-8 left-8 w-1 h-1 bg-yellow-300 rounded-full floating-particle opacity-60'></div>
+                  <div className='absolute bottom-4 right-4 w-2 h-2 bg-orange-300 rounded-full floating-particle opacity-90'></div>
                 </div>
               )}
 
@@ -421,7 +422,7 @@ const DemoSelector = ({
                   <div className='mb-4'>
                     <div className='bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-4 mb-3'>
                       <div className='flex items-center gap-3 mb-2'>
-                        <span className='text-3xl animate-bounce'>{badge.icon}</span>
+                        <span className='text-3xl celebration-sparkle'>{badge.icon}</span>
                         <div>
                           <h5 className='font-bold text-yellow-200 text-lg'>{badge.name}</h5>
                           <p className='text-yellow-300/80 text-sm'>{badge.description}</p>
@@ -432,7 +433,7 @@ const DemoSelector = ({
                         <span className='text-yellow-300/70'>+{badge.xpReward} XP</span>
                       </div>
                     </div>
-                    <div className='text-center text-green-300 text-sm font-semibold animate-pulse'>
+                    <div className='text-center text-green-300 text-sm font-semibold badge-celebration'>
                       🎉 Badge Earned! 🎉
                     </div>
                   </div>
