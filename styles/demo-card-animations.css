@@ -11,10 +11,10 @@
 
 @keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
   }
   50% {
-    box-shadow: 0 0 40px rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 40px rgba(14, 165, 233, 0.6);
   }
 }
 
@@ -88,7 +88,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Success glow for completed demos */
+/* Enhanced glow for completed demos - uses demo-specific colors via CSS variables */
 .demo-card.completed {
   position: relative;
 }
@@ -100,7 +100,7 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #10b981, #34d399, #6ee7b7, #34d399, #10b981);
+  background: linear-gradient(45deg, var(--demo-color-1, #0ea5e9), var(--demo-color-2, #38bdf8), var(--demo-color-3, #7dd3fc), var(--demo-color-2, #38bdf8), var(--demo-color-1, #0ea5e9));
   border-radius: 14px;
   z-index: -1;
   opacity: 0;

@@ -188,55 +188,121 @@ const DemoSelector = ({
     }
   };
 
-  const getDemoCardColors = (demoColor: string) => {
-    // Map demo colors to card background and title colors
+  const getDemoBadgeColors = (demoColor: string) => {
+    // Map demo colors to badge-specific colors
     switch (demoColor) {
       case 'from-brand-500 to-brand-400':
         return {
-          background: 'bg-gradient-to-br from-brand-500/15 via-brand-400/10 to-brand-600/15',
-          hoverBackground: 'hover:from-brand-500/20 hover:via-brand-400/15 hover:to-brand-600/20',
+          gradient: 'from-brand-500 to-brand-400',
+          background: 'from-brand-500/20 to-brand-400/20',
           border: 'border-brand-400/30',
-          hoverBorder: 'hover:border-brand-400/50',
           titleColor: 'text-brand-200',
-          hoverTitleColor: 'group-hover:text-brand-100',
-          shadow: 'shadow-brand-500/20',
-          hoverShadow: 'hover:shadow-brand-500/30',
+          descriptionColor: 'text-brand-300/80',
         };
       case 'from-success-500 to-success-400':
         return {
-          background: 'bg-gradient-to-br from-success-500/15 via-success-400/10 to-success-600/15',
-          hoverBackground:
-            'hover:from-success-500/20 hover:via-success-400/15 hover:to-success-600/20',
+          gradient: 'from-success-500 to-success-400',
+          background: 'from-success-500/20 to-success-400/20',
           border: 'border-success-400/30',
-          hoverBorder: 'hover:border-success-400/50',
           titleColor: 'text-success-200',
-          hoverTitleColor: 'group-hover:text-success-100',
-          shadow: 'shadow-success-500/20',
-          hoverShadow: 'hover:shadow-success-500/30',
+          descriptionColor: 'text-success-300/80',
         };
       case 'from-warning-500 to-warning-400':
         return {
-          background: 'bg-gradient-to-br from-warning-500/15 via-warning-400/10 to-warning-600/15',
-          hoverBackground:
-            'hover:from-warning-500/20 hover:via-warning-400/15 hover:to-warning-600/20',
+          gradient: 'from-warning-500 to-warning-400',
+          background: 'from-warning-500/20 to-warning-400/20',
           border: 'border-warning-400/30',
-          hoverBorder: 'hover:border-warning-400/50',
           titleColor: 'text-warning-200',
-          hoverTitleColor: 'group-hover:text-warning-100',
-          shadow: 'shadow-warning-500/20',
-          hoverShadow: 'hover:shadow-warning-500/30',
+          descriptionColor: 'text-warning-300/80',
         };
       case 'from-accent-500 to-accent-400':
         return {
-          background: 'bg-gradient-to-br from-accent-500/15 via-accent-400/10 to-accent-600/15',
-          hoverBackground:
-            'hover:from-accent-500/20 hover:via-accent-400/15 hover:to-accent-600/20',
+          gradient: 'from-accent-500 to-accent-400',
+          background: 'from-accent-500/20 to-accent-400/20',
           border: 'border-accent-400/30',
-          hoverBorder: 'hover:border-accent-400/50',
+          titleColor: 'text-accent-200',
+          descriptionColor: 'text-accent-300/80',
+        };
+      default:
+        return {
+          gradient: 'from-brand-500 to-brand-400',
+          background: 'from-brand-500/20 to-brand-400/20',
+          border: 'border-brand-400/30',
+          titleColor: 'text-brand-200',
+          descriptionColor: 'text-brand-300/80',
+        };
+    }
+  };
+
+  const getDemoColorValue = (demoColor: string, variant: number) => {
+    // Map demo colors to actual color values for CSS variables
+    switch (demoColor) {
+      case 'from-brand-500 to-brand-400':
+        return variant === 1 ? '#0ea5e9' : variant === 2 ? '#38bdf8' : '#7dd3fc';
+      case 'from-success-500 to-success-400':
+        return variant === 1 ? '#22c55e' : variant === 2 ? '#4ade80' : '#86efac';
+      case 'from-warning-500 to-warning-400':
+        return variant === 1 ? '#f59e0b' : variant === 2 ? '#fbbf24' : '#fcd34d';
+      case 'from-accent-500 to-accent-400':
+        return variant === 1 ? '#d946ef' : variant === 2 ? '#e879f9' : '#f0abfc';
+      default:
+        return variant === 1 ? '#0ea5e9' : variant === 2 ? '#38bdf8' : '#7dd3fc';
+    }
+  };
+
+  const getDemoCardColors = (demoColor: string, isCompleted: boolean = false) => {
+    // Map demo colors to card background and title colors
+    const baseOpacity = isCompleted ? 25 : 15;
+    const hoverOpacity = isCompleted ? 35 : 20;
+    const borderOpacity = isCompleted ? 60 : 30;
+    const hoverBorderOpacity = isCompleted ? 80 : 50;
+    const shadowOpacity = isCompleted ? 40 : 20;
+    const hoverShadowOpacity = isCompleted ? 60 : 30;
+
+    switch (demoColor) {
+      case 'from-brand-500 to-brand-400':
+        return {
+          background: `bg-gradient-to-br from-brand-500/${baseOpacity} via-brand-400/${baseOpacity - 5} to-brand-600/${baseOpacity}`,
+          hoverBackground: `hover:from-brand-500/${hoverOpacity} hover:via-brand-400/${hoverOpacity - 5} hover:to-brand-600/${hoverOpacity}`,
+          border: `border-brand-400/${borderOpacity}`,
+          hoverBorder: `hover:border-brand-400/${hoverBorderOpacity}`,
+          titleColor: 'text-brand-200',
+          hoverTitleColor: 'group-hover:text-brand-100',
+          shadow: `shadow-brand-500/${shadowOpacity}`,
+          hoverShadow: `hover:shadow-brand-500/${hoverShadowOpacity}`,
+        };
+      case 'from-success-500 to-success-400':
+        return {
+          background: `bg-gradient-to-br from-success-500/${baseOpacity} via-success-400/${baseOpacity - 5} to-success-600/${baseOpacity}`,
+          hoverBackground: `hover:from-success-500/${hoverOpacity} hover:via-success-400/${hoverOpacity - 5} hover:to-success-600/${hoverOpacity}`,
+          border: `border-success-400/${borderOpacity}`,
+          hoverBorder: `hover:border-success-400/${hoverBorderOpacity}`,
+          titleColor: 'text-success-200',
+          hoverTitleColor: 'group-hover:text-success-100',
+          shadow: `shadow-success-500/${shadowOpacity}`,
+          hoverShadow: `hover:shadow-success-500/${hoverShadowOpacity}`,
+        };
+      case 'from-warning-500 to-warning-400':
+        return {
+          background: `bg-gradient-to-br from-warning-500/${baseOpacity} via-warning-400/${baseOpacity - 5} to-warning-600/${baseOpacity}`,
+          hoverBackground: `hover:from-warning-500/${hoverOpacity} hover:via-warning-400/${hoverOpacity - 5} hover:to-warning-600/${hoverOpacity}`,
+          border: `border-warning-400/${borderOpacity}`,
+          hoverBorder: `hover:border-warning-400/${hoverBorderOpacity}`,
+          titleColor: 'text-warning-200',
+          hoverTitleColor: 'group-hover:text-warning-100',
+          shadow: `shadow-warning-500/${shadowOpacity}`,
+          hoverShadow: `hover:shadow-warning-500/${hoverShadowOpacity}`,
+        };
+      case 'from-accent-500 to-accent-400':
+        return {
+          background: `bg-gradient-to-br from-accent-500/${baseOpacity} via-accent-400/${baseOpacity - 5} to-accent-600/${baseOpacity}`,
+          hoverBackground: `hover:from-accent-500/${hoverOpacity} hover:via-accent-400/${hoverOpacity - 5} hover:to-accent-600/${hoverOpacity}`,
+          border: `border-accent-400/${borderOpacity}`,
+          hoverBorder: `hover:border-accent-400/${hoverBorderOpacity}`,
           titleColor: 'text-accent-200',
           hoverTitleColor: 'group-hover:text-accent-100',
-          shadow: 'shadow-accent-500/20',
-          hoverShadow: 'hover:shadow-accent-500/30',
+          shadow: `shadow-accent-500/${shadowOpacity}`,
+          hoverShadow: `hover:shadow-accent-500/${hoverShadowOpacity}`,
         };
       default:
         return {
@@ -273,12 +339,17 @@ const DemoSelector = ({
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : isCompleted
-                    ? `border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20 completed ${
+                    ? `${getDemoCardColors(demo.color, true).background} ${getDemoCardColors(demo.color, true).hoverBackground} ${getDemoCardColors(demo.color, true).border} ${getDemoCardColors(demo.color, true).hoverBorder} ${getDemoCardColors(demo.color, true).shadow} ${getDemoCardColors(demo.color, true).hoverShadow} completed ${
                         earnedBadge ? 'earned-badge' : ''
                       }`
-                    : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
+                    : `${getDemoCardColors(demo.color, false).background} ${getDemoCardColors(demo.color, false).hoverBackground} ${getDemoCardColors(demo.color, false).border} ${getDemoCardColors(demo.color, false).hoverBorder} ${getDemoCardColors(demo.color, false).shadow} ${getDemoCardColors(demo.color, false).hoverShadow}`
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
+              style={{
+                '--demo-color-1': getDemoColorValue(demo.color, 1),
+                '--demo-color-2': getDemoColorValue(demo.color, 2),
+                '--demo-color-3': getDemoColorValue(demo.color, 3),
+              } as React.CSSProperties}
             >
               {/* Coming Soon Badge for non-ready demos */}
               {!demo.isReady && (
@@ -298,12 +369,12 @@ const DemoSelector = ({
               {demo.isReady && isCompleted && (
                 <div className='absolute top-4 right-4 z-50'>
                   {earnedBadge && badge ? (
-                    <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine'>
+                    <div className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}>
                       <span className='text-lg badge-icon-bounce'>{badge.icon}</span>
                       <span>{badge.name}</span>
                     </div>
                   ) : (
-                    <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2'>
+                    <div className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2`}>
                       ✅ Completed
                     </div>
                   )}
@@ -405,14 +476,14 @@ const DemoSelector = ({
 
                   {/* Demo Title with Enhanced Styling */}
                   <h3
-                    className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color).titleColor} ${getDemoCardColors(demo.color).hoverTitleColor}`}
+                    className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color, isCompleted).titleColor} ${getDemoCardColors(demo.color, isCompleted).hoverTitleColor}`}
                   >
                     {demo.title}
                   </h3>
                 </div>
 
                 <h4
-                  className={`font-semibold mb-3 text-left text-sm uppercase tracking-wide ${getDemoCardColors(demo.color).titleColor.replace('200', '300')}`}
+                  className={`font-semibold mb-3 text-left text-sm uppercase tracking-wide ${getDemoCardColors(demo.color, isCompleted).titleColor.replace('200', '300')}`}
                 >
                   {demo.subtitle}
                 </h4>
@@ -420,20 +491,20 @@ const DemoSelector = ({
                 {/* Show badge info for completed demos with earned badges, otherwise show description */}
                 {isCompleted && earnedBadge && badge ? (
                   <div className='mb-4'>
-                    <div className='bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-4 mb-3'>
+                    <div className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).background} border ${getDemoBadgeColors(demo.color).border} rounded-lg p-4 mb-3`}>
                       <div className='flex items-center gap-3 mb-2'>
                         <span className='text-3xl celebration-sparkle'>{badge.icon}</span>
                         <div>
-                          <h5 className='font-bold text-yellow-200 text-lg'>{badge.name}</h5>
-                          <p className='text-yellow-300/80 text-sm'>{badge.description}</p>
+                          <h5 className={`font-bold ${getDemoBadgeColors(demo.color).titleColor} text-lg`}>{badge.name}</h5>
+                          <p className={`${getDemoBadgeColors(demo.color).descriptionColor} text-sm`}>{badge.description}</p>
                         </div>
                       </div>
                       <div className='flex items-center justify-between text-xs'>
-                        <span className='text-yellow-300/70'>Rarity: {badge.rarity}</span>
-                        <span className='text-yellow-300/70'>+{badge.xpReward} XP</span>
+                        <span className={`${getDemoBadgeColors(demo.color).descriptionColor}`}>Rarity: {badge.rarity}</span>
+                        <span className={`${getDemoBadgeColors(demo.color).descriptionColor}`}>+{badge.xpReward} XP</span>
                       </div>
                     </div>
-                    <div className='text-center text-green-300 text-sm font-semibold badge-celebration'>
+                    <div className={`text-center ${getDemoBadgeColors(demo.color).titleColor} text-sm font-semibold badge-celebration`}>
                       🎉 Badge Earned! 🎉
                     </div>
                   </div>

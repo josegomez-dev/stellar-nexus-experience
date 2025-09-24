@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { DemoFeedback, DemoStats } from '@/lib/firebase-types';
 import { demoFeedbackService, demoStatsService } from '@/lib/firebase-service';
 import { AnalyticsService } from '@/lib/analytics-service';
+import { useToast } from '@/contexts/ToastContext';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -32,6 +35,8 @@ export default function AnalyticsPage() {
     message: '',
   });
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [showDonationsModal, setShowDonationsModal] = useState(false);
+  const { addToast } = useToast();
 
   useEffect(() => {
     loadAnalyticsData();
@@ -92,6 +97,26 @@ export default function AnalyticsPage() {
     }
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      addToast({
+        type: 'success',
+        title: '📋 Copied!',
+        message: 'Wallet address copied to clipboard',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Copy Failed',
+        message: 'Failed to copy address to clipboard',
+        duration: 3000,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className='min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center'>
@@ -109,11 +134,30 @@ export default function AnalyticsPage() {
       <div className='bg-black/20 backdrop-blur-sm border-b border-white/10'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
           <div className='flex items-center justify-between'>
-            <div>
-              <h1 className='text-3xl font-bold text-white'>📊 Analytics Dashboard</h1>
-              <p className='text-gray-300 mt-2'>
-                Comprehensive insights into user feedback and engagement
-              </p>
+            <div className='flex items-center space-x-4'>
+              <Link
+                href='/'
+                className='flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors'
+              >
+                <span>←</span>
+                <span>Go back to Application</span>
+              </Link>
+              <div className='flex items-center space-x-3'>
+                <Image
+                  src='/images/logo/logoicon.png'
+                  alt='Stellar Nexus Logo'
+                  width={40}
+                  height={40}
+                  className='rounded-lg'
+                />
+                <Image
+                  src='/images/logo/iconletter.png'
+                  alt='Stellar Nexus Letter'
+                  width={120}
+                  height={40}
+                  className='rounded-lg'
+                />
+              </div>
             </div>
             <div className='flex items-center space-x-4'>
               <button
@@ -123,6 +167,12 @@ export default function AnalyticsPage() {
                 🔄 Refresh
               </button>
             </div>
+          </div>
+          <div className='mt-4'>
+            <h1 className='text-3xl font-bold text-white'>📊 Analytics Dashboard</h1>
+            <p className='text-gray-300 mt-2'>
+              Comprehensive insights into user feedback and engagement
+            </p>
           </div>
         </div>
       </div>
@@ -231,119 +281,6 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        {/* User Experience Analytics */}
-        {analyticsData && (
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8'>
-            <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
-              <h3 className='text-xl font-semibold text-white mb-4'>🔧 Trustless Work Knowledge</h3>
-              <div className='space-y-3'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Beginner</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-red-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.trustlessWorkKnowledge.beginner / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.trustlessWorkKnowledge.beginner}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Intermediate</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-yellow-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.trustlessWorkKnowledge.intermediate / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.trustlessWorkKnowledge.intermediate}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Advanced</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-green-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.trustlessWorkKnowledge.advanced / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.trustlessWorkKnowledge.advanced}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
-              <h3 className='text-xl font-semibold text-white mb-4'>⭐ Stellar Knowledge</h3>
-              <div className='space-y-3'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Beginner</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-red-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.stellarKnowledge.beginner / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.stellarKnowledge.beginner}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Intermediate</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-yellow-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.stellarKnowledge.intermediate / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.stellarKnowledge.intermediate}
-                    </span>
-                  </div>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-gray-300'>Advanced</span>
-                  <div className='flex items-center space-x-2'>
-                    <div className='w-32 bg-gray-700 rounded-full h-2'>
-                      <div
-                        className='bg-green-500 h-2 rounded-full'
-                        style={{
-                          width: `${(analyticsData.userExperience.stellarKnowledge.advanced / analyticsData.totalUsers) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className='text-white font-medium'>
-                      {analyticsData.userExperience.stellarKnowledge.advanced}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Feedback Filters */}
         <div className='bg-white/5 rounded-xl p-6 border border-white/10 mb-6'>
           <h3 className='text-xl font-semibold text-white mb-4'>🔍 Feedback Filters</h3>
@@ -442,15 +379,36 @@ export default function AnalyticsPage() {
 
                 <p className='text-gray-300 mb-3'>{feedback.feedback}</p>
 
-                <div className='flex items-center justify-between text-xs text-gray-400'>
-                  <div className='flex items-center space-x-4'>
-                    <span>⏱️ {feedback.completionTime} min</span>
-                    <span>
-                      {feedback.wouldRecommend ? '👍 Recommends' : "👎 Doesn't recommend"}
-                    </span>
+                  <div className='flex items-center justify-between text-xs text-gray-400'>
+                    <div className='flex items-center space-x-4'>
+                      <span>⏱️ {feedback.completionTime} min</span>
+                      <span>
+                        {feedback.wouldRecommend ? '👍 Recommends' : "👎 Doesn't recommend"}
+                      </span>
+                    </div>
+                    <div className='flex items-center space-x-2'>
+                      <span className='font-mono'>{feedback.userId.slice(0, 8)}...</span>
+                      <button
+                        onClick={() => copyToClipboard(feedback.userId)}
+                        className='p-1 hover:bg-white/10 rounded transition-colors duration-200 group'
+                        title='Copy wallet address'
+                      >
+                        <svg
+                          className='w-3 h-3 text-gray-400 group-hover:text-white transition-colors duration-200'
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <span className='font-mono'>{feedback.userId.slice(0, 8)}...</span>
-                </div>
 
                 {feedback.mostHelpfulFeature && (
                   <div className='mt-2 p-2 bg-green-500/10 rounded border border-green-500/20'>
@@ -504,29 +462,64 @@ export default function AnalyticsPage() {
               </a>
             </div>
             <div>
-              <h3 className='text-xl font-semibold text-white mb-3'>🌐 Share the Experience</h3>
+              <h3 className='text-xl font-semibold text-white mb-3'>💰 Support Development</h3>
               <p className='text-gray-300 mb-4'>
-                Spread the word about Stellar Nexus Experience! Share with developers, educators,
-                and Web3 enthusiasts.
+                Help us continue building Stellar wallet integrations and Web3 education tools.
+                Every contribution helps us grow!
               </p>
-              <div className='flex space-x-3'>
-                <a
-                  href='https://stellar-nexus-experience.vercel.app/'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='px-4 py-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all duration-200 text-sm'
-                >
-                  🌐 Live Demo
-                </a>
-                <a
-                  href='https://github.com/josegomez-dev/stellar-nexus-experience'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='px-4 py-2 bg-gray-500/20 border border-gray-400/30 text-gray-300 rounded-lg hover:bg-gray-500/30 transition-all duration-200 text-sm'
-                >
-                  📚 Source Code
-                </a>
-              </div>
+              <button
+                onClick={() => setShowDonationsModal(true)}
+                className='inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl'
+              >
+                <span className='text-xl'>💝</span>
+                <span>Make a Donation</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className='mt-6 p-4 bg-white/5 rounded-lg border border-white/10'>
+            <h4 className='text-lg font-semibold text-white mb-3 flex items-center space-x-2'>
+              <span className='text-xl'>🌐</span>
+              <span>Connect With Us</span>
+            </h4>
+            <div className='flex flex-wrap gap-4'>
+              <a
+                href='https://x.com/josegomez_dev'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-all duration-200'
+              >
+                <span className='text-lg'>🐦</span>
+                <span>@josegomez_dev</span>
+              </a>
+              <a
+                href='https://t.me/josegomezdev'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center space-x-2 px-4 py-2 bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-all duration-200'
+              >
+                <span className='text-lg'>📱</span>
+                <span>@josegomezdev</span>
+              </a>
+              <a
+                href='https://stellar-nexus-experience.vercel.app/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-400/30 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-all duration-200'
+              >
+                <span className='text-lg'>🌐</span>
+                <span>Live Demo</span>
+              </a>
+              <a
+                href='https://github.com/josegomez-dev/stellar-nexus-experience'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center space-x-2 px-4 py-2 bg-gray-500/20 border border-gray-400/30 text-gray-300 rounded-lg hover:bg-gray-500/30 transition-all duration-200'
+              >
+                <span className='text-lg'>📚</span>
+                <span>Source Code</span>
+              </a>
             </div>
           </div>
 
@@ -552,80 +545,97 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Contact/Contribution Section */}
-        <div className='bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-400/30'>
-          <h3 className='text-2xl font-semibold text-white mb-4'>
-            🚀 Get Involved with Mini Games Nexus
-          </h3>
-          <p className='text-gray-300 mb-6'>
-            Interested in contributing to our Web3 playground games? Whether you're a developer,
-            designer, or have great ideas, we'd love to hear from you!
-          </p>
+        {/* Donations Modal */}
+        {showDonationsModal && (
+          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
+            <div className='bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 max-w-md w-full border border-white/10 shadow-2xl'>
+              <div className='flex items-center justify-between mb-4'>
+                <h3 className='text-xl font-bold text-white flex items-center space-x-2'>
+                  <span className='text-2xl'>💝</span>
+                  <span>Support Our Mission</span>
+                </h3>
+                <button
+                  onClick={() => setShowDonationsModal(false)}
+                  className='text-gray-400 hover:text-white transition-colors'
+                >
+                  <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                  </svg>
+                </button>
+              </div>
+              
+              <p className='text-gray-300 mb-6'>
+                Help us continue building Stellar wallet integrations and Web3 education tools. 
+                Your support helps us maintain and improve the platform!
+              </p>
 
-          <form onSubmit={handleContactSubmit} className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
-              <label className='block text-sm font-medium text-gray-300 mb-2'>Name *</label>
-              <input
-                type='text'
-                value={contactForm.name}
-                onChange={e => setContactForm({ ...contactForm, name: e.target.value })}
-                required
-                className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500'
-                placeholder='Your name'
-              />
-            </div>
+              <div className='space-y-4'>
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <h4 className='text-lg font-semibold text-white mb-2 flex items-center space-x-2'>
+                    <span className='text-xl'>💳</span>
+                    <span>Stellar Wallet</span>
+                  </h4>
+                  <p className='text-sm text-gray-300 mb-3'>
+                    Send XLM or other Stellar assets to support development
+                  </p>
+                  <div className='flex items-center space-x-2'>
+                    <code className='bg-gray-700 text-green-300 px-3 py-2 rounded text-sm font-mono flex-1'>
+                      GABC...XYZ123
+                    </code>
+                    <button
+                      onClick={() => copyToClipboard('GABC...XYZ123')}
+                      className='px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors'
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-300 mb-2'>Email *</label>
-              <input
-                type='email'
-                value={contactForm.email}
-                onChange={e => setContactForm({ ...contactForm, email: e.target.value })}
-                required
-                className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500'
-                placeholder='your@email.com'
-              />
-            </div>
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <h4 className='text-lg font-semibold text-white mb-2 flex items-center space-x-2'>
+                    <span className='text-xl'>💳</span>
+                    <span>PayPal</span>
+                  </h4>
+                  <p className='text-sm text-gray-300 mb-3'>
+                    Support us through PayPal for easy donations
+                  </p>
+                  <a
+                    href='https://paypal.me/josegomezdev'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors'
+                  >
+                    <span>💳</span>
+                    <span>Donate via PayPal</span>
+                  </a>
+                </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-300 mb-2'>Interest Area</label>
-              <select
-                value={contactForm.interest}
-                onChange={e => setContactForm({ ...contactForm, interest: e.target.value })}
-                className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500'
-              >
-                <option value='development'>🔧 Development</option>
-                <option value='design'>🎨 Design</option>
-                <option value='testing'>🧪 Testing</option>
-                <option value='ideas'>💡 Ideas & Feedback</option>
-                <option value='partnership'>🤝 Partnership</option>
-                <option value='other'>🌟 Other</option>
-              </select>
-            </div>
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <h4 className='text-lg font-semibold text-white mb-2 flex items-center space-x-2'>
+                    <span className='text-xl'>☕</span>
+                    <span>Other Ways to Support</span>
+                  </h4>
+                  <div className='space-y-2 text-sm text-gray-300'>
+                    <p>• Star our GitHub repository</p>
+                    <p>• Share the project with others</p>
+                    <p>• Contribute code or documentation</p>
+                    <p>• Report bugs or suggest features</p>
+                  </div>
+                </div>
+              </div>
 
-            <div className='md:col-span-2'>
-              <label className='block text-sm font-medium text-gray-300 mb-2'>Message *</label>
-              <textarea
-                value={contactForm.message}
-                onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
-                required
-                rows={4}
-                className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none'
-                placeholder='Tell us about your interest in contributing to Mini Games Nexus...'
-              />
+              <div className='mt-6 flex justify-end'>
+                <button
+                  onClick={() => setShowDonationsModal(false)}
+                  className='px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors'
+                >
+                  Close
+                </button>
+              </div>
             </div>
+          </div>
+        )}
 
-            <div className='md:col-span-2'>
-              <button
-                type='submit'
-                disabled={isSubmittingContact}
-                className='w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg hover:shadow-xl'
-              >
-                {isSubmittingContact ? 'Sending...' : 'Send Message 🚀'}
-              </button>
-            </div>
-          </form>
-        </div>
       </div>
     </div>
   );

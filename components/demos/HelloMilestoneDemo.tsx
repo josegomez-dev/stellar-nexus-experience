@@ -10,8 +10,11 @@ import { API_ENDPOINTS } from '@/constants/api';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
 import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHistory';
+import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
+import { userTrackingService } from '@/lib/user-tracking-service';
+import { DemoFeedback } from '@/lib/firebase-types';
 import Image from 'next/image';
 import {
   useInitializeEscrow,
@@ -155,6 +158,51 @@ export const HelloMilestoneDemo = () => {
   const [isScrollingToTop, setIsScrollingToTop] = useState(false);
   const [hasShownTransactionGuidance, setHasShownTransactionGuidance] = useState(false);
   const [autoCompleteCountdown, setAutoCompleteCountdown] = useState<Record<string, number>>({});
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [demoCompletionTime, setDemoCompletionTime] = useState(0);
+
+  // Feedback handling
+  const handleFeedbackSubmit = async (feedback: {
+    demoId?: string;
+    demoName?: string;
+    rating?: number;
+    feedback?: string;
+    completionTime?: number;
+    difficulty?: string;
+    wouldRecommend?: boolean;
+  }) => {
+    try {
+      if (walletData?.publicKey && feedback.demoId && feedback.demoName && feedback.rating !== undefined) {
+        await userTrackingService.trackFeedbackSubmission(
+          walletData.publicKey,
+          feedback.demoId,
+          feedback.demoName,
+          {
+            rating: feedback.rating,
+            comment: feedback.feedback || '',
+            difficulty: feedback.difficulty || 'medium',
+            wouldRecommend: feedback.wouldRecommend || false,
+            completionTime: feedback.completionTime || 0,
+          }
+        );
+        
+        addToast({
+          type: 'success',
+          title: '🎉 Feedback Submitted!',
+          message: 'Thank you for your feedback! Your rating has been recorded.',
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Feedback Error',
+        message: 'Failed to submit feedback. Please try again.',
+        duration: 4000,
+      });
+    }
+  };
 
   // Enhanced scroll animation functions
   const scrollToTop = () => {
@@ -568,6 +616,10 @@ export const HelloMilestoneDemo = () => {
 
           // Complete the demo in the account system (this handles points transactions)
           await completeDemo('hello-milestone', score);
+          
+          // Set completion time and show feedback modal
+          setDemoCompletionTime(Math.round(completionTime / 60)); // Convert to minutes
+          setShowFeedbackModal(true);
         } catch (error) {
           console.error('Failed to complete demo:', error);
         }
@@ -2208,6 +2260,18 @@ export const HelloMilestoneDemo = () => {
           </div>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <SimpleFeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          onSubmit={handleFeedbackSubmit}
+          demoId="hello-milestone"
+          demoName="Baby Steps to Riches"
+          completionTime={demoCompletionTime}
+        />
+      )}
     </div>
   );
 };
