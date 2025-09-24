@@ -3,14 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import {
-  useInitializeEscrow,
-  useFundEscrow,
-  useChangeMilestoneStatus,
-  useApproveMilestone,
-  useReleaseFunds,
-  useStartDispute,
-  useResolveDispute,
+  useInitializeEscrow as useMockInitializeEscrow,
+  useFundEscrow as useMockFundEscrow,
+  useChangeMilestoneStatus as useMockChangeMilestoneStatus,
+  useApproveMilestone as useMockApproveMilestone,
+  useReleaseFunds as useMockReleaseFunds,
+  useStartDispute as useMockStartDispute,
+  useResolveDispute as useMockResolveDispute,
 } from '@/lib/mock-trustless-work';
+import {
+  useRealInitializeEscrow,
+} from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 import { useToast } from '@/contexts/ToastContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
@@ -64,22 +67,30 @@ export const DisputeResolutionDemo = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [useRealTrustlessWork, setUseRealTrustlessWork] = useState(true); // Toggle for real vs mock
 
-  // Hooks
-  const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow();
-  const { fundEscrow, isLoading: isFunding, error: fundError } = useFundEscrow();
-  const {
-    changeMilestoneStatus,
-    isLoading: isChangingStatus,
-    error: statusError,
-  } = useChangeMilestoneStatus();
-  const { approveMilestone, isLoading: isApproving, error: approveError } = useApproveMilestone();
-  const { releaseFunds, isLoading: isReleasing, error: releaseError } = useReleaseFunds();
-  const { startDispute, isLoading: isStartingDispute, error: disputeError } = useStartDispute();
-  const {
-    resolveDispute,
-    isLoading: isResolvingDispute,
-    error: resolveError,
-  } = useResolveDispute();
+  // Mock hooks
+  const mockHooks = {
+    initializeEscrow: useMockInitializeEscrow(),
+    fundEscrow: useMockFundEscrow(),
+    changeMilestoneStatus: useMockChangeMilestoneStatus(),
+    approveMilestone: useMockApproveMilestone(),
+    releaseFunds: useMockReleaseFunds(),
+    startDispute: useMockStartDispute(),
+    resolveDispute: useMockResolveDispute(),
+  };
+
+  // Real hooks (only initializeEscrow is available)
+  const realHooks = {
+    initializeEscrow: useRealInitializeEscrow(),
+    fundEscrow: useMockFundEscrow(),
+    changeMilestoneStatus: useMockChangeMilestoneStatus(),
+    approveMilestone: useMockApproveMilestone(),
+    releaseFunds: useMockReleaseFunds(),
+    startDispute: useMockStartDispute(),
+    resolveDispute: useMockResolveDispute(),
+  };
+
+  // Use appropriate hooks based on toggle
+  const hooks = useRealTrustlessWork ? realHooks : mockHooks;
 
   // Mock milestones - make mutable so we can update statuses
   const [milestones, setMilestones] = useState<Milestone[]>([
@@ -204,8 +215,8 @@ export const DisputeResolutionDemo = () => {
 
     try {
       const payload = {
-        escrowType: 'multi-release',
-        releaseMode: 'multi-release',
+        escrowType: 'multi-release' as const,
+        releaseMode: 'multi-release' as const,
         asset: assetConfig.defaultAsset,
         amount: '1000000', // 10 USDC (6 decimals)
         platformFee: assetConfig.platformFee,
@@ -221,7 +232,7 @@ export const DisputeResolutionDemo = () => {
         },
       };
 
-      const result = await initializeEscrow(payload);
+      const result = await hooks.initializeEscrow.initializeEscrow(payload);
       setContractId(result.contractId);
       setEscrowData(result.escrow);
       addToast({
@@ -260,7 +271,7 @@ export const DisputeResolutionDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      const result = await fundEscrow(payload);
+      const result = await hooks.fundEscrow.fundEscrow(payload);
       setEscrowData(result.escrow);
       addToast({
         type: 'success',
@@ -302,7 +313,7 @@ export const DisputeResolutionDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      const result = await changeMilestoneStatus(payload);
+      const result = await hooks.changeMilestoneStatus.changeMilestoneStatus(payload);
       setEscrowData(result.escrow);
 
       // Update milestone status
@@ -354,7 +365,7 @@ export const DisputeResolutionDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      const result = await approveMilestone(payload);
+      const result = await hooks.approveMilestone.approveMilestone(payload);
       setEscrowData(result.escrow);
 
       // Update milestone status
@@ -408,7 +419,7 @@ export const DisputeResolutionDemo = () => {
         reason: disputeReason,
       };
 
-      const result = await startDispute(payload);
+      const result = await hooks.startDispute.startDispute(payload);
       setEscrowData(result.escrow);
 
       // Create new dispute
@@ -483,7 +494,7 @@ export const DisputeResolutionDemo = () => {
         reason: resolutionReason,
       };
 
-      const result = await resolveDispute(payload);
+      const result = await hooks.resolveDispute.resolveDispute(payload);
       setEscrowData(result.escrow);
 
       // Update dispute status
@@ -559,7 +570,7 @@ export const DisputeResolutionDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      const result = await releaseFunds(payload);
+      const result = await hooks.releaseFunds.releaseFunds(payload);
       setEscrowData(result.escrow);
 
       // Update milestone status
@@ -773,10 +784,10 @@ export const DisputeResolutionDemo = () => {
               <div className='mt-6 text-center'>
                 <button
                   onClick={handleInitializeEscrow}
-                  disabled={!isConnected || isInitializing}
+                  disabled={!isConnected || hooks.initializeEscrow.isLoading}
                   className='px-8 py-3 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  {isInitializing ? 'Initializing...' : 'Initialize Dispute Resolution Escrow'}
+                  {hooks.initializeEscrow.isLoading ? 'Initializing...' : 'Initialize Dispute Resolution Escrow'}
                 </button>
               </div>
             </div>
@@ -815,10 +826,10 @@ export const DisputeResolutionDemo = () => {
                 <div className='mt-4 text-center'>
                   <button
                     onClick={handleFundEscrow}
-                    disabled={isFunding}
+                    disabled={hooks.fundEscrow.isLoading}
                     className='px-6 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30 rounded-lg text-orange-300 hover:text-orange-200 transition-colors'
                   >
-                    {isFunding ? 'Funding...' : 'Fund Escrow'}
+                    {hooks.fundEscrow.isLoading ? 'Funding...' : 'Fund Escrow'}
                   </button>
                 </div>
               )}
@@ -973,24 +984,24 @@ export const DisputeResolutionDemo = () => {
                           <div className='grid grid-cols-3 gap-2'>
                             <button
                               onClick={() => handleResolveDispute(dispute.id, 'approve')}
-                              disabled={isResolvingDispute}
+                              disabled={hooks.resolveDispute.isLoading}
                               className='px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm'
                             >
-                              {isResolvingDispute ? '...' : 'Approve'}
+                              {hooks.resolveDispute.isLoading ? '...' : 'Approve'}
                             </button>
                             <button
                               onClick={() => handleResolveDispute(dispute.id, 'reject')}
-                              disabled={isResolvingDispute}
+                              disabled={hooks.resolveDispute.isLoading}
                               className='px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors text-sm'
                             >
-                              {isResolvingDispute ? '...' : 'Reject'}
+                              {hooks.resolveDispute.isLoading ? '...' : 'Reject'}
                             </button>
                             <button
                               onClick={() => handleResolveDispute(dispute.id, 'modify')}
-                              disabled={isResolvingDispute}
+                              disabled={hooks.resolveDispute.isLoading}
                               className='px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-yellow-200 transition-colors text-sm'
                             >
-                              {isResolvingDispute ? '...' : 'Modify'}
+                              {hooks.resolveDispute.isLoading ? '...' : 'Modify'}
                             </button>
                           </div>
                         </div>
@@ -1065,23 +1076,24 @@ export const DisputeResolutionDemo = () => {
           <ConfettiAnimation isActive={showConfetti} />
 
           {/* Error Display */}
-          {(initError ||
-            fundError ||
-            statusError ||
-            approveError ||
-            releaseError ||
-            disputeError ||
-            resolveError) && (
+          {(hooks.initializeEscrow.error ||
+            hooks.fundEscrow.error ||
+            hooks.changeMilestoneStatus.error ||
+            hooks.approveMilestone.error ||
+            hooks.releaseFunds.error ||
+            hooks.startDispute.error ||
+            hooks.resolveDispute.error) && (
             <div className='p-4 bg-red-500/20 border border-red-400/30 rounded-lg'>
               <h4 className='font-semibold text-red-300 mb-2'>Error Occurred</h4>
               <p className='text-red-200 text-sm'>
-                {initError?.message ||
-                  fundError?.message ||
-                  statusError?.message ||
-                  approveError?.message ||
-                  releaseError?.message ||
-                  disputeError?.message ||
-                  resolveError?.message}
+                {hooks.initializeEscrow.error?.message ||
+                  hooks.fundEscrow.error?.message ||
+                  hooks.changeMilestoneStatus.error?.message ||
+                  hooks.approveMilestone.error?.message ||
+                  hooks.releaseFunds.error?.message ||
+                  hooks.startDispute.error?.message ||
+                  hooks.resolveDispute.error?.message ||
+                  'An unknown error occurred'}
               </p>
             </div>
           )}
