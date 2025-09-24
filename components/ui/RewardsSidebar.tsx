@@ -113,14 +113,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   const renderBadges = () => {
     try {
-      console.log('🔍 Debugging renderBadges:', {
-        safeAccount,
-        badges: safeAccount.badges,
-        badgesLength: safeAccount.badges?.length,
-        AVAILABLE_BADGES,
-        availableBadgesLength: AVAILABLE_BADGES?.length
-      });
-
       // Check which badges are earned by the user (match by name since that's how they're stored)
       const earnedBadgeNames = safeAccount.badges?.map((badge: any) => badge.name) || [];
       const badgesWithStatus = AVAILABLE_BADGES?.map((badge: Badge) => ({
