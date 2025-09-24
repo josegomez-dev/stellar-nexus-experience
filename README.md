@@ -129,13 +129,11 @@ npm run code-quality:fix # Fix all quality issues
 ### **Testing Suite**
 
 ```bash
-# Cypress E2E Testing
-npm run test             # Run all Cypress tests
-npm run test:open        # Open Cypress GUI
-npm run test:demos       # Test all demo flows
-npm run test:demos:open  # Open demo tests in GUI
-npm run test:headed      # Run tests with browser visible
-npm run test:dev         # Run tests against local dev server
+# Code Quality Testing
+npm run test             # Run basic test check
+npm run lint:check       # Check code quality
+npm run type-check       # TypeScript validation
+npm run format:check     # Check code formatting
 ```
 
 ### **Environment & Optimization**
@@ -219,18 +217,17 @@ const duration = DESIGN_TOKENS.animations.duration.normal; // '300ms'
 
 ## 🧪 **Testing Strategy**
 
-### **End-to-End Testing (Cypress)**
+### **Code Quality**
 
-- **Demo Workflows**: Complete user journeys for each demo
-- **Wallet Integration**: Connection and transaction flows
-- **Responsive Design**: Mobile and desktop testing
-- **Error Handling**: Edge cases and error scenarios
+- **ESLint**: Code linting and style enforcement
+- **TypeScript**: Type checking and error prevention
+- **Prettier**: Code formatting consistency
 
-### **Coverage Goals**
+### **Quality Goals**
 
-- **E2E Tests**: 100% critical path coverage
-- **Demo Testing**: All 4 demos fully tested
-- **Cross-Browser**: Chrome, Firefox, and Edge support
+- **Code Quality**: 100% ESLint compliance
+- **Type Safety**: Full TypeScript coverage
+- **Formatting**: Consistent code style
 
 ---
 
