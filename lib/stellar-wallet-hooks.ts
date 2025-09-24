@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { SendTransactionResponse } from '@/types/trustless-work';
 import { stellarConfig, assetConfig } from './wallet-config';
 import { validateStellarAddress } from './stellar-address-validation';
+import { NETWORK_CONFIGS } from '@/constants/network';
 import {
   StellarWalletsKit,
   WalletNetwork,
@@ -15,19 +16,7 @@ import {
 // POC Mode - No Stellar Wallets Kit initialization to avoid custom element conflicts
 const POC_MODE = process.env.NODE_ENV === 'development';
 
-// Network configurations
-const NETWORK_CONFIGS = {
-  TESTNET: {
-    passphrase: 'Test SDF Network ; September 2015',
-    horizonUrl: 'https://horizon-testnet.stellar.org',
-    isMainnet: false,
-  },
-  PUBLIC: {
-    passphrase: 'Public Global Stellar Network ; September 2015',
-    horizonUrl: 'https://horizon.stellar.org',
-    isMainnet: true,
-  },
-};
+// Network configurations are now imported from constants
 
 // Helper function to get network configuration
 const getNetworkConfig = (network: string) => {

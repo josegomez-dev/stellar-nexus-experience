@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { assetConfig } from './wallet-config';
+import { MOCK_DATA, MOCK_DELAYS } from '@/constants/mock-data';
 
 // Mock types for development
 export interface EscrowResult {
@@ -61,7 +62,7 @@ export const useInitializeEscrow = (): InitializeEscrowHook => {
 
     try {
       // Simulate realistic API call delay with progress
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, MOCK_DELAYS.NORMAL));
 
       // Generate mock contract ID
       const contractId = `contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

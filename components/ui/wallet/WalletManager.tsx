@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
+import { API_ENDPOINTS } from '@/constants/api';
 import {
   validateStellarAddress,
   sanitizeStellarAddressInput,
@@ -210,7 +211,7 @@ export const WalletManager = () => {
                 </p>
                 <div className='space-y-2'>
                   <a
-                    href='https://www.freighter.app/'
+                    href={API_ENDPOINTS.EXTERNAL.FREIGHTER_APP}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='block w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center'
@@ -228,7 +229,7 @@ export const WalletManager = () => {
                 <p className='text-xs text-blue-200/80 mb-2'>Other Stellar Wallets:</p>
                 <div className='grid grid-cols-2 gap-2'>
                   <a
-                    href='https://albedo.link/'
+                    href={API_ENDPOINTS.EXTERNAL.ALBEDO_LINK}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center'
@@ -236,7 +237,7 @@ export const WalletManager = () => {
                     🌅 Albedo
                   </a>
                   <a
-                    href='https://xbull.app/'
+                    href={API_ENDPOINTS.EXTERNAL.XBULL_APP}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-xs text-blue-300 hover:text-blue-200 underline transition-colors text-center'

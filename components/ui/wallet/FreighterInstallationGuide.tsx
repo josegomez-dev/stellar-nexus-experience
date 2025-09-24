@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal } from '../common/Modal';
+import { API_ENDPOINTS } from '@/constants/api';
 import Image from 'next/image';
 
 interface FreighterInstallationGuideProps {
@@ -29,7 +30,7 @@ export const FreighterInstallationGuide = ({ isOpen, onClose }: FreighterInstall
           
           <div className="space-y-3">
             <a
-              href="https://freighter.app"
+              href={API_ENDPOINTS.EXTERNAL.FREIGHTER_APP}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg px-4 py-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"

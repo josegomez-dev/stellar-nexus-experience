@@ -6,6 +6,7 @@ import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { API_ENDPOINTS } from '@/constants/api';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
 import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHistory';
@@ -100,11 +101,11 @@ export const HelloMilestoneDemo = () => {
       const networkSuffix = isTestnet ? 'testnet' : 'public';
       
       return {
-        explorerUrl: `https://stellar.expert/explorer/${networkSuffix}/tx/${txHash}`,
-        stellarExpertUrl: `https://stellar.expert/explorer/${networkSuffix}/tx/${txHash}`,
-        horizonUrl: isTestnet 
-          ? `https://horizon-testnet.stellar.org/transactions/${txHash}`
-          : `https://horizon.stellar.org/transactions/${txHash}`
+        explorerUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
+        stellarExpertUrl: `${API_ENDPOINTS.STELLAR_EXPERT.BASE_URL}/${networkSuffix}/tx/${txHash}`,
+        horizonUrl: isTestnet
+          ? `${API_ENDPOINTS.HORIZON.TESTNET}/transactions/${txHash}`
+          : `${API_ENDPOINTS.HORIZON.MAINNET}/transactions/${txHash}`
       };
     }
     return {
@@ -1651,7 +1652,7 @@ export const HelloMilestoneDemo = () => {
                   <h4 className="font-semibold text-blue-300 mb-2">🚰 How to Fund Your Testnet Account:</h4>
                   <ol className="text-blue-200 text-sm space-y-1">
                     <li>1. Copy your wallet address: <code className="bg-blue-900/30 px-1 rounded text-xs">{walletData?.publicKey?.slice(0, 8)}...{walletData?.publicKey?.slice(-8)}</code></li>
-                    <li>2. Visit <a href="https://friendbot.stellar.org" target="_blank" rel="noopener noreferrer" className="text-blue-100 underline hover:text-blue-50">friendbot.stellar.org</a></li>
+                    <li>2. Visit <a href={API_ENDPOINTS.EXTERNAL.FRIENDBOT} target="_blank" rel="noopener noreferrer" className="text-blue-100 underline hover:text-blue-50">friendbot.stellar.org</a></li>
                     <li>3. Paste your address and click "Fund"</li>
                     <li>4. Wait a few seconds and try the demo again</li>
                   </ol>
