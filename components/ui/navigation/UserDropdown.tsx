@@ -71,15 +71,15 @@ export const UserDropdown = () => {
   };
 
   const handleAutoGenerate = async () => {
-    if (!walletData?.publicKey) {
-      addToast({
-        type: 'error',
-        title: '❌ No Wallet Connected',
-        message: 'Please connect your wallet first',
-        duration: 3000,
-      });
-      return;
-    }
+    // if (!walletData?.publicKey) {
+    //   addToast({
+    //     type: 'error',
+    //     title: '❌ No Wallet Connected',
+    //     message: 'Please connect your wallet first',
+    //     duration: 3000,
+    //   });
+    //   return;
+    // }
 
     setIsGenerating(true);
     try {
@@ -112,7 +112,7 @@ export const UserDropdown = () => {
         duration: 3000,
       });
 
-      setIsOpen(false);
+      // Keep dropdown open to show the updated profile
     } catch (error) {
       console.error('Error updating profile:', error);
       addToast({
@@ -157,6 +157,20 @@ export const UserDropdown = () => {
                     </span>
                   </div>
                 )}
+                    <button
+                  onClick={handleAutoGenerate}
+                  disabled={isGenerating}
+                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  <span className='text-lg'>
+                    {isGenerating ? (
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    ) : (
+                      '🎲'
+                    )}
+                  </span>
+                  <span>{isGenerating ? 'Generating...' : 'Customize Profile Randomly'}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -181,21 +195,6 @@ export const UserDropdown = () => {
           <div className='relative z-10 p-2'>
             {isConnected ? (
               <>
-                <button
-                  onClick={handleAutoGenerate}
-                  disabled={isGenerating}
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  <span className='text-lg'>
-                    {isGenerating ? (
-                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                    ) : (
-                      '🎲'
-                    )}
-                  </span>
-                  <span>{isGenerating ? 'Generating...' : 'Auto Generate Profile'}</span>
-                </button>
-
                 <a
                   href='/'
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
