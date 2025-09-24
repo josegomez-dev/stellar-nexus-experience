@@ -13,6 +13,7 @@ import {
   useApproveMilestone,
   useReleaseFunds,
 } from '@/lib/mock-trustless-work';
+import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 
 interface MicroTask {
@@ -40,7 +41,7 @@ interface TaskCategory {
 export const MicroTaskMarketplaceDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
-  const { addTransaction } = useTransactionHistory();
+  const { addTransaction, updateTransaction } = useTransactionHistory();
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({
@@ -63,23 +64,40 @@ export const MicroTaskMarketplaceDemo = () => {
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Hooks
-  const { initializeEscrow, isLoading: isInitializing, error: initError } = useInitializeEscrow();
-  const { fundEscrow, isLoading: isFunding, error: fundError } = useFundEscrow();
-  const {
-    changeMilestoneStatus,
-    isLoading: isChangingStatus,
-    error: statusError,
-  } = useChangeMilestoneStatus();
-  const { approveMilestone, isLoading: isApproving, error: approveError } = useApproveMilestone();
-  const { releaseFunds, isLoading: isReleasing, error: releaseError } = useReleaseFunds();
+  // Real vs Mock toggle
+  const [useRealTrustlessWork, setUseRealTrustlessWork] = useState(true);
+
+  // Mock hooks
+  const mockHooks = {
+    initializeEscrow: useInitializeEscrow().initializeEscrow,
+    isLoading: useInitializeEscrow().isLoading,
+    error: useInitializeEscrow().error,
+    fundEscrow: useFundEscrow().fundEscrow,
+    changeMilestoneStatus: useChangeMilestoneStatus().changeMilestoneStatus,
+    approveMilestone: useApproveMilestone().approveMilestone,
+    releaseFunds: useReleaseFunds().releaseFunds,
+  };
+
+  // Real hooks
+  const realHooks = {
+    initializeEscrow: useRealInitializeEscrow().initializeEscrow,
+    isLoading: useRealInitializeEscrow().isLoading,
+    error: useRealInitializeEscrow().error,
+    fundEscrow: useFundEscrow().fundEscrow, // Fallback to mock for now
+    changeMilestoneStatus: useChangeMilestoneStatus().changeMilestoneStatus, // Fallback to mock for now
+    approveMilestone: useApproveMilestone().approveMilestone, // Fallback to mock for now
+    releaseFunds: useReleaseFunds().releaseFunds, // Fallback to mock for now
+  };
+
+  // Use appropriate hooks based on toggle
+  const hooks = useRealTrustlessWork ? realHooks : mockHooks;
 
   // Mock task categories
   const [categories] = useState<TaskCategory[]>([
     { id: 'design', name: 'Design', icon: '🎨', color: 'from-pink-500 to-rose-500' },
     { id: 'development', name: 'Development', icon: '💻', color: 'from-blue-500 to-cyan-500' },
     { id: 'writing', name: 'Writing', icon: '✍️', color: 'from-green-500 to-emerald-500' },
-    { id: 'marketing', icon: '📢', name: 'Marketing', color: 'from-purple-500 to-violet-500' },
+    { id: 'marketing', icon: '📢', name: 'Marketing', color: 'from-accent-500 to-accent-600' },
     { id: 'research', name: 'Research', icon: '🔍', color: 'from-orange-500 to-amber-500' },
   ]);
 
@@ -260,9 +278,24 @@ export const MicroTaskMarketplaceDemo = () => {
       const task = tasks.find(t => t.id === taskId);
       if (!task) return;
 
+      // Add pending transaction
+      const txHash = useRealTrustlessWork 
+        ? `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        : `mock_accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: `Accepting task "${task.title}" and creating escrow...`,
+        type: 'escrow',
+        demoId: 'micro-marketplace',
+        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
+        asset: 'USDC',
+      });
+
       const payload = {
-        escrowType: 'multi-release',
-        releaseMode: 'multi-release',
+        escrowType: 'multi-release' as const,
+        releaseMode: 'multi-release' as const,
         asset: assetConfig.defaultAsset,
         amount: task.budget,
         platformFee: assetConfig.platformFee,
@@ -279,7 +312,10 @@ export const MicroTaskMarketplaceDemo = () => {
         },
       };
 
-      const result = await initializeEscrow(payload);
+      const result = await hooks.initializeEscrow(payload);
+
+      // Update transaction status
+      updateTransaction(txHash, 'success', `Task "${task.title}" accepted and escrow created`);
 
       // Update task status
       const updatedTasks = tasks.map(t =>
@@ -294,15 +330,6 @@ export const MicroTaskMarketplaceDemo = () => {
       );
       setTasks(updatedTasks);
 
-      addTransaction({
-        hash: `accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'success',
-        message: `Task "${task.title}" accepted and escrow created`,
-        type: 'escrow',
-        demoId: 'micro-marketplace',
-        amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
-        asset: 'USDC',
-      });
 
       addToast({
         type: 'success',
@@ -318,6 +345,22 @@ export const MicroTaskMarketplaceDemo = () => {
       await handleFundEscrow(result.contractId, task.budget);
     } catch (error) {
       console.error('Failed to accept task:', error);
+      
+      // Update transaction status to failed
+      const txHash = useRealTrustlessWork 
+        ? `pending_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        : `mock_accept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to accept task: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'escrow',
+        demoId: 'micro-marketplace',
+        amount: '0 USDC',
+        asset: 'USDC',
+      });
+      
       addToast({
         type: 'error',
         title: '❌ Task Acceptance Failed',
@@ -338,7 +381,7 @@ export const MicroTaskMarketplaceDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      await fundEscrow(payload);
+      await hooks.fundEscrow(payload);
     } catch (error) {
       console.error('Failed to fund escrow:', error);
     }
@@ -391,7 +434,7 @@ export const MicroTaskMarketplaceDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      await changeMilestoneStatus(payload);
+      await hooks.changeMilestoneStatus(payload);
       setDeliverable('');
     } catch (error) {
       console.error('Failed to submit deliverable:', error);
@@ -425,7 +468,7 @@ export const MicroTaskMarketplaceDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      await approveMilestone(payload);
+      await hooks.approveMilestone(payload);
 
       addTransaction({
         hash: `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -487,7 +530,7 @@ export const MicroTaskMarketplaceDemo = () => {
         releaseMode: 'multi-release',
       };
 
-      await releaseFunds(payload);
+      await hooks.releaseFunds(payload);
 
       addTransaction({
         hash: `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -647,16 +690,44 @@ export const MicroTaskMarketplaceDemo = () => {
       <div className='bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8'>
         <div className='text-center mb-8'>
           <div className='flex items-center justify-between mb-4'>
-            <div></div>
-            <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500'>
-              🛒 Micro-Task Marketplace Demo
-            </h2>
             <button
               onClick={resetDemo}
               className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors'
             >
               🔄 Reset Demo
             </button>
+            <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500'>
+              🛒 Micro-Task Marketplace Demo
+            </h2>
+            <div className='flex flex-col items-end space-y-2'>
+              <button
+                onClick={() => setUseRealTrustlessWork(!useRealTrustlessWork)}
+                className={`px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-all duration-300 ${
+                  useRealTrustlessWork
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                    : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black'
+                }`}
+              >
+                <span className="font-semibold">Real Blockchain</span>
+                {useRealTrustlessWork && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                )}
+              </button>
+              <div className="text-center">
+                <div className={`text-xs font-medium ${
+                  useRealTrustlessWork ? 'text-green-300' : 'text-yellow-300'
+                }`}>
+                  {useRealTrustlessWork ? '🔗 Real Blockchain Mode' : '🧪 Mock Demo Mode'}
+                </div>
+                <div className={`text-xs ${
+                  useRealTrustlessWork ? 'text-green-200' : 'text-yellow-200'
+                }`}>
+                  {useRealTrustlessWork 
+                    ? 'Live Stellar transactions' 
+                    : 'Simulated transactions'}
+                </div>
+              </div>
+            </div>
           </div>
           <p className='text-white/80 text-lg'>
             Lightweight gig-board with escrow functionality for micro-tasks
@@ -664,7 +735,7 @@ export const MicroTaskMarketplaceDemo = () => {
 
           {/* Wallet Connection Required Message */}
           {!isConnected && (
-            <div className='mt-6 p-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-lg text-center'>
+            <div className='mt-6 p-4 bg-gradient-to-r from-cyan-500/20 to-accent-500/20 border border-cyan-400/30 rounded-lg text-center'>
               <div className='flex items-center justify-center space-x-2 mb-3'>
                 <span className='text-2xl'>🔐</span>
                 <h4 className='text-lg font-semibold text-cyan-300'>Wallet Connection Required</h4>
@@ -678,7 +749,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   // Dispatch custom event to open wallet sidebar
                   window.dispatchEvent(new CustomEvent('toggleWalletSidebar'));
                 }}
-                className='px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40'
+                className='px-6 py-2 bg-gradient-to-r from-cyan-500 to-accent-600 hover:from-cyan-600 hover:to-accent-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40'
               >
                 🔗 Connect Wallet
               </button>
@@ -695,7 +766,7 @@ export const MicroTaskMarketplaceDemo = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 px-4 py-2 rounded-md font-medium transition-all duration-300 ${
                   activeTab === tab
-                    ? 'bg-purple-500/30 text-purple-200 shadow-lg'
+                    ? 'bg-accent-500/30 text-accent-200 shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -791,7 +862,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   onClick={() => setSelectedCategory('all')}
                   className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                     selectedCategory === 'all'
-                      ? 'bg-purple-500/30 border-2 border-purple-400/50 text-purple-200'
+                      ? 'bg-accent-500/30 border-2 border-accent-400/50 text-accent-200'
                       : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                   }`}
                 >
@@ -803,7 +874,7 @@ export const MicroTaskMarketplaceDemo = () => {
                     onClick={() => setSelectedCategory(category.id)}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                       selectedCategory === category.id
-                        ? 'bg-purple-500/30 border-2 border-purple-400/50 text-purple-200'
+                        ? 'bg-accent-500/30 border-2 border-accent-400/50 text-accent-200'
                         : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
                     }`}
                   >
@@ -828,7 +899,7 @@ export const MicroTaskMarketplaceDemo = () => {
                       </div>
                       <p className='text-white/70 text-sm mb-3'>{task.description}</p>
                       <div className='flex items-center space-x-4 text-sm'>
-                        <span className='text-purple-300'>
+                        <span className='text-accent-300'>
                           {(parseInt(task.budget) / 100000).toFixed(1)} USDC
                         </span>
                         <span
@@ -850,7 +921,7 @@ export const MicroTaskMarketplaceDemo = () => {
                       <button
                         onClick={() => handleAcceptTask(task.id)}
                         disabled={!isConnected || taskLoadingStates[task.id]}
-                        className='w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-lg text-purple-300 hover:text-purple-200 transition-colors'
+                        className='w-full px-4 py-2 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors'
                       >
                         {taskLoadingStates[task.id] ? 'Accepting...' : 'Accept Task'}
                       </button>
@@ -863,7 +934,7 @@ export const MicroTaskMarketplaceDemo = () => {
                           value={deliverable}
                           onChange={e => setDeliverable(e.target.value)}
                           placeholder='Submit your deliverable...'
-                          className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-400/50'
+                          className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-accent-400/50'
                         />
                         <button
                           onClick={() => handleSubmitDeliverable(task.id)}
@@ -926,7 +997,7 @@ export const MicroTaskMarketplaceDemo = () => {
                         <h4 className='text-lg font-semibold text-white mb-2'>{task.title}</h4>
                         <p className='text-white/70 text-sm mb-3'>{task.description}</p>
                         <div className='flex items-center space-x-4 text-sm'>
-                          <span className='text-purple-300'>
+                          <span className='text-accent-300'>
                             {(parseInt(task.budget) / 100000).toFixed(1)} USDC
                           </span>
                           <span
@@ -992,7 +1063,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   value={newTask.title}
                   onChange={e => setNewTask({ ...newTask, title: e.target.value })}
                   placeholder='Enter task title...'
-                  className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-400/50'
+                  className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-accent-400/50'
                 />
               </div>
 
@@ -1003,7 +1074,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   onChange={e => setNewTask({ ...newTask, description: e.target.value })}
                   placeholder='Describe the task requirements...'
                   rows={4}
-                  className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-400/50'
+                  className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-accent-400/50'
                 />
               </div>
 
@@ -1013,7 +1084,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   <select
                     value={newTask.category}
                     onChange={e => setNewTask({ ...newTask, category: e.target.value })}
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-purple-400/50'
+                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-accent-400/50'
                   >
                     <option value=''>Select category</option>
                     {categories.map(category => (
@@ -1035,7 +1106,7 @@ export const MicroTaskMarketplaceDemo = () => {
                     placeholder='0.0'
                     step='0.1'
                     min='0.1'
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-400/50'
+                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-accent-400/50'
                   />
                 </div>
               </div>
@@ -1061,7 +1132,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   !newTask.budget ||
                   !newTask.deadline
                 }
-                className='w-full px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 rounded-lg text-purple-300 hover:text-purple-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                className='w-full px-6 py-3 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Post Task
               </button>
@@ -1070,23 +1141,19 @@ export const MicroTaskMarketplaceDemo = () => {
         )}
 
         {/* Error Display */}
-        {(initError || fundError || statusError || approveError || releaseError) && (
+        {hooks.error && (
           <div className='p-4 bg-red-500/20 border border-red-400/30 rounded-lg'>
             <h4 className='font-semibold text-red-300 mb-2'>Error Occurred</h4>
             <p className='text-red-200 text-sm'>
-              {initError?.message ||
-                fundError?.message ||
-                statusError?.message ||
-                approveError?.message ||
-                releaseError?.message}
+              {hooks.error?.message}
             </p>
           </div>
         )}
 
         {/* Demo Instructions */}
-        <div className='mt-8 p-6 bg-purple-500/10 border border-purple-400/30 rounded-lg'>
-          <h3 className='text-lg font-semibold text-purple-300 mb-3'>📚 How This Demo Works</h3>
-          <ul className='text-purple-200 text-sm space-y-2'>
+        <div className='mt-8 p-6 bg-accent-500/10 border border-accent-400/30 rounded-lg'>
+          <h3 className='text-lg font-semibold text-accent-300 mb-3'>📚 How This Demo Works</h3>
+          <ul className='text-accent-200 text-sm space-y-2'>
             <li>
               • <strong>Browse Tasks:</strong> View available micro-tasks by category
             </li>
@@ -1105,15 +1172,15 @@ export const MicroTaskMarketplaceDemo = () => {
               automatically
             </li>
           </ul>
-          <p className='text-purple-200 text-sm mt-3'>
+          <p className='text-accent-200 text-sm mt-3'>
             This demonstrates how a marketplace can integrate with Stellar escrow functionality,
             providing trustless payment processing for micro-tasks and gig work.
           </p>
-          <div className='mt-4 p-3 bg-purple-500/20 rounded-lg'>
-            <p className='text-purple-200 text-sm font-medium mb-2'>
+          <div className='mt-4 p-3 bg-accent-500/20 rounded-lg'>
+            <p className='text-accent-200 text-sm font-medium mb-2'>
               🎯 Demo Completion Requirements:
             </p>
-            <ul className='text-purple-200 text-xs space-y-1'>
+            <ul className='text-accent-200 text-xs space-y-1'>
               <li>• Post at least 1 task (any task counts)</li>
               <li>• Complete and approve 3 tasks (any tasks count)</li>
               <li>• All tasks, including template tasks, count toward completion</li>

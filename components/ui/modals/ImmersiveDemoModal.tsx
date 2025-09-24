@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { userTrackingService } from '@/lib/user-tracking-service';
 import Image from 'next/image';
 
 interface ImmersiveDemoModalProps {
@@ -51,6 +52,7 @@ export const ImmersiveDemoModal = ({
     wouldRecommend: true,
   });
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isCompletingDemo, setIsCompletingDemo] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(true); // Always show by default
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
 
@@ -88,11 +90,20 @@ export const ImmersiveDemoModal = ({
     }
   }, [isOpen, currentStep]);
 
-  const handleStartDemo = () => {
+  const handleStartDemo = async () => {
     setCurrentStep('demo');
     setStartTime(new Date());
     setProgress(0);
     setShowTransactionHistory(true); // Ensure transaction sidebar is always visible
+
+    // Track demo start
+    if (isConnected && walletData?.publicKey) {
+      await userTrackingService.trackDemoStart(
+        walletData.publicKey,
+        demoId,
+        demoTitle
+      );
+    }
 
     // Open wallet sidebar for better UX
     setTimeout(() => {
@@ -111,25 +122,66 @@ export const ImmersiveDemoModal = ({
     });
   };
 
-  const handleCompleteDemo = () => {
-    const completionTimeMinutes = Math.round(elapsedTime / 60);
-    
-    // Call the external feedback handler if provided
-    if (onDemoComplete) {
-      onDemoComplete(demoId, demoTitle, completionTimeMinutes);
-      // Close the demo modal after completion
-      handleCloseModal();
-    } else {
-      // Fallback to internal feedback system
-      setCurrentStep('feedback');
+  const handleCompleteDemo = async () => {
+    try {
+      setIsCompletingDemo(true);
+      console.log('🎯 Complete Demo button clicked!', { demoId, demoTitle, elapsedTime });
+      
+      const completionTimeMinutes = Math.round(elapsedTime / 60);
+      console.log('📊 Completion time:', completionTimeMinutes, 'minutes');
+      
+      // Track demo completion
+      if (isConnected && walletData?.publicKey) {
+        console.log('👤 Tracking demo completion for user:', walletData.publicKey);
+        try {
+          await userTrackingService.trackDemoCompletion(
+            walletData.publicKey,
+            demoId,
+            demoTitle,
+            completionTimeMinutes
+          );
+          console.log('✅ Demo completion tracked successfully');
+        } catch (trackingError) {
+          console.error('⚠️ Demo tracking failed, but continuing with completion:', trackingError);
+          // Continue with demo completion even if tracking fails
+        }
+      } else {
+        console.log('⚠️ No wallet connected, skipping user tracking');
+      }
+      
+      // Call the external feedback handler if provided
+      if (onDemoComplete) {
+        console.log('🔄 Calling external demo complete handler');
+        onDemoComplete(demoId, demoTitle, completionTimeMinutes);
+        console.log('✅ External handler called, closing modal');
+        // Close the demo modal after completion
+        handleCloseModal();
+      } else {
+        console.log('🔄 No external handler, using internal feedback system');
+        // Fallback to internal feedback system
+        setCurrentStep('feedback');
+      }
+      
+      console.log('🎉 Showing success toast');
+      addToast({
+        type: 'success',
+        title: '🎉 Demo Completed!',
+        message: 'Please share your feedback to help us improve!',
+        duration: 5000,
+      });
+      
+      console.log('✅ Complete Demo process finished successfully');
+    } catch (error) {
+      console.error('❌ Error in handleCompleteDemo:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Demo Completion Failed',
+        message: 'Failed to complete demo. Please try again.',
+        duration: 5000,
+      });
+    } finally {
+      setIsCompletingDemo(false);
     }
-    
-    addToast({
-      type: 'success',
-      title: '🎉 Demo Completed!',
-      message: 'Please share your feedback to help us improve!',
-      duration: 5000,
-    });
   };
 
   const handleCloseClick = () => {
@@ -171,10 +223,23 @@ export const ImmersiveDemoModal = ({
     setIsSubmittingFeedback(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Track feedback submission
+      if (isConnected && walletData?.publicKey) {
+        await userTrackingService.trackFeedbackSubmission(
+          walletData.publicKey,
+          demoId,
+          demoTitle,
+          {
+            rating: feedback.rating,
+            comment: feedback.comment,
+            difficulty: feedback.difficulty,
+            wouldRecommend: feedback.wouldRecommend,
+            completionTime: Math.round(elapsedTime / 60),
+          }
+        );
+      }
 
-      // Save feedback to localStorage
+      // Save feedback to localStorage as backup
       const existingFeedback = JSON.parse(localStorage.getItem('demoFeedback') || '{}');
       existingFeedback[demoId] = {
         ...feedback,
@@ -491,11 +556,34 @@ export const ImmersiveDemoModal = ({
                 {/* Complete Demo Button */}
                 <div className='text-center'>
                   <button
-                    onClick={handleCompleteDemo}
-                    className='px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105'
+                    onClick={(e) => {
+                      console.log('🖱️ Complete Demo button clicked directly!', e);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCompleteDemo();
+                    }}
+                    disabled={isCompletingDemo}
+                    className={`px-8 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer relative z-10 ${
+                      isCompletingDemo ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    style={{ pointerEvents: 'auto' }}
+                    type='button'
                   >
-                    🎉 Complete Demo
+                    {isCompletingDemo ? (
+                      <div className='flex items-center space-x-2'>
+                        <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+                        <span>Completing Demo...</span>
+                      </div>
+                    ) : (
+                      '🎉 Complete Demo'
+                    )}
                   </button>
+                  <p className='text-xs text-white/50 mt-2'>
+                    {isCompletingDemo 
+                      ? 'Processing demo completion...' 
+                      : 'Click to complete the demo and provide feedback'
+                    }
+                  </p>
                 </div>
               </div>
             )}

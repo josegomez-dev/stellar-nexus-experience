@@ -90,7 +90,7 @@ const demos: Demo[] = [
       'Lightweight gig-board with escrow! Post tasks, browse opportunities, and manage micro-work with built-in escrow protection for both clients and workers.',
     icon: '/images/demos/economy.png',
     color: 'from-accent-500 to-accent-400',
-    isReady: false,
+    isReady: true,
     multiStakeholderRequired: false,
   },
 ];
@@ -294,7 +294,7 @@ const DemoSelector = ({
                             <div className='text-lg font-bold text-amber-400'>
                               {stats.completions}
                             </div>
-                            <div className='text-xs text-white/60'>Completed</div>
+                            <div className='text-xs text-white/60'>tnx #</div>
                           </div>
                           <div>
                             <button
@@ -477,7 +477,7 @@ function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
-  const { submitFeedback } = useDemoStats();
+  const { submitFeedback, markDemoComplete } = useDemoStats();
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
@@ -587,7 +587,14 @@ function HomePageContent() {
   };
 
   // Handle demo completion and show feedback modal
-  const handleDemoComplete = (demoId: string, demoName: string, completionTime: number = 5) => {
+  const handleDemoComplete = async (demoId: string, demoName: string, completionTime: number = 5) => {
+    // Mark demo as complete in Firebase
+    try {
+      await markDemoComplete(demoId, demoName, completionTime);
+    } catch (error) {
+      console.error('Failed to mark demo as complete:', error);
+    }
+    
     setFeedbackDemoData({
       demoId,
       demoName,

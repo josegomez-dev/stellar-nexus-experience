@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
-import { AVAILABLE_BADGES, getRarityColor, getRarityTextColor, type BadgeConfig } from '@/lib/badge-config';
+import { getAllBadges, getBadgeRarityConfig } from '@/lib/badge-config';
+import { type Badge } from '@/lib/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 
 interface RewardsSidebarProps {
@@ -14,10 +15,33 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   const { account, pointsTransactions, getLevel, getExperienceProgress, getMainDemoProgress } = useAccount();
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'transactions' | 'leaderboard'>('overview');
 
+  // Helper functions for badge styling
+  const getRarityColor = (rarity: string) => {
+    const config = getBadgeRarityConfig(rarity);
+    return config?.color || 'gray';
+  };
+
+  const getRarityTextColor = (rarity: string) => {
+    const config = getBadgeRarityConfig(rarity);
+    return config?.color || 'text-gray-300';
+  };
+
+  const AVAILABLE_BADGES = getAllBadges();
+
   // Only show when account exists - consistent with UserProfile
-  if (!account) {
+  if (!account || !isOpen) {
     return null;
   }
+
+  // Ensure we have safe defaults for all data
+  const safeAccount = {
+    ...account,
+    badges: account.badges || [],
+    profile: account.profile || { level: 1, experience: 0, username: 'User' },
+    settings: account.settings || { notifications: true, theme: 'dark' }
+  };
+  
+  const safePointsTransactions = pointsTransactions || [];
 
   const level = getLevel();
   const expProgress = getExperienceProgress();
@@ -65,7 +89,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
       <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-lg p-4 border border-indigo-400/30">
         <h3 className="text-lg font-semibold text-white mb-3">Recent Badges</h3>
         <div className="space-y-2">
-          {account.badges.slice(-3).map((badge) => (
+          {safeAccount.badges.slice(-3).map((badge: any) => (
             <div key={badge.id} className="flex items-center space-x-3 p-2 bg-black/20 rounded-lg">
               <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm">
                 🏆
@@ -89,11 +113,11 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   const renderBadges = () => {
     // Check which badges are earned by the user (match by name since that's how they're stored)
-    const earnedBadgeNames = account.badges.map(badge => badge.name);
-    const badgesWithStatus = AVAILABLE_BADGES.map(badge => ({
+    const earnedBadgeNames = safeAccount.badges.map((badge: any) => badge.name);
+    const badgesWithStatus = AVAILABLE_BADGES.map((badge: Badge) => ({
       ...badge,
       isEarned: earnedBadgeNames.includes(badge.name),
-      earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt
+      earnedAt: safeAccount.badges.find(b => b.name === badge.name)?.earnedAt
     }));
 
     const earnedCount = earnedBadgeNames.length;
@@ -130,11 +154,11 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
     <div className="space-y-3">
       <div className="text-center mb-4">
         <div className="text-lg font-semibold text-white">Points History</div>
-        <div className="text-sm text-gray-400">Recent {pointsTransactions.length} transactions</div>
+        <div className="text-sm text-gray-400">Recent {safePointsTransactions.length} transactions</div>
       </div>
       
       <div className="space-y-2 max-h-96 overflow-y-auto">
-        {pointsTransactions.map((transaction) => (
+        {safePointsTransactions.map((transaction) => (
           <div key={transaction.id} className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-lg p-3 border border-gray-600/30">
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -155,7 +179,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
           </div>
         ))}
         
-        {pointsTransactions.length === 0 && (
+        {safePointsTransactions.length === 0 && (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📜</div>
             <div className="text-gray-400 mb-2">No transactions yet</div>
@@ -237,17 +261,13 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40"
-          onClick={onClose}
-        />
-      )}
+      <div 
+        className="fixed inset-0 bg-black/50 z-40"
+        onClick={onClose}
+      />
       
       {/* Sidebar */}
-      <div className={`absolute h-100 w-80 bg-gradient-to-b from-gray-900 to-gray-800 border-r border-gray-700 z-50 transform transition-transform duration-300 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div className="absolute h-100 w-80 bg-gradient-to-b from-gray-900 to-gray-800 border-r border-gray-700 z-50 transform transition-transform duration-300 translate-x-0">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">🎮 Rewards</h2>

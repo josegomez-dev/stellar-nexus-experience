@@ -314,6 +314,71 @@ const envSchema = z.object({
     .describe('Albedo wallet app name'),
 
   // ============================================================================
+  // FIREBASE CONFIGURATION
+  // ============================================================================
+
+  NEXT_PUBLIC_FIREBASE_API_KEY: z
+    .string()
+    .min(1, 'Firebase API key is required')
+    .default('AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no')
+    .describe('Firebase API key'),
+
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z
+    .string()
+    .min(1, 'Firebase auth domain is required')
+    .default('nexus-55966.firebaseapp.com')
+    .describe('Firebase auth domain'),
+
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z
+    .string()
+    .min(1, 'Firebase project ID is required')
+    .default('nexus-55966')
+    .describe('Firebase project ID'),
+
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z
+    .string()
+    .min(1, 'Firebase storage bucket is required')
+    .default('nexus-55966.firebasestorage.app')
+    .describe('Firebase storage bucket'),
+
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z
+    .string()
+    .min(1, 'Firebase messaging sender ID is required')
+    .default('48419163339')
+    .describe('Firebase messaging sender ID'),
+
+  NEXT_PUBLIC_FIREBASE_APP_ID: z
+    .string()
+    .min(1, 'Firebase app ID is required')
+    .default('1:48419163339:web:637eadbce2dadb24605f4e')
+    .describe('Firebase app ID'),
+
+  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z
+    .string()
+    .optional()
+    .default('G-80T26CG9PM')
+    .describe('Firebase measurement ID'),
+
+  FIREBASE_USE_EMULATOR: z
+    .string()
+    .optional()
+    .transform(val => val === 'true')
+    .default(() => false)
+    .describe('Use Firebase emulators'),
+
+  FIREBASE_FIRESTORE_EMULATOR_HOST: z
+    .string()
+    .optional()
+    .default('localhost:8080')
+    .describe('Firestore emulator host'),
+
+  FIREBASE_AUTH_EMULATOR_HOST: z
+    .string()
+    .optional()
+    .default('localhost:9099')
+    .describe('Auth emulator host'),
+
+  // ============================================================================
   // NODE ENVIRONMENT
   // ============================================================================
 
@@ -339,6 +404,12 @@ const parseEnv = () => {
     'NEXT_PUBLIC_DEFAULT_ASSET_DECIMALS',
     'NEXT_PUBLIC_APP_NAME',
     'NEXT_PUBLIC_APP_VERSION',
+    'NEXT_PUBLIC_FIREBASE_API_KEY',
+    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+    'NEXT_PUBLIC_FIREBASE_APP_ID',
   ];
 
   const optionalVarsList = [
@@ -370,6 +441,10 @@ const parseEnv = () => {
     'NEXT_PUBLIC_DEMO_DATA_ENABLED',
     'NEXT_PUBLIC_FREIGHTER_APP_ID',
     'NEXT_PUBLIC_ALBEDO_APP_NAME',
+    'NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID',
+    'FIREBASE_USE_EMULATOR',
+    'FIREBASE_FIRESTORE_EMULATOR_HOST',
+    'FIREBASE_AUTH_EMULATOR_HOST',
     'JWT_SECRET',
     'SESSION_SECRET',
   ];
@@ -437,6 +512,16 @@ const parseEnv = () => {
     NEXT_PUBLIC_DEMO_DATA_ENABLED: process.env.NEXT_PUBLIC_DEMO_DATA_ENABLED || 'true',
     NEXT_PUBLIC_FREIGHTER_APP_ID: process.env.NEXT_PUBLIC_FREIGHTER_APP_ID || 'nexus-experience',
     NEXT_PUBLIC_ALBEDO_APP_NAME: process.env.NEXT_PUBLIC_ALBEDO_APP_NAME || 'NEXUS EXPERIENCE',
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no',
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'nexus-55966.firebaseapp.com',
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nexus-55966',
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'nexus-55966.firebasestorage.app',
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '48419163339',
+    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:48419163339:web:637eadbce2dadb24605f4e',
+    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-80T26CG9PM',
+    FIREBASE_USE_EMULATOR: process.env.FIREBASE_USE_EMULATOR || 'false',
+    FIREBASE_FIRESTORE_EMULATOR_HOST: process.env.FIREBASE_FIRESTORE_EMULATOR_HOST || 'localhost:8080',
+    FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099',
     NODE_ENV: process.env.NODE_ENV || 'development',
   };
 
@@ -524,6 +609,16 @@ const parseEnv = () => {
       NEXT_PUBLIC_DEMO_DATA_ENABLED: true,
       NEXT_PUBLIC_FREIGHTER_APP_ID: 'nexus-experience',
       NEXT_PUBLIC_ALBEDO_APP_NAME: 'NEXUS EXPERIENCE',
+      NEXT_PUBLIC_FIREBASE_API_KEY: 'AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no',
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: 'nexus-55966.firebaseapp.com',
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'nexus-55966',
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: 'nexus-55966.firebasestorage.app',
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '48419163339',
+      NEXT_PUBLIC_FIREBASE_APP_ID: '1:48419163339:web:637eadbce2dadb24605f4e',
+      NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: 'G-80T26CG9PM',
+      FIREBASE_USE_EMULATOR: false,
+      FIREBASE_FIRESTORE_EMULATOR_HOST: 'localhost:8080',
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
       NODE_ENV: 'development',
     } as any;
   }

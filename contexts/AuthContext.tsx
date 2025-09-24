@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useGlobalWallet } from './WalletContext';
+import { userTrackingService } from '@/lib/user-tracking-service';
 
 export interface User {
   id: string;
@@ -96,6 +97,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (err) {
           console.error('Error parsing user data:', err);
         }
+      } else {
+        // Auto-create user account when wallet connects
+        const autoCreateUser = async () => {
+          try {
+            const defaultUsername = `User_${walletData.publicKey.slice(0, 8)}`;
+            await userTrackingService.createUserAccount(
+              walletData.publicKey,
+              defaultUsername,
+              walletData.walletType || 'manual',
+              walletData.walletName || 'Unknown Wallet'
+            );
+            console.log('✅ Auto-created user account for wallet connection');
+          } catch (error) {
+            console.error('Failed to auto-create user account:', error);
+          }
+        };
+        
+        autoCreateUser();
       }
     } else if (!isConnected && user) {
       // Sign out when wallet disconnects
