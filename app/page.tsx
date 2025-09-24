@@ -22,6 +22,7 @@ import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo';
 import { useDemoStats } from '@/hooks/useDemoStats';
+import { getAllBadges } from '@/lib/badge-config';
 import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
 import { initializeDemoStats } from '@/lib/demo-stats-initializer';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
@@ -106,8 +107,31 @@ const DemoSelector = ({
   setShowImmersiveDemo: (show: boolean) => void;
   isConnected: boolean;
 }) => {
-  const { getCompletedDemos } = useAccount();
+  const { getCompletedDemos, account } = useAccount();
   const { demoStats, clapDemo, refreshStats } = useDemoStats();
+
+  // Get badge information for each demo
+  const getDemoBadge = (demoId: string) => {
+    const badgeMap: Record<string, string> = {
+      'hello-milestone': 'escrow-expert',
+      'dispute-resolution': 'trust-guardian',
+      'micro-task-marketplace': 'stellar-champion',
+    };
+    
+    const badgeId = badgeMap[demoId];
+    if (!badgeId) return null;
+    
+    const badgeConfig = getAllBadges().find(badge => badge.id === badgeId);
+    return badgeConfig;
+  };
+
+  // Check if user has earned the badge for this demo
+  const hasEarnedBadge = (demoId: string) => {
+    if (!account) return false;
+    const badge = getDemoBadge(demoId);
+    if (!badge) return false;
+    return account.badges.some(userBadge => userBadge.name === badge.name);
+  };
 
   const getClapStats = (demoId: string) => {
     const stats = demoStats[demoId];
@@ -238,6 +262,8 @@ const DemoSelector = ({
         {demos.map(demo => {
           const completedDemos = getCompletedDemos();
           const isCompleted = completedDemos.includes(demo.id);
+          const earnedBadge = hasEarnedBadge(demo.id);
+          const badge = getDemoBadge(demo.id);
 
           return (
             <div
@@ -246,7 +272,9 @@ const DemoSelector = ({
                 activeDemo === demo.id
                   ? `border-white/50 bg-gradient-to-br ${demo.color}/20`
                   : isCompleted
-                    ? 'border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20'
+                    ? `border-green-400/40 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:border-green-400/60 hover:from-green-500/15 hover:to-emerald-500/15 shadow-lg shadow-green-500/20 ${
+                        earnedBadge ? 'animate-pulse hover:animate-bounce' : ''
+                      }`
                     : `${getDemoCardColors(demo.color).background} ${getDemoCardColors(demo.color).hoverBackground} ${getDemoCardColors(demo.color).border} ${getDemoCardColors(demo.color).hoverBorder} ${getDemoCardColors(demo.color).shadow} ${getDemoCardColors(demo.color).hoverShadow}`
               } ${!demo.isReady ? 'pointer-events-none' : ''}`}
               data-demo-id={demo.id}
@@ -268,15 +296,32 @@ const DemoSelector = ({
               {/* Completed Badge for finished demos */}
               {demo.isReady && isCompleted && (
                 <div className='absolute top-4 right-4 z-50'>
-                  <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2'>
-                    ✅ Completed
-                  </div>
+                  {earnedBadge && badge ? (
+                    <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 animate-pulse'>
+                      <span className='text-lg'>{badge.icon}</span>
+                      <span>{badge.name}</span>
+                    </div>
+                  ) : (
+                    <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2'>
+                      ✅ Completed
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Blur Overlay for non-ready demos */}
               {!demo.isReady && (
                 <div className='absolute inset-0 bg-black/60 backdrop-blur-md rounded-xl z-10'></div>
+              )}
+
+              {/* Floating particles for completed demos with badges */}
+              {isCompleted && earnedBadge && (
+                <div className='absolute inset-0 pointer-events-none overflow-hidden'>
+                  <div className='absolute top-4 left-4 w-2 h-2 bg-yellow-400 rounded-full animate-ping opacity-70'></div>
+                  <div className='absolute top-8 right-8 w-1 h-1 bg-orange-400 rounded-full animate-ping opacity-80' style={{ animationDelay: '0.5s' }}></div>
+                  <div className='absolute bottom-8 left-8 w-1 h-1 bg-yellow-300 rounded-full animate-ping opacity-60' style={{ animationDelay: '1s' }}></div>
+                  <div className='absolute bottom-4 right-4 w-2 h-2 bg-orange-300 rounded-full animate-ping opacity-90' style={{ animationDelay: '1.5s' }}></div>
+                </div>
               )}
 
               {/* Content with reduced opacity for non-ready demos */}
@@ -370,11 +415,34 @@ const DemoSelector = ({
                 >
                   {demo.subtitle}
                 </h4>
-                <p
-                  className={`text-sm text-white/70 text-left leading-relaxed mb-4 ${!demo.isReady ? 'blur-sm' : ''}`}
-                >
-                  {demo.description}
-                </p>
+                
+                {/* Show badge info for completed demos with earned badges, otherwise show description */}
+                {isCompleted && earnedBadge && badge ? (
+                  <div className='mb-4'>
+                    <div className='bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-4 mb-3'>
+                      <div className='flex items-center gap-3 mb-2'>
+                        <span className='text-3xl animate-bounce'>{badge.icon}</span>
+                        <div>
+                          <h5 className='font-bold text-yellow-200 text-lg'>{badge.name}</h5>
+                          <p className='text-yellow-300/80 text-sm'>{badge.description}</p>
+                        </div>
+                      </div>
+                      <div className='flex items-center justify-between text-xs'>
+                        <span className='text-yellow-300/70'>Rarity: {badge.rarity}</span>
+                        <span className='text-yellow-300/70'>+{badge.xpReward} XP</span>
+                      </div>
+                    </div>
+                    <div className='text-center text-green-300 text-sm font-semibold animate-pulse'>
+                      🎉 Badge Earned! 🎉
+                    </div>
+                  </div>
+                ) : (
+                  <p
+                    className={`text-sm text-white/70 text-left leading-relaxed mb-4 ${!demo.isReady ? 'blur-sm' : ''}`}
+                  >
+                    {demo.description}
+                  </p>
+                )}
 
                 {/* Start Demo Button */}
                 <div className='flex flex-col items-center space-y-2'>
