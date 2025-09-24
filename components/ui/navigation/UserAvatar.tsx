@@ -1,6 +1,8 @@
 'use client';
 
 import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useAuth } from '@/contexts/AuthContext';
+import RandomPixelAvatar, { AvatarStyles } from '../avatar/RandomPixelAvatar';
 
 interface UserAvatarProps {
   onClick?: () => void;
@@ -10,6 +12,7 @@ interface UserAvatarProps {
 
 export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvatarProps) => {
   const { isConnected, walletData } = useGlobalWallet();
+  const { user } = useAuth();
 
   // Generate initials from a two-word name (using wallet address as fallback)
   const generateInitials = (address: string) => {
@@ -29,16 +32,42 @@ export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvat
     lg: 'w-12 h-12 text-lg',
   };
 
+  const pixelSizes = {
+    sm: 32,
+    md: 40,
+    lg: 48,
+  };
+
+  // Use custom avatar if user has one, otherwise fallback to initials
+  const hasCustomAvatar = user?.avatarSeed !== undefined;
+  const avatarStyle = user?.avatarStyle || 'default';
+
   return (
     <div className='relative'>
-      <div
-        onClick={onClick}
-        className={`${sizeClasses[size]} bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-          onClick ? 'hover:from-cyan-600 hover:to-purple-600' : ''
-        }`}
-      >
-        {initials}
-      </div>
+      {hasCustomAvatar ? (
+        <div
+          onClick={onClick}
+          className={`${sizeClasses[size]} rounded-full cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden ${
+            onClick ? 'hover:ring-2 hover:ring-white/20' : ''
+          }`}
+        >
+          <RandomPixelAvatar
+            size={pixelSizes[size]}
+            seed={user.avatarSeed}
+            {...AvatarStyles[avatarStyle as keyof typeof AvatarStyles]}
+            className="w-full h-full"
+          />
+        </div>
+      ) : (
+        <div
+          onClick={onClick}
+          className={`${sizeClasses[size]} bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+            onClick ? 'hover:from-cyan-600 hover:to-purple-600' : ''
+          }`}
+        >
+          {initials}
+        </div>
+      )}
       {showStatus && isConnected && (
         <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center'>
           <span className='text-xs'>✓</span>
