@@ -255,16 +255,14 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
 
           <div className='flex items-center space-x-2'>
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={onToggle}
               className={`text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-110 ${
                 isExpanded ? 'p-2' : 'p-1.5'
               }`}
-              title={isExpanded ? 'Collapse' : 'Expand'}
+              title='Close Wallet'
             >
-              <div
-                className={`transform transition-transform duration-300 ${!isExpanded ? 'rotate-180' : 'rotate-0'}`}
-              >
-                ▶
+              <div className='transform transition-transform duration-300'>
+                ×
               </div>
             </button>
           </div>
@@ -275,16 +273,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           className={`flex-1 transition-all duration-300 overflow-y-auto ${isExpanded ? 'p-4' : 'p-2'}`}
           style={{ minHeight: '400px', maxHeight: 'calc(100vh - 200px)' }}
         >
-          {/* Close Button - Positioned in bottom right corner */}
-          <button
-            onClick={onToggle}
-            className='absolute bottom-8 right-4 w-8 h-8 bg-gradient-to-br from-red-500/80 to-pink-600/80 hover:from-red-500 to-pink-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl border border-white/20 flex items-center justify-center group z-10'
-            title='Close Wallet'
-          >
-            <span className='text-lg font-bold group-hover:scale-110 transition-transform duration-200'>
-              ×
-            </span>
-          </button>
 
           {!isConnected ? (
             // Not Connected State

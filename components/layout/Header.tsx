@@ -87,6 +87,7 @@ export const Header = () => {
               <span>Demos</span>
             </a>
             <Tooltip
+              position="bottom"
               content={
                 miniGamesUnlocked
                   ? 'Explore the Nexus Web3 Playground'
@@ -114,7 +115,7 @@ export const Header = () => {
                   className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
                 />
                 <span>
-                  {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                  {miniGamesUnlocked ? 'Nexus Web3 Playground' : 'Nexus Web3 Playground 🔒'}
                 </span>
               </a>
             </Tooltip>
