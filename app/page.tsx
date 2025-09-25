@@ -488,7 +488,7 @@ const DemoSelector = ({
                               <div className='text-lg font-bold text-amber-400'>
                                 {stats.completions}
                               </div>
-                              <div className='text-xs text-white/60'>👏🏻 Clap:</div>
+                              <div className='text-xs text-white/60'># TNX:</div>
                             </div>
                             <div>
                               <button
@@ -1421,10 +1421,10 @@ function HomePageContent() {
 
               <div className='mb-12'>
                 <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
-                  🎓 Interactive Tutorial
+                  🎓 Tutorial
                 </h3>
                 <p className='text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
-                  New to trustless work? <br /> Start with our interactive tutorial to learn how
+                  New to trustless work? <br /> Start with our tutorial to learn how
                   everything works!
                 </p>
               </div>
@@ -1442,7 +1442,7 @@ function HomePageContent() {
                       height={20}
                       className='w-5 h-5'
                     />
-                    <span>Start Interactive Tutorial</span>
+                    <span>Start Tutorial</span>
                   </div>
                 </button>
                 {!hasSeenOnboarding && (

@@ -176,87 +176,6 @@ export const OnboardingOverlay = ({
           },
         ];
 
-      case 'milestone-voting':
-        return [
-          ...baseSteps,
-          {
-            id: 'connect-wallet',
-            title: 'Step 1: Connect Your Wallet 🔗',
-            description:
-              'First, connect your Stellar wallet to access the multi-stakeholder approval system.',
-            target: '.wallet-connect-button',
-            position: 'top',
-            characterPosition: 'left',
-            highlightElement: true,
-          },
-          {
-            id: 'select-demo',
-            title: 'Step 2: Democracy in Action 🗳️',
-            description:
-              'This demo shows how multiple stakeholders must approve milestones before funds are released.',
-            target: '.demo-card[data-demo-id="milestone-voting"]',
-            position: 'bottom',
-            characterPosition: 'right',
-            highlightElement: true,
-          },
-          {
-            id: 'initialize-contract',
-            title: 'Step 3: Initialize Contract 📝',
-            description: 'Create a new escrow contract with multiple approval requirements.',
-            target: '.initialize-escrow-button',
-            position: 'top',
-            characterPosition: 'left',
-            highlightElement: true,
-          },
-          {
-            id: 'fund-escrow',
-            title: 'Step 4: Fund Escrow 💰',
-            description:
-              'Deposit funds into the escrow contract. Multiple stakeholders will need to approve before release.',
-            target: '.fund-escrow-button',
-            position: 'bottom',
-            characterPosition: 'right',
-            highlightElement: true,
-          },
-          {
-            id: 'complete-milestones',
-            title: 'Step 5: Complete Milestones ✅',
-            description:
-              'Mark milestones as complete. Each milestone requires multiple stakeholder approvals.',
-            target: '.complete-milestone-button',
-            position: 'top',
-            characterPosition: 'left',
-            highlightElement: true,
-          },
-          {
-            id: 'get-approvals',
-            title: 'Step 6: Get Stakeholder Approvals 👍',
-            description:
-              'All required stakeholders must approve the completed milestones before funds can be released.',
-            target: '.approve-milestone-button',
-            position: 'bottom',
-            characterPosition: 'right',
-            highlightElement: true,
-          },
-          {
-            id: 'release-funds',
-            title: 'Step 7: Release Funds 🎊',
-            description: 'Once all approvals are received, release the funds to complete the demo!',
-            target: '.release-funds-button',
-            position: 'top',
-            characterPosition: 'left',
-            highlightElement: true,
-          },
-          {
-            id: 'completion-requirements',
-            title: '🎯 Demo Completion Requirements',
-            description:
-              'To complete this demo successfully, you need to: 1) Initialize contract, 2) Fund escrow, 3) Complete milestones, 4) Get all stakeholder approvals, 5) Release funds. Complete all steps to see the success box!',
-            target: 'body',
-            position: 'top',
-            characterPosition: 'right',
-          },
-        ];
 
       case 'dispute-resolution':
         return [
@@ -442,25 +361,19 @@ export const OnboardingOverlay = ({
     {
       id: 'hello-milestone',
       title: '1. Baby Steps',
-      icon: '🍼',
+      icon: '🎮',
       color: 'from-brand-500 to-brand-400',
     },
     {
-      id: 'milestone-voting',
-      title: '2. Democracy',
-      icon: '🗳️',
-      color: 'from-success-500 to-success-400',
-    },
-    {
       id: 'dispute-resolution',
-      title: '3. Drama Queen',
-      icon: '👑',
+      title: '2. Drama Queen',
+      icon: '🎮',
       color: 'from-warning-500 to-warning-400',
     },
     {
       id: 'micro-marketplace',
-      title: '4. Gig Economy',
-      icon: '🛒',
+      title: '3. Gig Economy',
+      icon: '🎮',
       color: 'from-accent-500 to-accent-400',
     },
   ];
@@ -538,7 +451,7 @@ export const OnboardingOverlay = ({
                   className='rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'
                 />
               </div>
-              <h2 className='text-2xl font-bold text-white'>Interactive Tutorial</h2>
+              <h2 className='text-2xl font-bold text-white'>Tutorial</h2>
             </div>
 
             {/* TTS Controls */}
@@ -582,8 +495,8 @@ export const OnboardingOverlay = ({
         <div className='bg-white/5 p-4 border-b border-white/10'>
           <div className='flex flex-wrap gap-2'>
             {demoTabs.map(tab => {
-              const isFirstDemo = tab.id === 'hello-milestone';
-              const isDisabled = !isFirstDemo;
+              // All main demos are now available in the tutorial
+              const isDisabled = false;
 
               return (
                 <button
@@ -612,7 +525,7 @@ export const OnboardingOverlay = ({
           </div>
           <div className='mt-2 text-center'>
             <p className='text-xs text-gray-400'>
-              💡 Complete "Baby Steps" to unlock advanced tutorials
+              💡 All main demos are available in the tutorial
             </p>
           </div>
         </div>
