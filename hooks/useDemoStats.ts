@@ -31,7 +31,6 @@ export interface UseDemoStatsReturn {
 
 const DEMO_LIST = [
   { id: 'hello-milestone', name: 'Baby Steps to Riches' },
-  { id: 'milestone-voting', name: 'Democracy in Action' },
   { id: 'dispute-resolution', name: 'Drama Queen Escrow' },
   { id: 'micro-marketplace', name: 'Gig Economy Madness' },
 ];

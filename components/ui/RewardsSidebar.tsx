@@ -18,7 +18,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
     'overview' | 'badges' | 'transactions' | 'leaderboard'
   >('overview');
   const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
-  const [isExtraBadgesCollapsed, setIsExtraBadgesCollapsed] = useState(false);
 
   // Helper functions for badge styling
   const getRarityColor = (rarity: string) => {
@@ -96,7 +95,15 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
       <div className='bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-lg p-4 border border-indigo-400/30'>
         <h3 className='text-lg font-semibold text-white mb-3'>Recent Badges</h3>
         <div className='space-y-2'>
-          {safeAccount.badges.slice(-3).map((badge: any) => (
+          {safeAccount.badges
+            .sort((a: any, b: any) => {
+              // Sort by earnedAt date, most recent first
+              const aDate = a.earnedAt ? new Date(a.earnedAt.seconds * 1000) : new Date(0);
+              const bDate = b.earnedAt ? new Date(b.earnedAt.seconds * 1000) : new Date(0);
+              return bDate.getTime() - aDate.getTime();
+            })
+            .slice(0, 3)
+            .map((badge: any) => (
             <div key={badge.id} className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'>
               <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
                 🏆
@@ -108,7 +115,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
             </div>
           ))}
-          {account.badges.length === 0 && (
+          {safeAccount.badges.length === 0 && (
             <div className='text-center text-gray-400 py-4'>Complete demos to earn badges!</div>
           )}
         </div>
@@ -118,15 +125,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   const renderBadges = () => {
     try {
-      // Define main achievement badges
-      const mainBadgeIds = [
-        'welcome_explorer',
-        'escrow-expert',
-        'trust-guardian',
-        'stellar-champion',
-        'nexus-master',
-      ];
-
       // Check which badges are earned by the user (match by name since that's how they're stored)
       const earnedBadgeNames = safeAccount.badges?.map((badge: any) => badge.name) || [];
       const badgesWithStatus =
@@ -134,16 +132,11 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
           ...badge,
           isEarned: earnedBadgeNames.includes(badge.name),
           earnedAt: safeAccount.badges?.find(b => b.name === badge.name)?.earnedAt,
-          isMainAchievement: mainBadgeIds.includes(badge.id),
         })) || [];
-
-      // Separate main achievements from extra badges
-      const mainBadges = badgesWithStatus.filter(badge => badge.isMainAchievement);
-      const extraBadges = badgesWithStatus.filter(badge => !badge.isMainAchievement);
 
       const earnedCount = earnedBadgeNames.length;
       const totalCount = AVAILABLE_BADGES?.length || 0;
-      const mainEarnedCount = mainBadges.filter(badge => badge.isEarned).length;
+      const isAllMainBadgesEarned = earnedCount === 5; // All 5 main achievement badges
 
       return (
         <div className='space-y-4'>
@@ -151,7 +144,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
             <div className='text-2xl font-bold text-white'>
               {earnedCount} / {totalCount}
             </div>
-            <div className='text-sm text-gray-400'>Badges Collected</div>
+            <div className='text-sm text-gray-400'>Main Achievement Badges</div>
             <div className='w-full bg-gray-700 rounded-full h-2 mt-2'>
               <div
                 className='bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500'
@@ -159,6 +152,22 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               />
             </div>
           </div>
+
+          {/* Completion Celebration */}
+          {isAllMainBadgesEarned && (
+            <div className='bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-400/30 mb-4'>
+              <div className='text-center'>
+                <div className='text-4xl mb-2'>🎉</div>
+                <div className='text-lg font-bold text-purple-300 mb-1'>Congratulations!</div>
+                <div className='text-sm text-purple-200'>
+                  You've completed the full Stellar Nexus Experience flow!
+                </div>
+                <div className='text-xs text-purple-300/80 mt-2'>
+                  You've earned all 5 Main Achievement Badges and mastered the platform.
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Main Achievements Section */}
           <div className='space-y-3'>
@@ -169,7 +178,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               <div className='w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full'></div>
               <h3 className='text-lg font-semibold text-white'>Main Achievements</h3>
               <div className='bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-2 py-1 rounded-full text-xs text-blue-300 border border-blue-400/30'>
-                {mainEarnedCount} / {mainBadges.length}
+                {earnedCount} / {totalCount}
               </div>
               <div className='ml-auto'>
                 {isMainAchievementsCollapsed ? (
@@ -182,7 +191,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
             {!isMainAchievementsCollapsed && (
               <div className='space-y-2'>
-                {mainBadges.map(badge => (
+                {badgesWithStatus.map(badge => (
                   <div key={badge.id} className='relative'>
                     <Badge3D badge={badge} size='sm' compact={true} />
                     {/* Main Achievement Indicator */}
@@ -192,39 +201,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               </div>
             )}
           </div>
-
-          {/* Extra Badges Section */}
-          {extraBadges.length > 0 && (
-            <div className='space-y-3'>
-              <div 
-                className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
-                onClick={() => setIsExtraBadgesCollapsed(!isExtraBadgesCollapsed)}
-              >
-                <div className='w-2 h-2 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full'></div>
-                <h3 className='text-lg font-semibold text-white'>Extra Badges</h3>
-                <div className='bg-gradient-to-r from-gray-500/20 to-gray-600/20 px-2 py-1 rounded-full text-xs text-gray-300 border border-gray-400/30'>
-                  {extraBadges.filter(badge => badge.isEarned).length} / {extraBadges.length}
-                </div>
-                <div className='ml-auto'>
-                  {isExtraBadgesCollapsed ? (
-                    <span className='text-gray-400 text-lg'>▶</span>
-                  ) : (
-                    <span className='text-gray-400 text-lg'>▼</span>
-                  )}
-                </div>
-              </div>
-
-              {!isExtraBadgesCollapsed && (
-                <div className='space-y-2 max-h-64 overflow-y-auto'>
-                  {extraBadges.map(badge => (
-                    <div key={badge.id} className='opacity-80 hover:opacity-100 transition-opacity'>
-                      <Badge3D badge={badge} size='sm' compact={true} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Achievement Guide */}
           <div className='bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4'>
@@ -237,13 +213,13 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
                 • <span className='text-blue-300'>Complete Demo 1</span> → Escrow Expert
               </div>
               <div>
-                • <span className='text-blue-300'>Complete Demo 3</span> → Trust Guardian
+                • <span className='text-blue-300'>Complete Demo 2</span> → Trust Guardian
               </div>
               <div>
-                • <span className='text-blue-300'>Complete Demo 4</span> → Stellar Champion
+                • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
               </div>
               <div>
-                • <span className='text-purple-300'>Complete Demos 1, 3, 4</span> → Nexus Master
+                • <span className='text-purple-300'>Complete Demos 1, 2, 3 + Claim Button</span> → Nexus Master
               </div>
             </div>
           </div>

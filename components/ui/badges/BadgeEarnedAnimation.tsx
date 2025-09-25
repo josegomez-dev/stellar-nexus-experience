@@ -110,6 +110,21 @@ const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
           <path d='M32 18v20M22 28h20' stroke='#f59e0b' strokeWidth='3' />
         </svg>
       );
+    case 'nexus-master':
+      return (
+        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
+          <defs>
+            <linearGradient id={`anim-g7-${id}`} x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#10b981' />
+              <stop offset='100%' stopColor='#059669' />
+            </linearGradient>
+          </defs>
+          <circle cx='32' cy='32' r='28' fill={`url(#anim-g7-${id})`} opacity='0.9' />
+          <circle cx='32' cy='32' r='20' fill='#ffffff' opacity='0.1' />
+          <path d='M32 8l6 18 18 6-18 6-6 18-6-18-18-6 18-6 6-18z' fill='#ffffff' opacity='0.9' />
+          <circle cx='32' cy='32' r='4' fill='#ffffff' opacity='0.8' />
+        </svg>
+      );
     default:
       return (
         <div className='w-32 h-32 bg-gray-600 rounded-full flex items-center justify-center text-white text-6xl drop-shadow-2xl'>
@@ -126,32 +141,38 @@ interface BadgeEarnedAnimationProps {
   points?: number;
 }
 
-// Helper function to get rarity styles based on badge rarity
-const getRarityStyles = (rarity: string) => {
-  switch (rarity) {
-    case 'common':
+// Helper function to get badge-specific styles
+const getBadgeStyles = (badgeId: string) => {
+  switch (badgeId) {
+    case 'welcome_explorer':
       return {
         ring: 'from-gray-400 to-gray-600',
         glow: 'shadow-gray-400/20',
         text: 'text-gray-400',
       };
-    case 'rare':
+    case 'escrow-expert':
       return {
         ring: 'from-blue-400 to-blue-600',
         glow: 'shadow-blue-400/20',
         text: 'text-blue-400',
       };
-    case 'epic':
+    case 'trust-guardian':
       return {
-        ring: 'from-purple-400 to-purple-600',
-        glow: 'shadow-purple-400/20',
-        text: 'text-purple-400',
-      };
-    case 'legendary':
-      return {
-        ring: 'from-orange-400 to-orange-600',
+        ring: 'from-orange-400 to-yellow-500',
         glow: 'shadow-orange-400/20',
         text: 'text-orange-400',
+      };
+    case 'stellar-champion':
+      return {
+        ring: 'from-pink-400 to-rose-500',
+        glow: 'shadow-pink-400/20',
+        text: 'text-pink-400',
+      };
+    case 'nexus-master':
+      return {
+        ring: 'from-green-400 to-emerald-500',
+        glow: 'shadow-green-400/20',
+        text: 'text-green-400',
       };
     default:
       return {
@@ -170,7 +191,7 @@ export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
 }) => {
   const [progress, setProgress] = useState(0);
   const [animationPhase, setAnimationPhase] = useState<'enter' | 'display' | 'exit'>('enter');
-  const { ring, glow, text } = getRarityStyles(badge.rarity);
+  const { ring, glow, text } = getBadgeStyles(badge.id);
 
   useEffect(() => {
     if (!isVisible) {

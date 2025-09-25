@@ -40,12 +40,22 @@
 
 /* Demo card with earned badge */
 .demo-card.earned-badge {
-  animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite !important;
 }
 
 .demo-card.earned-badge:hover {
-  animation: float 1.5s ease-in-out infinite, glow-pulse 1s ease-in-out infinite;
-  transform: scale(1.05) translateY(-5px);
+  animation: float 1.5s ease-in-out infinite, glow-pulse 1s ease-in-out infinite !important;
+  transform: scale(1.05) translateY(-5px) !important;
+}
+
+/* Additional specificity for demo cards with earned badges */
+.demo-card.completed.earned-badge {
+  animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite !important;
+}
+
+.demo-card.completed.earned-badge:hover {
+  animation: float 1.5s ease-in-out infinite, glow-pulse 1s ease-in-out infinite !important;
+  transform: scale(1.05) translateY(-5px) !important;
 }
 
 /* Badge shine effect */

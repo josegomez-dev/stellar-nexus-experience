@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAccount } from '@/contexts/AccountContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
@@ -15,6 +15,18 @@ export const Header = () => {
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
   const { isConnected } = useGlobalWallet();
   const { account, loading } = useAccount();
+
+  // Listen for custom event to toggle rewards sidebar
+  useEffect(() => {
+    const handleToggleRewards = () => {
+      setIsRewardsOpen(true);
+    };
+
+    window.addEventListener('toggleRewardsSidebar', handleToggleRewards);
+    return () => {
+      window.removeEventListener('toggleRewardsSidebar', handleToggleRewards);
+    };
+  }, []);
 
   return (
     <header className='bg-white/10 backdrop-blur-md fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 shadow-lg'>

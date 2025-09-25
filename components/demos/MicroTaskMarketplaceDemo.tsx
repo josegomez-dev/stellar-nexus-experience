@@ -17,6 +17,7 @@ import {
 import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
 import { useDemoStats } from '@/hooks/useDemoStats';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 interface MicroTask {
   id: string;
@@ -55,7 +56,8 @@ export const MicroTaskMarketplaceDemo = () => {
     budget: '',
     deadline: '',
   });
-  const [deliverable, setDeliverable] = useState('');
+  // Per-task deliverable states to prevent sharing state between tasks
+  const [taskDeliverables, setTaskDeliverables] = useState<Record<string, string>>({});
   const [selectedTask, setSelectedTask] = useState<MicroTask | null>(null);
 
   // Progress tracking for demo completion
@@ -67,6 +69,9 @@ export const MicroTaskMarketplaceDemo = () => {
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Demo completion tracking
+  const [demoStartTime, setDemoStartTime] = useState<number>(Date.now());
 
   // Always use real blockchain transactions
   const hooks = {
@@ -101,23 +106,31 @@ export const MicroTaskMarketplaceDemo = () => {
 
   // Removed template task distinction - all tasks count toward completion
 
+  // Track if demo completion has been triggered to prevent multiple calls
+  const [demoCompletionTriggered, setDemoCompletionTriggered] = useState(false);
+
   // Trigger confetti when demo is completed
   useEffect(() => {
     const demoCompleted = canCompleteDemo();
     console.log('🎉 Micro Task Marketplace Demo - Demo completed:', demoCompleted);
     console.log('🎉 Posted tasks:', postedTasks.size, 'Completed tasks:', completedTasks.size);
 
-    if (demoCompleted) {
+    if (demoCompleted && !demoCompletionTriggered) {
       console.log('🎉 Triggering confetti for Micro Task Marketplace Demo!');
+      setDemoCompletionTriggered(true);
       setShowConfetti(true);
 
       // Complete the demo using the centralized account system
       const completeDemo = async () => {
         try {
           const score = 90; // High score for completing micro task marketplace
+          const completionTime = Math.floor((Date.now() - demoStartTime) / 1000); // Calculate completion time in seconds
 
           // Use the centralized account system for completion
           await completeDemoInAccount('micro-marketplace', score);
+
+          // Mark demo as complete in Firebase stats
+          await markDemoComplete('micro-marketplace', 'Gig Economy Madness', completionTime);
 
           console.log('✅ Micro Task Marketplace Demo completed successfully');
         } catch (error) {
@@ -141,7 +154,7 @@ export const MicroTaskMarketplaceDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [completedTasks, postedTasks, completeDemoInAccount, addToast]);
+  }, [completedTasks, postedTasks]); // Removed function dependencies to prevent infinite loops
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
@@ -349,6 +362,23 @@ export const MicroTaskMarketplaceDemo = () => {
       // Track completed task for demo completion
       setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
 
+      // Add a random deliverable message for demo purposes
+      const randomDeliverables = [
+        "✅ Completed the design mockup with modern UI components and responsive layout",
+        "🎨 Delivered high-quality graphics and illustrations for the project",
+        "📝 Wrote comprehensive documentation and user guides",
+        "🔧 Implemented the requested features with clean, maintainable code",
+        "🎯 Created marketing materials and social media content",
+        "📊 Analyzed data and provided detailed insights and recommendations",
+        "🎬 Produced video content with professional editing and effects",
+        "🔍 Conducted thorough research and compiled comprehensive findings",
+        "💡 Developed innovative solutions and creative concepts",
+        "⚡ Optimized performance and improved user experience"
+      ];
+      
+      const randomDeliverable = randomDeliverables[Math.floor(Math.random() * randomDeliverables.length)];
+      setTaskDeliverables(prev => ({ ...prev, [taskId]: randomDeliverable }));
+
       // Fund the escrow
       await handleFundEscrow(result.contractId, task.budget);
     } catch (error) {
@@ -403,7 +433,8 @@ export const MicroTaskMarketplaceDemo = () => {
       });
       return;
     }
-    if (!deliverable.trim()) return;
+    const deliverable = taskDeliverables[taskId];
+    if (!deliverable || !deliverable.trim()) return;
 
     try {
       const task = tasks.find(t => t.id === taskId);
@@ -435,7 +466,6 @@ export const MicroTaskMarketplaceDemo = () => {
       // Note: Milestone status change is handled by the escrow system
       // For demo purposes, we'll skip the milestone status change
       // as it requires real blockchain implementation
-      setDeliverable('');
     } catch (error) {
       console.error('Failed to submit deliverable:', error);
       addToast({
@@ -660,7 +690,8 @@ export const MicroTaskMarketplaceDemo = () => {
       budget: '',
       deadline: '',
     });
-    setDeliverable('');
+    // Clear all task deliverables
+    setTaskDeliverables({});
     setSelectedTask(null);
 
     // Reset all tasks to open status
@@ -676,6 +707,7 @@ export const MicroTaskMarketplaceDemo = () => {
     // Reset progress tracking
     setCompletedTasks(new Set());
     setPostedTasks(new Set());
+    setTaskDeliverables({});
 
     addToast({
       type: 'warning',
@@ -889,27 +921,47 @@ export const MicroTaskMarketplaceDemo = () => {
                   {/* Task Actions */}
                   <div className='space-y-2'>
                     {task.status === 'open' && (
-                      <button
-                        onClick={() => handleAcceptTask(task.id)}
-                        disabled={!isConnected || taskLoadingStates[task.id]}
-                        className='w-full px-4 py-2 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors'
+                      <Tooltip
+                        content={
+                          (!isConnected || taskLoadingStates[task.id]) ? (
+                            !isConnected ? (
+                              <div className='text-center'>
+                                <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                                <div className='text-xs text-gray-300'>
+                                  Please connect your wallet to accept tasks
+                                </div>
+                              </div>
+                            ) : (
+                              <div className='text-center'>
+                                <div className='text-blue-300 font-semibold mb-1'>⏳ Processing...</div>
+                                <div className='text-xs text-gray-300'>
+                                  Please wait for the current operation to complete
+                                </div>
+                              </div>
+                            )
+                          ) : null
+                        }
+                        position='top'
                       >
-                        {taskLoadingStates[task.id] ? 'Accepting...' : 'Accept Task'}
-                      </button>
+                        <button
+                          onClick={() => handleAcceptTask(task.id)}
+                          disabled={!isConnected || taskLoadingStates[task.id]}
+                          className='w-full px-4 py-2 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors'
+                        >
+                          {taskLoadingStates[task.id] ? 'Accepting...' : 'Accept Task'}
+                        </button>
+                      </Tooltip>
                     )}
 
                     {task.status === 'in-progress' && task.worker === walletData?.publicKey && (
                       <div className='space-y-2'>
-                        <input
-                          type='text'
-                          value={deliverable}
-                          onChange={e => setDeliverable(e.target.value)}
-                          placeholder='Submit your deliverable...'
-                          className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-accent-400/50'
-                        />
+                        <div className='p-3 bg-white/5 rounded-lg'>
+                          <p className='text-sm text-white/70 mb-2'>Deliverable Ready:</p>
+                          <p className='text-white text-sm'>{taskDeliverables[task.id] || 'Preparing deliverable...'}</p>
+                        </div>
                         <button
                           onClick={() => handleSubmitDeliverable(task.id)}
-                          disabled={!deliverable.trim() || taskLoadingStates[task.id]}
+                          disabled={!taskDeliverables[task.id] || taskLoadingStates[task.id]}
                           className='w-full px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors'
                         >
                           {taskLoadingStates[task.id] ? 'Submitting...' : 'Submit Deliverable'}
@@ -1025,7 +1077,23 @@ export const MicroTaskMarketplaceDemo = () => {
         {/* Post Task Tab */}
         {activeTab === 'post-task' && (
           <div className='max-w-2xl mx-auto'>
-            <h3 className='text-lg font-semibold text-white mb-6'>Post New Task</h3>
+            <div className='flex items-center justify-between mb-6'>
+              <h3 className='text-lg font-semibold text-white'>Post New Task</h3>
+              <button
+                onClick={() => {
+                  setNewTask({
+                    title: 'Design a modern landing page',
+                    description: 'Create a responsive landing page with modern UI/UX design, including hero section, features showcase, and contact form. Must be mobile-friendly and optimized for conversion.',
+                    category: 'design',
+                    budget: '150.0',
+                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+                  });
+                }}
+                className='px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors text-sm font-medium'
+              >
+                📝 Fill Template Data
+              </button>
+            </div>
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-white/80 mb-2'>Task Title</label>
@@ -1057,9 +1125,9 @@ export const MicroTaskMarketplaceDemo = () => {
                     onChange={e => setNewTask({ ...newTask, category: e.target.value })}
                     className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-accent-400/50'
                   >
-                    <option value=''>Select category</option>
+                    <option value='' className='text-black'>Select category</option>
                     {categories.map(category => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category.id} value={category.id} className='text-black'>
                         {category.icon} {category.name}
                       </option>
                     ))}
@@ -1093,20 +1161,48 @@ export const MicroTaskMarketplaceDemo = () => {
                 />
               </div>
 
-              <button
-                onClick={handlePostTask}
-                disabled={
-                  !isConnected ||
+              <Tooltip
+                content={
+                  (!isConnected ||
                   !newTask.title ||
                   !newTask.description ||
                   !newTask.category ||
                   !newTask.budget ||
-                  !newTask.deadline
+                  !newTask.deadline) ? (
+                    !isConnected ? (
+                      <div className='text-center'>
+                        <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                        <div className='text-xs text-gray-300'>
+                          Please connect your wallet to post tasks
+                        </div>
+                      </div>
+                    ) : (
+                      <div className='text-center'>
+                        <div className='text-yellow-300 font-semibold mb-1'>📝 Complete All Fields</div>
+                        <div className='text-xs text-gray-300'>
+                          Please fill in all required fields to post a task
+                        </div>
+                      </div>
+                    )
+                  ) : null
                 }
-                className='w-full px-6 py-3 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                position='top'
               >
-                Post Task
-              </button>
+                <button
+                  onClick={handlePostTask}
+                  disabled={
+                    !isConnected ||
+                    !newTask.title ||
+                    !newTask.description ||
+                    !newTask.category ||
+                    !newTask.budget ||
+                    !newTask.deadline
+                  }
+                  className='w-full px-6 py-3 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 rounded-lg text-accent-300 hover:text-accent-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  Post Task
+                </button>
+              </Tooltip>
             </div>
           </div>
         )}

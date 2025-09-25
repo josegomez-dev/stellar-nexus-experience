@@ -10,11 +10,6 @@ export const DEMO_CONFIG = [
     description: 'Basic Escrow Flow Demo',
   },
   {
-    id: 'milestone-voting',
-    name: 'Democracy in Action',
-    description: 'Multi-Stakeholder Approval System',
-  },
-  {
     id: 'dispute-resolution',
     name: 'Drama Queen Escrow',
     description: 'Dispute Resolution & Arbitration',

@@ -18,6 +18,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
+import { Tooltip } from '@/components/ui/Tooltip';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 
@@ -68,6 +69,9 @@ export const DisputeResolutionDemo = () => {
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Demo completion tracking
+  const [demoStartTime, setDemoStartTime] = useState<number>(Date.now());
 
   // Mock hooks
   const mockHooks = {
@@ -136,9 +140,13 @@ export const DisputeResolutionDemo = () => {
       const completeDemo = async () => {
         try {
           const score = 95; // High score for completing dispute resolution
+          const completionTime = Math.floor((Date.now() - demoStartTime) / 1000); // Calculate completion time in seconds
 
           // Use the centralized account system for completion
           await completeDemoInAccount('dispute-resolution', score);
+
+          // Mark demo as complete in Firebase stats
+          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTime);
 
           console.log('✅ Dispute Resolution Demo completed successfully');
         } catch (error) {
@@ -162,7 +170,7 @@ export const DisputeResolutionDemo = () => {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [milestones, completeDemoInAccount, walletData, addToast, isCompleted]);
+  }, [milestones, walletData, isCompleted]); // Removed function dependencies to prevent infinite loops
 
   async function handleInitializeEscrow() {
     if (!walletData) {
@@ -909,15 +917,38 @@ export const DisputeResolutionDemo = () => {
                 </div>
               </div>
               <div className='mt-6 text-center'>
-                <button
-                  onClick={handleInitializeEscrow}
-                  disabled={!isConnected || hooks.initializeEscrow.isLoading}
-                  className='px-8 py-3 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                <Tooltip
+                  content={
+                    (!isConnected || hooks.initializeEscrow.isLoading) ? (
+                      !isConnected ? (
+                        <div className='text-center'>
+                          <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                          <div className='text-xs text-gray-300'>
+                            Please connect your wallet to execute this demo step
+                          </div>
+                        </div>
+                      ) : (
+                        <div className='text-center'>
+                          <div className='text-yellow-300 font-semibold mb-1'>🌐 Switch to Testnet</div>
+                          <div className='text-xs text-gray-300'>
+                            Please choose "Testnet" in the navbar to run demo execute tests
+                          </div>
+                        </div>
+                      )
+                    ) : null
+                  }
+                  position='top'
                 >
-                  {hooks.initializeEscrow.isLoading
-                    ? 'Initializing...'
-                    : 'Initialize Dispute Resolution Escrow'}
-                </button>
+                  <button
+                    onClick={handleInitializeEscrow}
+                    disabled={!isConnected || hooks.initializeEscrow.isLoading}
+                    className='px-8 py-3 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {hooks.initializeEscrow.isLoading
+                      ? 'Initializing...'
+                      : 'Initialize Dispute Resolution Escrow'}
+                  </button>
+                </Tooltip>
               </div>
             </div>
           )}
@@ -1187,22 +1218,45 @@ export const DisputeResolutionDemo = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handleReleaseAllFunds}
-                disabled={!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)}
-                className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 ${
-                  canReleaseAllFunds()
-                    ? 'bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white border-warning-400 hover:border-warning-300 hover:scale-105 hover:shadow-warning-500/50'
-                    : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
-                }`}
-              >
-                {Object.values(milestoneLoadingStates).some(loading => loading) 
-                  ? 'Releasing All Funds...' 
-                  : canReleaseAllFunds() 
-                    ? '🚀 Release All Funds' 
-                    : '⏳ Complete All Milestones First'
+              <Tooltip
+                content={
+                  (!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)) ? (
+                    Object.values(milestoneLoadingStates).some(loading => loading) ? (
+                      <div className='text-center'>
+                        <div className='text-blue-300 font-semibold mb-1'>⏳ Processing...</div>
+                        <div className='text-xs text-gray-300'>
+                          Please wait for the current operation to complete
+                        </div>
+                      </div>
+                    ) : (
+                      <div className='text-center'>
+                        <div className='text-gray-300 font-semibold mb-1'>⏳ Complete All Milestones First</div>
+                        <div className='text-xs text-gray-300'>
+                          All milestones must be completed before releasing funds
+                        </div>
+                      </div>
+                    )
+                  ) : null
                 }
-              </button>
+                position='top'
+              >
+                <button
+                  onClick={handleReleaseAllFunds}
+                  disabled={!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)}
+                  className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 ${
+                    canReleaseAllFunds()
+                      ? 'bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white border-warning-400 hover:border-warning-300 hover:scale-105 hover:shadow-warning-500/50'
+                      : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                  }`}
+                >
+                  {Object.values(milestoneLoadingStates).some(loading => loading) 
+                    ? 'Releasing All Funds...' 
+                    : canReleaseAllFunds() 
+                      ? '🚀 Release All Funds' 
+                      : '⏳ Complete All Milestones First'
+                  }
+                </button>
+              </Tooltip>
             </div>
           )}
 

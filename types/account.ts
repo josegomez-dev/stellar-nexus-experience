@@ -65,7 +65,7 @@ export interface UserAccount {
     demo3: DemoProgress;
     'dispute-resolution': DemoProgress;
     demo4: DemoProgress;
-    'micro-task-marketplace': DemoProgress;
+    'micro-marketplace': DemoProgress;
   };
 
   // Rewards and badges

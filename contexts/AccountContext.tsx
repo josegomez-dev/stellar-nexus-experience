@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { UserAccount, PointsTransaction } from '@/types/account';
 import { accountService } from '@/lib/account-service';
 import { useGlobalWallet } from './WalletContext';
@@ -46,6 +46,9 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pointsTransactions, setPointsTransactions] = useState<PointsTransaction[]>([]);
+
+  // Track demo completions in progress to prevent duplicates
+  const completionInProgress = useRef(new Set<string>()).current;
 
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
@@ -203,16 +206,16 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       addToast({
         type: 'success',
         title: '🎉 Account Created!',
-        message: 'Welcome to Trustless Work! You earned 150 points and the Trust Guardian badge!',
+        message: 'Welcome to Trustless Work! You earned 150 points and the Welcome Explorer badge!',
         duration: 5000,
       });
 
-      // Show epic badge animation for Trust Guardian badge (client-side only)
+      // Show epic badge animation for Welcome Explorer badge (client-side only)
       if (typeof window !== 'undefined') {
         setTimeout(() => {
-          const trustGuardianBadge = getAllBadges().find(badge => badge.name === 'Trust Guardian');
-          if (trustGuardianBadge) {
-            showBadgeAnimation(trustGuardianBadge, 50);
+          const welcomeExplorerBadge = getAllBadges().find(badge => badge.name === 'Welcome Explorer');
+          if (welcomeExplorerBadge) {
+            showBadgeAnimation(welcomeExplorerBadge, 50);
           }
         }, 1000);
       }
@@ -307,6 +310,15 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   const completeDemo = async (demoId: string, score: number) => {
     if (!account) throw new Error('No account found');
 
+    // Prevent multiple simultaneous completions of the same demo
+    const completionKey = `${account.id}-${demoId}`;
+    if (completionInProgress.has(completionKey)) {
+      console.log(`⚠️ Demo ${demoId} completion already in progress, skipping...`);
+      return;
+    }
+    
+    completionInProgress.add(completionKey);
+
     try {
       console.log(`Completing demo: ${demoId}`, {
         accountId: account.id.substring(0, 8) + '...',
@@ -398,6 +410,9 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         duration: 5000,
       });
       throw err;
+    } finally {
+      // Clean up completion tracking
+      completionInProgress.delete(completionKey);
     }
   };
 

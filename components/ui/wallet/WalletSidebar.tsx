@@ -315,6 +315,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         if (!isExpanded) {
                           setIsExpanded(true); // Auto-expand if collapsed
                         }
+                        // Auto-close sidebar after successful connection
+                        setTimeout(() => {
+                          onToggle();
+                        }, 1500);
                       } finally {
                         setIsConnecting(false);
                       }
@@ -343,6 +347,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         if (!isExpanded) {
                           setIsExpanded(true);
                         }
+                        // Auto-close sidebar after successful connection
+                        setTimeout(() => {
+                          onToggle();
+                        }, 1500);
                       } catch (error) {
                         console.log('Freighter connection failed, opening manual input');
                         // If Freighter fails, just expand for manual input
@@ -488,6 +496,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                             message: 'Successfully connected to manual Stellar address',
                             duration: 4000,
                           });
+                          // Auto-close sidebar after successful manual connection
+                          setTimeout(() => {
+                            onToggle();
+                          }, 1500);
                         } catch (error) {
                           addToast({
                             type: 'error',
@@ -578,17 +590,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               <br />
               {/* Web3 Help Button */}
               {isExpanded && !isFreighterAvailable && (
-                <div className='space-y-2'>
-                  <button
-                    onClick={() => setShowFreighterGuide(true)}
-                    className='w-full p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 text-orange-200 rounded-lg transition-all duration-300 hover:from-orange-500/30 hover:to-red-500/30 hover:border-orange-400/50'
-                  >
-                    <div className='flex items-center justify-center space-x-2'>
-                      <span className='text-lg'>🔗</span>
-                      <span className='text-sm font-medium'>Install Freighter Wallet</span>
-                    </div>
-                  </button>
-
+                <div className='space-y-2'>                 
                   <button
                     onClick={() => setShowWeb3Modal(true)}
                     className='w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
@@ -1002,6 +1004,10 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         try {
                           if (isFreighterAvailable) {
                             await connect(); // Connect to Freighter
+                            // Auto-close sidebar after successful connection
+                            setTimeout(() => {
+                              onToggle();
+                            }, 1500);
                           } else {
                             // Just open sidebar for manual input
                             console.log(

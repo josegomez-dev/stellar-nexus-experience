@@ -118,8 +118,8 @@ export class AccountService {
           attempts: 0,
           pointsEarned: 0,
         },
-        'micro-task-marketplace': {
-          demoId: 'micro-task-marketplace',
+        'micro-marketplace': {
+          demoId: 'micro-marketplace',
           demoName: 'Gig Economy Madness',
           status: 'locked',
           attempts: 0,
@@ -311,7 +311,7 @@ export class AccountService {
       'hello-milestone': 'Baby Steps to Riches',
       'milestone-voting': 'Democracy in Action',
       'dispute-resolution': 'Drama Queen Escrow',
-      'micro-task-marketplace': 'Gig Economy Madness',
+      'micro-marketplace': 'Gig Economy Madness',
       'demo1': 'Baby Steps to Riches',
       'demo2': 'Democracy in Action',
       'demo3': 'Drama Queen Escrow',
@@ -334,7 +334,7 @@ export class AccountService {
       demo3: 200,
       'dispute-resolution': 200,
       demo4: 250,
-      'micro-task-marketplace': 250,
+      'micro-marketplace': 250,
     };
 
     const base = basePoints[demoId as keyof typeof basePoints] || 100;
@@ -408,8 +408,7 @@ export class AccountService {
     // Award badges based on specific demo completions
     await this.awardDemoBadge(accountId, demoId, earnedBadgeNames);
 
-    // Check for Nexus Master badge (completing demos 1, 3, and 4)
-    await this.checkNexusMasterBadge(accountId, earnedBadgeNames);
+    // Note: Nexus Master badge is now claimed manually by user action, not automatically
   }
 
   // Award badge for specific demo completion
@@ -425,30 +424,11 @@ export class AccountService {
 
     let badgeId: string | null = null;
 
-    // Map demo IDs to badge IDs based on user requirements:
-    // Demo 1 (Micro Task Marketplace) → Escrow Expert
-    // Demo 3 (Dispute Resolution) → Trust Guardian
-    // Demo 4 (Micro Task Marketplace) → Stellar Champion
+    // Map demo IDs to badge IDs based on current demo configuration:
+    // Demo 1 (Baby Steps to Riches) → Escrow Expert
+    // Demo 2 (Drama Queen Escrow) → Trust Guardian  
+    // Demo 3 (Gig Economy Madness) → Stellar Champion
     switch (demoId) {
-      case 'micro-marketplace':
-        badgeId = 'stellar-champion';
-        console.log(`✅ Micro marketplace demo completed - awarding stellar-champion badge`);
-        break;
-      case 'micro-task-marketplace': {
-        // This could be demo 1 or demo 4, we need to check which one
-        const accountDoc = await getDoc(doc(db, 'accounts', accountId));
-        const account = accountDoc.data() as UserAccount;
-
-        // If demo1 is completed, this is demo 1 (Escrow Expert)
-        if (account.demos.demo1?.status === 'completed') {
-          badgeId = 'escrow-expert';
-        }
-        // If demo4 is completed, this is demo 4 (Stellar Champion)
-        else if (account.demos.demo4?.status === 'completed') {
-          badgeId = 'stellar-champion';
-        }
-        break;
-      }
       case 'hello-milestone':
         badgeId = 'escrow-expert';
         console.log(`✅ Hello milestone demo completed - awarding escrow-expert badge`);
@@ -457,8 +437,14 @@ export class AccountService {
         badgeId = 'trust-guardian';
         console.log(`✅ Dispute resolution demo completed - awarding trust-guardian badge`);
         break;
+      case 'micro-marketplace':
+        badgeId = 'stellar-champion';
+        console.log(`✅ Micro marketplace demo completed - awarding stellar-champion badge`);
+        break;
+      // Legacy demo IDs (keeping for backward compatibility)
       case 'demo1':
         badgeId = 'escrow-expert';
+        console.log(`✅ Demo 1 completed - awarding escrow-expert badge`);
         break;
       case 'demo3':
         badgeId = 'trust-guardian';
@@ -466,6 +452,7 @@ export class AccountService {
         break;
       case 'demo4':
         badgeId = 'stellar-champion';
+        console.log(`✅ Demo 4 completed - awarding stellar-champion badge`);
         break;
     }
 
@@ -531,18 +518,18 @@ export class AccountService {
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
 
-    // Check if demos 1, 3, and 4 are completed
-    const demo1Completed =
-      account.demos.demo1?.status === 'completed' ||
-      account.demos['micro-task-marketplace']?.status === 'completed';
-    const demo3Completed =
-      account.demos.demo3?.status === 'completed' ||
-      account.demos['dispute-resolution']?.status === 'completed';
-    const demo4Completed =
-      account.demos.demo4?.status === 'completed' ||
-      account.demos['micro-task-marketplace']?.status === 'completed';
+    // Check if all 3 main demos are completed (current configuration)
+    const demo1Completed = account.demos['hello-milestone']?.status === 'completed';
+    const demo2Completed = account.demos['dispute-resolution']?.status === 'completed';
+    const demo3Completed = account.demos['micro-marketplace']?.status === 'completed';
 
-    const hasRequiredDemos = demo1Completed && demo3Completed && demo4Completed;
+    // Also check legacy demo IDs for backward compatibility
+    const legacyDemo1Completed = account.demos.demo1?.status === 'completed';
+    const legacyDemo3Completed = account.demos.demo3?.status === 'completed';
+    const legacyDemo4Completed = account.demos.demo4?.status === 'completed';
+
+    const hasRequiredDemos = (demo1Completed && demo2Completed && demo3Completed) ||
+                            (legacyDemo1Completed && legacyDemo3Completed && legacyDemo4Completed);
 
     if (hasRequiredDemos && !earnedBadgeNames.includes('Nexus Master')) {
       const nexusBadgeConfig = getBadgeById('nexus-master');
@@ -557,7 +544,7 @@ export class AccountService {
           pointsValue: nexusBadgeConfig.xpReward,
         };
 
-        console.log(`👑 Awarding Nexus Master badge! Completed demos 1, 3, and 4.`);
+        console.log(`👑 Awarding Nexus Master badge! Completed all 3 main demos.`);
         await this.awardBadge(accountId, badge);
       }
     }
@@ -583,9 +570,9 @@ export class AccountService {
 
     const earnedBadgeNames = account.badges.map(b => b.name);
 
-    // Check if all 4 demos are completed
+    // Check if all 3 demos are completed
     const mainDemoProgress = this.getMainDemoCompletionCount(account);
-    const allDemosCompleted = mainDemoProgress.completed === 4;
+    const allDemosCompleted = mainDemoProgress.completed === 3;
 
     // TODO: Add invite friend check when invite system is implemented
     const hasInvitedFriend = true; // For now, award when all demos are completed
@@ -720,13 +707,12 @@ export class AccountService {
     });
   }
 
-  // Get main demo completion count (only the 4 main demos)
+  // Get main demo completion count (only the 3 available demos)
   getMainDemoCompletionCount(account: UserAccount): { completed: number; total: number } {
     const mainDemos = [
       'hello-milestone',
-      'milestone-voting',
       'dispute-resolution',
-      'micro-task-marketplace',
+      'micro-marketplace',
     ];
 
     const completedCount = mainDemos.filter(
@@ -735,7 +721,7 @@ export class AccountService {
 
     return {
       completed: completedCount,
-      total: 4,
+      total: 3,
     };
   }
 }

@@ -13,6 +13,7 @@ import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHi
 import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { userTrackingService } from '@/lib/user-tracking-service';
 import { DemoFeedback } from '@/lib/firebase-types';
 import Image from 'next/image';
@@ -1751,18 +1752,47 @@ export const HelloMilestoneDemo = () => {
                   {step.details && <p className='text-xs text-white/50 mt-1'>{step.details}</p>}
                 </div>
                 {step.action && (
-                  <button
-                    onClick={step.action}
-                    disabled={step.disabled}
-                    className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
-                      step.disabled
-                        ? 'bg-neutral-500/20 text-neutral-400 cursor-not-allowed opacity-50'
-                        : step.status === 'current'
-                          ? 'bg-gradient-to-r from-brand-500/30 to-accent-500/30 hover:from-brand-500/40 hover:to-accent-500/40 border-2 border-brand-400/50 text-brand-200 hover:text-white shadow-lg shadow-brand-500/20'
-                          : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
-                    } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
-                    data-step-id={step.id}
+                  <Tooltip
+                    content={
+                      step.disabled ? (
+                        !isConnected ? (
+                          <div className='text-center'>
+                            <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                            <div className='text-xs text-gray-300'>
+                              Please connect your wallet to execute this demo step
+                            </div>
+                          </div>
+                        ) : networkValidation && !networkValidation.isValid ? (
+                          <div className='text-center'>
+                            <div className='text-yellow-300 font-semibold mb-1'>🌐 Switch to Testnet</div>
+                            <div className='text-xs text-gray-300'>
+                              Please choose "Testnet" in the navbar to run demo execute tests
+                            </div>
+                          </div>
+                        ) : (
+                          <div className='text-center'>
+                            <div className='text-gray-300 font-semibold mb-1'>⏳ Complete Previous Step</div>
+                            <div className='text-xs text-gray-300'>
+                              Finish the previous step to unlock this action
+                            </div>
+                          </div>
+                        )
+                      ) : null
+                    }
+                    position='top'
                   >
+                    <button
+                      onClick={step.action}
+                      disabled={step.disabled}
+                      className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
+                        step.disabled
+                          ? 'bg-neutral-500/20 text-neutral-400 cursor-not-allowed opacity-50'
+                          : step.status === 'current'
+                            ? 'bg-gradient-to-r from-brand-500/30 to-accent-500/30 hover:from-brand-500/40 hover:to-accent-500/40 border-2 border-brand-400/50 text-brand-200 hover:text-white shadow-lg shadow-brand-500/20'
+                            : 'bg-brand-500/20 hover:bg-brand-500/30 border border-brand-400/30 text-brand-300 hover:text-brand-200'
+                      } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
+                      data-step-id={step.id}
+                    >
                     {/* Loading spinner or status icon */}
                     {(() => {
                       const isLoading =
@@ -1818,6 +1848,7 @@ export const HelloMilestoneDemo = () => {
                       })()}
                     </span>
                   </button>
+                  </Tooltip>
                 )}
               </div>
             ))}
@@ -1908,203 +1939,6 @@ export const HelloMilestoneDemo = () => {
           </div>
         )}
 
-        {/* Transaction History with Explorer Links */}
-        {Object.keys(transactionDetails).length > 0 && (
-          <div
-            className={`mb-8 p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/30 transition-all duration-500 ${
-              showTransactionTooltip
-                ? 'ring-4 ring-purple-400/50 shadow-2xl shadow-purple-500/20'
-                : ''
-            }`}
-          >
-            <h3 className='text-xl font-semibold text-white mb-4 flex items-center space-x-2'>
-              <span>🔍</span>
-              <span>Transaction History</span>
-              <span className='text-sm text-purple-300 bg-purple-500/20 px-2 py-1 rounded-full'>
-                Real Blockchain
-              </span>
-              {showTransactionTooltip && (
-                <div className='animate-pulse'>
-                  <span className='text-yellow-300'>👈 Click the explorer buttons!</span>
-                </div>
-              )}
-            </h3>
-
-            <div className='space-y-3'>
-              {Object.values(transactionDetails)
-                .sort((a, b) => a.timestamp - b.timestamp)
-                .map(tx => (
-                  <div key={tx.hash} className='bg-white/5 rounded-lg p-4 border border-white/10'>
-                    <div className='flex items-center justify-between mb-3'>
-                      <div className='flex items-center space-x-3'>
-                        <div
-                          className={`w-3 h-3 rounded-full ${
-                            transactionStatuses[tx.hash] === 'success'
-                              ? 'bg-green-400'
-                              : transactionStatuses[tx.hash] === 'failed'
-                                ? 'bg-red-400'
-                                : 'bg-yellow-400 animate-pulse'
-                          }`}
-                        ></div>
-                        <div>
-                          <div className='font-semibold text-white text-sm capitalize'>
-                            {tx.type.replace('_', ' ')} {tx.amount && `(${tx.amount})`}
-                          </div>
-                          <div className='text-xs text-white/60'>
-                            {new Date(tx.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          transactionStatuses[tx.hash] === 'success'
-                            ? 'bg-green-500/20 text-green-300'
-                            : transactionStatuses[tx.hash] === 'failed'
-                              ? 'bg-red-500/20 text-red-300'
-                              : 'bg-yellow-500/20 text-yellow-300'
-                        }`}
-                      >
-                        {transactionStatuses[tx.hash] === 'success'
-                          ? '✅ Confirmed'
-                          : transactionStatuses[tx.hash] === 'failed'
-                            ? '❌ Failed'
-                            : '⏳ Pending'}
-                      </div>
-                    </div>
-
-                    {/* Transaction Hash */}
-                    <div className='mb-3'>
-                      <div className='text-xs text-white/60 mb-1'>Transaction Hash</div>
-                      <div className='flex items-center justify-between bg-black/20 rounded p-2'>
-                        <code className='font-mono text-xs text-blue-200'>
-                          {!tx.hash.startsWith('mock_')
-                            ? `${tx.hash.slice(0, 16)}...${tx.hash.slice(-16)}`
-                            : tx.hash}
-                        </code>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(tx.hash);
-                            addToast({
-                              type: 'success',
-                              title: '📋 Hash Copied',
-                              message: 'Transaction hash copied to clipboard!',
-                              duration: 3000,
-                            });
-                          }}
-                          className='ml-2 px-2 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-xs hover:bg-blue-500/30 transition-all duration-300'
-                          title='Copy transaction hash'
-                        >
-                          📋
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Explorer Links - Only show for real transactions */}
-                    {!tx.hash.startsWith('mock_') && (
-                      <div className='flex space-x-2'>
-                        <button
-                          onClick={() => {
-                            if (tx.stellarExpertUrl) {
-                              window.open(tx.stellarExpertUrl, '_blank', 'noopener,noreferrer');
-                            }
-                            addToast({
-                              type: 'info',
-                              title: '🌐 Opening Stellar Expert',
-                              message: 'View transaction details on blockchain explorer',
-                              duration: 3000,
-                            });
-                            // Hide tooltip when user clicks explorer
-                            if (showTransactionTooltip) {
-                              setShowTransactionTooltip(false);
-                            }
-                          }}
-                          className={`px-3 py-2 border text-xs rounded transition-all duration-300 flex items-center space-x-1 ${
-                            showTransactionTooltip
-                              ? 'bg-purple-500/40 border-purple-300 text-purple-100 animate-pulse ring-2 ring-purple-400/50 shadow-lg shadow-purple-500/30'
-                              : 'bg-purple-500/20 border-purple-400/30 text-purple-200 hover:bg-purple-500/30'
-                          }`}
-                          title='View on Stellar Expert Explorer'
-                        >
-                          <span>🌐</span>
-                          <span>Stellar Expert</span>
-                          {showTransactionTooltip && <span className='animate-bounce'>👈</span>}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            const urls = createExplorerUrls(tx.hash);
-                            if (urls.horizonUrl) {
-                              window.open(urls.horizonUrl, '_blank', 'noopener,noreferrer');
-                            }
-                            addToast({
-                              type: 'info',
-                              title: '🔍 Opening Horizon API',
-                              message: 'View raw transaction data on Horizon',
-                              duration: 3000,
-                            });
-                            // Hide tooltip when user clicks explorer
-                            if (showTransactionTooltip) {
-                              setShowTransactionTooltip(false);
-                            }
-                          }}
-                          className={`px-3 py-2 border text-xs rounded transition-all duration-300 flex items-center space-x-1 ${
-                            showTransactionTooltip
-                              ? 'bg-blue-500/40 border-blue-300 text-blue-100 animate-pulse ring-2 ring-blue-400/50 shadow-lg shadow-blue-500/30'
-                              : 'bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30'
-                          }`}
-                          title='View on Horizon API'
-                        >
-                          <span>🔍</span>
-                          <span>Horizon API</span>
-                          {showTransactionTooltip && <span className='animate-bounce'>👈</span>}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Mock Transaction Notice */}
-                    {tx.hash.startsWith('mock_') && (
-                      <div className='mt-2 p-2 bg-yellow-500/10 border border-yellow-400/30 rounded text-xs text-yellow-300'>
-                        <span>🧪</span> This is a mock transaction for demonstration purposes.
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {/* Contract Information */}
-        {contractId && (
-          <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
-            <h3 className='text-xl font-semibold text-white mb-4'>Contract Information</h3>
-            <div className='grid md:grid-cols-2 gap-4 text-sm'>
-              <div>
-                <p className='text-white/70'>Contract ID:</p>
-                <p className='font-mono text-brand-300 bg-brand-900/30 px-2 py-1 rounded'>
-                  {contractId.slice(0, 20)}...
-                </p>
-              </div>
-              <div>
-                <p className='text-white/70'>Status:</p>
-                <p className='text-brand-300'>{escrowData?.status || 'Active'}</p>
-              </div>
-              <div>
-                <p className='text-white/70'>Amount:</p>
-                <p className='text-brand-300'>10 USDC</p>
-              </div>
-              <div>
-                <p className='text-white/70'>Milestone Status:</p>
-                <p
-                  className={`${milestoneStatus === 'completed' ? 'text-success-300' : 'text-warning-300'}`}
-                >
-                  {milestoneStatus === 'completed' ? 'Completed' : 'Pending'}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
           <div className='mb-8 p-4 bg-danger-500/20 border border-danger-400/30 rounded-lg'>
@@ -2157,105 +1991,6 @@ export const HelloMilestoneDemo = () => {
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
 
-        {/* Demo Instructions */}
-        <div className='mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg'>
-          <h3 className='text-lg font-semibold text-brand-300 mb-3'>
-            <TypeWriter
-              text='📚 Baby Steps to Riches - Enhanced Demo Guide'
-              speed={40}
-              className='text-lg font-semibold text-brand-300'
-              showCursor={false}
-            />
-          </h3>
-
-          {/* Real vs Mock Mode Explanation */}
-          <div className='grid md:grid-cols-2 gap-4 mb-4'>
-            <div className='p-4 bg-green-500/10 border border-green-400/30 rounded-lg'>
-              <h4 className='font-semibold text-green-300 mb-2'>🔗 Real Blockchain Mode</h4>
-              <ul className='text-green-200 text-xs space-y-1'>
-                <li>• Creates actual Stellar smart contracts</li>
-                <li>• Uses real USDC on Testnet</li>
-                <li>• Requires Freighter wallet signatures</li>
-                <li>• Shows real transaction hashes</li>
-                <li>• Costs small XLM fees</li>
-              </ul>
-            </div>
-            <div className='p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg'>
-              <h4 className='font-semibold text-yellow-300 mb-2'>🧪 Mock Demo Mode</h4>
-              <ul className='text-yellow-200 text-xs space-y-1'>
-                <li>• Safe simulation for learning</li>
-                <li>• No real blockchain interaction</li>
-                <li>• No wallet fees required</li>
-                <li>• Perfect for first-time users</li>
-                <li>• Identical user experience</li>
-              </ul>
-            </div>
-          </div>
-
-          <h4 className='font-semibold text-brand-300 mb-2'>🚀 Enhanced Features</h4>
-          <ul className='text-brand-200 text-sm space-y-2 mb-4'>
-            <li>
-              • <strong>Real Trustless Work Integration:</strong> Actually creates escrow contracts
-              using Trustless Work smart contracts
-            </li>
-            <li>
-              • <strong>Animated Process Explanations:</strong> Typewriter animations explain what's
-              happening at each step
-            </li>
-            <li>
-              • <strong>Testnet Validation:</strong> Ensures your wallet is connected to the correct
-              network
-            </li>
-            <li>
-              • <strong>Enhanced Transaction History:</strong> Real transaction hashes and
-              blockchain confirmations
-            </li>
-            <li>
-              • <strong>Interactive Wallet Integration:</strong> Prompts Freighter wallet for real
-              signatures
-            </li>
-          </ul>
-
-          <h4 className='font-semibold text-brand-300 mb-2'>📋 Step-by-Step Process</h4>
-          <ul className='text-brand-200 text-sm space-y-2'>
-            <li>
-              • <strong>Initialize:</strong> Deploy smart contract with escrow logic and 10 USDC
-              capacity
-            </li>
-            <li>
-              • <strong>Fund:</strong> Transfer USDC tokens from your wallet to the smart contract
-            </li>
-            <li>
-              • <strong>Complete:</strong> Worker marks task as completed (simulated for demo)
-            </li>
-            <li>
-              • <strong>Approve:</strong> Client reviews and approves the work quality
-            </li>
-            <li>
-              • <strong>Release:</strong> Smart contract automatically sends funds to worker
-            </li>
-          </ul>
-
-          <div className='mt-4 p-4 bg-gradient-to-r from-brand-500/20 to-accent-500/20 rounded-lg border border-brand-400/30'>
-            <h4 className='font-semibold text-brand-200 mb-2'>🌟 What Makes This Special</h4>
-            <p className='text-brand-200 text-sm leading-relaxed'>
-              This is the world's first interactive demo that lets you experience{' '}
-              <strong>real trustless work</strong> on the blockchain. Unlike traditional escrows
-              that require third-party intermediaries, our smart contracts handle everything
-              automatically. Once conditions are met, funds release instantly - no delays, no
-              disputes, no intermediaries!
-            </p>
-          </div>
-
-          <div className='mt-4 p-3 bg-white/5 rounded-lg border border-white/10'>
-            <p className='text-xs text-white/60'>
-              💡 <strong>Pro Tips:</strong>• Switch between Real and Mock modes to compare
-              experiences • Watch the process explanations to understand blockchain mechanics •
-              Check your wallet sidebar (🔐) for real transaction confirmations • Try both modes to
-              see the difference between simulation and reality!
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Feedback Modal */}

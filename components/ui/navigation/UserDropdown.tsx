@@ -74,7 +74,7 @@ export const UserDropdown = () => {
     if (!walletData?.publicKey) {
       addToast({
         type: 'error',
-        title: '❌ No Wallet Connected',
+        title: 'No Wallet Connected',
         message: 'Please connect your wallet first',
         duration: 3000,
       });
@@ -243,19 +243,21 @@ export const UserDropdown = () => {
                   <span>Analytics</span>
                 </a>
 
+                <hr />
+
                 <button
-                  disabled
-                  className='w-full flex items-center justify-between px-3 py-2 text-gray-400 cursor-not-allowed rounded-lg transition-colors duration-200 text-sm relative'
-                  title='Leaderboard coming soon!'
+                  onClick={() => {
+                    // Dispatch custom event to open rewards sidebar
+                    window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
+                    setIsOpen(false);
+                  }}
+                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
                 >
-                  <div className='flex items-center space-x-3'>
-                    <span className='text-lg'>🏆</span>
-                    <span>Leaderboard</span>
-                  </div>
-                  <span className='text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full font-medium'>
-                    Coming Soon
-                  </span>
+                  <span className='text-lg'>🎮</span>
+                  <span>Rewards & Progress</span>
                 </button>
+
+                <hr />
 
                 <button
                   onClick={handleDisconnect}

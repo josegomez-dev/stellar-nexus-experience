@@ -64,7 +64,7 @@ export interface Badge {
   name: string;
   description: string;
   icon: string;
-  category: 'demo' | 'achievement' | 'social' | 'special';
+  category: 'demo' | 'achievement' | 'social' | 'special' | 'main_achievement';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   requirements: BadgeRequirement[];
   xpReward: number;

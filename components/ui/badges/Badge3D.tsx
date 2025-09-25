@@ -139,6 +139,21 @@ const BadgeEmblem: React.FC<{ id: string; size?: 'sm' | 'md' | 'lg' }> = ({ id, 
           <path d='M32 18v20M22 28h20' stroke='#f59e0b' strokeWidth='3' />
         </svg>
       );
+    case 'nexus-master':
+      return (
+        <svg viewBox='0 0 64 64' className={sizeClass}>
+          <defs>
+            <linearGradient id={`g7-${id}`} x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#10b981' />
+              <stop offset='100%' stopColor='#059669' />
+            </linearGradient>
+          </defs>
+          <circle cx='32' cy='32' r='28' fill={`url(#g7-${id})`} opacity='0.9' />
+          <circle cx='32' cy='32' r='20' fill='#ffffff' opacity='0.1' />
+          <path d='M32 8l6 18 18 6-18 6-6 18-6-18-18-6 18-6 6-18z' fill='#ffffff' opacity='0.9' />
+          <circle cx='32' cy='32' r='4' fill='#ffffff' opacity='0.8' />
+        </svg>
+      );
     default:
       return (
         <div
@@ -162,32 +177,38 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
     BADGE_RARITY[badge.rarity as keyof typeof BADGE_RARITY] || BADGE_RARITY.common;
   const { ref, transform, onMouseLeave, onMouseMove } = useTilt();
 
-  // Create the required styling variables from BADGE_RARITY
-  const getRarityStyles = (rarity: string) => {
-    switch (rarity) {
-      case 'common':
+  // Create custom badge-specific colors
+  const getBadgeStyles = (badgeId: string) => {
+    switch (badgeId) {
+      case 'welcome_explorer':
         return {
           ring: 'from-gray-400 to-gray-600',
           glow: 'shadow-gray-400/20',
           text: 'text-gray-400',
         };
-      case 'rare':
+      case 'escrow-expert':
         return {
           ring: 'from-blue-400 to-blue-600',
           glow: 'shadow-blue-400/20',
           text: 'text-blue-400',
         };
-      case 'epic':
+      case 'trust-guardian':
         return {
-          ring: 'from-purple-400 to-purple-600',
-          glow: 'shadow-purple-400/20',
-          text: 'text-purple-400',
-        };
-      case 'legendary':
-        return {
-          ring: 'from-orange-400 to-orange-600',
+          ring: 'from-orange-400 to-yellow-500',
           glow: 'shadow-orange-400/20',
           text: 'text-orange-400',
+        };
+      case 'stellar-champion':
+        return {
+          ring: 'from-pink-400 to-rose-500',
+          glow: 'shadow-pink-400/20',
+          text: 'text-pink-400',
+        };
+      case 'nexus-master':
+        return {
+          ring: 'from-green-400 to-emerald-500',
+          glow: 'shadow-green-400/20',
+          text: 'text-green-400',
         };
       default:
         return {
@@ -198,7 +219,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
     }
   };
 
-  const { ring, glow, text } = getRarityStyles(badge.rarity);
+  const { ring, glow, text } = getBadgeStyles(badge.id);
   const rarityLabel = badge.rarity.toUpperCase();
 
   if (compact) {
