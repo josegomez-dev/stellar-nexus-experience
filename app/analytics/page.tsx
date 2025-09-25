@@ -379,36 +379,36 @@ export default function AnalyticsPage() {
 
                 <p className='text-gray-300 mb-3'>{feedback.feedback}</p>
 
-                  <div className='flex items-center justify-between text-xs text-gray-400'>
-                    <div className='flex items-center space-x-4'>
-                      <span>⏱️ {feedback.completionTime} min</span>
-                      <span>
-                        {feedback.wouldRecommend ? '👍 Recommends' : "👎 Doesn't recommend"}
-                      </span>
-                    </div>
-                    <div className='flex items-center space-x-2'>
-                      <span className='font-mono'>{feedback.userId.slice(0, 8)}...</span>
-                      <button
-                        onClick={() => copyToClipboard(feedback.userId)}
-                        className='p-1 hover:bg-white/10 rounded transition-colors duration-200 group'
-                        title='Copy wallet address'
-                      >
-                        <svg
-                          className='w-3 h-3 text-gray-400 group-hover:text-white transition-colors duration-200'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                <div className='flex items-center justify-between text-xs text-gray-400'>
+                  <div className='flex items-center space-x-4'>
+                    <span>⏱️ {feedback.completionTime} min</span>
+                    <span>
+                      {feedback.wouldRecommend ? '👍 Recommends' : "👎 Doesn't recommend"}
+                    </span>
                   </div>
+                  <div className='flex items-center space-x-2'>
+                    <span className='font-mono'>{feedback.userId.slice(0, 8)}...</span>
+                    <button
+                      onClick={() => copyToClipboard(feedback.userId)}
+                      className='p-1 hover:bg-white/10 rounded transition-colors duration-200 group'
+                      title='Copy wallet address'
+                    >
+                      <svg
+                        className='w-3 h-3 text-gray-400 group-hover:text-white transition-colors duration-200'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
 
                 {feedback.mostHelpfulFeature && (
                   <div className='mt-2 p-2 bg-green-500/10 rounded border border-green-500/20'>
@@ -559,14 +559,19 @@ export default function AnalyticsPage() {
                   className='text-gray-400 hover:text-white transition-colors'
                 >
                   <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <p className='text-gray-300 mb-6'>
-                Help us continue building Stellar wallet integrations and Web3 education tools. 
-                Your support helps us maintain and improve the platform!
+                Help us continue building Stellar wallet integrations and Web3 education tools. Your
+                support helps us maintain and improve the platform!
               </p>
 
               <div className='space-y-4'>
@@ -635,7 +640,6 @@ export default function AnalyticsPage() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

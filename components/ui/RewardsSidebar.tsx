@@ -104,17 +104,20 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
             })
             .slice(0, 3)
             .map((badge: any) => (
-            <div key={badge.id} className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'>
-              <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
-                🏆
+              <div
+                key={badge.id}
+                className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'
+              >
+                <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
+                  🏆
+                </div>
+                <div className='flex-1'>
+                  <div className='text-sm font-medium text-white'>{badge.name}</div>
+                  <div className='text-xs text-gray-400'>{badge.description}</div>
+                </div>
+                <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
               </div>
-              <div className='flex-1'>
-                <div className='text-sm font-medium text-white'>{badge.name}</div>
-                <div className='text-xs text-gray-400'>{badge.description}</div>
-              </div>
-              <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
-            </div>
-          ))}
+            ))}
           {safeAccount.badges.length === 0 && (
             <div className='text-center text-gray-400 py-4'>Complete demos to earn badges!</div>
           )}
@@ -171,7 +174,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
           {/* Main Achievements Section */}
           <div className='space-y-3'>
-            <div 
+            <div
               className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
               onClick={() => setIsMainAchievementsCollapsed(!isMainAchievementsCollapsed)}
             >
@@ -219,7 +222,8 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
                 • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
               </div>
               <div>
-                • <span className='text-purple-300'>Complete Demos 1, 2, 3 + Claim Button</span> → Nexus Master
+                • <span className='text-purple-300'>Complete Demos 1, 2, 3 + Claim Button</span> →
+                Nexus Master
               </div>
             </div>
           </div>

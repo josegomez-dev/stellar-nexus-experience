@@ -519,78 +519,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </div>
                 )}
 
-                {/* Navigation Links */}
-                <div
-                  className={`${
-                    isExpanded ? 'grid grid-cols-2 gap-2' : 'flex flex-col space-y-1.5'
-                  }`}
-                >
-                  <Tooltip
-                    content={
-                      <div>
-                        <p className='text-white/90 text-sm font-medium'>Interactive Demo Suite</p>
-                        <p className='text-cyan-300 text-xs mt-1'>
-                          Experience trustless escrow workflows
-                        </p>
-                      </div>
-                    }
-                    position='bottom'
-                  >
-                    {isConnected ? (
-                      <a
-                        href='/'
-                        className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                        }`}
-                      >
-                        <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
-                      </a>
-                    ) : (
-                      <div
-                        className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
-                          isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                        }`}
-                        title='Connect wallet to access Demos'
-                      >
-                        <Image src='/images/icons/demos.png' alt='Demos' width={50} height={20} />
-                        <div className='absolute top-1 right-1'>
-                          <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>
-                            🔒
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </Tooltip>
-
-                  <Tooltip
-                    content={
-                      <div>
-                        <p className='text-white/90 text-sm font-medium'>Mini-Games Collection</p>
-                        <p className='text-purple-300 text-xs mt-1'>
-                          Learn Web3 through interactive games
-                        </p>
-                      </div>
-                    }
-                    position='bottom'
-                  >
-                    <button
-                      onClick={redirectToNexusStartersLiveApp}
-                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 relative flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                      title='Mini-Games Collection'
-                    >
-                      <Image src='/images/icons/console.png' alt='Store' width={50} height={20} />
-                    </button>
-                  </Tooltip>
-                </div>
               </div>
               <br />
               <hr />
               <br />
               {/* Web3 Help Button */}
               {isExpanded && !isFreighterAvailable && (
-                <div className='space-y-2'>                 
+                <div className='space-y-2'>
                   <button
                     onClick={() => setShowWeb3Modal(true)}
                     className='w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-200 rounded-lg transition-all duration-300 hover:from-blue-500/30 hover:to-purple-500/30 hover:border-blue-400/50'
@@ -693,89 +628,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               {/* Quick Actions */}
               <div className={`space-y-2 ${!isExpanded ? 'space-y-1.5' : ''}`}>
                 <button
-                  onClick={redirectToNexusStartersLiveApp}
-                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
-                    isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                  }`}
-                  title={!isExpanded ? 'Mini Games Store' : undefined}
-                >
-                  <span className='text-lg'>👨🏻‍💻</span>
-                  {isExpanded && <span className='animate-fadeIn'>Explore Nexus Starters</span>}
-                </button>
-
-                <button
-                  onClick={redirectToNexusStartersLiveApp}
-                  className={`w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center space-x-2 ${
-                    isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                  }`}
-                  title={!isExpanded ? 'Mini Games Store' : undefined}
-                >
-                  <span className='text-lg'>📚</span>
-                  {isExpanded && <span className='animate-fadeIn'>Nexus Documentation</span>}
-                </button>
-
-                {/* Navigation Links */}
-                <div
-                  className={`${
-                    isExpanded ? 'grid grid-cols-4 gap-2' : 'flex flex-col space-y-1.5'
-                  }`}
-                >
-                  {isConnected ? (
-                    <a
-                      href='/'
-                      className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                      title={!isExpanded ? 'Demos' : undefined}
-                    >
-                      <Image
-                        src='/images/icons/demos.png'
-                        alt='Demos'
-                        width={20}
-                        height={20}
-                        className='w-5 h-5'
-                      />
-                    </a>
-                  ) : (
-                    <div
-                      className={`bg-gray-500/30 border border-gray-400/30 text-gray-400 text-sm rounded-lg cursor-not-allowed blur-[1px] opacity-70 relative flex items-center justify-center ${
-                        isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                      }`}
-                      title={!isExpanded ? 'Connect wallet to access Demos' : undefined}
-                    >
-                      <Image
-                        src='/images/icons/demos.png'
-                        alt='Demos'
-                        width={20}
-                        height={20}
-                        className='w-5 h-5'
-                      />
-                      <div className='absolute top-1 right-1'>
-                        <span className='text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full'>
-                          🔒
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={redirectToNexusStartersLiveApp}
-                    className={`bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-lg transition-all duration-300 hover:border-white/40 relative flex items-center justify-center ${
-                      isExpanded ? 'px-3 py-2' : 'px-2 py-2'
-                    }`}
-                    title={!isExpanded ? 'Mini-Games Collection' : 'Mini-Games Collection'}
-                  >
-                    <Image
-                      src='/images/icons/console.png'
-                      alt='Console'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5'
-                    />
-                  </button>
-                </div>
-
-                <button
                   onClick={disconnect}
                   className={`w-full bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 text-sm rounded-lg transition-all duration-300 hover:border-red-400/50 flex items-center justify-center space-x-2 ${
                     isExpanded ? 'px-3 py-2' : 'px-2 py-2'
@@ -786,27 +638,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   {isExpanded && <span className='animate-fadeIn'>Disconnect</span>}
                 </button>
               </div>
-
-              {/* Demo Status - Only show when expanded */}
-              {isExpanded && (
-                <div className='p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn'>
-                  <h4 className='text-white font-medium text-sm mb-3'>Demo Status</h4>
-                  <div className='grid grid-cols-3 gap-2 text-xs'>
-                    <div className='text-center'>
-                      <div className='text-green-400 mb-1'>✅</div>
-                      <span className='text-white/60'>Ready</span>
-                    </div>
-                    <div className='text-center'>
-                      <div className='text-green-400 mb-1'>🛜</div>
-                      <span className='text-white/60'>Network</span>
-                    </div>
-                    <div className='text-center'>
-                      <div className='text-green-400 mb-1'>💳ve</div>
-                      <span className='text-white/60'>{transactions.length} TX</span>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Transaction History - Only show when expanded */}
               {isExpanded && transactions.length > 0 && (

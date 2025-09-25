@@ -20,7 +20,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
   demoName,
   completionTime,
 }) => {
-  const [rating, setRating] = useState<number>(5);
+  const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +39,11 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -101,6 +106,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
               ))}
             </div>
             <p className='text-xs text-gray-400 mt-2'>
+              {rating === 0 && 'Click a star to rate ⭐'}
               {rating === 1 && 'Needs work 😔'}
               {rating === 2 && 'Could be better 🤔'}
               {rating === 3 && 'Good 👍'}
@@ -161,7 +167,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
             <button
               type='submit'
-              disabled={isSubmitting}
+              disabled={isSubmitting || rating === 0}
               className='px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg hover:shadow-xl text-sm'
             >
               {isSubmitting ? 'Sending...' : 'Submit 🚀'}

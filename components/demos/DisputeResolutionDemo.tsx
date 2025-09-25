@@ -712,7 +712,7 @@ export const DisputeResolutionDemo = () => {
         message: 'Releasing all funds...',
         type: 'release',
         demoId: 'dispute-resolution',
-        amount: milestones.reduce((total, m) => total + (parseInt(m.amount) / 100000), 0).toFixed(1),
+        amount: milestones.reduce((total, m) => total + parseInt(m.amount) / 100000, 0).toFixed(1),
         asset: 'USDC',
       });
 
@@ -814,8 +814,7 @@ export const DisputeResolutionDemo = () => {
 
   const canReleaseAllFunds = () => {
     return (
-      milestones.every(m => m.status === 'approved') &&
-      !disputes.some(d => d.status === 'open')
+      milestones.every(m => m.status === 'approved') && !disputes.some(d => d.status === 'open')
     );
   };
 
@@ -919,17 +918,21 @@ export const DisputeResolutionDemo = () => {
               <div className='mt-6 text-center'>
                 <Tooltip
                   content={
-                    (!isConnected || hooks.initializeEscrow.isLoading) ? (
+                    !isConnected || hooks.initializeEscrow.isLoading ? (
                       !isConnected ? (
                         <div className='text-center'>
-                          <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                          <div className='text-red-300 font-semibold mb-1'>
+                            🔌 Wallet Not Connected
+                          </div>
                           <div className='text-xs text-gray-300'>
                             Please connect your wallet to execute this demo step
                           </div>
                         </div>
                       ) : (
                         <div className='text-center'>
-                          <div className='text-yellow-300 font-semibold mb-1'>🌐 Switch to Testnet</div>
+                          <div className='text-yellow-300 font-semibold mb-1'>
+                            🌐 Switch to Testnet
+                          </div>
                           <div className='text-xs text-gray-300'>
                             Please choose "Testnet" in the navbar to run demo execute tests
                           </div>
@@ -1057,7 +1060,6 @@ export const DisputeResolutionDemo = () => {
                             </button>
                           </div>
                         )}
-
                       </div>
                     </div>
 
@@ -1187,78 +1189,92 @@ export const DisputeResolutionDemo = () => {
           )}
 
           {/* Release All Funds Button */}
-          {contractId && escrowData?.metadata?.funded && !milestones.every(m => m.status === 'released') && (
-            <div className='mb-8 p-6 bg-gradient-to-r from-warning-500/20 to-warning-600/20 border border-warning-400/30 rounded-lg text-center'>
-              <h3 className='text-xl font-semibold text-warning-300 mb-4'>💰 Release All Funds</h3>
-              <p className='text-warning-200 mb-4'>
-                {canReleaseAllFunds() 
-                  ? 'All milestones have been approved and disputes resolved. Ready to release all funds!'
-                  : 'Complete all milestones and resolve any disputes to release funds.'
-                }
-              </p>
-              
-              {/* Milestone Status Summary */}
-              <div className='mb-4 p-4 bg-white/5 rounded-lg'>
-                <h4 className='text-sm font-semibold text-white mb-2'>Milestone Status:</h4>
-                <div className='grid grid-cols-2 gap-2 text-sm'>
-                  {milestones.map(milestone => (
-                    <div key={milestone.id} className='flex items-center justify-between'>
-                      <span className='text-white/70'>{milestone.title}</span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        milestone.status === 'approved' ? 'bg-green-500/20 text-green-300' :
-                        milestone.status === 'completed' ? 'bg-blue-500/20 text-blue-300' :
-                        milestone.status === 'pending' ? 'bg-gray-500/20 text-gray-300' :
-                        milestone.status === 'released' ? 'bg-purple-500/20 text-purple-300' :
-                        'bg-red-500/20 text-red-300'
-                      }`}>
-                        {milestone.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {contractId &&
+            escrowData?.metadata?.funded &&
+            !milestones.every(m => m.status === 'released') && (
+              <div className='mb-8 p-6 bg-gradient-to-r from-warning-500/20 to-warning-600/20 border border-warning-400/30 rounded-lg text-center'>
+                <h3 className='text-xl font-semibold text-warning-300 mb-4'>
+                  💰 Release All Funds
+                </h3>
+                <p className='text-warning-200 mb-4'>
+                  {canReleaseAllFunds()
+                    ? 'All milestones have been approved and disputes resolved. Ready to release all funds!'
+                    : 'Complete all milestones and resolve any disputes to release funds.'}
+                </p>
 
-              <Tooltip
-                content={
-                  (!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)) ? (
+                {/* Milestone Status Summary */}
+                <div className='mb-4 p-4 bg-white/5 rounded-lg'>
+                  <h4 className='text-sm font-semibold text-white mb-2'>Milestone Status:</h4>
+                  <div className='grid grid-cols-2 gap-2 text-sm'>
+                    {milestones.map(milestone => (
+                      <div key={milestone.id} className='flex items-center justify-between'>
+                        <span className='text-white/70'>{milestone.title}</span>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            milestone.status === 'approved'
+                              ? 'bg-green-500/20 text-green-300'
+                              : milestone.status === 'completed'
+                                ? 'bg-blue-500/20 text-blue-300'
+                                : milestone.status === 'pending'
+                                  ? 'bg-gray-500/20 text-gray-300'
+                                  : milestone.status === 'released'
+                                    ? 'bg-purple-500/20 text-purple-300'
+                                    : 'bg-red-500/20 text-red-300'
+                          }`}
+                        >
+                          {milestone.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Tooltip
+                  content={
+                    !canReleaseAllFunds() ||
                     Object.values(milestoneLoadingStates).some(loading => loading) ? (
-                      <div className='text-center'>
-                        <div className='text-blue-300 font-semibold mb-1'>⏳ Processing...</div>
-                        <div className='text-xs text-gray-300'>
-                          Please wait for the current operation to complete
+                      Object.values(milestoneLoadingStates).some(loading => loading) ? (
+                        <div className='text-center'>
+                          <div className='text-blue-300 font-semibold mb-1'>⏳ Processing...</div>
+                          <div className='text-xs text-gray-300'>
+                            Please wait for the current operation to complete
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className='text-center'>
-                        <div className='text-gray-300 font-semibold mb-1'>⏳ Complete All Milestones First</div>
-                        <div className='text-xs text-gray-300'>
-                          All milestones must be completed before releasing funds
+                      ) : (
+                        <div className='text-center'>
+                          <div className='text-gray-300 font-semibold mb-1'>
+                            ⏳ Complete All Milestones First
+                          </div>
+                          <div className='text-xs text-gray-300'>
+                            All milestones must be completed before releasing funds
+                          </div>
                         </div>
-                      </div>
-                    )
-                  ) : null
-                }
-                position='top'
-              >
-                <button
-                  onClick={handleReleaseAllFunds}
-                  disabled={!canReleaseAllFunds() || Object.values(milestoneLoadingStates).some(loading => loading)}
-                  className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 ${
-                    canReleaseAllFunds()
-                      ? 'bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white border-warning-400 hover:border-warning-300 hover:scale-105 hover:shadow-warning-500/50'
-                      : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
-                  }`}
-                >
-                  {Object.values(milestoneLoadingStates).some(loading => loading) 
-                    ? 'Releasing All Funds...' 
-                    : canReleaseAllFunds() 
-                      ? '🚀 Release All Funds' 
-                      : '⏳ Complete All Milestones First'
+                      )
+                    ) : null
                   }
-                </button>
-              </Tooltip>
-            </div>
-          )}
+                  position='top'
+                >
+                  <button
+                    onClick={handleReleaseAllFunds}
+                    disabled={
+                      !canReleaseAllFunds() ||
+                      Object.values(milestoneLoadingStates).some(loading => loading)
+                    }
+                    className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 ${
+                      canReleaseAllFunds()
+                        ? 'bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white border-warning-400 hover:border-warning-300 hover:scale-105 hover:shadow-warning-500/50'
+                        : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                    }`}
+                  >
+                    {Object.values(milestoneLoadingStates).some(loading => loading)
+                      ? 'Releasing All Funds...'
+                      : canReleaseAllFunds()
+                        ? '🚀 Release All Funds'
+                        : '⏳ Complete All Milestones First'}
+                  </button>
+                </Tooltip>
+              </div>
+            )}
 
           {/* Success Message - Demo Completion */}
           {milestones.every(m => m.status === 'released') && (

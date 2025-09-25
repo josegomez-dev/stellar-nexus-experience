@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
 import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
+import { getAllBadges } from '@/lib/badge-config';
 import Image from 'next/image';
 
 export const Header = () => {
@@ -15,6 +16,28 @@ export const Header = () => {
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
   const { isConnected } = useGlobalWallet();
   const { account, loading } = useAccount();
+
+  // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
+  const hasUnlockedMiniGames = () => {
+    if (!account) return false;
+
+    // Check if all 3 main demos are completed
+    const mainDemoIds = ['hello-milestone', 'dispute-resolution', 'micro-marketplace'];
+    const allDemosCompleted = mainDemoIds.every(
+      demoId => (account.demos as any)[demoId]?.completed === true
+    );
+
+    // Check if all 5 main achievement badges are earned
+    const allBadges = getAllBadges();
+    const mainAchievementBadges = allBadges.filter(badge => badge.category === 'main_achievement');
+    const allBadgesEarned = mainAchievementBadges.every(badge =>
+      account.badges.some(userBadge => userBadge.name === badge.name)
+    );
+
+    return allDemosCompleted && allBadgesEarned;
+  };
+
+  const miniGamesUnlocked = hasUnlockedMiniGames();
 
   // Listen for custom event to toggle rewards sidebar
   useEffect(() => {
@@ -63,19 +86,38 @@ export const Header = () => {
               />
               <span>Demos</span>
             </a>
-            <a
-              href='/mini-games'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            <Tooltip
+              content={
+                miniGamesUnlocked
+                  ? 'Explore the Nexus Web3 Playground'
+                  : 'Complete all 3 demos and earn all 5 main achievement badges to unlock the Nexus Web3 Playground'
+              }
             >
-              <Image
-                src='/images/icons/console.png'
-                alt='Nexus Web3 Playground'
-                width={20}
-                height={20}
-                className='w-5 h-5'
-              />
-              <span>Nexus Web3 Playground</span>
-            </a>
+              <a
+                href={miniGamesUnlocked ? '/mini-games' : '#'}
+                onClick={e => {
+                  if (!miniGamesUnlocked) {
+                    e.preventDefault();
+                  }
+                }}
+                className={`transition-colors flex items-center space-x-2 ${
+                  miniGamesUnlocked
+                    ? 'text-white/80 hover:text-white cursor-pointer'
+                    : 'text-white/40 cursor-not-allowed'
+                }`}
+              >
+                <Image
+                  src='/images/icons/console.png'
+                  alt='Nexus Web3 Playground'
+                  width={20}
+                  height={20}
+                  className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                />
+                <span>
+                  {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                </span>
+              </a>
+            </Tooltip>
           </nav>
 
           {/* Header Controls */}
@@ -164,22 +206,42 @@ export const Header = () => {
                 <span>Demos</span>
               </div>
             </a>
-            <a
-              href='/mini-games'
-              className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
-              onClick={() => setIsMenuOpen(false)}
+            <Tooltip
+              content={
+                miniGamesUnlocked
+                  ? 'Explore the Nexus Web3 Playground'
+                  : 'Complete all 3 demos and earn all 5 main achievement badges to unlock the Nexus Web3 Playground'
+              }
             >
-              <div className='flex items-center space-x-2'>
-                <Image
-                  src='/images/icons/console.png'
-                  alt='Nexus Web3 Playground'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5'
-                />
-                <span>Nexus Web3 Playground</span>
-              </div>
-            </a>
+              <a
+                href={miniGamesUnlocked ? '/mini-games' : '#'}
+                onClick={e => {
+                  if (!miniGamesUnlocked) {
+                    e.preventDefault();
+                  } else {
+                    setIsMenuOpen(false);
+                  }
+                }}
+                className={`block px-3 py-2 rounded-md transition-colors ${
+                  miniGamesUnlocked
+                    ? 'text-white/80 hover:text-white hover:bg-white/10'
+                    : 'text-white/40 cursor-not-allowed'
+                }`}
+              >
+                <div className='flex items-center space-x-2'>
+                  <Image
+                    src='/images/icons/console.png'
+                    alt='Nexus Web3 Playground'
+                    width={20}
+                    height={20}
+                    className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                  />
+                  <span>
+                    {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                  </span>
+                </div>
+              </a>
+            </Tooltip>
 
             <a
               href='/docs'

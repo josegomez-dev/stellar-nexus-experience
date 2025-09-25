@@ -174,7 +174,12 @@ export const HelloMilestoneDemo = () => {
     wouldRecommend?: boolean;
   }) => {
     try {
-      if (walletData?.publicKey && feedback.demoId && feedback.demoName && feedback.rating !== undefined) {
+      if (
+        walletData?.publicKey &&
+        feedback.demoId &&
+        feedback.demoName &&
+        feedback.rating !== undefined
+      ) {
         await userTrackingService.trackFeedbackSubmission(
           walletData.publicKey,
           feedback.demoId,
@@ -187,7 +192,7 @@ export const HelloMilestoneDemo = () => {
             completionTime: feedback.completionTime || 0,
           }
         );
-        
+
         addToast({
           type: 'success',
           title: '🎉 Feedback Submitted!',
@@ -618,10 +623,10 @@ export const HelloMilestoneDemo = () => {
 
           // Complete the demo in the account system (this handles points transactions)
           await completeDemo('hello-milestone', score);
-          
+
           // Mark demo as complete in Firebase stats
           await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTime);
-          
+
           // Set completion time and show feedback modal
           setDemoCompletionTime(Math.round(completionTime / 60)); // Convert to minutes
           setShowFeedbackModal(true);
@@ -1757,21 +1762,27 @@ export const HelloMilestoneDemo = () => {
                       step.disabled ? (
                         !isConnected ? (
                           <div className='text-center'>
-                            <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                            <div className='text-red-300 font-semibold mb-1'>
+                              🔌 Wallet Not Connected
+                            </div>
                             <div className='text-xs text-gray-300'>
                               Please connect your wallet to execute this demo step
                             </div>
                           </div>
                         ) : networkValidation && !networkValidation.isValid ? (
                           <div className='text-center'>
-                            <div className='text-yellow-300 font-semibold mb-1'>🌐 Switch to Testnet</div>
+                            <div className='text-yellow-300 font-semibold mb-1'>
+                              🌐 Switch to Testnet
+                            </div>
                             <div className='text-xs text-gray-300'>
                               Please choose "Testnet" in the navbar to run demo execute tests
                             </div>
                           </div>
                         ) : (
                           <div className='text-center'>
-                            <div className='text-gray-300 font-semibold mb-1'>⏳ Complete Previous Step</div>
+                            <div className='text-gray-300 font-semibold mb-1'>
+                              ⏳ Complete Previous Step
+                            </div>
                             <div className='text-xs text-gray-300'>
                               Finish the previous step to unlock this action
                             </div>
@@ -1793,31 +1804,7 @@ export const HelloMilestoneDemo = () => {
                       } ${step.id === 'initialize' ? 'initialize-escrow-button' : ''} ${step.id === 'fund' ? 'fund-escrow-button' : ''} ${step.id === 'complete' ? 'complete-milestone-button' : ''} ${step.id === 'approve' ? 'approve-milestone-button' : ''} ${step.id === 'release' ? 'release-funds-button' : ''}`}
                       data-step-id={step.id}
                     >
-                    {/* Loading spinner or status icon */}
-                    {(() => {
-                      const isLoading =
-                        ((isInitializing || isInitializingReal) && step.id === 'initialize') ||
-                        (isFunding && step.id === 'fund') ||
-                        (isChangingStatus && step.id === 'complete') ||
-                        (isApproving && step.id === 'approve') ||
-                        (isReleasing && step.id === 'release');
-
-                      const txHash = pendingTransactions[step.id];
-                      const txStatus = txHash ? transactionStatuses[txHash] : null;
-                      const isPending = txStatus === 'pending';
-
-                      if (isLoading || isPending) {
-                        return (
-                          <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
-                        );
-                      }
-
-                      if (step.status === 'completed') return <span className='text-lg'>✅</span>;
-                      if (step.status === 'current') return <span className='text-lg'>🚀</span>;
-                      return <span className='text-lg'>⏳</span>;
-                    })()}
-
-                    <span>
+                      {/* Loading spinner or status icon */}
                       {(() => {
                         const isLoading =
                           ((isInitializing || isInitializingReal) && step.id === 'initialize') ||
@@ -1830,24 +1817,48 @@ export const HelloMilestoneDemo = () => {
                         const txStatus = txHash ? transactionStatuses[txHash] : null;
                         const isPending = txStatus === 'pending';
 
-                        if (isLoading) {
-                          if (step.id === 'initialize') return 'Creating Real Contract...';
-                          if (step.id === 'fund') return 'Funding Contract...';
-                          if (step.id === 'complete') return 'Completing Milestone...';
-                          if (step.id === 'approve') return 'Approving Work...';
-                          if (step.id === 'release') return 'Releasing Funds...';
+                        if (isLoading || isPending) {
+                          return (
+                            <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
+                          );
                         }
 
-                        if (isPending) {
-                          return 'Waiting for Blockchain Confirmation...';
-                        }
-
-                        if (step.status === 'completed') return 'Completed';
-                        if (step.status === 'current') return 'Execute Now';
-                        return 'Execute';
+                        if (step.status === 'completed') return <span className='text-lg'>✅</span>;
+                        if (step.status === 'current') return <span className='text-lg'>🚀</span>;
+                        return <span className='text-lg'>⏳</span>;
                       })()}
-                    </span>
-                  </button>
+
+                      <span>
+                        {(() => {
+                          const isLoading =
+                            ((isInitializing || isInitializingReal) && step.id === 'initialize') ||
+                            (isFunding && step.id === 'fund') ||
+                            (isChangingStatus && step.id === 'complete') ||
+                            (isApproving && step.id === 'approve') ||
+                            (isReleasing && step.id === 'release');
+
+                          const txHash = pendingTransactions[step.id];
+                          const txStatus = txHash ? transactionStatuses[txHash] : null;
+                          const isPending = txStatus === 'pending';
+
+                          if (isLoading) {
+                            if (step.id === 'initialize') return 'Creating Real Contract...';
+                            if (step.id === 'fund') return 'Funding Contract...';
+                            if (step.id === 'complete') return 'Completing Milestone...';
+                            if (step.id === 'approve') return 'Approving Work...';
+                            if (step.id === 'release') return 'Releasing Funds...';
+                          }
+
+                          if (isPending) {
+                            return 'Waiting for Blockchain Confirmation...';
+                          }
+
+                          if (step.status === 'completed') return 'Completed';
+                          if (step.status === 'current') return 'Execute Now';
+                          return 'Execute';
+                        })()}
+                      </span>
+                    </button>
                   </Tooltip>
                 )}
               </div>
@@ -1990,7 +2001,6 @@ export const HelloMilestoneDemo = () => {
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
-
       </div>
 
       {/* Feedback Modal */}
@@ -1999,8 +2009,8 @@ export const HelloMilestoneDemo = () => {
           isOpen={showFeedbackModal}
           onClose={() => setShowFeedbackModal(false)}
           onSubmit={handleFeedbackSubmit}
-          demoId="hello-milestone"
-          demoName="Baby Steps to Riches"
+          demoId='hello-milestone'
+          demoName='Baby Steps to Riches'
           completionTime={demoCompletionTime}
         />
       )}

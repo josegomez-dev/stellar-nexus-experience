@@ -20,7 +20,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
   demoName,
   completionTime,
 }) => {
-  const [rating, setRating] = useState<number>(5);
+  const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [difficulty, setDifficulty] = useState<DemoFeedback['difficulty']>('medium');
   const [wouldRecommend, setWouldRecommend] = useState(true);
@@ -30,6 +30,11 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
 
     if (!feedback.trim()) {
       alert('Please provide your feedback');
@@ -51,7 +56,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
       });
 
       // Reset form
-      setRating(5);
+      setRating(0);
       setFeedback('');
       setDifficulty('medium');
       setWouldRecommend(true);
@@ -115,6 +120,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
                 </button>
               ))}
               <span className='ml-4 text-white/70'>
+                {rating === 0 && 'Please select a rating'}
                 {rating === 1 && 'Poor'}
                 {rating === 2 && 'Fair'}
                 {rating === 3 && 'Good'}
@@ -253,7 +259,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
               </button>
               <button
                 type='submit'
-                disabled={isSubmitting || !feedback.trim()}
+                disabled={isSubmitting || !feedback.trim() || rating === 0}
                 className='px-6 py-3 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg hover:shadow-xl'
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Feedback 🚀'}

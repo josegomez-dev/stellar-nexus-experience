@@ -3,19 +3,45 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccount } from '@/contexts/AccountContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { UserAvatar } from './UserAvatar';
 import { generateFunnyName } from '@/lib/funny-name-generator';
 import { useToast } from '@/contexts/ToastContext';
+import { getAllBadges } from '@/lib/badge-config';
+import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
   const { isConnected, walletData, disconnect, connect, isFreighterAvailable } = useGlobalWallet();
   const { isAuthenticated, user, getUserStats, updateUser } = useAuth();
+  const { account } = useAccount();
   const { addToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
+  const hasUnlockedMiniGames = () => {
+    if (!account) return false;
+
+    // Check if all 3 main demos are completed
+    const mainDemoIds = ['hello-milestone', 'dispute-resolution', 'micro-marketplace'];
+    const allDemosCompleted = mainDemoIds.every(
+      demoId => (account.demos as any)[demoId]?.completed === true
+    );
+
+    // Check if all 5 main achievement badges are earned
+    const allBadges = getAllBadges();
+    const mainAchievementBadges = allBadges.filter(badge => badge.category === 'main_achievement');
+    const allBadgesEarned = mainAchievementBadges.every(badge =>
+      account.badges.some(userBadge => userBadge.name === badge.name)
+    );
+
+    return allDemosCompleted && allBadgesEarned;
+  };
+
+  const miniGamesUnlocked = hasUnlockedMiniGames();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,9 +64,9 @@ export const UserDropdown = () => {
     return generateFunnyName(address);
   };
 
-  const displayName = 
-    isAuthenticated && user 
-      ? (user.customName || user.username) 
+  const displayName =
+    isAuthenticated && user
+      ? user.customName || user.username
       : (() => {
           // Check localStorage for profile data if wallet is connected
           if (walletData?.publicKey) {
@@ -85,7 +111,7 @@ export const UserDropdown = () => {
     try {
       // Generate new funny name
       const newName = generateFunnyName(walletData.publicKey + Date.now().toString());
-      
+
       // Generate new avatar seed
       const newAvatarSeed = Date.now().toString() + Math.random().toString();
 
@@ -157,7 +183,7 @@ export const UserDropdown = () => {
                     </span>
                   </div>
                 )}
-                    <button
+                <button
                   onClick={handleAutoGenerate}
                   disabled={isGenerating}
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
@@ -210,20 +236,40 @@ export const UserDropdown = () => {
                   <span>Stellar Nexus Experience</span>
                 </a>
 
-                <a
-                  href='/mini-games'
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+                <Tooltip
+                  content={
+                    miniGamesUnlocked
+                      ? 'Explore the Nexus Web3 Playground'
+                      : 'Complete all 3 demos and earn all 5 main achievement badges to unlock the Nexus Web3 Playground'
+                  }
                 >
-                  <span className='text-lg'>
-                    <Image
-                      src='/images/icons/console.png'
-                      alt='Web3 Playground'
-                      width={50}
-                      height={20}
-                    />
-                  </span>
-                  <span>Nexus Web3 Playground</span>
-                </a>
+                  <a
+                    href={miniGamesUnlocked ? '/mini-games' : '#'}
+                    onClick={e => {
+                      if (!miniGamesUnlocked) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm ${
+                      miniGamesUnlocked
+                        ? 'text-white/80 hover:text-white hover:bg-white/10'
+                        : 'text-white/40 cursor-not-allowed'
+                    }`}
+                  >
+                    <span className='text-lg'>
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Web3 Playground'
+                        width={50}
+                        height={20}
+                        className={miniGamesUnlocked ? '' : 'grayscale'}
+                      />
+                    </span>
+                    <span>
+                      {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                    </span>
+                  </a>
+                </Tooltip>
 
                 <hr />
 
@@ -234,7 +280,7 @@ export const UserDropdown = () => {
                   <span className='text-lg'>📚</span>
                   <span>Documentation</span>
                 </a>
-                
+
                 <a
                   href='/docs'
                   className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'

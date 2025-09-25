@@ -312,10 +312,10 @@ export class AccountService {
       'milestone-voting': 'Democracy in Action',
       'dispute-resolution': 'Drama Queen Escrow',
       'micro-marketplace': 'Gig Economy Madness',
-      'demo1': 'Baby Steps to Riches',
-      'demo2': 'Democracy in Action',
-      'demo3': 'Drama Queen Escrow',
-      'demo4': 'Gig Economy Madness',
+      demo1: 'Baby Steps to Riches',
+      demo2: 'Democracy in Action',
+      demo3: 'Drama Queen Escrow',
+      demo4: 'Gig Economy Madness',
     };
     return demoNames[demoId] || 'Unknown Demo';
   }
@@ -397,8 +397,8 @@ export class AccountService {
     console.log(`📊 Current account state:`, {
       totalBadges: account.badges.length,
       earnedBadgeNames,
-      completedDemos: Object.keys(account.demos).filter(demoId => 
-        account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
+      completedDemos: Object.keys(account.demos).filter(
+        demoId => account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
       ),
     });
 
@@ -426,7 +426,7 @@ export class AccountService {
 
     // Map demo IDs to badge IDs based on current demo configuration:
     // Demo 1 (Baby Steps to Riches) → Escrow Expert
-    // Demo 2 (Drama Queen Escrow) → Trust Guardian  
+    // Demo 2 (Drama Queen Escrow) → Trust Guardian
     // Demo 3 (Gig Economy Madness) → Stellar Champion
     switch (demoId) {
       case 'hello-milestone':
@@ -500,7 +500,7 @@ export class AccountService {
       pointsValue: badge.pointsValue,
       rarity: badge.rarity,
     });
-    
+
     try {
       await this.awardBadge(accountId, badge);
       console.log(`✅ Successfully awarded badge: ${badge.name}`);
@@ -528,8 +528,9 @@ export class AccountService {
     const legacyDemo3Completed = account.demos.demo3?.status === 'completed';
     const legacyDemo4Completed = account.demos.demo4?.status === 'completed';
 
-    const hasRequiredDemos = (demo1Completed && demo2Completed && demo3Completed) ||
-                            (legacyDemo1Completed && legacyDemo3Completed && legacyDemo4Completed);
+    const hasRequiredDemos =
+      (demo1Completed && demo2Completed && demo3Completed) ||
+      (legacyDemo1Completed && legacyDemo3Completed && legacyDemo4Completed);
 
     if (hasRequiredDemos && !earnedBadgeNames.includes('Nexus Master')) {
       const nexusBadgeConfig = getBadgeById('nexus-master');
@@ -709,11 +710,7 @@ export class AccountService {
 
   // Get main demo completion count (only the 3 available demos)
   getMainDemoCompletionCount(account: UserAccount): { completed: number; total: number } {
-    const mainDemos = [
-      'hello-milestone',
-      'dispute-resolution',
-      'micro-marketplace',
-    ];
+    const mainDemos = ['hello-milestone', 'dispute-resolution', 'micro-marketplace'];
 
     const completedCount = mainDemos.filter(
       demoId => account.demos[demoId as keyof typeof account.demos]?.status === 'completed'

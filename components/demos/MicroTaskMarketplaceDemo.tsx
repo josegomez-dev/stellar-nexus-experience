@@ -364,19 +364,20 @@ export const MicroTaskMarketplaceDemo = () => {
 
       // Add a random deliverable message for demo purposes
       const randomDeliverables = [
-        "✅ Completed the design mockup with modern UI components and responsive layout",
-        "🎨 Delivered high-quality graphics and illustrations for the project",
-        "📝 Wrote comprehensive documentation and user guides",
-        "🔧 Implemented the requested features with clean, maintainable code",
-        "🎯 Created marketing materials and social media content",
-        "📊 Analyzed data and provided detailed insights and recommendations",
-        "🎬 Produced video content with professional editing and effects",
-        "🔍 Conducted thorough research and compiled comprehensive findings",
-        "💡 Developed innovative solutions and creative concepts",
-        "⚡ Optimized performance and improved user experience"
+        '✅ Completed the design mockup with modern UI components and responsive layout',
+        '🎨 Delivered high-quality graphics and illustrations for the project',
+        '📝 Wrote comprehensive documentation and user guides',
+        '🔧 Implemented the requested features with clean, maintainable code',
+        '🎯 Created marketing materials and social media content',
+        '📊 Analyzed data and provided detailed insights and recommendations',
+        '🎬 Produced video content with professional editing and effects',
+        '🔍 Conducted thorough research and compiled comprehensive findings',
+        '💡 Developed innovative solutions and creative concepts',
+        '⚡ Optimized performance and improved user experience',
       ];
-      
-      const randomDeliverable = randomDeliverables[Math.floor(Math.random() * randomDeliverables.length)];
+
+      const randomDeliverable =
+        randomDeliverables[Math.floor(Math.random() * randomDeliverables.length)];
       setTaskDeliverables(prev => ({ ...prev, [taskId]: randomDeliverable }));
 
       // Fund the escrow
@@ -923,17 +924,21 @@ export const MicroTaskMarketplaceDemo = () => {
                     {task.status === 'open' && (
                       <Tooltip
                         content={
-                          (!isConnected || taskLoadingStates[task.id]) ? (
+                          !isConnected || taskLoadingStates[task.id] ? (
                             !isConnected ? (
                               <div className='text-center'>
-                                <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                                <div className='text-red-300 font-semibold mb-1'>
+                                  🔌 Wallet Not Connected
+                                </div>
                                 <div className='text-xs text-gray-300'>
                                   Please connect your wallet to accept tasks
                                 </div>
                               </div>
                             ) : (
                               <div className='text-center'>
-                                <div className='text-blue-300 font-semibold mb-1'>⏳ Processing...</div>
+                                <div className='text-blue-300 font-semibold mb-1'>
+                                  ⏳ Processing...
+                                </div>
                                 <div className='text-xs text-gray-300'>
                                   Please wait for the current operation to complete
                                 </div>
@@ -957,7 +962,9 @@ export const MicroTaskMarketplaceDemo = () => {
                       <div className='space-y-2'>
                         <div className='p-3 bg-white/5 rounded-lg'>
                           <p className='text-sm text-white/70 mb-2'>Deliverable Ready:</p>
-                          <p className='text-white text-sm'>{taskDeliverables[task.id] || 'Preparing deliverable...'}</p>
+                          <p className='text-white text-sm'>
+                            {taskDeliverables[task.id] || 'Preparing deliverable...'}
+                          </p>
                         </div>
                         <button
                           onClick={() => handleSubmitDeliverable(task.id)}
@@ -1083,10 +1090,13 @@ export const MicroTaskMarketplaceDemo = () => {
                 onClick={() => {
                   setNewTask({
                     title: 'Design a modern landing page',
-                    description: 'Create a responsive landing page with modern UI/UX design, including hero section, features showcase, and contact form. Must be mobile-friendly and optimized for conversion.',
+                    description:
+                      'Create a responsive landing page with modern UI/UX design, including hero section, features showcase, and contact form. Must be mobile-friendly and optimized for conversion.',
                     category: 'design',
                     budget: '150.0',
-                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                      .toISOString()
+                      .split('T')[0], // 7 days from now
                   });
                 }}
                 className='px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30 rounded-lg text-blue-300 hover:text-blue-200 transition-colors text-sm font-medium'
@@ -1125,7 +1135,9 @@ export const MicroTaskMarketplaceDemo = () => {
                     onChange={e => setNewTask({ ...newTask, category: e.target.value })}
                     className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-accent-400/50'
                   >
-                    <option value='' className='text-black'>Select category</option>
+                    <option value='' className='text-black'>
+                      Select category
+                    </option>
                     {categories.map(category => (
                       <option key={category.id} value={category.id} className='text-black'>
                         {category.icon} {category.name}
@@ -1163,22 +1175,26 @@ export const MicroTaskMarketplaceDemo = () => {
 
               <Tooltip
                 content={
-                  (!isConnected ||
+                  !isConnected ||
                   !newTask.title ||
                   !newTask.description ||
                   !newTask.category ||
                   !newTask.budget ||
-                  !newTask.deadline) ? (
+                  !newTask.deadline ? (
                     !isConnected ? (
                       <div className='text-center'>
-                        <div className='text-red-300 font-semibold mb-1'>🔌 Wallet Not Connected</div>
+                        <div className='text-red-300 font-semibold mb-1'>
+                          🔌 Wallet Not Connected
+                        </div>
                         <div className='text-xs text-gray-300'>
                           Please connect your wallet to post tasks
                         </div>
                       </div>
                     ) : (
                       <div className='text-center'>
-                        <div className='text-yellow-300 font-semibold mb-1'>📝 Complete All Fields</div>
+                        <div className='text-yellow-300 font-semibold mb-1'>
+                          📝 Complete All Fields
+                        </div>
                         <div className='text-xs text-gray-300'>
                           Please fill in all required fields to post a task
                         </div>

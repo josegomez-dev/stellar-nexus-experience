@@ -51,9 +51,9 @@ export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvat
           onClick ? 'hover:shadow-2xl' : ''
         }`}
       >
-        <PixelArtAvatar 
-          seed={avatarSeed} 
-          size={pixelSize} 
+        <PixelArtAvatar
+          seed={avatarSeed}
+          size={pixelSize}
           className='rounded-lg border-2 border-white/20 hover:border-white/40 transition-colors'
         />
       </div>
