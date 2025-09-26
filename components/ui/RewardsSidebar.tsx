@@ -1,24 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAccount } from '@/contexts/AccountContext';
 import { getAllBadges, getBadgeRarityConfig } from '@/lib/badge-config';
 import { type Badge } from '@/lib/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import { Tooltip } from '@/components/ui/Tooltip';
 
-interface RewardsSidebarProps {
+interface RewardsDropdownProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose }) => {
+export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose }) => {
   const { account, pointsTransactions, getLevel, getExperienceProgress, getMainDemoProgress } =
     useAccount();
   const [activeTab, setActiveTab] = useState<
     'overview' | 'badges' | 'transactions'
   >('overview');
   const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   // Helper functions for badge styling
   const getRarityColor = (rarity: string) => {
@@ -96,7 +114,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
         <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Achievement Guide</h4>
         <div className='text-xs text-gray-300 space-y-1'>
           <div>
-            • <span className='text-blue-300'>Account Creation</span> → Welcome Explorer
+            • <span>Account Creation</span> → Welcome Explorer
           </div>
           <div>
             • <span className='text-blue-300'>Complete Demo 1</span> → Escrow Expert
@@ -291,42 +309,50 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
 
   return (
     <>
-      {/* Backdrop */}
-      <div className='fixed inset-0 bg-black/50 z-40' onClick={onClose} />
-
-      {/* Sidebar */}
-      <div className='absolute h-100 w-80 bg-gradient-to-b from-gray-900 to-gray-800 border-r border-gray-700 z-50 transform transition-transform duration-300 translate-x-0'>
-        {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-gray-700'>
-          <h2 className='text-xl font-bold text-white'>🎮 Rewards & Progress</h2>
-          <button onClick={onClose} className='text-gray-400 hover:text-white transition-colors'>
-            ✕
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className='flex border-b border-gray-700'>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'text-white bg-gray-700/50 border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <div className='flex flex-col items-center space-y-1'>
-                <span className='text-lg'>{tab.icon}</span>
-                <span>{tab.label}</span>
-              </div>
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div 
+          ref={dropdownRef}
+          className='absolute right-0 mt-2 w-80 bg-black/80 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[80vh]'
+        >
+          {/* Enhanced background blur overlay */}
+          <div className='absolute inset-0 bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-3xl'></div>
+          <div className='absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/20'></div>
+          
+          {/* Header */}
+          <div className='relative z-10 flex items-center justify-between p-4 border-b border-white/10'>
+            <h2 className='text-xl font-bold text-white'>🎮 Rewards & Progress</h2>
+            <button onClick={onClose} className='text-gray-400 hover:text-white transition-colors'>
+              ✕
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Content */}
-        <div className='p-4 h-full overflow-y-auto'>{renderContent()}</div>
-      </div>
+          {/* Tabs */}
+          <div className='relative z-10 flex border-b border-white/10'>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'text-white bg-white/10 border-b-2 border-blue-500'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <div className='flex flex-col items-center space-y-1'>
+                  <span className='text-lg'>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          <div className='relative z-10 p-4 overflow-y-auto max-h-[60vh]'>
+            {renderContent()}
+          </div>
+        </div>
+      )}
       <Badge3DStyles />
     </>
   );

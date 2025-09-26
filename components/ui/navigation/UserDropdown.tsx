@@ -347,7 +347,7 @@ export const UserDropdown = () => {
             </div>
             <button
               onClick={() => {
-                // Dispatch custom event to open rewards sidebar
+                // Dispatch custom event to open rewards dropdown
                 window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
                 setIsOpen(false);
               }}

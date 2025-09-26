@@ -15,7 +15,7 @@ export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
   const { isConnected } = useGlobalWallet();
-  const { account, loading } = useAccount();
+  const { account, loading, getLevel } = useAccount();
 
   // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
   const hasUnlockedMiniGames = () => {
@@ -39,7 +39,7 @@ export const Header = () => {
 
   const miniGamesUnlocked = hasUnlockedMiniGames();
 
-  // Listen for custom event to toggle rewards sidebar
+  // Listen for custom event to toggle rewards dropdown
   useEffect(() => {
     const handleToggleRewards = () => {
       setIsRewardsOpen(true);
@@ -136,24 +136,29 @@ export const Header = () => {
                       </span>
                       <span className='text-xs text-white/70'>Level:</span>
                       <span className='text-sm font-semibold text-blue-400'>
-                        {account.profile.level}
+                        {getLevel()}
                       </span>
                     </div>
 
                     {/* Rewards Button */}
-                    <Tooltip position='bottom' content='View Rewards & Progress'>
-                      <button
-                        onClick={() => setIsRewardsOpen(true)}
-                        className='relative p-2 text-white/80 hover:text-white transition-colors'
-                      >
-                        <span className='text-xl'>🎮</span>
-                        {account.profile.totalPoints > 0 && (
-                          <span className='absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
-                            {account.profile.totalPoints}
-                          </span>
-                        )}
-                      </button>
-                    </Tooltip>
+                    <div className='relative'>
+                      <Tooltip position='bottom' content='View Rewards & Progress'>
+                        <button
+                          onClick={() => setIsRewardsOpen(!isRewardsOpen)}
+                          className='relative p-2 text-white/80 hover:text-white transition-colors'
+                        >
+                          <span className='text-xl'>🎮</span>
+                          {account.profile.totalPoints > 0 && (
+                            <span className='absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                              {account.profile.totalPoints}
+                            </span>
+                          )}
+                        </button>
+                      </Tooltip>
+                      
+                      {/* Rewards Dropdown */}
+                      <RewardsSidebar isOpen={isRewardsOpen} onClose={() => setIsRewardsOpen(false)} />
+                    </div>
                   </>
                 ) : loading ? (
                   <div className='flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
@@ -274,8 +279,6 @@ export const Header = () => {
         </div>
       )}
 
-      {/* Rewards Sidebar */}
-      <RewardsSidebar isOpen={isRewardsOpen} onClose={() => setIsRewardsOpen(false)} />
     </header>
   );
 };
