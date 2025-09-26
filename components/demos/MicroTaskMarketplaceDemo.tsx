@@ -71,7 +71,9 @@ export const MicroTaskMarketplaceDemo = () => {
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Demo completion tracking
-  const [demoStartTime, setDemoStartTime] = useState<number>(Date.now());
+  const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
+  const [demoStarted, setDemoStarted] = useState(false);
+  const [demoCompleted, setDemoCompleted] = useState(false);
 
   // Always use real blockchain transactions
   const hooks = {
@@ -109,52 +111,17 @@ export const MicroTaskMarketplaceDemo = () => {
   // Track if demo completion has been triggered to prevent multiple calls
   const [demoCompletionTriggered, setDemoCompletionTriggered] = useState(false);
 
-  // Trigger confetti when demo is completed
+  // Check if demo can be completed (but don't auto-complete)
   useEffect(() => {
-    const demoCompleted = canCompleteDemo();
-    console.log('🎉 Micro Task Marketplace Demo - Demo completed:', demoCompleted);
+    const canComplete = canCompleteDemo();
+    console.log('🎉 Micro Task Marketplace Demo - Can complete:', canComplete);
     console.log('🎉 Posted tasks:', postedTasks.size, 'Completed tasks:', completedTasks.size);
 
-    if (demoCompleted && !demoCompletionTriggered) {
-      console.log('🎉 Triggering confetti for Micro Task Marketplace Demo!');
-      setDemoCompletionTriggered(true);
-      setShowConfetti(true);
-
-      // Complete the demo using the centralized account system
-      const completeDemo = async () => {
-        try {
-          const score = 90; // High score for completing micro task marketplace
-          const completionTime = Math.floor((Date.now() - demoStartTime) / 1000); // Calculate completion time in seconds
-
-          // Use the centralized account system for completion
-          await completeDemoInAccount('micro-marketplace', score);
-
-          // Mark demo as complete in Firebase stats
-          await markDemoComplete('micro-marketplace', 'Gig Economy Madness', completionTime);
-
-          console.log('✅ Micro Task Marketplace Demo completed successfully');
-        } catch (error) {
-          console.error('❌ Failed to complete Micro Task Marketplace Demo:', error);
-          addToast({
-            type: 'error',
-            title: '❌ Demo Completion Failed',
-            message: 'Failed to complete demo. Please try again.',
-            duration: 5000,
-          });
-        }
-      };
-
-      // Complete demo after a short delay
-      setTimeout(completeDemo, 2000);
-
-      // Hide confetti after animation
-      const timer = setTimeout(() => {
-        console.log('🎉 Hiding confetti for Micro Task Marketplace Demo');
-        setShowConfetti(false);
-      }, 4000);
-      return () => clearTimeout(timer);
+    if (canComplete && !demoCompleted) {
+      console.log('🎉 Demo requirements met - ready for completion!');
+      // Don't auto-complete - wait for user to click "Complete Demo" button
     }
-  }, [completedTasks, postedTasks]); // Removed function dependencies to prevent infinite loops
+  }, [completedTasks, postedTasks, demoCompleted]);
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
@@ -335,6 +302,12 @@ export const MicroTaskMarketplaceDemo = () => {
       };
 
       const result = await hooks.initializeEscrow(payload);
+
+      // Start demo timing when first task is accepted
+      if (!demoStarted) {
+        setDemoStarted(true);
+        setDemoStartTime(Date.now());
+      }
 
       // Update transaction status
       updateTransaction(txHash, 'success', `Task "${task.title}" accepted and escrow created`);
@@ -681,6 +654,70 @@ export const MicroTaskMarketplaceDemo = () => {
     return category?.color || 'from-gray-500 to-gray-600';
   };
 
+  async function handleCompleteDemo() {
+    if (!canCompleteDemo()) {
+      addToast({
+        type: 'warning',
+        title: '⚠️ Requirements Not Met',
+        message: 'Please complete the demo requirements before claiming completion.',
+        duration: 5000,
+      });
+      return;
+    }
+
+    if (demoCompleted) {
+      addToast({
+        type: 'info',
+        title: '✅ Already Completed',
+        message: 'This demo has already been completed.',
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      console.log('🎉 Manually completing Micro Task Marketplace Demo!');
+      setDemoCompleted(true);
+      setShowConfetti(true);
+
+      const score = 90; // High score for completing micro task marketplace
+      const completionTimeInSeconds = demoStartTime 
+        ? Math.floor((Date.now() - demoStartTime) / 1000) 
+        : 0; // Calculate completion time in seconds
+      const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
+
+      // Use the centralized account system for completion
+      await completeDemoInAccount('micro-marketplace', score);
+
+      // Mark demo as complete in Firebase stats (store in minutes)
+      await markDemoComplete('micro-marketplace', 'Gig Economy Madness', completionTimeInMinutes);
+
+      addToast({
+        type: 'success',
+        title: '🎉 Demo Completed!',
+        message: 'Congratulations! You have successfully completed the Gig Economy Madness demo and earned your badge!',
+        duration: 6000,
+      });
+
+      console.log('✅ Micro Task Marketplace Demo completed successfully');
+
+      // Hide confetti after animation
+      setTimeout(() => {
+        console.log('🎉 Hiding confetti for Micro Task Marketplace Demo');
+        setShowConfetti(false);
+      }, 4000);
+    } catch (error) {
+      console.error('❌ Failed to complete Micro Task Marketplace Demo:', error);
+      setDemoCompleted(false); // Reset on error
+      addToast({
+        type: 'error',
+        title: '❌ Demo Completion Failed',
+        message: 'Failed to complete demo. Please try again.',
+        duration: 5000,
+      });
+    }
+  }
+
   function resetDemo() {
     setActiveTab('browse');
     setSelectedCategory('all');
@@ -709,6 +746,7 @@ export const MicroTaskMarketplaceDemo = () => {
     setCompletedTasks(new Set());
     setPostedTasks(new Set());
     setTaskDeliverables({});
+    setDemoCompleted(false);
 
     addToast({
       type: 'warning',
@@ -819,38 +857,6 @@ export const MicroTaskMarketplaceDemo = () => {
           </div>
         </div>
 
-        {/* Demo Completion Success Box */}
-        {canCompleteDemo() && (
-          <div className='mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg'>
-            <div className='text-center'>
-              <div className='flex justify-center mb-4'>
-                <Image
-                  src='/images/logo/logoicon.png'
-                  alt='Stellar Nexus Logo'
-                  width={80}
-                  height={80}
-                  className='animate-bounce'
-                />
-              </div>
-              <h3 className='text-xl font-bold text-green-300 mb-2'>
-                Demo Successfully Completed!
-              </h3>
-              <p className='text-green-200 mb-4'>
-                Congratulations! You've successfully demonstrated the micro-task marketplace
-                workflow:
-              </p>
-              <ul className='text-green-200 text-sm space-y-1 mb-4'>
-                <li>✅ Posted at least 1 task</li>
-                <li>✅ Completed and approved 3 tasks</li>
-                <li>✅ Experienced the full escrow workflow</li>
-              </ul>
-              <p className='text-green-200 text-sm'>
-                You've mastered the micro-task marketplace! Try different roles or reset the demo to
-                explore more scenarios.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
@@ -1228,6 +1234,67 @@ export const MicroTaskMarketplaceDemo = () => {
           <div className='p-4 bg-red-500/20 border border-red-400/30 rounded-lg'>
             <h4 className='font-semibold text-red-300 mb-2'>Error Occurred</h4>
             <p className='text-red-200 text-sm'>{hooks.error?.message}</p>
+          </div>
+        )}
+
+        {/* Demo Completion Success Box - Moved to bottom */}
+        {canCompleteDemo() && !demoCompleted && (
+          <div className='mt-8 mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg'>
+            <div className='text-center'>
+              <div className='flex justify-center mb-4'>
+                <Image
+                  src='/images/logo/logoicon.png'
+                  alt='Stellar Nexus Logo'
+                  width={80}
+                  height={80}
+                  className='animate-bounce'
+                />
+              </div>
+              <h3 className='text-xl font-bold text-green-300 mb-2'>
+                Demo Requirements Met!
+              </h3>
+              <p className='text-green-200 mb-4'>
+                Congratulations! You've successfully demonstrated the micro-task marketplace
+                workflow:
+              </p>
+              <ul className='text-green-200 text-sm space-y-1 mb-6'>
+                <li>✅ Posted at least 1 task</li>
+                <li>✅ Completed and approved 3 tasks</li>
+                <li>✅ Experienced the full escrow workflow</li>
+              </ul>
+              <button
+                onClick={handleCompleteDemo}
+                className='px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40'
+              >
+                🏆 Complete Demo & Claim Badge
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Demo Completion Success Box - After completion */}
+        {demoCompleted && (
+          <div className='mt-8 mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg'>
+            <div className='text-center'>
+              <div className='flex justify-center mb-4'>
+                <Image
+                  src='/images/logo/logoicon.png'
+                  alt='Stellar Nexus Logo'
+                  width={80}
+                  height={80}
+                  className='animate-bounce'
+                />
+              </div>
+              <h3 className='text-xl font-bold text-green-300 mb-2'>
+                Demo Successfully Completed!
+              </h3>
+              <p className='text-green-200 mb-4'>
+                🎉 You've earned the <strong>Gig Economy Guru</strong> badge! You've mastered the micro-task marketplace workflow.
+              </p>
+              <p className='text-green-200 text-sm'>
+                Try different roles or reset the demo to explore more scenarios.
+              </p>
+            </div>
           </div>
         )}
 
