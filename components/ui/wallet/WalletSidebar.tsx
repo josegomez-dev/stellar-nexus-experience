@@ -610,6 +610,29 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                 </button>
               </div>
 
+              {/* Achievement Guide */}
+              <div className='bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4'>
+                <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Achievement Guide</h4>
+                <div className='text-xs text-gray-300 space-y-1'>
+                  <div>
+                    • <span>Account Creation</span> → Welcome Explorer
+                  </div>
+                  <div>
+                    • <span className='text-blue-300'>Complete Demo 1</span> → Escrow Expert
+                  </div>
+                  <div>
+                    • <span className='text-blue-300'>Complete Demo 2</span> → Trust Guardian
+                  </div>
+                  <div>
+                    • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
+                  </div>
+                  <div>
+                    • <span className='text-purple-300'>Complete Demos 1, 2, 3 </span> →
+                    Nexus Master
+                  </div>
+                </div>
+              </div>
+
               {/* Transaction History - Only show when expanded */}
               {isExpanded && transactions.length > 0 && (
                 <div className='p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn'>
