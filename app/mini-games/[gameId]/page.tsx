@@ -12,53 +12,12 @@ import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
 import Image from 'next/image';
 
-// Game data with detailed information
+// Game data with detailed information - synced with MiniGameStore
 const gameLibrary = {
-  'escrow-puzzle-master': {
-    id: 'escrow-puzzle-master',
-    title: 'Escrow Puzzle Master',
-    subtitle: 'Master the Art of Trustless Transactions',
-    description:
-      'Solve complex escrow puzzles while learning Stellar blockchain fundamentals. Complete challenges, unlock achievements, and become a DeFi expert!',
-    icon: '🔐',
-    status: 'development',
-    category: 'blockchain',
-    difficulty: 'Intermediate',
-    estimatedTime: '3-4 hours',
-    rewards: '150 XLM + Master Badge',
-    currentPlayers: 2341,
-    rating: 4.9,
-    thumbnail: '/images/demos/demo1.png',
-    progress: 100,
-    estimatedRelease: 'Available Now',
-    donationGoal: 0,
-    currentDonations: 0,
-    features: [
-      'Smart Contract Puzzles',
-      'Escrow Mechanics',
-      'Stellar Network',
-      'DeFi Fundamentals',
-    ],
-    achievements: ['Puzzle Master', 'Escrow Expert', 'Stellar Champion', 'Trust Guardian'],
-    developers: [
-      {
-        name: 'Stellar Development Team',
-        role: 'Core Engine',
-        avatar: '/images/logo/logoicon.png',
-      },
-      { name: 'Trustless Work Labs', role: 'Game Design', avatar: '/images/logo/logoicon.png' },
-      { name: 'Blockchain Gaming Studio', role: 'UI/UX', avatar: '/images/logo/logoicon.png' },
-    ],
-    technologies: ['Stellar Blockchain', 'Smart Contracts', 'React Hooks', 'TypeScript'],
-    releaseDate: '2024',
-    version: '1.2.0',
-    size: '45.2 MB',
-    tags: ['Puzzle', 'Educational', 'Blockchain', 'DeFi'],
-  },
   'web3-basics-adventure': {
     id: 'web3-basics-adventure',
     title: 'Web3 Basics Adventure',
-    subtitle: 'Journey Through Blockchain Fundamentals',
+    subtitle: 'Master blockchain basics through interactive gameplay',
     description:
       'Embark on an epic journey through blockchain fundamentals. Learn smart contracts, wallets, and DeFi while earning crypto rewards!',
     icon: '🌐',
@@ -69,8 +28,8 @@ const gameLibrary = {
     rewards: '50 XLM + NFT Badge',
     currentPlayers: 1247,
     rating: 4.8,
-    thumbnail: '/images/demos/demo2.png',
-    progress: 100,
+    thumbnail: '/images/games/web3-basics-adventure.png',
+    progress: 20,
     estimatedRelease: 'Available Now',
     donationGoal: 0,
     currentDonations: 0,
@@ -97,10 +56,51 @@ const gameLibrary = {
     size: '32.1 MB',
     tags: ['Adventure', 'Educational', 'Beginner', 'Crypto'],
   },
+  'escrow-puzzle-master': {
+    id: 'escrow-puzzle-master',
+    title: 'Escrow Puzzle Master',
+    subtitle: 'Master the Art of Trustless Transactions',
+    description:
+      'Solve complex escrow puzzles while learning Stellar blockchain fundamentals. Complete challenges, unlock achievements, and become a DeFi expert!',
+    icon: '⭐',
+    status: 'development',
+    category: 'blockchain',
+    difficulty: 'Intermediate',
+    estimatedTime: '4-5 hours',
+    rewards: '100 XLM + Expert Badge',
+    currentPlayers: 892,
+    rating: 4.9,
+    thumbnail: '/images/games/escrow-puzzle-master.png',
+    progress: 0,
+    estimatedRelease: 'Available Now',
+    donationGoal: 0,
+    currentDonations: 0,
+    features: [
+      'Escrow Systems',
+      'Multi-Sig Wallets',
+      'Trustless Transactions',
+      'Stellar Network',
+    ],
+    achievements: ['Escrow Master', 'Trust Guardian', 'Stellar Expert', 'Security Champion'],
+    developers: [
+      {
+        name: 'Stellar Development Team',
+        role: 'Core Engine',
+        avatar: '/images/logo/logoicon.png',
+      },
+      { name: 'Trustless Work Labs', role: 'Game Design', avatar: '/images/logo/logoicon.png' },
+      { name: 'Blockchain Gaming Studio', role: 'UI/UX', avatar: '/images/logo/logoicon.png' },
+    ],
+    technologies: ['Stellar Blockchain', 'Smart Contracts', 'React Hooks', 'TypeScript'],
+    releaseDate: '2024',
+    version: '1.2.0',
+    size: '45.2 MB',
+    tags: ['Puzzle', 'Educational', 'Blockchain', 'DeFi'],
+  },
   'defi-trading-arena': {
     id: 'defi-trading-arena',
     title: 'DeFi Trading Arena',
-    subtitle: 'Compete in the Ultimate Trading Challenge',
+    subtitle: 'Compete in DeFi trading challenges',
     description:
       'Enter the competitive world of DeFi trading! Learn liquidity pools, yield farming, and automated market making while competing for top rankings.',
     icon: '📈',
@@ -111,8 +111,8 @@ const gameLibrary = {
     rewards: '200 XLM + Trading Trophy',
     currentPlayers: 567,
     rating: 4.7,
-    thumbnail: '/images/demos/demo3.png',
-    progress: 85,
+    thumbnail: '/images/games/defi-trading-arena.png',
+    progress: 0,
     estimatedRelease: 'Beta Testing',
     donationGoal: 5000,
     currentDonations: 3200,
@@ -128,6 +128,38 @@ const gameLibrary = {
     version: '0.9.5',
     size: '67.8 MB',
     tags: ['Trading', 'Competitive', 'Advanced', 'DeFi'],
+  },
+  'nft-creation': {
+    id: 'nft-creation',
+    title: 'NFT Creation Studio',
+    subtitle: 'Create and trade unique NFTs',
+    description:
+      'Unleash your creativity in the NFT universe! Design, mint, and trade unique digital assets while learning the art of digital ownership.',
+    icon: '🎨',
+    status: 'development',
+    category: 'nft',
+    difficulty: 'Intermediate',
+    estimatedTime: '3-4 hours',
+    rewards: '75 XLM + Creator Badge',
+    currentPlayers: 423,
+    rating: 4.6,
+    thumbnail: '/images/games/blank.png',
+    progress: 0,
+    estimatedRelease: 'Beta Testing',
+    donationGoal: 3000,
+    currentDonations: 1800,
+    features: ['NFT Design Tools', 'Minting Process', 'Marketplace Trading', 'Royalty Systems'],
+    achievements: ['Creative Genius', 'NFT Pioneer', 'Market Master', 'Digital Artist'],
+    developers: [
+      { name: 'NFT Gaming Studio', role: 'Core Engine', avatar: '/images/logo/logoicon.png' },
+      { name: 'Digital Art Labs', role: 'Game Design', avatar: '/images/logo/logoicon.png' },
+      { name: 'Creative Technologies', role: 'UI/UX', avatar: '/images/logo/logoicon.png' },
+    ],
+    technologies: ['Solidity', 'IPFS', 'Web3.js', 'React'],
+    releaseDate: '2024',
+    version: '0.8.2',
+    size: '52.3 MB',
+    tags: ['NFT', 'Creative', 'Intermediate', 'Digital Art'],
   },
 };
 
@@ -397,17 +429,6 @@ export default function GamePage() {
                           <span className='text-white font-semibold'>{game.rewards}</span>
                         </div>
 
-                        <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                          <span className='text-white/70'>Players:</span>
-                          <span className='text-white font-semibold'>
-                            {game.currentPlayers.toLocaleString()}
-                          </span>
-                        </div>
-
-                        <div className='flex justify-between items-center p-3 bg-white/5 rounded-xl'>
-                          <span className='text-white/70'>Rating:</span>
-                          <span className='text-white font-semibold'>⭐ {game.rating}</span>
-                        </div>
                       </div>
                     </div>
 
