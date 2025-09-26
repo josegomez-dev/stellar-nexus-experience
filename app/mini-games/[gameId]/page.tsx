@@ -10,7 +10,6 @@ import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
-import { ProtectedMiniGamesAccess } from '@/components/ui/ProtectedMiniGamesAccess';
 import Image from 'next/image';
 
 // Game data with detailed information
@@ -234,8 +233,7 @@ export default function GamePage() {
   }));
 
   return (
-    <ProtectedMiniGamesAccess>
-      <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
+    <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
         {/* Epic Arcade Machine Background */}
         <div className='absolute inset-0'>
           {/* CRT Scan Lines Effect */}
@@ -490,6 +488,5 @@ export default function GamePage() {
 
         <Footer />
       </div>
-    </ProtectedMiniGamesAccess>
   );
 }

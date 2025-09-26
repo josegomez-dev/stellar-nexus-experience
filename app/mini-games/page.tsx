@@ -8,8 +8,6 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { TransactionProvider } from '@/contexts/TransactionContext';
 import { AccountProvider } from '@/contexts/AccountContext';
 import { ToastContainer } from '@/components/ui/Toast';
-import { ProtectedMiniGamesAccess } from '@/components/ui/ProtectedMiniGamesAccess';
-
 export default function MiniGamesPage() {
   return (
     <WalletProvider>
@@ -17,9 +15,7 @@ export default function MiniGamesPage() {
         <AccountProvider>
           <ToastProvider>
             <TransactionProvider>
-              <ProtectedMiniGamesAccess>
-                <MiniGameStore />
-              </ProtectedMiniGamesAccess>
+              <MiniGameStore />
               <ToastContainer />
             </TransactionProvider>
           </ToastProvider>
