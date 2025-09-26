@@ -6,7 +6,7 @@ import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useAccount } from '@/contexts/AccountContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { API_ENDPOINTS } from '@/constants/api';
+import { API_ENDPOINTS } from '@/utils/constants/api';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
 import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHistory';

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
-import { API_ENDPOINTS } from '@/constants/api';
+import { API_ENDPOINTS } from '@/utils/constants/api';
 import {
   validateStellarAddress,
   sanitizeStellarAddressInput,

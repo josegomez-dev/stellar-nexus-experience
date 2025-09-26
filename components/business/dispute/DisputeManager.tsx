@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useStartDispute } from '@/lib/mock-trustless-work';
 import { useEscrowContext } from '@/contexts/EscrowContext';
-import { MultiReleaseStartDisputePayload } from '@/types/trustless-work';
+import { MultiReleaseStartDisputePayload } from '@/utils/types/trustless-work';
 
 export const DisputeManager = () => {
   const { walletData, isConnected, signTransaction, sendTransaction } = useWallet();

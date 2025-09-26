@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { UserAccount, PointsTransaction } from '@/types/account';
+import { UserAccount, PointsTransaction } from '@/utils/types/account';
 import { accountService } from '@/lib/account-service';
 import { useGlobalWallet } from './WalletContext';
 import { useToast } from './ToastContext';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useApproveMilestone } from '@/lib/mock-trustless-work';
 import { useEscrowContext } from '@/contexts/EscrowContext';
-import { ApproveMilestonePayload } from '@/types/trustless-work';
+import { ApproveMilestonePayload } from '@/utils/types/trustless-work';
 
 export const MilestoneApproval = () => {
   const { walletData, isConnected, signTransaction, sendTransaction } = useWallet();

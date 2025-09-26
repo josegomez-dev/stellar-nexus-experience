@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { SendTransactionResponse } from '@/types/trustless-work';
+import { SendTransactionResponse } from '@/utils/types/trustless-work';
 import { stellarConfig, assetConfig } from './wallet-config';
 import { validateStellarAddress } from './stellar-address-validation';
-import { NETWORK_CONFIGS } from '@/constants/network';
+import { NETWORK_CONFIGS } from '@/utils/constants/network';
 import {
   StellarWalletsKit,
   WalletNetwork,

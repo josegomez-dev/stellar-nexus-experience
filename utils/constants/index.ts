@@ -1,5 +1,5 @@
-// Main Constants Export
-// This file provides a centralized export for all constants used throughout the application
+// Constants Export
+// This file provides a centralized export for all constants
 
 // API Constants
 export * from './api';

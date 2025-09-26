@@ -5,7 +5,7 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { userTrackingService } from '@/lib/user-tracking-service';
-import { API_ENDPOINTS } from '@/constants/api';
+import { API_ENDPOINTS } from '@/utils/constants/api';
 import Image from 'next/image';
 
 interface ImmersiveDemoModalProps {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
 import { useFundEscrow } from '@/lib/mock-trustless-work';
 import { useEscrowContext } from '@/contexts/EscrowContext';
-import { FundEscrowPayload } from '@/types/trustless-work';
+import { FundEscrowPayload } from '@/utils/types/trustless-work';
 
 export const EscrowFunding = () => {
   const { walletData, isConnected, signTransaction, sendTransaction } = useWallet();

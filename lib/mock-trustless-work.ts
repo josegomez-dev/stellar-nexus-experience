@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { assetConfig } from './wallet-config';
-import { MOCK_DATA, MOCK_DELAYS } from '@/constants/mock-data';
+import { MOCK_DATA, MOCK_DELAYS } from '@/utils/constants/mock-data';
 
 // Mock types for development
 export interface EscrowResult {

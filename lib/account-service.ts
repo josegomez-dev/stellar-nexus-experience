@@ -24,7 +24,7 @@ import {
   Reward,
   PointsTransaction,
   Achievement,
-} from '@/types/account';
+} from '@/utils/types/account';
 import { getBadgeById } from './badge-config';
 import { badgeService, demoProgressService, userService } from './firebase-service';
 import { demoStatsService } from './firebase-service';

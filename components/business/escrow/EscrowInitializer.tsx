@@ -7,7 +7,7 @@ import {
   InitializePayload,
   TransactionResult,
   SendTransactionResponse,
-} from '@/types/trustless-work';
+} from '@/utils/types/trustless-work';
 import { useEscrowContext } from '@/contexts/EscrowContext';
 import { assetConfig, appConfig } from '@/lib/wallet-config';
 
