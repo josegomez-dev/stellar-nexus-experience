@@ -31,7 +31,6 @@ import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
-import '@/styles/demo-card-animations.css';
 
 // Demo Selection Component
 interface Demo {

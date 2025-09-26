@@ -966,48 +966,6 @@ export const DisputeResolutionDemo = () => {
             </div>
           )}
 
-          {/* Contract Information */}
-          {contractId && (
-            <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
-              <div className='flex items-center justify-between mb-4'>
-                <h3 className='text-xl font-semibold text-white'>Contract Information</h3>
-                <button
-                  onClick={resetDemo}
-                  className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors'
-                >
-                  🔄 Reset Demo
-                </button>
-              </div>
-              <div className='grid md:grid-cols-3 gap-4 text-sm'>
-                <div>
-                  <p className='text-white/70'>Contract ID:</p>
-                  <p className='font-mono text-warning-300 bg-warning-900/30 px-2 py-1 rounded'>
-                    {contractId.slice(0, 20)}...
-                  </p>
-                </div>
-                <div>
-                  <p className='text-white/70'>Status:</p>
-                  <p className='text-warning-300'>{escrowData?.status || 'Active'}</p>
-                </div>
-                <div>
-                  <p className='text-white/70'>Total Amount:</p>
-                  <p className='text-warning-300'>10 USDC</p>
-                </div>
-              </div>
-
-              {!escrowData?.metadata?.funded && (
-                <div className='mt-4 text-center'>
-                  <button
-                    onClick={handleFundEscrow}
-                    disabled={hooks.fundEscrow.isLoading}
-                    className='px-6 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors'
-                  >
-                    {hooks.fundEscrow.isLoading ? 'Funding...' : 'Fund Escrow'}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Milestones Management */}
           {contractId && escrowData?.metadata?.funded && (
