@@ -1,5 +1,3 @@
-// Business Logic Components
-export * from './business';
 
 // UI Components by Category
 export * from './ui/auth';
