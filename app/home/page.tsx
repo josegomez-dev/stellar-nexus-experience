@@ -421,12 +421,12 @@ const DemoSelector = ({
                 <div className='absolute top-4 right-4 z-50'>
                   {earnedBadge && badge ? (
                     <div
-                      className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}
+                      // className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}
                     >
-                      <div className='badge-icon-bounce'>
+                      {/* <div className='badge-icon-bounce'>
                         <BadgeEmblem id={badge.id} size='sm' className='text-white' />
-                      </div>
-                      <span>{badge.name}</span>
+                      </div> */}
+                      {/* <span>{badge.name}</span> */}
                     </div>
                   ) : (
                     <div
@@ -480,12 +480,12 @@ const DemoSelector = ({
                     
                     return (
                       <>
-                        <div className='absolute top-4 left-4 floating-particle opacity-70'>
+                        {/* <div className='absolute top-4 left-4 floating-particle opacity-70'>
                           <BadgeEmblem id={badgeId} size='sm' className='text-yellow-400' />
-                        </div>
-                        <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
+                        </div> */}
+                        {/* <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
                           <BadgeEmblem id={badgeId} size='sm' className='text-orange-400' />
-                        </div>
+                        </div> */}
                         <div className='absolute bottom-8 left-8 floating-particle opacity-60' style={{ animationDelay: '1s' }}>
                           <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
                         </div>
@@ -634,10 +634,16 @@ const DemoSelector = ({
                     {isCompleted && earnedBadge && badge ? (
                       <div className='mb-4'>
                         <div
-                          className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).background} border ${getDemoBadgeColors(demo.color).border} rounded-lg p-4 mb-3`}
+                          className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).background} border ${getDemoBadgeColors(demo.color).border} rounded-lg p-4 mb-3 relative`}
                         >
+                          {/* Floating XP text in top right corner */}
+                          <div className='absolute top-2 right-2'>
+                            <span className={`${getDemoBadgeColors(demo.color).descriptionColor} text-xs font-semibold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm`}>
+                              +{badge.xpReward} XP
+                            </span>
+                          </div>
                           <div className='flex items-center gap-3 mb-2'>
-                            <div className='celebration-sparkle'>
+                            <div>
                               <BadgeEmblem id={badge.id} size='lg' />
                             </div>
                             <div>
@@ -653,16 +659,6 @@ const DemoSelector = ({
                               </p>
                             </div>
                           </div>
-                          <div className='flex items-center justify-center text-xs'>
-                            <span className={`${getDemoBadgeColors(demo.color).descriptionColor}`}>
-                              +{badge.xpReward} XP
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className={`text-center ${getDemoBadgeColors(demo.color).titleColor} text-sm font-semibold badge-celebration`}
-                        >
-                          🎉 Badge Earned! 🎉
                         </div>
                       </div>
                     ) : (
@@ -793,11 +789,6 @@ const DemoSelector = ({
                         <div className='text-sm text-green-300/80 font-semibold'>
                           Demo Successfully Finished!
                         </div>
-                        {earnedBadge && badge && (
-                          <div className='mt-3 text-xs text-yellow-300/70'>
-                            Earned: {badge.name} (+{badge.xpReward} XP)
-                          </div>
-                        )}
 
                         {/* Do Again Link */}
                         <div className='mt-4'>
@@ -811,7 +802,7 @@ const DemoSelector = ({
                             }}
                             className={`text-sm font-semibold hover:underline transition-all duration-200 ${getDemoBadgeColors(demo.color).titleColor} hover:${getDemoBadgeColors(demo.color).titleColor.replace('300', '200')}`}
                           >
-                            🔄 Do Again to Earn More XP
+                            🔄 Do Again to Earn More XP!
                           </button>
                         </div>
                       </div>
