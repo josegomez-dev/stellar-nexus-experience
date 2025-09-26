@@ -36,7 +36,6 @@ export { ClientOnly } from './ui/ClientOnly';
 export { DownloadStarter } from './DownloadStarter';
 export { default as NewsSection } from './ui/NewsSection';
 export { OnboardingOverlay } from './OnboardingOverlay';
-export { Providers } from './Providers';
 export { default as RetroArcadeSidebar } from './ui/RetroArcadeSidebar';
 export { RewardsSidebar } from './ui/RewardsSidebar';
 export { ToastContainer, ToastStyles } from './ui/Toast';
