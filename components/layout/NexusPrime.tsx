@@ -248,11 +248,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
   return (
     <>
-      {/* Speaking Character - Appears from right side when speaking */}
+      {/* Speaking Character - Appears from left side when speaking */}
       {walletConnected && isSpeaking && (
         <div
-          className='fixed bottom-6 right-6 z-100 animate-slideInRight'
-          style={{ zIndex: 1000, marginRight: '80px', marginBottom: '-50px' }}
+          className='fixed bottom-6 left-6 z-100 animate-slideInLeft'
+          style={{ zIndex: 1000, marginLeft: '80px', marginBottom: '-50px' }}
         >
           <div className='relative'>
             {/* Character Image */}
@@ -283,7 +283,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         </div>
       )}
 
-      <div className='fixed bottom-6 right-6 z-50'>
+      <div className='fixed bottom-6 left-6 z-50'>
         {/* Character Avatar - Only show when wallet is connected */}
         {walletConnected && (
           <div className='relative group'>
@@ -327,9 +327,9 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
             {/* Speech Bubble */}
             {isExpanded && (
-              <div className='absolute bottom-20 right-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
+              <div className='absolute bottom-20 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
                 {/* Arrow */}
-                <div className='absolute -bottom-2 right-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
+                <div className='absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
 
                 {/* Character Header */}
                 <div className='flex items-center justify-between mb-3'>
@@ -592,10 +592,10 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
             {/* Simple Hover Tooltip */}
             {!isExpanded && (
-              <div className='absolute bottom-20 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none'>
+              <div className='absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none'>
                 <div className='bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-xl shadow-2xl p-3 w-48'>
                   {/* Arrow */}
-                  <div className='absolute -bottom-2 right-6 w-3 h-3 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
+                  <div className='absolute -bottom-2 left-6 w-3 h-3 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
 
                   {/* Simple Message */}
                   <div className='text-center'>

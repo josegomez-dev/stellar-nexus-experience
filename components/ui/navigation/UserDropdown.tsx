@@ -19,6 +19,9 @@ export const UserDropdown = () => {
   const { addToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
@@ -152,6 +155,75 @@ export const UserDropdown = () => {
     }
   };
 
+  const handleStartEditing = () => {
+    setTempName(displayName);
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!tempName.trim()) {
+      addToast({
+        type: 'error',
+        title: '❌ Invalid Name',
+        message: 'Name cannot be empty',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!walletData?.publicKey) {
+      addToast({
+        type: 'error',
+        title: 'No Wallet Connected',
+        message: 'Please connect your wallet first',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (user) {
+        // Update existing user
+        await updateUser({
+          customName: tempName.trim(),
+        });
+      } else {
+        // Store in localStorage for non-authenticated users
+        const profileData = {
+          customName: tempName.trim(),
+          walletAddress: walletData.publicKey,
+        };
+        localStorage.setItem(`profile_${walletData.publicKey}`, JSON.stringify(profileData));
+      }
+
+      addToast({
+        type: 'success',
+        title: '✅ Name Saved!',
+        message: `Your display name is now: ${tempName.trim()}`,
+        duration: 3000,
+      });
+
+      setIsEditingName(false);
+      setTempName('');
+    } catch (error) {
+      console.error('Error saving name:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Save Failed',
+        message: 'Failed to save name. Please try again.',
+        duration: 3000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditingName(false);
+    setTempName('');
+  };
+
   return (
     <div className='relative' ref={dropdownRef}>
       {/* Avatar Button */}
@@ -166,39 +238,124 @@ export const UserDropdown = () => {
           {/* Header */}
           <div className='relative z-10 p-4 border-b border-white/10'>
             <div className='flex items-center space-x-3'>
-              <UserAvatar size='lg' showStatus={false} />
+              <div className='relative'>
+                {isConnected ? (
+                  <Tooltip content="Click to generate random name & avatar" position="right">
+                    <button
+                      onClick={handleAutoGenerate}
+                      disabled={isGenerating}
+                      className='cursor-pointer transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed'
+                    >
+                      {isGenerating ? (
+                        <div className='relative'>
+                          <UserAvatar size='lg' showStatus={false} />
+                          <div className='absolute inset-0 flex items-center justify-center'>
+                            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white'></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <UserAvatar size='lg' showStatus={false} />
+                      )}
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <UserAvatar size='lg' showStatus={false} />
+                )}
+              </div>
               <div className='flex-1 min-w-0'>
-                <h3 className='text-white font-semibold text-sm truncate'>{displayName}</h3>
+                {isEditingName ? (
+                  <div className='flex items-center space-x-2'>
+                    <input
+                      type='text'
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveName();
+                        } else if (e.key === 'Escape') {
+                          handleCancelEditing();
+                        }
+                      }}
+                      className='flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50'
+                      placeholder='Enter custom name...'
+                      autoFocus
+                    />
+                    {/* Save and Cancel buttons */}
+                    <Tooltip content="Save Name" position="bottom">
+                      <button
+                        onClick={handleSaveName}
+                        disabled={isSaving}
+                        className='p-1 text-green-400 hover:text-green-300 transition-colors duration-200 disabled:opacity-50'
+                      >
+                        {isSaving ? (
+                          <div className='animate-spin rounded-full h-3 w-3 border-b border-white'></div>
+                        ) : (
+                          <span className='text-xs'>✓</span>
+                        )}
+                      </button>
+                    </Tooltip>
+                    <Tooltip content="Cancel" position="bottom">
+                      <button
+                        onClick={handleCancelEditing}
+                        className='p-1 text-red-400 hover:text-red-300 transition-colors duration-200'
+                      >
+                        <span className='text-xs'>✕</span>
+                      </button>
+                    </Tooltip>
+                  </div>
+                ) : (
+                  <div className='flex items-center space-x-2'>
+                    <Tooltip content={displayName} position='bottom'>
+                      <h3 
+                        className={`text-white font-semibold text-sm truncate transition-colors duration-200 ${
+                          isConnected 
+                            ? 'cursor-pointer hover:text-blue-300' 
+                            : 'cursor-default'
+                        }`}
+                        onClick={isConnected ? handleStartEditing : undefined}
+                        title={isConnected ? 'Click to edit name' : 'Connect wallet to edit name'}
+                      >
+                        {displayName}
+                      </h3>
+                    </Tooltip>
+                    {/* Small edit button */}
+                    {isConnected && (
+                      <Tooltip content="Edit Name" position="left">
+                        <button
+                          onClick={handleStartEditing}
+                          className='p-1 text-white/60 hover:text-blue-300 transition-colors duration-200'
+                        >
+                          <span className='text-xs'>✏️</span>
+                        </button>
+                      </Tooltip>
+                    )}
+                  </div>
+                )}
                 <p className='text-white/60 text-xs truncate'>
                   {isConnected
                     ? `${walletData?.publicKey?.slice(0, 6)}...${walletData?.publicKey?.slice(-4)}`
                     : 'Not Connected'}
                 </p>
-                {isAuthenticated && (
                   <div className='flex items-center space-x-2 mt-1'>
                     <span className='text-brand-300 text-xs'>Level {stats.level}</span>
-                    <span className='text-white/50 text-xs'>•</span>
+                    <span className='text-white/50 text-xs'>|</span>
                     <span className='text-accent-300 text-xs'>
                       {stats.totalDemosCompleted} demos
                     </span>
                   </div>
-                )}
-                <button
-                  onClick={handleAutoGenerate}
-                  disabled={isGenerating}
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  <span className='text-lg'>
-                    {isGenerating ? (
-                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                    ) : (
-                      '🎲'
-                    )}
-                  </span>
-                  <span>{isGenerating ? 'Generating...' : 'Customize Profile'}</span>
-                </button>
               </div>
             </div>
+            <button
+              onClick={() => {
+                // Dispatch custom event to open rewards sidebar
+                window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
+                setIsOpen(false);
+              }}
+              className='w-full flex items-center space-x-3 mt-2 text-brand-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+            >
+              <span className='text-lg'>🎮</span>
+              <span>Check your Progress</span>
+            </button>
           </div>
 
           {/* Network Status */}
@@ -250,7 +407,7 @@ export const UserDropdown = () => {
                         e.preventDefault();
                       }
                     }}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm ${
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm mb-2 ${
                       miniGamesUnlocked
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-white/40 cursor-not-allowed'
@@ -272,39 +429,7 @@ export const UserDropdown = () => {
                 </Tooltip>
 
                 <hr />
-
-                <a
-                  href='/docs'
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-                >
-                  <span className='text-lg'>📚</span>
-                  <span>Documentation</span>
-                </a>
-
-                <a
-                  href='/docs'
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-                >
-                  <span className='text-lg'>📊</span>
-                  <span>Analytics</span>
-                </a>
-
-                <hr />
-
-                <button
-                  onClick={() => {
-                    // Dispatch custom event to open rewards sidebar
-                    window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
-                    setIsOpen(false);
-                  }}
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-                >
-                  <span className='text-lg'>🎮</span>
-                  <span>Rewards & Progress</span>
-                </button>
-
-                <hr />
-
+                
                 <button
                   onClick={handleDisconnect}
                   className='w-full flex items-center space-x-3 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors duration-200 text-sm'

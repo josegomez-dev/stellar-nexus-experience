@@ -100,17 +100,7 @@ export interface Transaction {
   metadata: Record<string, any>;
 }
 
-export interface LeaderboardEntry {
-  userId: string;
-  username: string;
-  walletAddress: string;
-  totalXp: number;
-  level: number;
-  demosCompleted: number;
-  badgesEarned: number;
-  rank: number;
-  lastUpdated: Date;
-}
+// Leaderboard functionality removed - will be derived from users collection in the future
 
 export interface DemoStats {
   id: string; // demoId
@@ -154,7 +144,6 @@ export const COLLECTIONS = {
   BADGES: 'badges',
   USER_BADGES: 'user_badges',
   TRANSACTIONS: 'transactions',
-  LEADERBOARD: 'leaderboard',
   DEMO_STATS: 'demo_stats',
   DEMO_CLAPS: 'demo_claps',
   DEMO_FEEDBACK: 'demo_feedback',

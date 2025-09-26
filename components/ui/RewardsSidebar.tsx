@@ -89,40 +89,31 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
           </div>
           <div className='text-sm text-gray-300'>Demos Completed</div>
         </div>
-      </div>
+      </div>      
 
-      {/* Recent Badges */}
-      <div className='bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-lg p-4 border border-indigo-400/30'>
-        <h3 className='text-lg font-semibold text-white mb-3'>Recent Badges</h3>
-        <div className='space-y-2'>
-          {safeAccount.badges
-            .sort((a: any, b: any) => {
-              // Sort by earnedAt date, most recent first
-              const aDate = a.earnedAt ? new Date(a.earnedAt.seconds * 1000) : new Date(0);
-              const bDate = b.earnedAt ? new Date(b.earnedAt.seconds * 1000) : new Date(0);
-              return bDate.getTime() - aDate.getTime();
-            })
-            .slice(0, 3)
-            .map((badge: any) => (
-              <div
-                key={badge.id}
-                className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'
-              >
-                <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
-                  🏆
-                </div>
-                <div className='flex-1'>
-                  <div className='text-sm font-medium text-white'>{badge.name}</div>
-                  <div className='text-xs text-gray-400'>{badge.description}</div>
-                </div>
-                <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
-              </div>
-            ))}
-          {safeAccount.badges.length === 0 && (
-            <div className='text-center text-gray-400 py-4'>Complete demos to earn badges!</div>
-          )}
+      {/* Achievement Guide */}
+      <div className='bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4'>
+        <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Achievement Guide</h4>
+        <div className='text-xs text-gray-300 space-y-1'>
+          <div>
+            • <span className='text-blue-300'>Account Creation</span> → Welcome Explorer
+          </div>
+          <div>
+            • <span className='text-blue-300'>Complete Demo 1</span> → Escrow Expert
+          </div>
+          <div>
+            • <span className='text-blue-300'>Complete Demo 2</span> → Trust Guardian
+          </div>
+          <div>
+            • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
+          </div>
+          <div>
+            • <span className='text-purple-300'>Complete Demos 1, 2, 3 </span> →
+            Nexus Master
+          </div>
         </div>
       </div>
+
     </div>
   );
 
@@ -204,7 +195,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
                           <div className='text-xs text-cyan-300'>{badge.xpReward} pts</div>
                         </div>
                       }
-                      position='right'
+                      position='top'
                     >
                       <div>
                         <Badge3D badge={badge} size='sm' compact={true} />
@@ -218,28 +209,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
             )}
           </div>
 
-          {/* Achievement Guide */}
-          <div className='bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4'>
-            <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Achievement Guide</h4>
-            <div className='text-xs text-gray-300 space-y-1'>
-              <div>
-                • <span className='text-blue-300'>Account Creation</span> → Welcome Explorer
-              </div>
-              <div>
-                • <span className='text-blue-300'>Complete Demo 1</span> → Escrow Expert
-              </div>
-              <div>
-                • <span className='text-blue-300'>Complete Demo 2</span> → Trust Guardian
-              </div>
-              <div>
-                • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
-              </div>
-              <div>
-                • <span className='text-purple-300'>Complete Demos 1, 2, 3 + Claim Button</span> →
-                Nexus Master
-              </div>
-            </div>
-          </div>
         </div>
       );
     } catch (error) {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DemoFeedback } from '@/lib/firebase-types';
+import { StarRating } from '@/components/ui/common';
 
 interface SimpleFeedbackModalProps {
   isOpen: boolean;
@@ -91,28 +92,14 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
           {/* Rating */}
           <div className='text-center'>
             <label className='block text-sm font-medium text-white mb-3'>How was it? ⭐</label>
-            <div className='flex justify-center items-center space-x-2'>
-              {[1, 2, 3, 4, 5].map(star => (
-                <button
-                  key={star}
-                  type='button'
-                  onClick={() => setRating(star)}
-                  className={`text-3xl transition-all duration-200 hover:scale-110 ${
-                    star <= rating ? 'text-yellow-400' : 'text-gray-600'
-                  }`}
-                >
-                  ⭐
-                </button>
-              ))}
-            </div>
-            <p className='text-xs text-gray-400 mt-2'>
-              {rating === 0 && 'Click a star to rate ⭐'}
-              {rating === 1 && 'Needs work 😔'}
-              {rating === 2 && 'Could be better 🤔'}
-              {rating === 3 && 'Good 👍'}
-              {rating === 4 && 'Great! 🎉'}
-              {rating === 5 && 'Amazing! 🚀'}
-            </p>
+            <StarRating
+              rating={rating}
+              onRatingChange={setRating}
+              maxRating={5}
+              size="lg"
+              showLabels={true}
+              disabled={isSubmitting}
+            />
           </div>
 
           {/* Quick Feedback Options */}
@@ -150,7 +137,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
           {/* Stats */}
           <div className='bg-white/5 rounded-lg p-3 text-center'>
             <p className='text-xs text-gray-400'>
-              ⏱️ Completed in {Math.round(completionTime)} minutes
+              ⏱️ Completed in {completionTime} minutes
             </p>
           </div>
 

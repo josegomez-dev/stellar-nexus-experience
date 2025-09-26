@@ -3,7 +3,6 @@ import {
   userService,
   demoProgressService,
   badgeService,
-  leaderboardService,
   demoStatsService,
   demoClapService,
   demoFeedbackService,
@@ -12,7 +11,6 @@ import {
 import {
   UserProfile,
   DemoProgress,
-  LeaderboardEntry,
   DemoFeedback,
   UserBadge,
 } from './firebase-types';
@@ -39,7 +37,6 @@ export interface UserProgress {
   badgesEarned: number;
   totalTimeSpent: number;
   streak: number;
-  rank: number;
   completionRate: number;
 }
 
@@ -199,19 +196,7 @@ class UserTrackingService {
         await userService.updateUserStats(userId, newStats);
         console.log('✅ User stats updated');
 
-        // Update leaderboard
-        console.log('🏆 Updating leaderboard...');
-        await leaderboardService.updateLeaderboardEntry({
-          userId,
-          username: user.username,
-          walletAddress: userId,
-          totalXp: newStats.totalXp,
-          level: newStats.level,
-          demosCompleted: newStats.demosCompleted,
-          badgesEarned: user.stats.badgesEarned || 0,
-          lastUpdated: new Date(),
-        });
-        console.log('✅ Leaderboard updated');
+        // Leaderboard functionality removed
       } else {
         console.log('⚠️ User not found, skipping user stats update');
       }
@@ -456,7 +441,7 @@ class UserTrackingService {
       const user = await userService.getUserByWalletAddress(userId);
       if (!user) return null;
 
-      const rank = await leaderboardService.getUserRank(userId);
+      // Leaderboard functionality removed
       const demoProgress = await demoProgressService.getUserDemoProgress(userId);
 
       const totalAttempts = demoProgress.length;
@@ -470,7 +455,6 @@ class UserTrackingService {
         badgesEarned: user.stats.badgesEarned,
         totalTimeSpent: user.stats.totalTimeSpent,
         streak: user.stats.streak,
-        rank,
         completionRate,
       };
     } catch (error) {

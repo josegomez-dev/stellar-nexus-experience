@@ -7,15 +7,13 @@ import {
   demoProgressService, 
   badgeService, 
   transactionService,
-  leaderboardService,
   firebaseUtils 
 } from '../lib/firebase-service';
 import { 
   UserProfile, 
   DemoProgress, 
   UserBadge, 
-  Transaction, 
-  LeaderboardEntry 
+  Transaction
 } from '../lib/firebase-types';
 
 interface FirebaseContextType {
@@ -23,14 +21,12 @@ interface FirebaseContextType {
   userProfile: UserProfile | null;
   userBadges: UserBadge[];
   userTransactions: Transaction[];
-  userRank: number;
   
   // Demo progress
   demoProgress: DemoProgress[];
   currentDemoProgress: DemoProgress | null;
   
-  // Leaderboard
-  leaderboard: LeaderboardEntry[];
+  // Leaderboard functionality removed
   
   // Loading states
   isLoading: boolean;
@@ -43,7 +39,6 @@ interface FirebaseContextType {
   addTransaction: (transaction: Partial<Transaction>) => Promise<string>;
   updateUserStats: (stats: Partial<UserProfile['stats']>) => Promise<void>;
   refreshUserData: () => Promise<void>;
-  refreshLeaderboard: () => Promise<void>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -68,10 +63,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
-  const [userRank, setUserRank] = useState<number>(-1);
+  // User rank removed (was tied to leaderboard)
   const [demoProgress, setDemoProgress] = useState<DemoProgress[]>([]);
   const [currentDemoProgress, setCurrentDemoProgress] = useState<DemoProgress | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  // Leaderboard state removed
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -119,19 +114,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     if (!walletData?.publicKey) return;
     
     try {
-      const [profile, badges, transactions, progress, rank] = await Promise.all([
+      const [profile, badges, transactions, progress] = await Promise.all([
         userService.getUserByWalletAddress(walletData.publicKey),
         badgeService.getUserBadges(walletData.publicKey),
         transactionService.getUserTransactions(walletData.publicKey),
         demoProgressService.getUserDemoProgress(walletData.publicKey),
-        leaderboardService.getUserRank(walletData.publicKey),
       ]);
       
       setUserProfile(profile);
       setUserBadges(badges);
       setUserTransactions(transactions);
       setDemoProgress(progress);
-      setUserRank(rank);
     } catch (error) {
       console.error('Failed to load user data:', error);
     }
@@ -183,17 +176,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     if (!walletData?.publicKey) return;
     
     try {
-      // Update demo progress
-      await demoProgressService.createOrUpdateProgress({
-        userId: walletData.publicKey,
-        demoId,
-        demoName,
-        status: 'completed',
-        completedAt: new Date(),
-        score,
-      });
-      
-      // Update user stats
+      // Update user stats (demo progress is handled by markDemoComplete)
       const newStats = {
         demosCompleted: (userProfile?.stats.demosCompleted || 0) + 1,
         totalXp: (userProfile?.stats.totalXp || 0) + (score || 50),
@@ -203,21 +186,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       
       await userService.updateUserStats(walletData.publicKey, newStats);
       
-      // Update leaderboard
-      await leaderboardService.updateLeaderboardEntry({
-        userId: walletData.publicKey,
-        username: userProfile?.username || 'Unknown',
-        walletAddress: walletData.publicKey,
-        totalXp: newStats.totalXp,
-        level: newStats.level,
-        demosCompleted: newStats.demosCompleted,
-        badgesEarned: userProfile?.stats.badgesEarned || 0,
-        lastUpdated: new Date(),
-      });
-      
       // Refresh data
       await loadUserData();
-      await refreshLeaderboard();
     } catch (error) {
       console.error('Failed to complete demo:', error);
     }
@@ -261,29 +231,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     await loadUserData();
   };
 
-  // Refresh leaderboard
-  const refreshLeaderboard = async () => {
-    try {
-      const topUsers = await leaderboardService.getTopUsers(10);
-      setLeaderboard(topUsers);
-    } catch (error) {
-      console.error('Failed to refresh leaderboard:', error);
-    }
-  };
-
-  // Load leaderboard on mount
-  useEffect(() => {
-    refreshLeaderboard();
-  }, []);
+  // Leaderboard functionality removed
 
   const value: FirebaseContextType = {
     userProfile,
     userBadges,
     userTransactions,
-    userRank,
     demoProgress,
     currentDemoProgress,
-    leaderboard,
     isLoading,
     isInitialized,
     initializeUser,
@@ -292,7 +247,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     addTransaction,
     updateUserStats,
     refreshUserData,
-    refreshLeaderboard,
   };
 
   return (

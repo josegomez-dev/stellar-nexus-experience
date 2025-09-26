@@ -91,7 +91,7 @@ export default function MiniGameStore() {
       { progress: 20, message: 'Loading Game Engine...' },
       { progress: 40, message: 'Initializing Web3 Games...' },
       { progress: 60, message: 'Preparing Rewards System...' },
-      { progress: 80, message: 'Setting up Leaderboards...' },
+      { progress: 80, message: 'Setting up Analytics...' },
       { progress: 100, message: 'Games Ready to Play!' },
     ];
 
@@ -471,7 +471,7 @@ export default function MiniGameStore() {
                     Preparing Rewards System...
                   </p>
                   <p className='animate-fadeInUp' style={{ animationDelay: '4s' }}>
-                    Setting up Leaderboards...
+                    Setting up Analytics...
                   </p>
                   <p className='animate-fadeInUp' style={{ animationDelay: '5s' }}>
                     Games Ready to Play!

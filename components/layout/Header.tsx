@@ -141,7 +141,7 @@ export const Header = () => {
                     </div>
 
                     {/* Rewards Button */}
-                    <Tooltip content='View Rewards & Progress'>
+                    <Tooltip position='bottom' content='View Rewards & Progress'>
                       <button
                         onClick={() => setIsRewardsOpen(true)}
                         className='relative p-2 text-white/80 hover:text-white transition-colors'

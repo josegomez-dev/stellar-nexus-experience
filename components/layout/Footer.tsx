@@ -35,18 +35,6 @@ export const Footer = () => {
               A proof-of-concept application demonstrating Trustless Work escrow management on the
               Stellar blockchain. Experience the future of decentralized work.
             </p>
-            <div className='flex items-center justify-center space-x-4'>
-              <span className='text-xs text-white/60'>Network:</span>
-              <span
-                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  stellarConfig.network === 'TESTNET'
-                    ? 'bg-warning-500/30 text-warning-200 border border-warning-400/30'
-                    : 'bg-success-500/30 text-success-200 border border-success-400/30'
-                }`}
-              >
-                {stellarConfig.network}
-              </span>
-            </div>
           </div>
         </div>
 

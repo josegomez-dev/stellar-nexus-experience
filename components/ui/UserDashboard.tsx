@@ -5,7 +5,7 @@ import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { userTrackingService, UserProgress } from '@/lib/user-tracking-service';
-import { LeaderboardModal } from './LeaderboardModal';
+// LeaderboardModal removed
 import { BadgeShowcase } from './BadgeShowcase';
 
 interface UserDashboardProps {
@@ -14,12 +14,12 @@ interface UserDashboardProps {
 }
 
 export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
-  const { userProfile, userBadges, leaderboard } = useFirebase();
+  const { userProfile, userBadges } = useFirebase();
   const { walletData, isConnected } = useGlobalWallet();
   const { demoStats } = useDemoStats();
 
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  // Leaderboard functionality removed
   const [showBadges, setShowBadges] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'demos' | 'achievements' | 'analytics'>(
     'overview'
@@ -208,18 +208,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
 
               {/* Quick Actions */}
               <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <button
-                  onClick={() => setShowLeaderboard(true)}
-                  className='p-4 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-400/30 rounded-xl hover:from-blue-500/30 hover:to-blue-600/30 transition-all duration-300 text-left'
-                >
-                  <div className='flex items-center space-x-3'>
-                    <div className='text-2xl'>🏆</div>
-                    <div>
-                      <h4 className='font-semibold text-white'>Leaderboard</h4>
-                      <p className='text-blue-300 text-sm'>Check your rank</p>
-                    </div>
-                  </div>
-                </button>
+                {/* Leaderboard functionality removed */}
 
                 <button
                   onClick={() => setShowBadges(true)}
@@ -353,11 +342,11 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 </div>
 
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
-                  <h4 className='font-semibold text-white mb-4'>Global Rank</h4>
+                  <h4 className='font-semibold text-white mb-4'>Progress</h4>
                   <div className='text-3xl font-bold text-accent-300 mb-2'>
-                    #{userProgress?.rank || 'Unranked'}
+                    {userProgress?.completionRate?.toFixed(0) || '0'}%
                   </div>
-                  <p className='text-white/70 text-sm'>Among all users</p>
+                  <p className='text-white/70 text-sm'>Completion Rate</p>
                 </div>
 
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
@@ -374,9 +363,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
       </div>
 
       {/* Modals */}
-      {showLeaderboard && (
-        <LeaderboardModal isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
-      )}
+      {/* Leaderboard modal removed */}
 
       {showBadges && <BadgeShowcase isOpen={showBadges} onClose={() => setShowBadges(false)} />}
     </div>

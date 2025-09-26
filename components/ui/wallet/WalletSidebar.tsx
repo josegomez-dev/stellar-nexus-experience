@@ -533,23 +533,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </button>
                 </div>
               )}
-
-              {/* Network Info - Only show when expanded */}
-              {isExpanded && (
-                <div className='mt-6 p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn'>
-                  <div className='flex items-center justify-center space-x-2 mb-2'>
-                    <div
-                      className={`w-2 h-2 bg-gradient-to-r ${getNetworkColor()} rounded-full animate-pulse`}
-                    ></div>
-                    <span className='text-xs text-white/60'>Network</span>
-                  </div>
-                  <span
-                    className={`text-sm font-medium bg-gradient-to-r ${getNetworkColor()} bg-clip-text text-transparent`}
-                  >
-                    {stellarConfig.network}
-                  </span>
-                </div>
-              )}
             </div>
           ) : (
             // Connected State

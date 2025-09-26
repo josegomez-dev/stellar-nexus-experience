@@ -5,4 +5,5 @@ export { Modal } from './Modal';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ProgressBar } from './ProgressBar';
 export { Card } from './Card';
+export { StarRating } from './StarRating';
 export { ClientOnly } from '../ClientOnly';

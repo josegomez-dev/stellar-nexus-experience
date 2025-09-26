@@ -25,7 +25,6 @@ import {
   Badge,
   UserBadge,
   Transaction,
-  LeaderboardEntry,
   DemoStats,
   DemoClap,
   DemoFeedback,
@@ -285,49 +284,7 @@ export const transactionService = {
   },
 };
 
-// Leaderboard Operations
-export const leaderboardService = {
-  // Update leaderboard entry
-  async updateLeaderboardEntry(entry: Partial<LeaderboardEntry>): Promise<void> {
-    const leaderboardRef = doc(db, COLLECTIONS.LEADERBOARD, entry.userId!);
-    await setDoc(leaderboardRef, {
-      ...entry,
-      lastUpdated: serverTimestamp(),
-    }, { merge: true });
-  },
-
-  // Get top users
-  async getTopUsers(limitCount: number = 10): Promise<LeaderboardEntry[]> {
-    const q = query(
-      collection(db, COLLECTIONS.LEADERBOARD),
-      orderBy('totalXp', 'desc'),
-      limit(limitCount)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map((doc, index) => 
-      convertTimestamps({ 
-        id: doc.id, 
-        rank: index + 1,
-        ...doc.data() 
-      })
-    ) as LeaderboardEntry[];
-  },
-
-  // Get user rank
-  async getUserRank(userId: string): Promise<number> {
-    const q = query(
-      collection(db, COLLECTIONS.LEADERBOARD),
-      orderBy('totalXp', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    const docs = querySnapshot.docs;
-    const userIndex = docs.findIndex(doc => doc.id === userId);
-    
-    return userIndex >= 0 ? userIndex + 1 : -1;
-  },
-};
+// Leaderboard functionality removed - will be derived from users collection in the future
 
 // Utility functions
 export const firebaseUtils = {

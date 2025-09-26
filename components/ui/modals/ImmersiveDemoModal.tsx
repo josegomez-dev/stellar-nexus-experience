@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
@@ -19,6 +19,24 @@ interface ImmersiveDemoModalProps {
   children: React.ReactNode;
   onDemoComplete?: (demoId: string, demoName: string, completionTime: number) => void;
 }
+
+// Progress tracking context
+interface ProgressContextType {
+  updateProgress: (interaction: string) => void;
+  markStepCompleted: (stepName: string) => void;
+}
+
+const ProgressContext = React.createContext<ProgressContextType | null>(null);
+
+// Export the context and hook for use in demo components
+export const useImmersiveProgress = () => {
+  const context = React.useContext(ProgressContext);
+  if (!context) {
+    console.warn('useImmersiveProgress must be used within an ImmersiveDemoModal');
+    return { updateProgress: () => {}, markStepCompleted: () => {} };
+  }
+  return context;
+};
 
 interface FeedbackData {
   rating: number;
@@ -46,6 +64,9 @@ export const ImmersiveDemoModal = ({
   const [progress, setProgress] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [demoSteps, setDemoSteps] = useState<string[]>([]);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [currentDemoStep, setCurrentDemoStep] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackData>({
     rating: 0,
     comment: '',
@@ -60,6 +81,92 @@ export const ImmersiveDemoModal = ({
   // Get transactions for this demo
   const demoTransactions = getTransactionsByDemo(demoId);
 
+  // Get demo steps based on demo ID
+  const getDemoSteps = (demoId: string): string[] => {
+    const steps = {
+      'hello-milestone': [
+        'Initialize Escrow',
+        'Fund Escrow',
+        'Complete Milestone',
+        'Approve Milestone',
+        'Release Funds'
+      ],
+      'dispute-resolution': [
+        'Initialize Escrow',
+        'Fund Escrow',
+        'Complete Milestone',
+        'Raise Dispute',
+        'Resolve Dispute',
+        'Release Funds'
+      ],
+      'micro-marketplace': [
+        'Browse Tasks',
+        'Accept Task',
+        'Initialize Escrow',
+        'Complete Work',
+        'Approve Work',
+        'Release Payment'
+      ],
+      'milestone-voting': [
+        'Initialize Escrow',
+        'Fund Escrow',
+        'Complete Milestone',
+        'Vote on Milestone',
+        'Release Funds'
+      ]
+    };
+    return steps[demoId as keyof typeof steps] || ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5'];
+  };
+
+  // Calculate meaningful progress based on steps and time
+  const calculateProgress = (completedSteps: string[], totalSteps: string[], elapsedTime: number, estimatedTime: number): number => {
+    const stepProgress = (completedSteps.length / totalSteps.length) * 60; // 60% from steps
+    const timeProgress = Math.min((elapsedTime / (estimatedTime * 60)) * 40, 40); // 40% from time
+    return Math.min(stepProgress + timeProgress, 100);
+  };
+
+  // Function to mark a demo step as completed
+  const markStepCompleted = (stepName: string) => {
+    if (!completedSteps.includes(stepName)) {
+      setCompletedSteps(prev => [...prev, stepName]);
+      setCurrentDemoStep(prev => prev + 1);
+    }
+  };
+
+  // Function to detect demo interactions and update progress
+  const updateDemoProgress = (interaction: string) => {
+    // Map interactions to demo steps
+    const interactionMap: Record<string, string> = {
+      'escrow_initialized': 'Initialize Escrow',
+      'escrow_funded': 'Fund Escrow',
+      'milestone_completed': 'Complete Milestone',
+      'milestone_approved': 'Approve Milestone',
+      'funds_released': 'Release Funds',
+      'dispute_raised': 'Raise Dispute',
+      'dispute_resolved': 'Resolve Dispute',
+      'task_accepted': 'Accept Task',
+      'work_completed': 'Complete Work',
+      'work_approved': 'Approve Work',
+      'payment_released': 'Release Payment',
+      'voting_completed': 'Vote on Milestone'
+    };
+
+    const stepName = interactionMap[interaction];
+    if (stepName) {
+      markStepCompleted(stepName);
+    }
+  };
+
+  // Initialize demo steps when demo starts
+  useEffect(() => {
+    if (currentStep === 'demo') {
+      const steps = getDemoSteps(demoId);
+      setDemoSteps(steps);
+      setCompletedSteps([]);
+      setCurrentDemoStep(0);
+    }
+  }, [currentStep, demoId]);
+
   // Progress tracking
   useEffect(() => {
     if (currentStep === 'demo' && startTime) {
@@ -67,15 +174,14 @@ export const ImmersiveDemoModal = ({
         const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000);
         setElapsedTime(elapsed);
 
-        // Calculate progress based on estimated time
-        const estimatedSeconds = estimatedTime * 60;
-        const progressPercent = Math.min((elapsed / estimatedSeconds) * 100, 100);
+        // Calculate meaningful progress based on steps and time
+        const progressPercent = calculateProgress(completedSteps, demoSteps, elapsed, estimatedTime);
         setProgress(progressPercent);
       }, 1000);
 
       return () => clearInterval(interval);
     }
-  }, [currentStep, startTime, estimatedTime]);
+  }, [currentStep, startTime, estimatedTime, completedSteps, demoSteps]);
 
   // Keyboard support for ESC key
   useEffect(() => {
@@ -130,7 +236,7 @@ export const ImmersiveDemoModal = ({
       setIsCompletingDemo(true);
       console.log('🎯 Complete Demo button clicked!', { demoId, demoTitle, elapsedTime });
 
-      const completionTimeMinutes = Math.round(elapsedTime / 60);
+      const completionTimeMinutes = Math.max(1, Math.round(elapsedTime / 60));
       console.log('📊 Completion time:', completionTimeMinutes, 'minutes');
 
       // Track demo completion
@@ -227,7 +333,7 @@ export const ImmersiveDemoModal = ({
           comment: feedback.comment,
           difficulty: feedback.difficulty,
           wouldRecommend: feedback.wouldRecommend,
-          completionTime: Math.round(elapsedTime / 60),
+          completionTime: Math.max(1, Math.round(elapsedTime / 60)),
         });
       }
 
@@ -413,18 +519,21 @@ export const ImmersiveDemoModal = ({
               </div>
             </div>
 
-            {/* Progress Bar and Transaction Status */}
+            {/* Enhanced Progress Bar and Transaction Status */}
             {currentStep === 'demo' && (
               <div className='flex items-center space-x-4'>
                 <div className='flex items-center space-x-3'>
                   <div className='text-sm text-white/70'>{formatTime(elapsedTime)}</div>
-                  <div className='w-32 h-2 bg-white/10 rounded-full overflow-hidden'>
+                  <div className='w-40 h-2 bg-white/10 rounded-full overflow-hidden'>
                     <div
                       className={`h-full bg-gradient-to-r ${colorClasses.progressGradient} transition-all duration-300`}
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
                   <div className='text-sm text-white/70'>{Math.round(progress)}%</div>
+                  <div className='text-xs text-white/50'>
+                    ({completedSteps.length}/{demoSteps.length} steps)
+                  </div>
                 </div>
 
                 {/* Transaction Status Indicator and Account Explorer */}
@@ -579,7 +688,11 @@ export const ImmersiveDemoModal = ({
                 </div>
 
                 {/* Demo Content */}
-                <div className='bg-white/5 rounded-xl p-4 border border-white/20'>{children}</div>
+                <div className='bg-white/5 rounded-xl p-4 border border-white/20'>
+                  <ProgressContext.Provider value={{ updateProgress: updateDemoProgress, markStepCompleted }}>
+                    {children}
+                  </ProgressContext.Provider>
+                </div>
 
                 {/* Complete Demo Button */}
                 <div className='text-center'>
@@ -916,21 +1029,72 @@ export const ImmersiveDemoModal = ({
                   lost and you'll need to start over.
                 </p>
 
-                {/* Progress indicator */}
-                {progress > 0 && (
-                  <div className='bg-white/5 rounded-lg p-3 border border-white/10'>
-                    <div className='text-xs text-white/60 mb-2'>Current Progress</div>
-                    <div className='w-full h-2 bg-white/10 rounded-full overflow-hidden'>
-                      <div
-                        className={`h-full bg-gradient-to-r ${colorClasses.progressGradient} transition-all duration-300`}
-                        style={{ width: `${progress}%` }}
-                      ></div>
+                {/* Enhanced Progress indicator */}
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <div className='flex items-center justify-between mb-3'>
+                    <div className='text-sm font-medium text-white'>Current Progress</div>
+                    <div className='text-sm font-bold text-brand-300'>{Math.round(progress)}%</div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className='w-full h-3 bg-white/10 rounded-full overflow-hidden mb-3'>
+                    <div
+                      className={`h-full bg-gradient-to-r ${colorClasses.progressGradient} transition-all duration-500 ease-out`}
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Progress Details */}
+                  <div className='grid grid-cols-2 gap-3 text-xs'>
+                    <div className='bg-white/5 rounded-lg p-2 border border-white/5'>
+                      <div className='text-white/60 mb-1'>Steps Completed</div>
+                      <div className='text-white font-semibold'>
+                        {completedSteps.length} / {demoSteps.length}
+                      </div>
                     </div>
-                    <div className='text-xs text-white/60 mt-1'>
-                      {Math.round(progress)}% complete
+                    <div className='bg-white/5 rounded-lg p-2 border border-white/5'>
+                      <div className='text-white/60 mb-1'>Time Spent</div>
+                      <div className='text-white font-semibold'>
+                        {formatTime(elapsedTime)}
+                      </div>
                     </div>
                   </div>
-                )}
+
+                  {/* Completed Steps List */}
+                  {completedSteps.length > 0 && (
+                    <div className='mt-3 pt-3 border-t border-white/10'>
+                      <div className='text-xs text-white/60 mb-2'>Completed Steps:</div>
+                      <div className='space-y-1'>
+                        {completedSteps.map((step, index) => (
+                          <div key={step} className='flex items-center space-x-2'>
+                            <div className='w-1.5 h-1.5 bg-green-400 rounded-full'></div>
+                            <span className='text-xs text-green-300'>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Remaining Steps */}
+                  {demoSteps.filter(step => !completedSteps.includes(step)).length > 0 && (
+                    <div className='mt-2'>
+                      <div className='text-xs text-white/60 mb-2'>Remaining Steps:</div>
+                      <div className='space-y-1'>
+                        {demoSteps.filter(step => !completedSteps.includes(step)).slice(0, 3).map((step, index) => (
+                          <div key={step} className='flex items-center space-x-2'>
+                            <div className='w-1.5 h-1.5 bg-white/30 rounded-full'></div>
+                            <span className='text-xs text-white/60'>{step}</span>
+                          </div>
+                        ))}
+                        {demoSteps.filter(step => !completedSteps.includes(step)).length > 3 && (
+                          <div className='text-xs text-white/40 ml-3'>
+                            +{demoSteps.filter(step => !completedSteps.includes(step)).length - 3} more steps
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className='flex space-x-3'>
                   <button

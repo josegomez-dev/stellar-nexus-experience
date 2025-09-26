@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DemoFeedback } from '@/lib/firebase-types';
+import { StarRating } from '@/components/ui/common';
 
 interface DemoFeedbackModalProps {
   isOpen: boolean;
@@ -106,28 +107,14 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             <label className='block text-sm font-medium text-white mb-3'>
               Overall Rating <span className='text-red-400'>*</span>
             </label>
-            <div className='flex items-center space-x-2'>
-              {[1, 2, 3, 4, 5].map(star => (
-                <button
-                  key={star}
-                  type='button'
-                  onClick={() => setRating(star)}
-                  className={`text-3xl transition-all duration-200 hover:scale-110 ${
-                    star <= rating ? 'text-yellow-400' : 'text-gray-600'
-                  }`}
-                >
-                  ⭐
-                </button>
-              ))}
-              <span className='ml-4 text-white/70'>
-                {rating === 0 && 'Please select a rating'}
-                {rating === 1 && 'Poor'}
-                {rating === 2 && 'Fair'}
-                {rating === 3 && 'Good'}
-                {rating === 4 && 'Very Good'}
-                {rating === 5 && 'Excellent'}
-              </span>
-            </div>
+            <StarRating
+              rating={rating}
+              onRatingChange={setRating}
+              maxRating={5}
+              size="lg"
+              showLabels={true}
+              disabled={isSubmitting}
+            />
           </div>
 
           {/* Feedback */}
@@ -227,7 +214,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
               <div>
                 <span className='text-white/70'>Completion Time:</span>
                 <div className='text-brand-400 font-medium'>
-                  {Math.round(completionTime)} minutes
+                  {completionTime} minutes
                 </div>
               </div>
               <div>

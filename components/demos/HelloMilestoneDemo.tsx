@@ -13,6 +13,7 @@ import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHi
 import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
 import { useDemoStats } from '@/hooks/useDemoStats';
 import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
+import { useImmersiveProgress } from '@/components/ui/modals/ImmersiveDemoModal';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { userTrackingService } from '@/lib/user-tracking-service';
 import { DemoFeedback } from '@/lib/firebase-types';
@@ -55,6 +56,7 @@ export const HelloMilestoneDemo = () => {
   const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
     useDemoCompletionHistory();
   const { markDemoComplete } = useDemoStats();
+  const { updateProgress } = useImmersiveProgress();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
@@ -585,14 +587,15 @@ export const HelloMilestoneDemo = () => {
       // Complete the demo with a good score
       const completeThisDemo = async () => {
         try {
-          // Calculate completion time
-          const completionTime = demoStartTime
+          // Calculate completion time in minutes
+          const completionTimeInSeconds = demoStartTime
             ? Math.round((Date.now() - demoStartTime) / 1000)
             : 0;
+          const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
 
           // Calculate score based on performance (85% base + bonuses)
           let score = 85;
-          if (completionTime < 300) score += 10; // Bonus for quick completion
+          if (completionTimeInSeconds < 300) score += 10; // Bonus for quick completion
           score += 5; // Bonus for using real blockchain
           score = Math.min(100, score); // Cap at 100%
 
@@ -615,20 +618,20 @@ export const HelloMilestoneDemo = () => {
             demoName: 'Baby Steps to Riches',
             score,
             pointsEarned,
-            completionTime,
+            completionTime: completionTimeInSeconds,
             isFirstCompletion,
             network: walletData?.network || 'TESTNET',
             walletAddress: walletData?.publicKey || '',
           });
 
-          // Complete the demo in the account system (this handles points transactions)
+          // Use the centralized account system for completion
           await completeDemo('hello-milestone', score);
 
-          // Mark demo as complete in Firebase stats
-          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTime);
+          // Mark demo as complete in Firebase stats (store in minutes)
+          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTimeInMinutes);
 
           // Set completion time and show feedback modal
-          setDemoCompletionTime(Math.round(completionTime / 60)); // Convert to minutes
+          setDemoCompletionTime(completionTimeInMinutes);
           setShowFeedbackModal(true);
         } catch (error) {
           console.error('Failed to complete demo:', error);
@@ -891,6 +894,9 @@ export const HelloMilestoneDemo = () => {
             setDemoStarted(true);
             setDemoStartTime(Date.now());
             completionTriggeredRef.current = false; // Reset completion flag for new demo
+            
+            // Update progress tracking
+            updateProgress('escrow_initialized');
 
             // Force step progression for initialization
             console.log('🚀 Forcing step progression to step 1 (fund escrow)');
@@ -974,6 +980,9 @@ export const HelloMilestoneDemo = () => {
         setDemoStarted(true);
         setDemoStartTime(Date.now());
         completionTriggeredRef.current = false; // Reset completion flag for new demo
+        
+        // Update progress tracking
+        updateProgress('escrow_initialized');
 
         // Clear from pending transactions
         setPendingTransactions(prev => {
@@ -1117,6 +1126,9 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(2);
+      
+      // Update progress tracking
+      updateProgress('escrow_funded');
 
       // Scroll to next step after a short delay
       setTimeout(() => {
@@ -1229,6 +1241,9 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setMilestoneStatus('completed');
       setCurrentStep(3);
+      
+      // Update progress tracking
+      updateProgress('milestone_completed');
 
       // Scroll to next step after a short delay
       setTimeout(() => {
@@ -1339,6 +1354,9 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(4);
+      
+      // Update progress tracking
+      updateProgress('milestone_approved');
 
       // Scroll to next step after a short delay
       setTimeout(() => {
@@ -1449,6 +1467,9 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(5);
+      
+      // Update progress tracking
+      updateProgress('funds_released');
 
       // Scroll to completion section
       setTimeout(() => {

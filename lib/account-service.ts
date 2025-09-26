@@ -280,22 +280,7 @@ export class AccountService {
       // Don't throw error - stats update failure shouldn't break demo completion
     }
 
-    // Also update Firebase demo progress for consistency
-    try {
-      const demoName = this.getDemoName(demoId);
-      await demoProgressService.createOrUpdateProgress({
-        userId: accountId,
-        demoId,
-        demoName,
-        status: 'completed',
-        completedAt: new Date(),
-        score,
-      });
-      console.log(`✅ Demo completion also tracked in Firebase: ${demoId}`);
-    } catch (firebaseError) {
-      console.error(`⚠️ Failed to track demo completion in Firebase: ${demoId}`, firebaseError);
-      // Don't throw error - Account Service is the primary system
-    }
+    // Demo progress is tracked separately by markDemoComplete to avoid duplicates
 
     // Only check for badge rewards on first completion
     if (isFirstCompletion) {
@@ -675,14 +660,7 @@ export class AccountService {
     return querySnapshot.docs.map(doc => doc.data() as PointsTransaction);
   }
 
-  // Get leaderboard
-  async getLeaderboard(limitCount: number = 10): Promise<UserAccount[]> {
-    const accountsRef = collection(db, 'accounts');
-    const q = query(accountsRef, orderBy('profile.totalPoints', 'desc'), limit(limitCount));
-
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data() as UserAccount);
-  }
+  // Leaderboard functionality removed - will be derived from accounts collection in the future
 
   // Update profile
   async updateProfile(

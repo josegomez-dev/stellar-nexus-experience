@@ -71,7 +71,8 @@ export const DisputeResolutionDemo = () => {
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Demo completion tracking
-  const [demoStartTime, setDemoStartTime] = useState<number>(Date.now());
+  const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
+  const [demoStarted, setDemoStarted] = useState(false);
 
   // Mock hooks
   const mockHooks = {
@@ -140,13 +141,16 @@ export const DisputeResolutionDemo = () => {
       const completeDemo = async () => {
         try {
           const score = 95; // High score for completing dispute resolution
-          const completionTime = Math.floor((Date.now() - demoStartTime) / 1000); // Calculate completion time in seconds
+          const completionTimeInSeconds = demoStartTime 
+            ? Math.floor((Date.now() - demoStartTime) / 1000) 
+            : 0; // Calculate completion time in seconds
+          const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
 
           // Use the centralized account system for completion
           await completeDemoInAccount('dispute-resolution', score);
 
-          // Mark demo as complete in Firebase stats
-          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTime);
+          // Mark demo as complete in Firebase stats (store in minutes)
+          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTimeInMinutes);
 
           console.log('✅ Dispute Resolution Demo completed successfully');
         } catch (error) {
@@ -218,6 +222,12 @@ export const DisputeResolutionDemo = () => {
       const result = await hooks.initializeEscrow.initializeEscrow(payload);
       setContractId(result.contractId);
       setEscrowData(result.escrow);
+
+      // Start demo timing when escrow is initialized
+      if (!demoStarted) {
+        setDemoStarted(true);
+        setDemoStartTime(Date.now());
+      }
 
       updateTransaction(txHash, 'success', 'Dispute resolution escrow initialized successfully');
 

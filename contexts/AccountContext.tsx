@@ -119,12 +119,12 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         console.log('Points transactions loaded', { count: transactions.length });
 
         // Welcome back message
-        addToast({
-          type: 'success',
-          title: 'Welcome Back!',
-          message: `Account loaded with ${userAccount.profile.totalPoints} points`,
-          duration: 4000,
-        });
+        // addToast({
+        //   type: 'success',
+        //   title: 'Welcome Back!',
+        //   message: `Account loaded with ${userAccount.profile.totalPoints} points`,
+        //   duration: 4000,
+        // });
       }
     } catch (err) {
       console.error('Error loading account:', err);
