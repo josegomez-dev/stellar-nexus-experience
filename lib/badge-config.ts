@@ -78,7 +78,7 @@ export const BADGE_CONFIG: Record<string, Badge> = {
   'nexus-master': {
     id: 'nexus-master',
     name: 'Nexus Master',
-    description: 'Completed all key demos and achieved mastery',
+    description: 'Master of all trustless work demos',
     icon: '👑',
     category: 'main_achievement',
     rarity: 'legendary',

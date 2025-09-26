@@ -5,6 +5,7 @@ import { useAccount } from '@/contexts/AccountContext';
 import { getAllBadges, getBadgeRarityConfig } from '@/lib/badge-config';
 import { type Badge } from '@/lib/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 interface RewardsSidebarProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
   const { account, pointsTransactions, getLevel, getExperienceProgress, getMainDemoProgress } =
     useAccount();
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'badges' | 'transactions' | 'leaderboard'
+    'overview' | 'badges' | 'transactions'
   >('overview');
   const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
 
@@ -56,7 +57,6 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'badges', label: 'Badges', icon: '🏆' },
     { id: 'transactions', label: 'History', icon: '📜' },
-    { id: 'leaderboard', label: 'Ranking', icon: '🥇' },
   ];
 
   const renderOverview = () => (
@@ -196,9 +196,22 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
               <div className='space-y-2'>
                 {badgesWithStatus.map(badge => (
                   <div key={badge.id} className='relative'>
-                    <Badge3D badge={badge} size='sm' compact={true} />
-                    {/* Main Achievement Indicator */}
-                    <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                    <Tooltip
+                      content={
+                        <div className='text-center'>
+                          <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
+                          <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
+                          <div className='text-xs text-cyan-300'>{badge.xpReward} pts</div>
+                        </div>
+                      }
+                      position='right'
+                    >
+                      <div>
+                        <Badge3D badge={badge} size='sm' compact={true} />
+                        {/* Main Achievement Indicator */}
+                        <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                      </div>
+                    </Tooltip>
                   </div>
                 ))}
               </div>
@@ -291,63 +304,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
     </div>
   );
 
-  const renderLeaderboard = () => (
-    <div className='space-y-4'>
-      <div className='text-center mb-4 relative'>
-        <div className='text-lg font-semibold text-white'>Global Leaderboard</div>
-        <div className='text-sm text-gray-400'>Top players by points</div>
-
-        {/* Coming Soon Badge */}
-        <div className='absolute -top-2 -right-2'>
-          <div className='bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-3 py-1 rounded-full font-bold text-xs shadow-lg animate-pulse'>
-            🚧 Coming Soon
-          </div>
-        </div>
-      </div>
-
-      <div className='space-y-2'>
-        {/* Enhanced placeholder with blur effect */}
-        <div className='relative overflow-hidden rounded-lg'>
-          {/* Blur Overlay */}
-          <div className='absolute inset-0 bg-black/60 backdrop-blur-md rounded-lg z-10'></div>
-
-          {/* Content with reduced opacity */}
-          <div className='relative z-20 opacity-30'>
-            <div className='bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-lg p-4 border border-gray-600/30'>
-              <div className='space-y-3'>
-                {/* Mock leaderboard entries */}
-                {[1, 2, 3, 4, 5].map(position => (
-                  <div
-                    key={position}
-                    className='flex items-center justify-between p-2 bg-black/20 rounded'
-                  >
-                    <div className='flex items-center space-x-3'>
-                      <div className='w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-xs font-bold'>
-                        {position}
-                      </div>
-                      <div className='text-sm text-white font-medium'>Player {position}</div>
-                    </div>
-                    <div className='text-sm text-gray-300'>
-                      {(1000 - position * 150).toLocaleString()} pts
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Center message */}
-          <div className='absolute inset-0 flex items-center justify-center z-30'>
-            <div className='text-center'>
-              <div className='text-4xl mb-2'>🏆</div>
-              <div className='text-white font-semibold mb-1'>Leaderboard Coming Soon!</div>
-              <div className='text-sm text-gray-400'>Compete with other players</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Leaderboard functionality removed
 
   const renderContent = () => {
     switch (activeTab) {
@@ -357,8 +314,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
         return renderBadges();
       case 'transactions':
         return renderTransactions();
-      case 'leaderboard':
-        return renderLeaderboard();
+      // Leaderboard functionality removed
       default:
         return renderOverview();
     }
@@ -373,7 +329,7 @@ export const RewardsSidebar: React.FC<RewardsSidebarProps> = ({ isOpen, onClose 
       <div className='absolute h-100 w-80 bg-gradient-to-b from-gray-900 to-gray-800 border-r border-gray-700 z-50 transform transition-transform duration-300 translate-x-0'>
         {/* Header */}
         <div className='flex items-center justify-between p-4 border-b border-gray-700'>
-          <h2 className='text-xl font-bold text-white'>🎮 Rewards</h2>
+          <h2 className='text-xl font-bold text-white'>🎮 Rewards & Progress</h2>
           <button onClick={onClose} className='text-gray-400 hover:text-white transition-colors'>
             ✕
           </button>
