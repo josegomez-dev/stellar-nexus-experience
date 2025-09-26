@@ -336,13 +336,13 @@ export const UserDropdown = () => {
                     ? `${walletData?.publicKey?.slice(0, 6)}...${walletData?.publicKey?.slice(-4)}`
                     : 'Not Connected'}
                 </p>
-                  <div className='flex items-center space-x-2 mt-1'>
-                    <span className='text-brand-300 text-xs'>Level {stats.level}</span>
-                    <span className='text-white/50 text-xs'>|</span>
-                    <span className='text-accent-300 text-xs'>
-                      {stats.totalDemosCompleted} demos
-                    </span>
-                  </div>
+                {/* <div className='flex items-center space-x-2 mt-1'>
+                  <span className='text-brand-300 text-xs'>Level {stats.level}</span>
+                  <span className='text-white/50 text-xs'>|</span>
+                  <span className='text-accent-300 text-xs'>
+                    {stats.totalDemosCompleted} demos
+                  </span>
+                </div> */}
               </div>
             </div>
             <button

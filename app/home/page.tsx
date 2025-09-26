@@ -110,6 +110,7 @@ const DemoSelector = ({
   const { getCompletedDemos, account, getMainDemoProgress } = useAccount();
   const { showBadgeAnimation } = useBadgeAnimation();
   const { demoStats, clapDemo, refreshStats } = useDemoStats();
+  const [isClaimingNexusMaster, setIsClaimingNexusMaster] = useState(false);
 
   // Get badge information for each demo
   const getDemoBadge = (demoId: string) => {
@@ -649,8 +650,18 @@ const DemoSelector = ({
                       /* Ready to Claim Nexus Master */
                       <div className='flex flex-col items-center justify-center h-full'>
                         <div className='text-4xl mb-4 animate-bounce'>👑</div>
+                        <div className='text-lg font-bold text-purple-300 mb-2'>NEXUS MASTER</div>
+                        <div className='text-sm text-gray-300/80 mb-4 text-center px-2'>
+                          Master of all trustless work demos
+                        </div>
+                        <div className='text-xs text-yellow-300/70 mb-4'>
+                          Reward: 200 XP + Legendary Badge
+                        </div>
                         <button
                           onClick={async () => {
+                            if (isClaimingNexusMaster) return; // Prevent multiple clicks
+                            
+                            setIsClaimingNexusMaster(true);
                             try {
                               if (account) {
                                 // Award the Nexus Master badge directly
@@ -691,11 +702,33 @@ const DemoSelector = ({
                                 message: 'Failed to claim Nexus Master badge. Please try again.',
                                 duration: 4000,
                               });
+                            } finally {
+                              setIsClaimingNexusMaster(false);
                             }
                           }}
-                          className='px-6 py-3 font-bold rounded-lg transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-purple-500/50 border border-white/30'
+                          disabled={isClaimingNexusMaster}
+                          className={`px-6 py-3 font-bold rounded-lg transition-all duration-300 transform ${
+                            isClaimingNexusMaster 
+                              ? 'scale-95 cursor-not-allowed opacity-75' 
+                              : 'hover:scale-105 cursor-pointer'
+                          } bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-purple-500/50 border border-white/30 relative overflow-hidden`}
                         >
-                          CLAIM NEXUS MASTER
+                          {isClaimingNexusMaster && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse"></div>
+                          )}
+                          <div className="relative flex items-center justify-center space-x-2">
+                            {isClaimingNexusMaster ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                <span>PROCESSING...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>👑</span>
+                                <span>CLAIM NEXUS MASTER</span>
+                              </>
+                            )}
+                          </div>
                         </button>
                       </div>
                     ) : (
