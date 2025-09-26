@@ -966,6 +966,51 @@ export const DisputeResolutionDemo = () => {
             </div>
           )}
 
+          {/* Funding Step */}
+          {contractId && !escrowData?.metadata?.funded && (
+            <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
+              <h3 className='text-xl font-semibold text-white mb-4'>💰 Fund Escrow</h3>
+              <p className='text-white/70 mb-6'>
+                Now fund the escrow contract with 10 USDC to enable milestone management.
+              </p>
+              <div className='text-center'>
+                <Tooltip
+                  content={
+                    !isConnected || hooks.fundEscrow.isLoading ? (
+                      !isConnected ? (
+                        <div className='text-center'>
+                          <div className='text-red-300 font-semibold mb-1'>
+                            🔌 Wallet Not Connected
+                          </div>
+                          <div className='text-xs text-gray-300'>
+                            Please connect your wallet to fund the escrow
+                          </div>
+                        </div>
+                      ) : (
+                        <div className='text-center'>
+                          <div className='text-yellow-300 font-semibold mb-1'>
+                            ⏳ Processing...
+                          </div>
+                          <div className='text-xs text-gray-300'>
+                            Please wait for the funding transaction to complete
+                          </div>
+                        </div>
+                      )
+                    ) : null
+                  }
+                  position='top'
+                >
+                  <button
+                    onClick={handleFundEscrow}
+                    disabled={!isConnected || hooks.fundEscrow.isLoading}
+                    className='px-8 py-3 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {hooks.fundEscrow.isLoading ? 'Funding...' : 'Fund Escrow (10 USDC)'}
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
+          )}
 
           {/* Milestones Management */}
           {contractId && escrowData?.metadata?.funded && (
