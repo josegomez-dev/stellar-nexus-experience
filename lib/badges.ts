@@ -2,7 +2,7 @@ export interface BadgeDefinition {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: string; // Keep for backward compatibility, but prefer using BadgeEmblem component
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   category: 'demo' | 'milestone' | 'achievement' | 'special';
   requirements: {

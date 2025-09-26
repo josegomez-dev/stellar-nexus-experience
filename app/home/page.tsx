@@ -19,6 +19,7 @@ import { AccountService } from '@/lib/account-service';
 import { useToast } from '@/contexts/ToastContext';
 import { useBadgeAnimation } from '@/contexts/BadgeAnimationContext';
 import { getBadgeById, getAllBadges } from '@/lib/badge-config';
+import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/modals/ImmersiveDemoModal';
 import { TechTreeModal } from '@/components/ui/modals/TechTreeModal';
@@ -422,14 +423,17 @@ const DemoSelector = ({
                     <div
                       className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}
                     >
-                      <span className='text-lg badge-icon-bounce'>{badge.icon}</span>
+                      <div className='badge-icon-bounce'>
+                        <BadgeEmblem id={badge.id} size='sm' className='text-white' />
+                      </div>
                       <span>{badge.name}</span>
                     </div>
                   ) : (
                     <div
                       className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2`}
                     >
-                      ✅ Completed
+                      <BadgeEmblem id='perfect-score' size='sm' className='text-white' />
+                      <span>Completed</span>
                     </div>
                   )}
                 </div>
@@ -439,7 +443,9 @@ const DemoSelector = ({
               {isNexusMasterCard && hasNexusMasterBadge && (
                 <div className='absolute top-4 right-4 z-50'>
                   <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine'>
-                    <span className='text-lg badge-icon-bounce'>👑</span>
+                    <div className='badge-icon-bounce'>
+                      <BadgeEmblem id='nexus-master' size='sm' className='text-white' />
+                    </div>
                     <span>Nexus Master</span>
                   </div>
                 </div>
@@ -453,10 +459,42 @@ const DemoSelector = ({
               {/* Floating particles for completed demos with badges */}
               {((isCompleted && earnedBadge) || isNexusMasterCompleted) && (
                 <div className='absolute inset-0 pointer-events-none overflow-hidden'>
-                  <div className='absolute top-4 left-4 w-2 h-2 bg-yellow-400 rounded-full floating-particle opacity-70'></div>
-                  <div className='absolute top-8 right-8 w-1 h-1 bg-orange-400 rounded-full floating-particle opacity-80'></div>
-                  <div className='absolute bottom-8 left-8 w-1 h-1 bg-yellow-300 rounded-full floating-particle opacity-60'></div>
-                  <div className='absolute bottom-4 right-4 w-2 h-2 bg-orange-300 rounded-full floating-particle opacity-90'></div>
+                  {(() => {
+                    // Get the specific badge ID for this demo
+                    let badgeId = 'nexus-master'; // Default for Nexus Master card
+                    
+                    if (isNexusMasterCard) {
+                      badgeId = 'nexus-master';
+                    } else if (earnedBadge && badge) {
+                      // Use the earned badge ID
+                      badgeId = badge.id;
+                    } else if (demo.id) {
+                      // Map demo ID to badge ID
+                      const demoBadgeMap: Record<string, string> = {
+                        'hello-milestone': 'escrow-expert',
+                        'dispute-resolution': 'trust-guardian', 
+                        'micro-marketplace': 'stellar-champion',
+                      };
+                      badgeId = demoBadgeMap[demo.id] || 'nexus-master';
+                    }
+                    
+                    return (
+                      <>
+                        <div className='absolute top-4 left-4 floating-particle opacity-70'>
+                          <BadgeEmblem id={badgeId} size='sm' className='text-yellow-400' />
+                        </div>
+                        <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
+                          <BadgeEmblem id={badgeId} size='sm' className='text-orange-400' />
+                        </div>
+                        <div className='absolute bottom-8 left-8 floating-particle opacity-60' style={{ animationDelay: '1s' }}>
+                          <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
+                        </div>
+                        <div className='absolute bottom-4 right-4 floating-particle opacity-90' style={{ animationDelay: '1.5s' }}>
+                          <BadgeEmblem id={badgeId} size='sm' className='text-orange-300' />
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -599,7 +637,9 @@ const DemoSelector = ({
                           className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).background} border ${getDemoBadgeColors(demo.color).border} rounded-lg p-4 mb-3`}
                         >
                           <div className='flex items-center gap-3 mb-2'>
-                            <span className='text-3xl celebration-sparkle'>{badge.icon}</span>
+                            <div className='celebration-sparkle'>
+                              <BadgeEmblem id={badge.id} size='lg' />
+                            </div>
                             <div>
                               <h5
                                 className={`font-bold ${getDemoBadgeColors(demo.color).titleColor} text-lg`}

@@ -188,7 +188,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               onClick={() => setIsMainAchievementsCollapsed(!isMainAchievementsCollapsed)}
             >
               <div className='w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full'></div>
-              <h3 className='text-lg font-semibold text-white'>Main Achievements</h3>
+              <h3 className='text-lg font-semibold text-white'>Top Badges</h3>
               <div className='bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-2 py-1 rounded-full text-xs text-blue-300 border border-blue-400/30'>
                 {earnedCount} / {totalCount}
               </div>

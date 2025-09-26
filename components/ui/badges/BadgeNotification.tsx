@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Badge } from '@/contexts/AuthContext';
+import { BadgeEmblem } from './BadgeEmblem';
 
 interface BadgeNotificationProps {
   badge: Badge;
@@ -97,7 +98,9 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({ badge, onC
             {/* Header */}
             <div className='flex items-center justify-between mb-3'>
               <div className='flex items-center space-x-2'>
-                <div className='text-2xl animate-bounce'>{badge.icon}</div>
+                <div className='animate-bounce'>
+                  <BadgeEmblem id={badge.id} size='md' />
+                </div>
                 <div>
                   <h3 className='text-white font-bold text-sm'>Badge Earned!</h3>
                   <p className='text-white/80 text-xs'>Congratulations!</p>

@@ -12,6 +12,7 @@ import {
   getCategoryConfig,
 } from '@/lib/badge-config';
 import { userTrackingService } from '@/lib/user-tracking-service';
+import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 
 interface BadgeShowcaseProps {
   isOpen: boolean;
@@ -160,8 +161,8 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
                 >
                   {/* Badge Icon */}
                   <div className='text-center mb-3'>
-                    <div className={`text-4xl mb-2 ${isEarned ? '' : 'grayscale opacity-50'}`}>
-                      {badge.icon}
+                    <div className={`mb-2 ${isEarned ? '' : 'grayscale opacity-50'}`}>
+                      <BadgeEmblem id={badge.id} size='lg' />
                     </div>
 
                     {/* Rarity Indicator */}
