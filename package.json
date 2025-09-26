@@ -15,8 +15,6 @@
     "code-quality": "npm run lint:check && npm run type-check",
     "code-quality:fix": "npm run lint:fix && npm run format",
     "test": "echo 'No tests configured'",
-    "purge-css": "node scripts/purge-css.js",
-    "optimize-css": "npm run purge-css && npm run format",
     "prepare": "husky || true",
     "check": "npm run code-quality",
     "check:fix": "npm run code-quality:fix",
