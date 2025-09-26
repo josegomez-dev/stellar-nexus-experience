@@ -156,24 +156,14 @@ const DemoSelector = ({
     };
   };
 
-  // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
+  // Check if user has unlocked mini-games access (earned Nexus Master badge)
   const hasUnlockedMiniGames = () => {
     if (!account) return false;
 
-    // Check if all 3 main demos are completed
-    const mainDemoIds = ['hello-milestone', 'dispute-resolution', 'micro-marketplace'];
-    const allDemosCompleted = mainDemoIds.every(
-      demoId => (account.demos as any)[demoId]?.completed === true
-    );
+    // Check if user has earned the Nexus Master badge
+    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
 
-    // Check if all 5 main achievement badges are earned
-    const allBadges = getAllBadges();
-    const mainAchievementBadges = allBadges.filter(badge => badge.category === 'main_achievement');
-    const allBadgesEarned = mainAchievementBadges.every(badge =>
-      account.badges.some(userBadge => userBadge.name === badge.name)
-    );
-
-    return allDemosCompleted && allBadgesEarned;
+    return hasNexusMasterBadge;
   };
 
   const miniGamesUnlocked = hasUnlockedMiniGames();
@@ -912,24 +902,14 @@ export default function HomePageContent() {
   const accountService = AccountService.getInstance();
   const { addToast } = useToast();
 
-  // Check if user has unlocked mini-games access (completed all 3 demos + all 5 main achievement badges)
+  // Check if user has unlocked mini-games access (earned Nexus Master badge)
   const hasUnlockedMiniGames = () => {
     if (!account) return false;
 
-    // Check if all 3 main demos are completed
-    const mainDemoIds = ['hello-milestone', 'dispute-resolution', 'micro-marketplace'];
-    const allDemosCompleted = mainDemoIds.every(
-      demoId => (account.demos as any)[demoId]?.completed === true
-    );
+    // Check if user has earned the Nexus Master badge
+    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
 
-    // Check if all 5 main achievement badges are earned
-    const allBadges = getAllBadges();
-    const mainAchievementBadges = allBadges.filter(badge => badge.category === 'main_achievement');
-    const allBadgesEarned = mainAchievementBadges.every(badge =>
-      account.badges.some(userBadge => userBadge.name === badge.name)
-    );
-
-    return allDemosCompleted && allBadgesEarned;
+    return hasNexusMasterBadge;
   };
 
   const miniGamesUnlocked = hasUnlockedMiniGames();
@@ -1314,7 +1294,7 @@ export default function HomePageContent() {
                   content={
                     miniGamesUnlocked
                       ? 'Explore the Nexus Web3 Playground'
-                      : 'Complete all 3 demos and earn all 5 main achievement badges to unlock the Nexus Web3 Playground'
+                      : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
                   }
                 >
                   <a
@@ -1332,7 +1312,7 @@ export default function HomePageContent() {
                     title={
                       miniGamesUnlocked
                         ? 'Explore the Nexus Web3 Playground'
-                        : 'Complete all 3 demos and earn all 5 main achievement badges to unlock the Nexus Web3 Playground'
+                        : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
                     }
                   >
                     <span>
