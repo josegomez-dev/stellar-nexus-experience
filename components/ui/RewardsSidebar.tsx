@@ -151,10 +151,25 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               {level === 1 ? (
                 <video
                   autoPlay
-                  loop
                   muted
                   playsInline
                   className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
+                  style={{
+                    animation: '4s ease-in-out infinite alternate'
+                  }}
+                  onEnded={(e) => {
+                    const video = e.target as HTMLVideoElement;
+                    video.currentTime = video.duration;
+                    const reverseInterval = setInterval(() => {
+                      if (video.currentTime <= 0) {
+                        clearInterval(reverseInterval);
+                        video.currentTime = 0;
+                        video.play();
+                      } else {
+                        video.currentTime -= 0.1;
+                      }
+                    }, 100);
+                  }}
                 >
                   <source src='/videos/phases/baby.mp4' type='video/mp4' />
                   <img
@@ -194,21 +209,23 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               </p>
             </div>
             
-            {/* Progress Bar */}
-            <div className='w-full bg-gray-700/50 rounded-full h-4 border border-gray-600/30 overflow-hidden'>
-              <div
-                className='bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-700 ease-out relative'
-                style={{ width: `${expPercentage}%` }}
-              >
-                {/* Animated shine effect */}
-                <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse'></div>
-              </div>
-            </div>
-            
             {/* XP to Next Level */}
-            <p className='text-xs text-gray-400 mt-2'>
-              {expProgress.next - expProgress.current} XP to next level
+            <p className='text-xs text-gray-400'>
+              <span className='text-brand-300 font-bold'>{expProgress.next - expProgress.current} XP</span> to next level!
             </p>
+          </div>
+        </div>
+        
+        {/* Full Width XP Progress Bar at Bottom */}
+        <div className='relative z-10 mt-6'>
+          <div className='w-full bg-gray-700/50 rounded-full h-6 border border-gray-600/30 overflow-hidden'>
+            <div
+              className='bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 h-6 rounded-full transition-all duration-700 ease-out relative'
+              style={{ width: `${expPercentage}%` }}
+            >
+              {/* Animated shine effect */}
+              <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse'></div>
+            </div>
           </div>
         </div>
       </div>
