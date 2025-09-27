@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
 import { UserAvatar } from './UserAvatar';
 import { generateFunnyName } from '@/lib/utils/funny-name-generator';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/contexts/ui/ToastContext';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';

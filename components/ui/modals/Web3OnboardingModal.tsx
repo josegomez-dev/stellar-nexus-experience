@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 
 interface Web3OnboardingModalProps {
   isOpen: boolean;

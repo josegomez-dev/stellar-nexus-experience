@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
-import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { useToast } from '@/contexts/ToastContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
+import { useToast } from '@/contexts/ui/ToastContext';
 import { stellarConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '../Tooltip';
 import Image from 'next/image';

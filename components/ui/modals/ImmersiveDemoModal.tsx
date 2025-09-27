@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/contexts/ToastContext';
-import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useToast } from '@/contexts/ui/ToastContext';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { API_ENDPOINTS } from '@/utils/constants/api';
 import Image from 'next/image';
 

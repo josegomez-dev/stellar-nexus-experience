@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
-import { EscrowProvider } from '@/contexts/EscrowContext';
-import { WalletProvider } from '@/contexts/WalletContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider } from '@/contexts/ToastContext';
-import { TransactionProvider } from '@/contexts/TransactionContext';
-import { AccountProvider } from '@/contexts/AccountContext';
+import { EscrowProvider } from '@/contexts/data/EscrowContext';
+import { WalletProvider } from '@/contexts/wallet/WalletContext';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
+import { ToastProvider } from '@/contexts/ui/ToastContext';
+import { TransactionProvider } from '@/contexts/data/TransactionContext';
+import { AccountProvider } from '@/contexts/auth/AccountContext';
 import Image from 'next/image';
 
 export default function DocsPage() {

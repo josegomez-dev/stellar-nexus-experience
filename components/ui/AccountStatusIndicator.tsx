@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useFirebase } from '@/contexts/FirebaseContext';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 
 export const AccountStatusIndicator: React.FC = () => {
   const { account, isLoading } = useFirebase();

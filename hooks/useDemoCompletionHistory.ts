@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/contexts/ToastContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useToast } from '@/contexts/ui/ToastContext';
 
 export interface DemoCompletionRecord {
   id: string;

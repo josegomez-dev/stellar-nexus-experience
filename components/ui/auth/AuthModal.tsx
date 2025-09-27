@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import Image from 'next/image';
 
 interface AuthModalProps {

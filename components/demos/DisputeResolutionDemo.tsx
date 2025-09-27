@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import {
   useInitializeEscrow as useMockInitializeEscrow,
   useFundEscrow as useMockFundEscrow,
@@ -13,9 +13,9 @@ import {
 } from '@/lib/services/trustless-work/mock-trustless-work';
 import { useRealInitializeEscrow } from '@/lib/services/trustless-work/real-trustless-work';
 import { assetConfig } from '@/lib/stellar/wallet-config';
-import { useFirebase } from '@/contexts/FirebaseContext';
-import { useToast } from '@/contexts/ToastContext';
-import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useToast } from '@/contexts/ui/ToastContext';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 import { Tooltip } from '@/components/ui/Tooltip';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/contexts/ui/ToastContext';
 import {
   initializeContract,
   fundEscrow,

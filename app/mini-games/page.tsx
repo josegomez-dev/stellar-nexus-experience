@@ -2,11 +2,11 @@
 export const dynamic = 'force-dynamic';
 
 import MiniGameStore from '@/components/games/MiniGameStore';
-import { WalletProvider } from '@/contexts/WalletContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider } from '@/contexts/ToastContext';
-import { TransactionProvider } from '@/contexts/TransactionContext';
-import { AccountProvider } from '@/contexts/AccountContext';
+import { WalletProvider } from '@/contexts/wallet/WalletContext';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
+import { ToastProvider } from '@/contexts/ui/ToastContext';
+import { TransactionProvider } from '@/contexts/data/TransactionContext';
+import { AccountProvider } from '@/contexts/auth/AccountContext';
 import { ToastContainer } from '@/components/ui/Toast';
 export default function MiniGamesPage() {
   return (

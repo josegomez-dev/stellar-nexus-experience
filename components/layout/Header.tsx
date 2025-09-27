@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';

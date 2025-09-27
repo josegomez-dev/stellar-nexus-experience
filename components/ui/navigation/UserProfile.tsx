@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import Image from 'next/image';

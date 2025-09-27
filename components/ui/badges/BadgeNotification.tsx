@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from '@/contexts/AuthContext';
+import { Badge } from '@/contexts/auth/AuthContext';
 import { BadgeEmblem } from './BadgeEmblem';
 
 interface BadgeNotificationProps {

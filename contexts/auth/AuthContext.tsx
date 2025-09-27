@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useGlobalWallet } from './WalletContext';
+import { useGlobalWallet } from '../wallet/WalletContext';
 // Removed user-tracking-service import
 
 export interface User {

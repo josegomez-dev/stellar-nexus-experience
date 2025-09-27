@@ -1,7 +1,7 @@
 'use client';
 
-import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import { PixelArtAvatar } from '@/components/ui/avatar/PixelArtAvatar';
 
 interface UserAvatarProps {

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFirebase } from '@/contexts/FirebaseContext';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 // LeaderboardModal removed
 import { BadgeShowcase } from './BadgeShowcase';
 

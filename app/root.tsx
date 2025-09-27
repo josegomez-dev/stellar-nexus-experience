@@ -1,14 +1,14 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { TransactionProvider } from '@/contexts/TransactionContext';
-import { ToastProvider } from '@/contexts/ToastContext';
-import { BadgeAnimationProvider } from '@/contexts/BadgeAnimationContext';
-import { WalletProvider } from '@/contexts/WalletContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { NetworkProvider } from '@/contexts/NetworkContext';
-import { FirebaseProvider } from '@/contexts/FirebaseContext';
-import { EscrowProvider } from '@/contexts/EscrowContext';
+import { TransactionProvider } from '@/contexts/data/TransactionContext';
+import { ToastProvider } from '@/contexts/ui/ToastContext';
+import { BadgeAnimationProvider } from '@/contexts/ui/BadgeAnimationContext';
+import { WalletProvider } from '@/contexts/wallet/WalletContext';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
+import { NetworkProvider } from '@/contexts/wallet/NetworkContext';
+import { FirebaseProvider } from '@/contexts/data/FirebaseContext';
+import { EscrowProvider } from '@/contexts/data/EscrowContext';
 
 interface RootProvidersProps {
   children: ReactNode;

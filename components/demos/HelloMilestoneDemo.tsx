@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useGlobalWallet } from '@/contexts/WalletContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { useWallet } from '@/lib/stellar/stellar-wallet-hooks';
-import { useFirebase } from '@/contexts/FirebaseContext';
-import { useToast } from '@/contexts/ToastContext';
-import { useTransactionHistory } from '@/contexts/TransactionContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useToast } from '@/contexts/ui/ToastContext';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 import { API_ENDPOINTS } from '@/utils/constants/api';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import { ProcessExplanation } from '@/components/ui/TypeWriter';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/contexts/ui/ToastContext';
 
 export const ToastContainer = () => {
   const { toasts, removeToast } = useToast();

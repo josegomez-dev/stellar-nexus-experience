@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
-import { EscrowProvider } from '@/contexts/EscrowContext';
-import { WalletProvider } from '@/contexts/WalletContext';
+import { EscrowProvider } from '@/contexts/data/EscrowContext';
+import { WalletProvider } from '@/contexts/wallet/WalletContext';
 import Image from 'next/image';
 
 export default function MiniGameStore() {

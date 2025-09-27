@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { UserAccount, PointsTransaction } from '@/utils/types/account';
 import { accountService } from '@/lib/services/account-service';
-import { useGlobalWallet } from './WalletContext';
-import { useToast } from './ToastContext';
-import { useBadgeAnimation } from './BadgeAnimationContext';
+import { useGlobalWallet } from '../wallet/WalletContext';
+import { useToast } from '../ui/ToastContext';
+import { useBadgeAnimation } from '../ui/BadgeAnimationContext';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 
 interface AccountContextType {
