@@ -150,6 +150,28 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         </div>
       </div>
 
+      {/* Character Display */}
+      <div className='bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-lg p-4 border border-indigo-400/30'>
+        <div className='flex items-center justify-center'>
+          <div className='relative'>
+            <img
+              src={
+                level === 1 
+                  ? '/images/character/baby.png'
+                  : level === 2 
+                  ? '/images/character/teen.png'
+                  : '/images/character/character.png'
+              }
+              alt={`Level ${level} Character`}
+              className='w-24 h-24 object-contain drop-shadow-lg'
+            />
+            <div className='absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg'>
+              Lv.{level}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Points Summary */}
       <div className='grid grid-cols-3 gap-3'>
         <div className='bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30'>
