@@ -52,6 +52,34 @@ export const TransactionProvider = ({ children }: TransactionProviderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { walletData } = useGlobalWallet();
 
+  const refreshTransactions = useCallback(async () => {
+    if (!walletData?.publicKey) return;
+
+    setIsLoading(true);
+    try {
+      const firebaseTransactions = await accountService.getUserTransactions(walletData.publicKey);
+      const formattedTransactions = firebaseTransactions.map((tx: TransactionRecord) => ({
+        hash: tx.hash,
+        status: tx.status,
+        message: tx.message,
+        timestamp: tx.timestamp instanceof Date ? tx.timestamp : new Date(tx.timestamp),
+        type: tx.type,
+        demoId: tx.demoId,
+        amount: tx.amount,
+        asset: tx.asset,
+        explorerUrl: tx.explorerUrl,
+        stellarExpertUrl: tx.stellarExpertUrl,
+        points: tx.points,
+        badgeId: tx.badgeId,
+      }));
+      setTransactions(formattedTransactions);
+    } catch (error) {
+      console.error('Failed to refresh transactions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [walletData?.publicKey]);
+
   // Load transactions when wallet connects
   useEffect(() => {
     if (walletData?.publicKey) {
@@ -124,34 +152,6 @@ export const TransactionProvider = ({ children }: TransactionProviderProps) => {
   const getTransactionsByType = (type: TransactionStatus['type']) => {
     return transactions.filter(tx => tx.type === type);
   };
-
-  const refreshTransactions = useCallback(async () => {
-    if (!walletData?.publicKey) return;
-
-    setIsLoading(true);
-    try {
-      const firebaseTransactions = await accountService.getUserTransactions(walletData.publicKey);
-      const formattedTransactions = firebaseTransactions.map((tx: TransactionRecord) => ({
-        hash: tx.hash,
-        status: tx.status,
-        message: tx.message,
-        timestamp: tx.timestamp instanceof Date ? tx.timestamp : new Date(tx.timestamp),
-        type: tx.type,
-        demoId: tx.demoId,
-        amount: tx.amount,
-        asset: tx.asset,
-        explorerUrl: tx.explorerUrl,
-        stellarExpertUrl: tx.stellarExpertUrl,
-        points: tx.points,
-        badgeId: tx.badgeId,
-      }));
-      setTransactions(formattedTransactions);
-    } catch (error) {
-      console.error('Failed to refresh transactions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [walletData?.publicKey]);
 
   const value: TransactionContextType = {
     transactions,
