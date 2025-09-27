@@ -137,55 +137,7 @@ export const BADGE_SVG_ICONS = {
     </svg>
   ),
 
-  'milestone-first-completion': (id: string, size: string = 'w-8 h-8') => (
-    <svg viewBox='0 0 64 64' className={size}>
-      <defs>
-        <linearGradient id={`g-milestone-${id}`} x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stopColor='#fbbf24' />
-          <stop offset='100%' stopColor='#f59e0b' />
-        </linearGradient>
-      </defs>
-      <circle cx='32' cy='32' r='24' fill={`url(#g-milestone-${id})`} opacity='0.9' />
-      <path d='M32 16l4 12 12 4-12 4-4 12-4-12-12-4 12-4 4-12z' fill='#fff' opacity='0.9' />
-    </svg>
-  ),
 
-  'perfect-score': (id: string, size: string = 'w-8 h-8') => (
-    <svg viewBox='0 0 64 64' className={size}>
-      <defs>
-        <linearGradient id={`g-perfect-${id}`} x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stopColor='#10b981' />
-          <stop offset='100%' stopColor='#059669' />
-        </linearGradient>
-      </defs>
-      <circle cx='32' cy='32' r='24' fill={`url(#g-perfect-${id})`} opacity='0.9' />
-      <path
-        d='M24 32l6 6 12-12'
-        fill='none'
-        stroke='#fff'
-        strokeWidth='4'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-      <text x='32' y='52' textAnchor='middle' fill='#fff' fontSize='16' fontWeight='bold'>
-        100
-      </text>
-    </svg>
-  ),
-
-  'early-adopter': (id: string, size: string = 'w-8 h-8') => (
-    <svg viewBox='0 0 64 64' className={size}>
-      <defs>
-        <linearGradient id={`g-rocket-${id}`} x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stopColor='#ef4444' />
-          <stop offset='100%' stopColor='#dc2626' />
-        </linearGradient>
-      </defs>
-      <path d='M32 48l-8-8 8-8 8 8-8 8z' fill={`url(#g-rocket-${id})`} opacity='0.9' />
-      <path d='M32 32l-4-12 4-12 4 12-4 12z' fill='#fff' opacity='0.9' />
-      <circle cx='32' cy='20' r='4' fill={`url(#g-rocket-${id})`} />
-    </svg>
-  ),
 } as const;
 
 // Badge sound effect
@@ -237,33 +189,6 @@ export const BADGE_ASSETS: Record<string, BadgeAsset> = {
     category: 'special',
     earningPoints: 200,
     colors: BADGE_COLORS.legendary,
-  },
-  'milestone-first-completion': {
-    id: 'milestone-first-completion',
-    name: 'First Steps',
-    description: 'Completed your first milestone',
-    rarity: 'common',
-    category: 'milestone',
-    earningPoints: 25,
-    colors: BADGE_COLORS.common,
-  },
-  'perfect-score': {
-    id: 'perfect-score',
-    name: 'Perfect Score',
-    description: 'Achieved a perfect score on a demo',
-    rarity: 'rare',
-    category: 'achievement',
-    earningPoints: 50,
-    colors: BADGE_COLORS.rare,
-  },
-  'early-adopter': {
-    id: 'early-adopter',
-    name: 'Early Adopter',
-    description: 'Joined during the early access phase',
-    rarity: 'epic',
-    category: 'special',
-    earningPoints: 75,
-    colors: BADGE_COLORS.epic,
   },
 } as const;
 

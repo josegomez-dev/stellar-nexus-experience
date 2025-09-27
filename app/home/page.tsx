@@ -456,7 +456,7 @@ const DemoSelector = ({
                     <div
                       className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2`}
                     >
-                      {getBadgeIcon('perfect-score', BADGE_SIZES.sm) || <BadgeEmblem id='perfect-score' size='sm' className='text-white' />}
+                      {getBadgeIcon('escrow_expert', BADGE_SIZES.sm) || <BadgeEmblem id='escrow_expert' size='sm' className='text-white' />}
                       <span>Completed</span>
                     </div>
                   )}

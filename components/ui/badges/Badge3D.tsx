@@ -260,7 +260,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
           className={`relative rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl p-3 ${badge.isEarned ? glow : ''}`}
         >
           <div className='flex items-center gap-3'>
-            <BadgeEmblem id={badge.icon} size='sm' />
+            <BadgeEmblem id={badge.id} size='sm' />
             <div className='min-w-0 flex-1'>
               <h4 className={`font-medium text-sm ${badge.isEarned ? text : 'text-gray-400'}`}>
                 {badge.name}
@@ -324,7 +324,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
         {/* Emblem + title */}
         <div className='relative z-10 flex items-center gap-4'>
           <div className='shrink-0'>
-            <BadgeEmblem id={badge.icon} size={size} />
+            <BadgeEmblem id={badge.id} size={size} />
           </div>
           <div className='min-w-0'>
             <h3

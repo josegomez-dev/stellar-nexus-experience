@@ -18,7 +18,7 @@ export interface BadgeDefinition {
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   // Demo Completion Badges
   {
-    id: 'demo-completed-hello-milestone',
+    id: 'escrow_expert',
     name: 'Baby Steps Master',
     description: 'Completed the Hello Milestone demo',
     icon: '🚀',
@@ -33,7 +33,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'demo-completed-milestone-voting',
+    id: 'escrow_expert',
     name: 'Democracy Champion',
     description: 'Completed the Milestone Voting demo',
     icon: '🗳️',
@@ -48,7 +48,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'demo-completed-dispute-resolution',
+    id: 'trust_guardian',
     name: 'Drama Resolver',
     description: 'Completed the Dispute Resolution demo',
     icon: '⚖️',
@@ -63,7 +63,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'demo-completed-micro-marketplace',
+    id: 'stellar_champion',
     name: 'Gig Economy Expert',
     description: 'Completed the Micro Marketplace demo',
     icon: '💼',
@@ -80,7 +80,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 
   // Milestone Badges
   {
-    id: 'milestone-first-completion',
+    id: 'welcome_explorer',
     name: 'First Steps',
     description: 'Completed your first milestone',
     icon: '👶',
@@ -95,7 +95,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'milestone-ten-completions',
+    id: 'nexus_master',
     name: 'Milestone Master',
     description: 'Completed 10 milestones',
     icon: '🎯',
@@ -110,7 +110,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'milestone-fifty-completions',
+    id: 'nexus_master',
     name: 'Milestone Legend',
     description: 'Completed 50 milestones',
     icon: '👑',
@@ -127,7 +127,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 
   // Time-based Badges
   {
-    id: 'time-spent-one-hour',
+    id: 'escrow_expert',
     name: 'Time Explorer',
     description: 'Spent 1 hour in demos',
     icon: '⏰',
@@ -142,7 +142,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'time-spent-ten-hours',
+    id: 'trust_guardian',
     name: 'Time Master',
     description: 'Spent 10 hours in demos',
     icon: '⏳',
@@ -159,7 +159,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 
   // Level Badges
   {
-    id: 'level-five',
+    id: 'stellar_champion',
     name: 'Rising Star',
     description: 'Reached level 5',
     icon: '⭐',
@@ -174,7 +174,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'level-ten',
+    id: 'nexus_master',
     name: 'Expert Explorer',
     description: 'Reached level 10',
     icon: '🌟',
@@ -189,7 +189,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'level-twenty',
+    id: 'nexus_master',
     name: 'Master Navigator',
     description: 'Reached level 20',
     icon: '💫',
@@ -206,7 +206,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 
   // Special Badges
   {
-    id: 'early-adopter',
+    id: 'welcome_explorer',
     name: 'Early Adopter',
     description: 'One of the first users to join Nexus Experience',
     icon: '🚀',
@@ -222,7 +222,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     },
   },
   {
-    id: 'perfect-score',
+    id: 'escrow_expert',
     name: 'Perfectionist',
     description: 'Achieved a perfect score in any demo',
     icon: '💯',
