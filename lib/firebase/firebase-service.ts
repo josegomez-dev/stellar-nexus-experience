@@ -6,10 +6,18 @@ import {
   updateDoc,
   serverTimestamp,
   Timestamp,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
   Account,
+  TransactionRecord,
   COLLECTIONS,
 } from './firebase-types';
 
@@ -135,6 +143,123 @@ export const accountService = {
     return account && account.demosCompleted && Array.isArray(account.demosCompleted) 
       ? account.demosCompleted.includes(demoId) 
       : false;
+  },
+
+  // Add transaction to user's history
+  async addTransaction(walletAddress: string, transaction: Omit<TransactionRecord, 'timestamp' | 'walletAddress'>): Promise<void> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    const newTransaction: Omit<TransactionRecord, 'id'> = {
+      ...transaction,
+      timestamp: new Date(),
+      walletAddress,
+    };
+
+    // Add to transactions collection
+    const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
+    await addDoc(transactionsRef, {
+      ...newTransaction,
+      timestamp: serverTimestamp(),
+    });
+  },
+
+  // Update transaction status
+  async updateTransaction(walletAddress: string, transactionHash: string, status: 'success' | 'failed', message: string): Promise<void> {
+    // Find the transaction in the transactions collection
+    const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
+    const q = query(
+      transactionsRef,
+      where('walletAddress', '==', walletAddress),
+      where('hash', '==', transactionHash)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const transactionDoc = querySnapshot.docs[0];
+      await updateDoc(transactionDoc.ref, {
+        status,
+        message,
+        timestamp: serverTimestamp(),
+      });
+    }
+  },
+
+  // Get user's transaction history
+  async getUserTransactions(walletAddress: string, limitCount?: number): Promise<TransactionRecord[]> {
+    const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
+    let q = query(
+      transactionsRef,
+      where('walletAddress', '==', walletAddress),
+      orderBy('timestamp', 'desc')
+    );
+
+    if (limitCount) {
+      q = query(q, limit(limitCount));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const transactions: TransactionRecord[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      transactions.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as TransactionRecord);
+    });
+
+    return transactions;
+  },
+
+  // Get transactions by type
+  async getTransactionsByType(walletAddress: string, type: TransactionRecord['type']): Promise<TransactionRecord[]> {
+    const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
+    const q = query(
+      transactionsRef,
+      where('walletAddress', '==', walletAddress),
+      where('type', '==', type),
+      orderBy('timestamp', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const transactions: TransactionRecord[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      transactions.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as TransactionRecord);
+    });
+
+    return transactions;
+  },
+
+  // Get transactions by demo
+  async getTransactionsByDemo(walletAddress: string, demoId: string): Promise<TransactionRecord[]> {
+    const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
+    const q = query(
+      transactionsRef,
+      where('walletAddress', '==', walletAddress),
+      where('demoId', '==', demoId),
+      orderBy('timestamp', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const transactions: TransactionRecord[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      transactions.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as TransactionRecord);
+    });
+
+    return transactions;
   },
 };
 

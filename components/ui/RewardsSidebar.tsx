@@ -2,10 +2,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
-import { getAllBadges, Badge } from '@/lib/firebase/firebase-types';
+import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { getBadgeColors, BADGE_COLORS } from '@/utils/constants/badges/assets';
+import { TransactionList } from './transactions/TransactionList';
+import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 
 interface RewardsDropdownProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface RewardsDropdownProps {
 
 export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose }) => {
   const { account, badges } = useFirebase();
+  const { transactions, isLoading, refreshTransactions } = useTransactionHistory();
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'transactions'>('overview');
   const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -105,9 +108,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
     let completedArray: string[] = [];
     
     if (Array.isArray(completedDemos)) {
-      completedArray = completedDemos;
+      completedArray = completedDemos as string[];
     } else if (completedDemos && typeof completedDemos === 'object') {
-      completedArray = Object.values(completedDemos);
+      completedArray = Object.values(completedDemos) as string[];
     }
     
     // Filter out nexus-master from the count since it's not a real demo
@@ -219,8 +222,8 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const renderBadges = () => {
     try {
       // Check which badges are earned by the user (using badgesEarned array)
-      const earnedBadgeIds = Array.isArray(safeAccount.badgesEarned)
-        ? safeAccount.badgesEarned
+      const earnedBadgeIds: string[] = Array.isArray(safeAccount.badgesEarned)
+        ? safeAccount.badgesEarned as string[]
         : [];
       
       const badgesWithStatus =
@@ -376,49 +379,30 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   };
 
   const renderTransactions = () => (
-    <div className='space-y-3'>
-      <div className='text-center mb-4'>
-        <div className='text-lg font-semibold text-white'>Points History</div>
-        <div className='text-sm text-gray-400'>
-          Recent {safePointsTransactions.length} transactions
+    <div className='space-y-4'>
+      <div className='flex items-center justify-between'>
+        <div>
+          <div className='text-lg font-semibold text-white'>Transaction History</div>
+          <div className='text-sm text-gray-400'>
+            {transactions.length} total transactions
+          </div>
         </div>
+        <button
+          onClick={refreshTransactions}
+          disabled={isLoading}
+          className='px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors disabled:opacity-50'
+        >
+          {isLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
 
-      <div className='space-y-2 max-h-96 overflow-y-auto'>
-        {safePointsTransactions.map(transaction => (
-          <div
-            key={transaction.id}
-            className='bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-lg p-3 border border-gray-600/30'
-          >
-            <div className='flex items-center justify-between'>
-              <div className='flex-1'>
-                <div className='text-sm font-medium text-white'>{transaction.reason}</div>
-                <div className='text-xs text-gray-400'>
-                  {transaction.timestamp.toDate().toLocaleString()}
-                  {transaction.demoId && ` • ${transaction.demoId}`}
-                </div>
-              </div>
-              <div
-                className={`text-sm font-semibold ${
-                  transaction.type === 'earn' || transaction.type === 'bonus'
-                    ? 'text-green-400'
-                    : 'text-red-400'
-                }`}
-              >
-                {transaction.type === 'earn' || transaction.type === 'bonus' ? '+' : '-'}
-                {transaction.amount}
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {safePointsTransactions.length === 0 && (
-          <div className='text-center py-8'>
-            <div className='text-4xl mb-4'>📜</div>
-            <div className='text-gray-400 mb-2'>No transactions yet</div>
-            <div className='text-sm text-gray-500'>Start earning points by completing demos!</div>
-          </div>
-        )}
+      <div className='max-h-96 overflow-y-auto'>
+        <TransactionList
+          transactions={transactions}
+          isLoading={isLoading}
+          showFilters={true}
+          emptyMessage="No transactions found. Complete some demos to see your transaction history!"
+        />
       </div>
     </div>
   );

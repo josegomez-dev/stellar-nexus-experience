@@ -20,13 +20,13 @@ export const RootProviders = ({ children }: RootProvidersProps) => {
       <NetworkProvider>
         <AuthProvider>
           <ToastProvider>
-            <FirebaseProvider>
-              <TransactionProvider>
+            <TransactionProvider>
+              <FirebaseProvider>
                 <BadgeAnimationProvider>
                   <EscrowProvider>{children}</EscrowProvider>
                 </BadgeAnimationProvider>
-              </TransactionProvider>
-            </FirebaseProvider>
+              </FirebaseProvider>
+            </TransactionProvider>
           </ToastProvider>
         </AuthProvider>
       </NetworkProvider>

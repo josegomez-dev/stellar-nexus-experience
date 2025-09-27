@@ -14,6 +14,7 @@ import {
 } from '../../lib/firebase/firebase-types';
 import { useBadgeAnimation } from '../ui/BadgeAnimationContext';
 import { useToast } from '../ui/ToastContext';
+import { useTransactionHistory } from './TransactionContext';
 
 interface FirebaseContextType {
   // Account data
@@ -54,6 +55,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   const { walletData } = useGlobalWallet();
   const { showBadgeAnimation } = useBadgeAnimation();
   const { addToast } = useToast();
+  const { addTransaction, refreshTransactions } = useTransactionHistory();
   
   // State
   const [account, setAccount] = useState<Account | null>(null);
@@ -282,6 +284,33 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         console.log('FirebaseContext: All 3 demos completed, Nexus Master demo card should now be unlocked');
         // Note: Nexus Master badge is NOT auto-awarded here
         // It will only be awarded when user manually claims it from the 4th demo card
+      }
+
+      // Add demo completion transaction to history
+      try {
+        await addTransaction({
+          hash: `demo-completion-${demoId}-${Date.now()}`,
+          status: 'success',
+          message: `Completed ${demoId.replace('-', ' ')} demo`,
+          type: 'demo_completion',
+          demoId: demoId,
+          points: pointsEarned,
+        });
+
+        // Add badge earning transaction if badge was awarded
+        if (badgeToAward) {
+          await addTransaction({
+            hash: `badge-earned-${badgeToAward}-${Date.now()}`,
+            status: 'success',
+            message: `Earned ${badgeToAward.replace('_', ' ')} badge`,
+            type: 'badge_earned',
+            badgeId: badgeToAward,
+            points: badge ? badge.earningPoints : 0,
+          });
+        }
+      } catch (transactionError) {
+        console.error('FirebaseContext: Failed to add transaction to history:', transactionError);
+        // Don't fail the demo completion if transaction logging fails
       }
       
       // Refresh account data

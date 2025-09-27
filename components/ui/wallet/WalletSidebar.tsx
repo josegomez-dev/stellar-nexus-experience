@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { Web3OnboardingModal } from '../modals/Web3OnboardingModal';
 import { NetworkIndicator } from './NetworkIndicator';
 import { FreighterInstallationGuide } from './FreighterInstallationGuide';
+import { TransactionList } from '../transactions/TransactionList';
 
 interface WalletSidebarProps {
   isOpen: boolean;
@@ -654,8 +655,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                 </div>
               </div>
 
-              {/* Transaction History - Only show when expanded */}
-              {isExpanded && transactions.length > 0 && (
+              {/* Enhanced Transaction History - Only show when expanded */}
+              {isExpanded && (
                 <div className='p-3 bg-white/5 rounded-lg border border-white/10 animate-fadeIn'>
                   <div className='flex items-center justify-between mb-3'>
                     <h4 className='text-white font-medium text-sm'>Transaction History</h4>
@@ -668,55 +669,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   </div>
 
                   {showTransactionHistory && (
-                    <div className='space-y-2 max-h-40 overflow-y-auto'>
-                      {recentTransactions.map((tx, index) => (
-                        <div
-                          key={index}
-                          className={`p-2 rounded-lg border text-xs ${
-                            tx.status === 'success'
-                              ? 'border-success-400/30 bg-success-500/10'
-                              : tx.status === 'failed'
-                                ? 'border-danger-400/30 bg-danger-500/10'
-                                : 'border-warning-400/30 bg-warning-500/10'
-                          }`}
-                        >
-                          <div className='flex items-center justify-between mb-1'>
-                            <p
-                              className={`font-medium truncate flex-1 ${
-                                tx.status === 'success'
-                                  ? 'text-success-300'
-                                  : tx.status === 'failed'
-                                    ? 'text-danger-300'
-                                    : 'text-warning-300'
-                              }`}
-                            >
-                              {tx.message}
-                            </p>
-                          </div>
-                          <div className='flex items-center justify-between text-xs'>
-                            <span className='text-white/50'>
-                              {tx.timestamp.toLocaleTimeString()}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-xs ${
-                                tx.status === 'success'
-                                  ? 'text-success-400 bg-success-500/20'
-                                  : tx.status === 'failed'
-                                    ? 'text-danger-400 bg-danger-500/20'
-                                    : 'text-warning-400 bg-warning-500/20'
-                              }`}
-                            >
-                              {tx.status.toUpperCase()}
-                            </span>
-                          </div>
-                          {tx.demoId && (
-                            <div className='text-xs text-white/40 mt-1'>
-                              Demo:{' '}
-                              {tx.demoId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                    <div className='max-h-60 overflow-y-auto'>
+                      <TransactionList
+                        transactions={recentTransactions}
+                        compact={true}
+                        limit={5}
+                        emptyMessage="No recent transactions"
+                      />
                     </div>
                   )}
 
@@ -728,6 +687,13 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                       >
                         View {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
                       </button>
+                    </div>
+                  )}
+
+                  {transactions.length === 0 && (
+                    <div className='text-center py-4'>
+                      <div className='text-2xl mb-2'>📝</div>
+                      <p className='text-xs text-gray-400'>No transactions yet</p>
                     </div>
                   )}
                 </div>

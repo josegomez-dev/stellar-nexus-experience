@@ -1,5 +1,23 @@
 // Firebase Firestore data models and types
 
+// Transaction record for user history
+export interface TransactionRecord {
+  id: string; // Transaction hash or unique ID
+  hash: string;
+  status: 'pending' | 'success' | 'failed';
+  message: string;
+  timestamp: Date;
+  type: 'escrow' | 'milestone' | 'fund' | 'approve' | 'release' | 'dispute' | 'demo_completion' | 'badge_earned';
+  demoId?: string;
+  amount?: string;
+  asset?: string;
+  explorerUrl?: string;
+  stellarExpertUrl?: string;
+  points?: number; // Points earned from this transaction
+  badgeId?: string; // If this transaction earned a badge
+  walletAddress: string; // Reference to the account that owns this transaction
+}
+
 // Account - Single collection for all user data
 export interface Account {
   id: string; // Wallet address as ID
@@ -16,11 +34,14 @@ export interface Account {
   totalPoints: number; // Accumulated points from badges
   demosCompleted: string[]; // Array of demo IDs completed
   badgesEarned: string[]; // Array of badge IDs earned
+  
+  // Transaction history - now stored in separate collection
 }
 
 // Collection names
 export const COLLECTIONS = {
   ACCOUNTS: 'accounts',
+  TRANSACTIONS: 'transactions',
 } as const;
 
 // Predefined demos configuration (static data)
