@@ -75,17 +75,31 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     }
   }, [isConnected, walletData, isFreighterAvailable]);
 
-  // Auto-close wallet sidebar when wallet connects
+  // Auto-close wallet sidebar only for first-time account creation
   useEffect(() => {
-    if (isConnected && isOpen) {
-      // Small delay to ensure connection is complete
-      const timer = setTimeout(() => {
-        onToggle();
-      }, 800);
+    if (isConnected && isOpen && account) {
+      // Check if this is a first-time account creation by looking for the welcome_explorer badge
+      // Ensure badgesEarned is an array before calling includes
+      const badgesEarned = Array.isArray(account.badgesEarned) ? account.badgesEarned : [];
+      const isFirstTimeUser = badgesEarned.includes('welcome_explorer');
       
-      return () => clearTimeout(timer);
+      // Only auto-close for first-time users who just created their account
+      if (isFirstTimeUser) {
+        // Check if account was just created (within last 30 seconds)
+        const accountAge = Date.now() - (account.createdAt?.toDate?.()?.getTime() || account.createdAt?.getTime() || 0);
+        const isRecentlyCreated = accountAge < 30000; // 30 seconds
+        
+        if (isRecentlyCreated) {
+          // Small delay to ensure connection and account creation is complete
+          const timer = setTimeout(() => {
+            onToggle();
+          }, 1500); // Slightly longer delay for first-time users
+          
+          return () => clearTimeout(timer);
+        }
+      }
     }
-  }, [isConnected, isOpen, onToggle]);
+  }, [isConnected, isOpen, onToggle, account]);
 
   // Handle escape key to close sidebar and custom event to open
   useEffect(() => {
