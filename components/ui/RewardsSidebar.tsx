@@ -106,18 +106,18 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const getMainDemoProgress = () => {
     const completedDemos = safeAccount.demosCompleted;
     let completedArray: string[] = [];
-
+    
     if (Array.isArray(completedDemos)) {
       completedArray = completedDemos as string[];
     } else if (completedDemos && typeof completedDemos === 'object') {
       completedArray = Object.values(completedDemos) as string[];
     }
-
+    
     // Filter out nexus-master from the count since it's not a real demo
-    const mainDemosCompleted = completedArray.filter(demoId =>
+    const mainDemosCompleted = completedArray.filter(demoId => 
       ['hello-milestone', 'dispute-resolution', 'micro-marketplace'].includes(demoId)
     );
-
+    
     return {
       completed: mainDemosCompleted.length,
       total: 3, // Total number of main demos
@@ -143,7 +143,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         <div className='absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5'></div>
         <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-transparent rounded-full blur-2xl'></div>
         <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400/10 to-transparent rounded-full blur-xl'></div>
-
+        
         <div className='relative z-10 flex items-center gap-6'>
           {/* Character Avatar - Bigger and Enhanced */}
           <div className='flex-shrink-0'>
@@ -154,30 +154,32 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                   loop
                   muted
                   playsInline
-                  className='w-32 h-32 object-contain drop-shadow-2xl'
+                  className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
                 >
                   <source src='/videos/phases/baby.mp4' type='video/mp4' />
                   <img
                     src='/images/character/baby.png'
                     alt='Level 1 Character'
-                    className='w-32 h-32 object-contain drop-shadow-2xl'
+                    className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
                   />
                 </video>
               ) : (
                 <img
                   src={
-                    level === 2 ? '/images/character/teen.png' : '/images/character/character.png'
+                    level === 2 
+                      ? '/images/character/teen.png'
+                      : '/images/character/character.png'
                   }
                   alt={`Level ${level} Character`}
                   className='w-32 h-32 object-contain drop-shadow-2xl rounded-full border-2 border-purple-400/30'
                 />
               )}
-
+              
               {/* Level Badge */}
               <div className='absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20'>
                 Lv.{level}
               </div>
-
+              
               {/* Glow Effect */}
               <div className='absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full blur-lg scale-110'></div>
             </div>
@@ -191,7 +193,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                 {expProgress.current} / {expProgress.next} XP
               </p>
             </div>
-
+            
             {/* Progress Bar */}
             <div className='w-full bg-gray-700/50 rounded-full h-4 border border-gray-600/30 overflow-hidden'>
               <div
@@ -202,7 +204,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                 <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse'></div>
               </div>
             </div>
-
+            
             {/* XP to Next Level */}
             <p className='text-xs text-gray-400 mt-2'>
               {expProgress.next - expProgress.current} XP to next level
@@ -259,9 +261,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
     try {
       // Check which badges are earned by the user (using badgesEarned array)
       const earnedBadgeIds: string[] = Array.isArray(safeAccount.badgesEarned)
-        ? (safeAccount.badgesEarned as string[])
+        ? safeAccount.badgesEarned as string[]
         : [];
-
+      
       const badgesWithStatus =
         AVAILABLE_BADGES?.map(badge => ({
           ...badge,
@@ -271,15 +273,14 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         })) || [];
 
       // Filter to only count the 3 main demo badges (exclude welcome_explorer and nexus_master)
-      const mainDemoBadges =
-        AVAILABLE_BADGES?.filter(badge =>
-          ['escrow_expert', 'trust_guardian', 'stellar_champion'].includes(badge.id)
-        ) || [];
-
-      const earnedMainBadges = earnedBadgeIds.filter(badgeId =>
+      const mainDemoBadges = AVAILABLE_BADGES?.filter(badge => 
+        ['escrow_expert', 'trust_guardian', 'stellar_champion'].includes(badge.id)
+      ) || [];
+      
+      const earnedMainBadges = earnedBadgeIds.filter(badgeId => 
         ['escrow_expert', 'trust_guardian', 'stellar_champion'].includes(badgeId)
       );
-
+      
       const earnedCount = earnedMainBadges.length;
       const totalCount = mainDemoBadges.length; // Should be 3
       const isAllMainBadgesEarned = earnedCount === 3; // All 3 main demo badges
@@ -287,7 +288,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
       return (
         <div className='space-y-4'>
           <div className='text-center mb-4'>
-            <div className='text-2xl font-bold text-white'>{earnedBadgeIds.length} / 5</div>
+            <div className='text-2xl font-bold text-white'>
+              {earnedBadgeIds.length} / 5
+            </div>
             <div className='text-sm text-gray-400'>Top Badges</div>
             <div className='w-full bg-gray-700 rounded-full h-2 mt-2'>
               <div
@@ -319,38 +322,35 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               <div className='w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full'></div>
               <h3 className='text-lg font-semibold text-white'>Nexus Badges</h3>
               <div className='bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-2 py-1 rounded-full text-xs text-purple-300 border border-purple-400/30'>
-                {
-                  earnedBadgeIds.filter(badgeId =>
-                    ['welcome_explorer', 'nexus_master'].includes(badgeId)
-                  ).length
-                }{' '}
-                / 2
+                {earnedBadgeIds.filter(badgeId => 
+                  ['welcome_explorer', 'nexus_master'].includes(badgeId)
+                ).length} / 2
               </div>
             </div>
 
             <div className='space-y-2'>
-              {badgesWithStatus
-                .filter(badge => ['welcome_explorer', 'nexus_master'].includes(badge.id))
-                .map(badge => (
-                  <div key={badge.id} className='relative'>
-                    <Tooltip
-                      content={
-                        <div className='text-center'>
-                          <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
-                          <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
-                          <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
-                        </div>
-                      }
-                      position='top'
-                    >
-                      <div>
-                        <Badge3D badge={badge} size='sm' compact={true} />
-                        {/* Nexus Badge Indicator */}
-                        <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full border border-white/20'></div>
+              {badgesWithStatus.filter(badge => 
+                ['welcome_explorer', 'nexus_master'].includes(badge.id)
+              ).map(badge => (
+                <div key={badge.id} className='relative'>
+                  <Tooltip
+                    content={
+                      <div className='text-center'>
+                        <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
+                        <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
+                        <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
                       </div>
-                    </Tooltip>
-                  </div>
-                ))}
+                    }
+                    position='top'
+                  >
+                    <div>
+                      <Badge3D badge={badge} size='sm' compact={true} />
+                      {/* Nexus Badge Indicator */}
+                      <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full border border-white/20'></div>
+                    </div>
+                  </Tooltip>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -376,30 +376,28 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
             {!isMainAchievementsCollapsed && (
               <div className='space-y-2'>
-                {badgesWithStatus
-                  .filter(badge =>
-                    ['escrow_expert', 'trust_guardian', 'stellar_champion'].includes(badge.id)
-                  )
-                  .map(badge => (
-                    <div key={badge.id} className='relative'>
-                      <Tooltip
-                        content={
-                          <div className='text-center'>
-                            <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
-                            <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
-                            <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
-                          </div>
-                        }
-                        position='top'
-                      >
-                        <div>
-                          <Badge3D badge={badge} size='sm' compact={true} />
-                          {/* Demo Badge Indicator */}
-                          <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                {badgesWithStatus.filter(badge => 
+                  ['escrow_expert', 'trust_guardian', 'stellar_champion'].includes(badge.id)
+                ).map(badge => (
+                  <div key={badge.id} className='relative'>
+                    <Tooltip
+                      content={
+                        <div className='text-center'>
+                          <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
+                          <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
+                          <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
                         </div>
-                      </Tooltip>
-                    </div>
-                  ))}
+                      }
+                      position='top'
+                    >
+                      <div>
+                        <Badge3D badge={badge} size='sm' compact={true} />
+                        {/* Demo Badge Indicator */}
+                        <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                      </div>
+                    </Tooltip>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -423,7 +421,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
       <div className='flex items-center justify-between'>
         <div>
           <div className='text-lg font-semibold text-white'>Transaction History</div>
-          <div className='text-sm text-gray-400'>{transactions.length} total transactions</div>
+          <div className='text-sm text-gray-400'>
+            {transactions.length} total transactions
+          </div>
         </div>
         <button
           onClick={refreshTransactions}
@@ -439,7 +439,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
           transactions={transactions}
           isLoading={isLoading}
           showFilters={true}
-          emptyMessage='No transactions found. Complete some demos to see your transaction history!'
+          emptyMessage="No transactions found. Complete some demos to see your transaction history!"
         />
       </div>
     </div>
