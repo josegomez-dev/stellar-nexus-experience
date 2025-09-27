@@ -133,7 +133,11 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
               <stop offset='100%' stopColor='#f59e0b' />
             </linearGradient>
           </defs>
-          <path d='M32 8l8 16 16 4-16 4-8 16-8-16-16-4 16-4 8-16z' fill={`url(#g-crown-${id})`} opacity='0.9' />
+          <path
+            d='M32 8l8 16 16 4-16 4-8 16-8-16-16-4 16-4 8-16z'
+            fill={`url(#g-crown-${id})`}
+            opacity='0.9'
+          />
           <circle cx='32' cy='32' r='6' fill='#fff' opacity='0.9' />
           <path d='M20 44h24v8H20z' fill={`url(#g-crown-${id})`} opacity='0.8' />
         </svg>
@@ -178,7 +182,11 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
               <stop offset='100%' stopColor='#f59e0b' />
             </linearGradient>
           </defs>
-          <path d='M32 8l6 18 18 6-18 6-6 18-6-18-18-6 18-6 6-18z' fill={`url(#g-star-${id})`} opacity='0.9' />
+          <path
+            d='M32 8l6 18 18 6-18 6-6 18-6-18-18-6 18-6 6-18z'
+            fill={`url(#g-star-${id})`}
+            opacity='0.9'
+          />
         </svg>
       );
 
@@ -191,7 +199,11 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
               <stop offset='100%' stopColor='#f59e0b' />
             </radialGradient>
           </defs>
-          <path d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8 8-20z' fill={`url(#g-star-burst-${id})`} opacity='0.9' />
+          <path
+            d='M32 4l8 20 20 8-20 8-8 20-8-20-20-8 20-8 8-20z'
+            fill={`url(#g-star-burst-${id})`}
+            opacity='0.9'
+          />
           <circle cx='32' cy='32' r='8' fill='#fff' opacity='0.9' />
         </svg>
       );
@@ -236,8 +248,17 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
             </linearGradient>
           </defs>
           <circle cx='32' cy='32' r='24' fill={`url(#g-perfect-${id})`} opacity='0.9' />
-          <path d='M24 32l6 6 12-12' fill='none' stroke='#fff' strokeWidth='4' strokeLinecap='round' strokeLinejoin='round' />
-          <text x='32' y='52' textAnchor='middle' fill='#fff' fontSize='16' fontWeight='bold'>100</text>
+          <path
+            d='M24 32l6 6 12-12'
+            fill='none'
+            stroke='#fff'
+            strokeWidth='4'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+          <text x='32' y='52' textAnchor='middle' fill='#fff' fontSize='16' fontWeight='bold'>
+            100
+          </text>
         </svg>
       );
 
@@ -250,14 +271,20 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
               <stop offset='100%' stopColor='#f59e0b' />
             </radialGradient>
           </defs>
-          <path d='M32 8l8 20 20 8-20 8-8 20-8-20-20-8 20-8 8-20z' fill={`url(#g-welcome-${id})`} opacity='0.9' />
+          <path
+            d='M32 8l8 20 20 8-20 8-8 20-8-20-20-8 20-8 8-20z'
+            fill={`url(#g-welcome-${id})`}
+            opacity='0.9'
+          />
           <circle cx='32' cy='32' r='8' fill='#fff' opacity='0.9' />
         </svg>
       );
 
     default:
       return (
-        <div className={`${sizeClass} bg-gray-600 rounded-full flex items-center justify-center text-white text-xs ${className}`}>
+        <div
+          className={`${sizeClass} bg-gray-600 rounded-full flex items-center justify-center text-white text-xs ${className}`}
+        >
           🏆
         </div>
       );

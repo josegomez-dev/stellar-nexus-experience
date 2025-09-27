@@ -48,13 +48,10 @@ export const WalletManager = () => {
       return;
     }
 
-    console.log('Attempting to connect wallet with ID:', selectedWallet);
     try {
       await connect(selectedWallet);
-      console.log('✅ Wallet connection successful');
       setValidationError(''); // Clear any previous errors
     } catch (err) {
-      console.error('❌ Failed to connect wallet:', err);
       // Show user-friendly error message
       const errorMessage = err instanceof Error ? err.message : 'Unknown connection error';
       setValidationError(`❌ Connection failed: ${errorMessage}`);
@@ -92,7 +89,6 @@ export const WalletManager = () => {
       const wallets = await getAvailableWallets();
       setAvailableWallets(wallets);
     } catch (err) {
-      console.error('Failed to load available wallets:', err);
       // Use fallback wallets
       setAvailableWallets([
         { id: 'freighter', name: 'Freighter' },
@@ -423,7 +419,7 @@ export const WalletManager = () => {
 
               <button
                 onClick={() => {
-                  console.log('🔍 Current Wallet State:', {
+                  console.log({
                     walletData,
                     isConnected,
                     isLoading,
@@ -431,7 +427,6 @@ export const WalletManager = () => {
                     selectedWallet,
                     availableWallets,
                   });
-                  alert('🔍 Wallet state logged to console. Press F12 to view.');
                 }}
                 className='w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-4 rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg'
               >
@@ -441,28 +436,20 @@ export const WalletManager = () => {
               <button
                 onClick={async () => {
                   try {
-                    console.log('🧪 Testing wallet functionality...');
-                    console.log('Wallet data:', walletData);
-                    console.log('Network:', walletData?.network);
-                    console.log('Public key:', walletData?.publicKey);
-
                     // Test 1: Check wallet connection
                     if (!walletData || !walletData.isConnected) {
                       throw new Error('Wallet not properly connected');
                     }
-                    console.log('✅ Wallet connection test passed');
 
                     // Test 2: Check wallet data integrity
                     if (!walletData.publicKey || walletData.publicKey.length < 10) {
                       throw new Error('Invalid wallet public key');
                     }
-                    console.log('✅ Wallet data integrity test passed');
 
                     // Test 3: Check network configuration
                     if (!walletData.network) {
                       throw new Error('Network not configured');
                     }
-                    console.log('✅ Network configuration test passed');
 
                     // Test 4: Try to create a simple test transaction (mock)
                     const testTransaction = {
@@ -471,16 +458,13 @@ export const WalletManager = () => {
                       timestamp: Date.now(),
                       test: true,
                     };
-                    console.log('✅ Test transaction creation passed:', testTransaction);
 
                     // Test 5: Test signTransaction function
                     try {
                       const testXdr = `test_xdr_${Date.now()}`;
-                      console.log('Testing signTransaction with:', testXdr);
                       const signedResult = await signTransaction(testXdr);
-                      console.log('✅ signTransaction test passed:', signedResult);
                     } catch (signErr) {
-                      console.warn(
+                      console.log(
                         '⚠️ signTransaction test failed (this is expected in POC mode):',
                         signErr
                       );
@@ -492,7 +476,6 @@ export const WalletManager = () => {
                   } catch (err) {
                     const errorMessage =
                       err instanceof Error ? err.message : 'Unknown error occurred';
-                    console.error('❌ Wallet functionality test failed:', err);
                     alert(`❌ Test failed: ${errorMessage}`);
                   }
                 }}
@@ -504,22 +487,16 @@ export const WalletManager = () => {
               <button
                 onClick={async () => {
                   try {
-                    console.log('🚀 Testing transaction sending...');
-                    console.log('Wallet data:', walletData);
-
                     // Test 1: Check wallet connection
                     if (!walletData || !walletData.isConnected) {
                       throw new Error('Wallet not properly connected');
                     }
-                    console.log('✅ Wallet connection test passed');
 
                     // Test 2: Check if we can create a mock transaction
                     const mockSignedXdr = `mock_xdr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                    console.log('✅ Mock signed XDR created:', mockSignedXdr);
 
                     // Test 3: Try to send the mock transaction
                     const result = await sendTransaction(mockSignedXdr);
-                    console.log('✅ Transaction test result:', result);
 
                     if (result.success) {
                       alert('✅ Transaction test successful! Check console for details.');
@@ -529,7 +506,6 @@ export const WalletManager = () => {
                   } catch (err) {
                     const errorMessage =
                       err instanceof Error ? err.message : 'Unknown error occurred';
-                    console.error('❌ Transaction test failed:', err);
                     alert(`❌ Transaction test failed: ${errorMessage}`);
                   }
                 }}

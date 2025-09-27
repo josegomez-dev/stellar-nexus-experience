@@ -61,8 +61,6 @@ const createEscrowTransactionXDR = async (
   walletPublicKey: string
 ): Promise<string> => {
   try {
-    console.log('🔨 Creating real Stellar transaction for wallet:', walletPublicKey);
-
     // Import Stellar SDK dynamically to avoid SSR issues
     if (!isStellarSDKAvailable()) {
       throw new Error('Stellar SDK not available in this environment');
@@ -74,9 +72,7 @@ const createEscrowTransactionXDR = async (
     const server = await getStellarServer('https://horizon-testnet.stellar.org');
 
     // Load the source account (the user's wallet)
-    console.log('📡 Loading account from Stellar network...');
     const sourceAccount = await server.loadAccount(walletPublicKey);
-    console.log('✅ Account loaded successfully. Sequence:', sourceAccount.sequenceNumber());
 
     // Create a simple "escrow initialization" transaction
     // This will be a minimal XLM transaction that represents the escrow creation
@@ -98,11 +94,8 @@ const createEscrowTransactionXDR = async (
       .build();
 
     const xdr = transaction.toXDR();
-    console.log('✅ Transaction XDR created successfully');
     return xdr;
   } catch (error) {
-    console.error('❌ Failed to create transaction XDR:', error);
-
     // Instead of returning mock XDR, throw the error so we can handle it properly
     throw new Error(
       `Failed to create transaction: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -131,8 +124,6 @@ export const useRealInitializeEscrow = (): RealInitializeEscrowHook => {
     setError(null);
 
     try {
-      console.log('🚀 Initializing real Trustless Work escrow...', payload);
-
       // For now, let's skip the complex transaction creation and use Freighter's built-in transaction builder
       // This will create a simple transaction that can be signed and submitted
 
@@ -146,7 +137,6 @@ export const useRealInitializeEscrow = (): RealInitializeEscrowHook => {
         // Try to create a real transaction using the connected wallet
         transactionXDR = await createEscrowTransactionXDR(payload, walletData.publicKey);
       } catch (xdrError) {
-        console.log('⚠️ Failed to create real XDR, using simplified approach:', xdrError);
         // If XDR creation fails, we'll let Freighter handle the transaction creation
         // This is a placeholder XDR that Freighter can work with
         transactionXDR = 'placeholder_for_freighter_handling';
@@ -194,12 +184,10 @@ export const useRealInitializeEscrow = (): RealInitializeEscrowHook => {
         },
       };
 
-      console.log('✅ Real Trustless Work escrow initialized:', escrowResult);
       return escrowResult;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to initialize real escrow');
       setError(error);
-      console.error('❌ Real escrow initialization failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -245,8 +233,6 @@ export const checkAccountFunding = async (
   publicKey: string
 ): Promise<{ isFunded: boolean; balance: string; message: string }> => {
   try {
-    console.log('🔍 Checking account funding for:', publicKey);
-
     // Use fetch API directly instead of Stellar SDK to avoid constructor issues
     const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
 
@@ -268,8 +254,6 @@ export const checkAccountFunding = async (
     const xlmBalance = accountData.balances.find((balance: any) => balance.asset_type === 'native');
     const balance = xlmBalance ? xlmBalance.balance : '0';
 
-    console.log('💰 Account balance:', balance, 'XLM');
-
     if (parseFloat(balance) < 1) {
       return {
         isFunded: false,
@@ -284,8 +268,6 @@ export const checkAccountFunding = async (
       message: `Account funded with ${balance} XLM`,
     };
   } catch (error) {
-    console.error('❌ Account funding check failed:', error);
-
     return {
       isFunded: false,
       balance: '0',
@@ -301,11 +283,6 @@ export const submitRealTransaction = async (
   network: 'TESTNET' | 'MAINNET' = 'TESTNET'
 ) => {
   try {
-    console.log('📤 Submitting transaction to Stellar network...', {
-      network,
-      xdrLength: signedXDR.length,
-    });
-
     let StellarSDK: any;
     try {
       // Try the new package first
@@ -328,20 +305,13 @@ export const submitRealTransaction = async (
             : 'https://horizon.stellar.org'
         );
 
-    console.log('🔍 Parsing signed XDR...');
     // Parse the signed XDR to get the transaction
     const transaction = TransactionBuilder.fromXDR(
       signedXDR,
       network === 'TESTNET' ? StellarSDK.Networks.TESTNET : StellarSDK.Networks.PUBLIC
     );
 
-    console.log('✅ XDR parsed successfully, submitting to network...');
     const transactionResult = await server.submitTransaction(transaction);
-
-    console.log('🎉 Transaction submitted successfully!', {
-      hash: transactionResult.hash,
-      ledger: transactionResult.ledger,
-    });
 
     return {
       success: true,
@@ -350,8 +320,6 @@ export const submitRealTransaction = async (
       result: transactionResult,
     };
   } catch (error) {
-    console.error('❌ Transaction submission failed:', error);
-
     // Extract more detailed error information
     let errorMessage = 'Unknown error';
     if (error instanceof Error) {

@@ -1,153 +1,117 @@
 // Firebase Firestore data models and types
 
-export interface UserProfile {
-  id: string; // Wallet address
-  username: string;
-  customName?: string; // User's custom display name
-  avatarSeed?: string; // Seed for generating consistent avatar
-  email?: string;
+// Account - Single collection for all user data
+export interface Account {
+  id: string; // Wallet address as ID
+  displayName: string;
   walletAddress: string;
-  walletType: 'freighter' | 'albedo' | 'rabet' | 'lobstr' | 'manual';
-  walletName: string;
+  network: string; // 'testnet' | 'mainnet'
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
-  isActive: boolean;
-  preferences: UserPreferences;
-  stats: UserStats;
-}
-
-export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
-  notifications: {
-    email: boolean;
-    push: boolean;
-    demoUpdates: boolean;
-    badgeEarned: boolean;
-  };
-  privacy: {
-    showProfile: boolean;
-    showStats: boolean;
-    showBadges: boolean;
-  };
-}
-
-export interface UserStats {
-  totalXp: number;
+  
+  // Progress tracking
   level: number;
-  demosCompleted: number;
-  badgesEarned: number;
-  totalTimeSpent: number; // in minutes
-  streak: number; // consecutive days
-  lastActivityAt: Date;
-}
-
-export interface DemoProgress {
-  id: string;
-  userId: string; // Wallet address
-  demoId: string;
-  demoName: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'failed';
-  currentStep: number;
-  totalSteps: number;
-  startedAt: Date;
-  completedAt?: Date;
-  timeSpent: number; // in minutes
-  score?: number;
-  notes?: string;
-  metadata: Record<string, any>;
-}
-
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: 'demo' | 'achievement' | 'social' | 'special' | 'main_achievement';
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  requirements: BadgeRequirement[];
-  xpReward: number;
-  createdAt: Date;
-}
-
-export interface BadgeRequirement {
-  type: 'demo_completion' | 'xp_threshold' | 'streak' | 'time_spent' | 'custom';
-  value: number;
-  description: string;
-}
-
-export interface UserBadge {
-  id: string;
-  userId: string;
-  badgeId: string;
-  earnedAt: Date;
-  progress: number; // 0-100
-  isCompleted: boolean;
-}
-
-export interface Transaction {
-  id: string;
-  userId: string;
-  demoId: string;
-  type: 'escrow_init' | 'escrow_fund' | 'milestone_complete' | 'milestone_approve' | 'fund_release' | 'dispute';
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  amount?: number;
-  assetCode?: string;
-  hash?: string;
-  createdAt: Date;
-  completedAt?: Date;
-  metadata: Record<string, any>;
-}
-
-// Leaderboard functionality removed - will be derived from users collection in the future
-
-export interface DemoStats {
-  id: string; // demoId
-  demoId: string;
-  demoName: string;
-  totalCompletions: number;
-  totalClaps: number;
-  averageRating: number;
-  totalRatings: number;
-  averageCompletionTime: number; // in minutes
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface DemoClap {
-  id: string;
-  userId: string; // Wallet address
-  demoId: string;
-  createdAt: Date;
-}
-
-export interface DemoFeedback {
-  id: string;
-  userId: string; // Wallet address
-  demoId: string;
-  demoName: string;
-  rating: number; // 1-5 stars
-  feedback: string;
-  completionTime: number; // in minutes
-  difficulty: 'very_easy' | 'easy' | 'medium' | 'hard' | 'very_hard';
-  wouldRecommend: boolean;
-  mostHelpfulFeature?: string;
-  suggestions?: string;
-  createdAt: Date;
+  experience: number; // XP points
+  totalPoints: number; // Accumulated points from badges
+  demosCompleted: string[]; // Array of demo IDs completed
+  badgesEarned: string[]; // Array of badge IDs earned
 }
 
 // Collection names
 export const COLLECTIONS = {
-  USERS: 'users',
-  DEMO_PROGRESS: 'demo_progress',
-  BADGES: 'badges',
-  USER_BADGES: 'user_badges',
-  TRANSACTIONS: 'transactions',
-  DEMO_STATS: 'demo_stats',
-  DEMO_CLAPS: 'demo_claps',
-  DEMO_FEEDBACK: 'demo_feedback',
+  ACCOUNTS: 'accounts',
 } as const;
 
-// Firestore document references
-export type CollectionName = typeof COLLECTIONS[keyof typeof COLLECTIONS];
+// Predefined demos configuration (static data)
+export const PREDEFINED_DEMOS = [
+  {
+    id: 'hello-milestone',
+    name: 'Baby Steps to Riches',
+    subtitle: 'Learn the basics of milestone-based escrow',
+    description: 'Master the fundamental escrow flow with milestone payments. Perfect for beginners to understand how trustless transactions work.',
+  },
+  {
+    id: 'dispute-resolution',
+    name: 'Drama Queen Escrow',
+    subtitle: 'Navigate complex dispute scenarios',
+    description: 'Experience real-world dispute resolution scenarios. Learn how to handle conflicts and make fair decisions in escrow disputes.',
+  },
+  {
+    id: 'micro-marketplace',
+    name: 'Gig Economy Madness',
+    subtitle: 'Build a micro-task marketplace',
+    description: 'Create and manage a micro-task marketplace. Learn about task creation, worker assignment, and payment distribution.',
+  },
+];
+
+// Predefined badges configuration (static data)
+export const PREDEFINED_BADGES = [
+  {
+    id: 'welcome_explorer',
+    name: 'Welcome Explorer',
+    description: 'Joined the Nexus Experience community',
+    earningPoints: 10,
+    baseColor: '#10B981',
+    icon: 'explorer',
+    category: 'achievement',
+    rarity: 'common',
+  },
+  {
+    id: 'escrow_expert',
+    name: 'Escrow Expert',
+    description: 'Mastered the basic escrow flow',
+    earningPoints: 30,
+    baseColor: '#3B82F6',
+    icon: 'escrow',
+    category: 'demo',
+    rarity: 'rare',
+  },
+  {
+    id: 'trust_guardian',
+    name: 'Trust Guardian',
+    description: 'Resolved conflicts like a true arbitrator',
+    earningPoints: 50,
+    baseColor: '#8B5CF6',
+    icon: 'guardian',
+    category: 'demo',
+    rarity: 'epic',
+  },
+  {
+    id: 'stellar_champion',
+    name: 'Stellar Champion',
+    description: 'Mastered the micro-task marketplace',
+    earningPoints: 100,
+    baseColor: '#F59E0B',
+    icon: 'champion',
+    category: 'demo',
+    rarity: 'epic',
+  },
+  {
+    id: 'nexus_master',
+    name: 'Nexus Master',
+    description: 'Master of all trustless work demos',
+    earningPoints: 200,
+    baseColor: '#EF4444',
+    icon: 'master',
+    category: 'special',
+    rarity: 'legendary',
+  },
+];
+
+// Helper functions
+export const getDemoById = (id: string) => {
+  return PREDEFINED_DEMOS.find(demo => demo.id === id);
+};
+
+export const getBadgeById = (id: string) => {
+  return PREDEFINED_BADGES.find(badge => badge.id === id);
+};
+
+export const getAllDemos = () => {
+  return PREDEFINED_DEMOS;
+};
+
+export const getAllBadges = () => {
+  return PREDEFINED_BADGES;
+};

@@ -22,9 +22,7 @@ export const useBadgeAnimation = () => {
     // During SSR or if provider is missing, return a no-op function
     return {
       showBadgeAnimation: () => {
-        console.warn(
-          'useBadgeAnimation: BadgeAnimationProvider not found, badge animation skipped'
-        );
+        // Badge animation skipped - provider not found
       },
     };
   }

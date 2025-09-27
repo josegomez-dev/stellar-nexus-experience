@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useDemoStats } from '@/hooks/useDemoStats';
-import { userTrackingService, UserProgress } from '@/lib/user-tracking-service';
 // LeaderboardModal removed
 import { BadgeShowcase } from './BadgeShowcase';
 
@@ -14,33 +12,15 @@ interface UserDashboardProps {
 }
 
 export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
-  const { userProfile, userBadges } = useFirebase();
+  const { account, demos } = useFirebase();
   const { walletData, isConnected } = useGlobalWallet();
-  const { demoStats } = useDemoStats();
-
-  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   // Leaderboard functionality removed
   const [showBadges, setShowBadges] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'demos' | 'achievements' | 'analytics'>(
     'overview'
   );
 
-  useEffect(() => {
-    if (isOpen && isConnected && walletData?.publicKey) {
-      loadUserProgress();
-    }
-  }, [isOpen, isConnected, walletData?.publicKey]);
-
-  const loadUserProgress = async () => {
-    if (!walletData?.publicKey) return;
-
-    try {
-      const progress = await userTrackingService.getUserProgress(walletData.publicKey);
-      setUserProgress(progress);
-    } catch (error) {
-      console.error('Failed to load user progress:', error);
-    }
-  };
+  // No need for separate user progress loading - data comes from Firebase context
 
   const formatXp = (xp: number) => {
     if (xp >= 1000) {
@@ -59,20 +39,20 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
   };
 
   const getLevelProgress = (totalXp: number) => {
-    const currentLevel = Math.floor(totalXp / 100) + 1;
-    const currentLevelXp = totalXp % 100;
-    const nextLevelXp = 100 - currentLevelXp;
+    const currentLevel = Math.floor(totalXp / 1000) + 1;
+    const currentLevelXp = totalXp % 1000;
+    const nextLevelXp = 1000 - currentLevelXp;
     return {
       currentLevel,
       currentLevelXp,
       nextLevelXp,
-      progress: (currentLevelXp / 100) * 100,
+      progress: (currentLevelXp / 1000) * 100,
     };
   };
 
   if (!isOpen) return null;
 
-  const levelProgress = userProgress ? getLevelProgress(userProgress.totalXp) : null;
+  const levelProgress = account ? getLevelProgress(account.experience) : null;
 
   return (
     <div className='fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4'>
@@ -85,7 +65,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
               <div>
                 <h2 className='text-2xl font-bold text-white'>User Dashboard</h2>
                 <p className='text-brand-300 text-sm'>
-                  {userProfile?.username || 'User'} • Level {userProgress?.level || 1}
+                  {account?.displayName || 'User'} • Level {account?.level || 1}
                 </p>
               </div>
             </div>
@@ -140,7 +120,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     <div>
                       <p className='text-brand-300 text-sm font-medium'>Total XP</p>
                       <p className='text-3xl font-bold text-white'>
-                        {formatXp(userProgress?.totalXp || 0)}
+                        {formatXp(account?.experience || 0)}
                       </p>
                     </div>
                     <div className='text-3xl'>⚡</div>
@@ -151,7 +131,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                   <div className='flex items-center justify-between'>
                     <div>
                       <p className='text-accent-300 text-sm font-medium'>Level</p>
-                      <p className='text-3xl font-bold text-white'>{userProgress?.level || 1}</p>
+                      <p className='text-3xl font-bold text-white'>{account?.level || 1}</p>
                     </div>
                     <div className='text-3xl'>🎯</div>
                   </div>
@@ -162,7 +142,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     <div>
                       <p className='text-success-300 text-sm font-medium'>Demos</p>
                       <p className='text-3xl font-bold text-white'>
-                        {userProgress?.demosCompleted || 0}
+                        {account?.demosCompleted?.length || 0}
                       </p>
                     </div>
                     <div className='text-3xl'>🎮</div>
@@ -174,7 +154,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     <div>
                       <p className='text-warning-300 text-sm font-medium'>Badges</p>
                       <p className='text-3xl font-bold text-white'>
-                        {userProgress?.badgesEarned || 0}
+                        {account?.badgesEarned?.length || 0}
                       </p>
                     </div>
                     <div className='text-3xl'>🏆</div>
@@ -193,7 +173,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                   </div>
                   <div className='space-y-2'>
                     <div className='flex justify-between text-sm text-white/70'>
-                      <span>{levelProgress.currentLevelXp}/100 XP</span>
+                      <span>{levelProgress.currentLevelXp}/1000 XP</span>
                       <span>{levelProgress.nextLevelXp} XP to next level</span>
                     </div>
                     <div className='w-full h-3 bg-white/10 rounded-full overflow-hidden'>
@@ -229,7 +209,8 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     <div>
                       <h4 className='font-semibold text-white'>Progress</h4>
                       <p className='text-green-300 text-sm'>
-                        {userProgress?.completionRate?.toFixed(1) || 0}% completion rate
+                        {account ? ((account.demosCompleted.length / 3) * 100).toFixed(1) : 0}%
+                        completion rate
                       </p>
                     </div>
                   </div>
@@ -242,25 +223,19 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
             <div className='space-y-6'>
               <h3 className='text-xl font-semibold text-white mb-4'>Demo Progress</h3>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {Object.entries(demoStats).map(([demoId, stats]) => (
-                  <div key={demoId} className='bg-white/5 rounded-xl p-6 border border-white/20'>
+                {demos.map(demo => (
+                  <div key={demo.id} className='bg-white/5 rounded-xl p-6 border border-white/20'>
                     <div className='flex items-center justify-between mb-4'>
-                      <h4 className='font-semibold text-white capitalize'>
-                        {demoId.replace('-', ' ')}
-                      </h4>
+                      <h4 className='font-semibold text-white capitalize'>{demo.name}</h4>
                       <div className='flex items-center space-x-2'>
                         <span className='text-brand-300 text-sm'>
-                          {stats.totalCompletions} completions
+                          {demo.totalCompletions} completions
                         </span>
                         <button
                           onClick={() => {
                             /* Handle clap */
                           }}
-                          className={`text-lg transition-all duration-300 ${
-                            stats.hasUserClapped
-                              ? 'text-yellow-400'
-                              : 'text-white/40 hover:text-yellow-400'
-                          }`}
+                          className={`text-lg transition-all duration-300 ${'text-white/40 hover:text-yellow-400'}`}
                         >
                           👏
                         </button>
@@ -268,12 +243,12 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     </div>
                     <div className='space-y-2'>
                       <div className='flex justify-between text-sm text-white/70'>
-                        <span>Average Rating</span>
-                        <span>{stats.averageRating.toFixed(1)}/5</span>
+                        <span>Description</span>
+                        <span>{demo.description}</span>
                       </div>
                       <div className='flex justify-between text-sm text-white/70'>
                         <span>Total Claps</span>
-                        <span>{stats.totalClaps}</span>
+                        <span>{demo.totalClaps}</span>
                       </div>
                     </div>
                   </div>
@@ -328,7 +303,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Time Spent</h4>
                   <div className='text-3xl font-bold text-brand-300 mb-2'>
-                    {formatTime(userProgress?.totalTimeSpent || 0)}
+                    {formatTime(0)} {/* TODO: Calculate total time spent from user data */}
                   </div>
                   <p className='text-white/70 text-sm'>Total learning time</p>
                 </div>
@@ -336,7 +311,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Current Streak</h4>
                   <div className='text-3xl font-bold text-success-300 mb-2'>
-                    {userProgress?.streak || 0} days
+                    0 days {/* TODO: Calculate streak from user data */}
                   </div>
                   <p className='text-white/70 text-sm'>Consecutive activity</p>
                 </div>
@@ -344,7 +319,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Progress</h4>
                   <div className='text-3xl font-bold text-accent-300 mb-2'>
-                    {userProgress?.completionRate?.toFixed(0) || '0'}%
+                    {user ? Math.round((user.demosCompleted.length / 3) * 100) : 0}%
                   </div>
                   <p className='text-white/70 text-sm'>Completion Rate</p>
                 </div>
@@ -352,7 +327,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Completion Rate</h4>
                   <div className='text-3xl font-bold text-warning-300 mb-2'>
-                    {userProgress?.completionRate?.toFixed(1) || 0}%
+                    {user ? ((user.demosCompleted.length / 3) * 100).toFixed(1) : 0}%
                   </div>
                   <p className='text-white/70 text-sm'>Demo success rate</p>
                 </div>

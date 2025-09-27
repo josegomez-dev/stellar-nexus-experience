@@ -1,4 +1,3 @@
-
 // UI Components by Category
 export * from './ui/auth';
 export * from './ui/badges';
@@ -23,9 +22,6 @@ export { MilestoneVotingDemo } from './demos/MilestoneVotingDemo';
 // Game Components
 export { default as EscrowPuzzleMaster } from './games/EscrowPuzzleMaster';
 export { default as MiniGameStore } from './games/MiniGameStore';
-
-// Effect Components
-export { default as PlasmaBubbles } from './effects/PlasmaBubbles';
 
 // Other Components
 export { AccountStatusIndicator } from './ui/AccountStatusIndicator';

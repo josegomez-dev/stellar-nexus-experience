@@ -41,8 +41,6 @@ export default function ConfettiAnimation({ isActive, duration = 3000 }: Confett
       return;
     }
 
-    console.log('🎉 Confetti animation triggered!');
-
     // Create confetti pieces
     const pieces: ConfettiPiece[] = Array.from({ length: 50 }, (_, i) => ({
       id: i,

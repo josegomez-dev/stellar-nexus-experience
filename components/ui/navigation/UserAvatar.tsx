@@ -26,8 +26,8 @@ export const UserAvatar = ({ onClick, size = 'md', showStatus = true }: UserAvat
           return parsed.avatarSeed || walletData.publicKey;
         }
       } catch (error) {
-        console.error('Error reading profile data:', error);
-      }
+      console.error('Error loading avatar:', error);
+    }
       return walletData.publicKey;
     }
     return 'default';

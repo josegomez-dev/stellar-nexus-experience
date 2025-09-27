@@ -1,24 +1,20 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAccount } from '@/contexts/AccountContext';
 import { HelloMilestoneDemo } from '@/components/demos/HelloMilestoneDemo';
 import { MilestoneVotingDemo } from '@/components/demos/MilestoneVotingDemo';
 import { DisputeResolutionDemo } from '@/components/demos/DisputeResolutionDemo';
 import { MicroTaskMarketplaceDemo } from '@/components/demos/MicroTaskMarketplaceDemo';
-import { useDemoStats } from '@/hooks/useDemoStats';
 import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
-import { initializeDemoStats } from '@/lib/demo-stats-initializer';
-import { AccountService } from '@/lib/account-service';
 import { useToast } from '@/contexts/ToastContext';
 import { useBadgeAnimation } from '@/contexts/BadgeAnimationContext';
-import { getBadgeById, getAllBadges } from '@/lib/badge-config';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/modals/ImmersiveDemoModal';
@@ -31,9 +27,11 @@ import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/newsData';
+import { getBadgeById } from '@/lib/firebase-types';
+import { getBadgeIcon, getBadgeColors, BADGE_SIZES } from '@/utils/constants/badges/assets';
 
 // Demo Selection Component
-interface Demo {
+interface DemoCard {
   id: string;
   title: string;
   subtitle: string;
@@ -45,7 +43,7 @@ interface Demo {
 }
 
 // Demo configurations
-const demos: Demo[] = [
+const demos: DemoCard[] = [
   {
     id: 'hello-milestone',
     title: '1. Baby Steps to Riches',
@@ -97,50 +95,67 @@ const DemoSelector = ({
   setActiveDemo,
   setShowImmersiveDemo,
   isConnected,
-  accountService,
   addToast,
+  account,
+  demos,
+  completeDemo,
+  hasBadge,
+  refreshAccountData,
 }: {
   activeDemo: string;
   setActiveDemo: (demo: string) => void;
   setShowImmersiveDemo: (show: boolean) => void;
   isConnected: boolean;
-  accountService: any;
   addToast: (toast: any) => void;
+  account: any;
+  demos: any;
+  completeDemo: (demoId: string) => Promise<void>;
+  hasBadge: (badgeId: string) => Promise<boolean>;
+  refreshAccountData: () => Promise<void>;
 }) => {
-  const { getCompletedDemos, account, getMainDemoProgress } = useAccount();
+  // Removed old AccountContext usage
   const { showBadgeAnimation } = useBadgeAnimation();
-  const { demoStats, clapDemo, refreshStats } = useDemoStats();
   const [isClaimingNexusMaster, setIsClaimingNexusMaster] = useState(false);
 
-  // Get badge information for each demo
-  const getDemoBadge = (demoId: string) => {
+  // Placeholder clap function - TODO: Implement clap functionality
+  const clapDemo = (demoId: string, demoTitle: string) => {
+    // TODO: Implement clap functionality with Firebase
+  };
+
+  // Get badge information for each demo - memoized to prevent setState during render
+  const getDemoBadge = useMemo(() => {
     const badgeMap: Record<string, string> = {
-      'hello-milestone': 'escrow-expert',
-      'dispute-resolution': 'trust-guardian',
-      'micro-marketplace': 'stellar-champion',
+      'hello-milestone': 'escrow_expert',
+      'dispute-resolution': 'trust_guardian',
+      'micro-marketplace': 'stellar_champion',
+    };
+
+    return (demoId: string) => {
+      const badgeId = badgeMap[demoId];
+      if (!badgeId) return null;
+
+      return getBadgeById(badgeId);
+    };
+  }, []);
+
+  // Check if user has earned the badge for this demo
+  const hasEarnedBadge = async (demoId: string) => {
+    const badgeMap: Record<string, string> = {
+      'hello-milestone': 'escrow_expert',
+      'dispute-resolution': 'trust_guardian',
+      'micro-marketplace': 'stellar_champion',
     };
 
     const badgeId = badgeMap[demoId];
-    if (!badgeId) return null;
+    if (!badgeId) return false;
 
-    const badgeConfig = getAllBadges().find(badge => badge.id === badgeId);
-    return badgeConfig;
-  };
-
-  // Check if user has earned the badge for this demo
-  const hasEarnedBadge = (demoId: string) => {
-    if (!account) return false;
-    const badge = getDemoBadge(demoId);
-    if (!badge) return false;
-    const hasBadge = account.badges.some(userBadge => userBadge.name === badge.name);
-
-    return hasBadge;
+    return await hasBadge(badgeId);
   };
 
   const getClapStats = (demoId: string) => {
-    const stats = demoStats[demoId];
+    const demo = demos.find((d: DemoCard) => d.id === demoId);
 
-    if (!stats) {
+    if (!demo) {
       return {
         claps: 0,
         hasClapped: false,
@@ -148,24 +163,21 @@ const DemoSelector = ({
       };
     }
 
+    // Show "???" for curiosity when wallet is not connected
+    if (!isConnected) {
+      return {
+        claps: 0,
+        hasClapped: false,
+        completions: '???',
+      };
+    }
+
     return {
-      claps: stats.totalClaps,
-      hasClapped: stats.hasUserClapped,
-      completions: stats.totalCompletions,
+      claps: demo.totalClaps || 0,
+      hasClapped: false, // TODO: Implement clap tracking
+      completions: demo.totalCompletions || 0,
     };
   };
-
-  // Check if user has unlocked mini-games access (earned Nexus Master badge)
-  const hasUnlockedMiniGames = () => {
-    if (!account) return false;
-
-    // Check if user has earned the Nexus Master badge
-    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
-
-    return hasNexusMasterBadge;
-  };
-
-  const miniGamesUnlocked = hasUnlockedMiniGames();
 
   const getDemoButtonColors = (demoColor: string) => {
     // Map demo colors to button gradient colors
@@ -341,16 +353,39 @@ const DemoSelector = ({
     <div className='space-y-8'>
       {/* Demo Cards */}
       <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-2'>
-        {demos.map(demo => {
-          const completedDemos = getCompletedDemos();
-          const isCompleted = completedDemos.includes(demo.id);
-          const earnedBadge = hasEarnedBadge(demo.id);
+        {demos.map((demo: DemoCard) => {
+          // Handle both array and object formats for demosCompleted (Firebase sometimes stores arrays as objects)
+          let demosCompletedArray: string[] = [];
+          if (Array.isArray(account?.demosCompleted)) {
+            demosCompletedArray = account.demosCompleted;
+          } else if (account?.demosCompleted && typeof account.demosCompleted === 'object') {
+            demosCompletedArray = Object.values(account.demosCompleted);
+          }
+
+          const isCompleted = demosCompletedArray.includes(demo.id);
+
+          // Check if user has earned the badge for this demo synchronously
+          const badgeMap: Record<string, string> = {
+            'hello-milestone': 'escrow_expert',
+            'dispute-resolution': 'trust_guardian',
+            'micro-marketplace': 'stellar_champion',
+          };
+          const badgeId = badgeMap[demo.id];
+
+          // Handle both array and object formats for badgesEarned (Firebase sometimes stores arrays as objects)
+          let badgesEarnedArray: string[] = [];
+          if (Array.isArray(account?.badgesEarned)) {
+            badgesEarnedArray = account.badgesEarned;
+          } else if (account?.badgesEarned && typeof account.badgesEarned === 'object') {
+            badgesEarnedArray = Object.values(account.badgesEarned);
+          }
+
+          const earnedBadge = badgeId ? badgesEarnedArray.includes(badgeId) : false;
           const badge = getDemoBadge(demo.id);
 
           // Special logic for Nexus Master card
-          const mainDemoProgress = getMainDemoProgress();
-          const allDemosCompleted = mainDemoProgress.completed === 3;
-          const hasNexusMasterBadge = account?.badges.some(b => b.name === 'Nexus Master') || false;
+          const allDemosCompleted = demosCompletedArray.length === 3;
+          const hasNexusMasterBadge = badgesEarnedArray.includes('nexus_master');
           const isNexusMasterCard = demo.id === 'nexus-master';
           const isNexusMasterReady = isNexusMasterCard && allDemosCompleted;
           const isNexusMasterCompleted = isNexusMasterCard && hasNexusMasterBadge;
@@ -410,7 +445,7 @@ const DemoSelector = ({
                 <div className='absolute top-4 right-4 z-50'>
                   {earnedBadge && badge ? (
                     <div
-                      // className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}
+                    // className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine`}
                     >
                       {/* <div className='badge-icon-bounce'>
                         <BadgeEmblem id={badge.id} size='sm' className='text-white' />
@@ -421,7 +456,7 @@ const DemoSelector = ({
                     <div
                       className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2`}
                     >
-                      <BadgeEmblem id='perfect-score' size='sm' className='text-white' />
+                      {getBadgeIcon('perfect-score', BADGE_SIZES.sm) || <BadgeEmblem id='perfect-score' size='sm' className='text-white' />}
                       <span>Completed</span>
                     </div>
                   )}
@@ -433,7 +468,7 @@ const DemoSelector = ({
                 <div className='absolute top-4 right-4 z-50'>
                   <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine'>
                     <div className='badge-icon-bounce'>
-                      <BadgeEmblem id='nexus-master' size='sm' className='text-white' />
+                      {getBadgeIcon('nexus_master', BADGE_SIZES.sm) || <BadgeEmblem id='nexus-master' size='sm' className='text-white' />}
                     </div>
                     <span>Nexus Master</span>
                   </div>
@@ -450,23 +485,23 @@ const DemoSelector = ({
                 <div className='absolute inset-0 pointer-events-none overflow-hidden'>
                   {(() => {
                     // Get the specific badge ID for this demo
-                    let badgeId = 'nexus-master'; // Default for Nexus Master card
-                    
+                    let badgeId = 'nexus_master'; // Default for Nexus Master card
+
                     if (isNexusMasterCard) {
-                      badgeId = 'nexus-master';
+                      badgeId = 'nexus_master';
                     } else if (earnedBadge && badge) {
                       // Use the earned badge ID
                       badgeId = badge.id;
                     } else if (demo.id) {
                       // Map demo ID to badge ID
                       const demoBadgeMap: Record<string, string> = {
-                        'hello-milestone': 'escrow-expert',
-                        'dispute-resolution': 'trust-guardian', 
-                        'micro-marketplace': 'stellar-champion',
+                        'hello-milestone': 'escrow_expert',
+                        'dispute-resolution': 'trust_guardian',
+                        'micro-marketplace': 'stellar_champion',
                       };
-                      badgeId = demoBadgeMap[demo.id] || 'nexus-master';
+                      badgeId = demoBadgeMap[demo.id] || 'nexus_master';
                     }
-                    
+
                     return (
                       <>
                         {/* <div className='absolute top-4 left-4 floating-particle opacity-70'>
@@ -475,11 +510,17 @@ const DemoSelector = ({
                         {/* <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
                           <BadgeEmblem id={badgeId} size='sm' className='text-orange-400' />
                         </div> */}
-                        <div className='absolute bottom-8 left-8 floating-particle opacity-60' style={{ animationDelay: '1s' }}>
-                          <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
+                        <div
+                          className='absolute bottom-8 left-8 floating-particle opacity-60'
+                          style={{ animationDelay: '1s' }}
+                        >
+                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />}
                         </div>
-                        <div className='absolute bottom-4 right-4 floating-particle opacity-90' style={{ animationDelay: '1.5s' }}>
-                          <BadgeEmblem id={badgeId} size='sm' className='text-orange-300' />
+                        <div
+                          className='absolute bottom-4 right-4 floating-particle opacity-90'
+                          style={{ animationDelay: '1.5s' }}
+                        >
+                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || <BadgeEmblem id={badgeId} size='sm' className='text-orange-300' />}
                         </div>
                       </>
                     );
@@ -507,7 +548,7 @@ const DemoSelector = ({
                               <div className='text-lg font-bold text-amber-400'>
                                 {stats.completions}
                               </div>
-                              <div className='text-xs text-white/60'># TNX:</div>
+                              <div className='text-xs text-white/60'>Completions:</div>
                             </div>
                             <div>
                               <button
@@ -627,8 +668,10 @@ const DemoSelector = ({
                         >
                           {/* Floating XP text in top right corner */}
                           <div className='absolute top-2 right-2'>
-                            <span className={`${getDemoBadgeColors(demo.color).descriptionColor} text-xs font-semibold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm`}>
-                              +{badge.xpReward} XP
+                            <span
+                              className={`${getDemoBadgeColors(demo.color).descriptionColor} text-xs font-semibold bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm`}
+                            >
+                              +{badge?.earningPoints || 0} XP
                             </span>
                           </div>
                           <div className='flex items-center gap-3 mb-2'>
@@ -685,42 +728,34 @@ const DemoSelector = ({
                         <button
                           onClick={async () => {
                             if (isClaimingNexusMaster) return; // Prevent multiple clicks
-                            
+
                             setIsClaimingNexusMaster(true);
                             try {
-                              if (account) {
-                                // Award the Nexus Master badge directly
-                                const nexusMasterBadge = {
-                                  id: `nexus-master-${Date.now()}`,
-                                  name: 'Nexus Master',
-                                  description: 'Master of all trustless work demos',
-                                  imageUrl: '👑',
-                                  rarity: 'legendary' as const,
-                                  earnedAt: new Date(),
-                                  pointsValue: 200,
+                              // Use the completeDemo function to properly award the Nexus Master badge
+                              await completeDemo('nexus-master'); // Complete Nexus Master demo
+
+                              // Show badge animation
+                              const nexusMasterBadgeConfig = getBadgeById('nexus_master');
+                              if (nexusMasterBadgeConfig) {
+                                const fullBadge = {
+                                  ...nexusMasterBadgeConfig,
+                                  createdAt: new Date(),
                                 };
-
-                                await accountService.awardBadge(account.id, nexusMasterBadge);
-                                await refreshStats();
-                                console.log('🎉 Nexus Master badge claimed!');
-
-                                // Show badge animation
-                                const nexusMasterBadgeConfig = getBadgeById('nexus-master');
-                                if (nexusMasterBadgeConfig) {
-                                  showBadgeAnimation(nexusMasterBadgeConfig, 200);
-                                }
-
-                                // Show success toast
-                                addToast({
-                                  type: 'success',
-                                  title: '👑 Nexus Master Unlocked!',
-                                  message:
-                                    'You have mastered all trustless work demos! Earned 200 XP and the legendary Nexus Master badge!',
-                                  duration: 6000,
-                                });
+                                showBadgeAnimation(fullBadge, 200);
                               }
+
+                              // Show success toast
+                              addToast({
+                                type: 'success',
+                                title: '👑 Nexus Master Unlocked!',
+                                message:
+                                  'You have mastered all trustless work demos! Earned 200 XP and the legendary Nexus Master badge!',
+                                duration: 6000,
+                              });
+
+                              // Refresh account data to update UI
+                              await refreshAccountData();
                             } catch (error) {
-                              console.error('Error claiming Nexus Master badge:', error);
                               addToast({
                                 type: 'error',
                                 title: '❌ Claim Failed',
@@ -733,18 +768,18 @@ const DemoSelector = ({
                           }}
                           disabled={isClaimingNexusMaster}
                           className={`px-6 py-3 font-bold rounded-lg transition-all duration-300 transform ${
-                            isClaimingNexusMaster 
-                              ? 'scale-95 cursor-not-allowed opacity-75' 
+                            isClaimingNexusMaster
+                              ? 'scale-95 cursor-not-allowed opacity-75'
                               : 'hover:scale-105 cursor-pointer'
                           } bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-purple-500/50 border border-white/30 relative overflow-hidden`}
                         >
                           {isClaimingNexusMaster && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse"></div>
+                            <div className='absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse'></div>
                           )}
-                          <div className="relative flex items-center justify-center space-x-2">
+                          <div className='relative flex items-center justify-center space-x-2'>
                             {isClaimingNexusMaster ? (
                               <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
                                 <span>PROCESSING...</span>
                               </>
                             ) : (
@@ -764,7 +799,7 @@ const DemoSelector = ({
                           Complete all 3 demos to unlock
                         </div>
                         <div className='mt-2 text-xs text-gray-400/70'>
-                          Progress: {mainDemoProgress.completed}/3
+                          Progress: {account?.demosCompleted?.length || 0}/3
                         </div>
                       </div>
                     )
@@ -838,7 +873,7 @@ const DemoSelector = ({
                           className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-500 transform shadow-2xl border-2 text-lg ${
                             isConnected
                               ? `hover:scale-110 hover:rotate-1 ${getDemoButtonColors(demo.color).shadow} bg-gradient-to-r ${getDemoButtonColors(demo.color).gradient} ${getDemoButtonColors(demo.color).hoverGradient} text-white border-white/30 hover:border-white/60`
-                              : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed blur-sm opacity-60'
+                              : 'bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 text-gray-400 border-gray-600 cursor-not-allowed opacity-60'
                           }`}
                         >
                           {/* Button Content */}
@@ -869,7 +904,7 @@ const DemoSelector = ({
                             width={100}
                             height={100}
                             className='animate-spin'
-                            style={{ animationDuration: '2s' }}
+                            style={{ animationDuration: '2s', width: 'auto', height: 'auto' }}
                           />
                         </div>
                       </div>
@@ -879,7 +914,7 @@ const DemoSelector = ({
                       disabled={true}
                       className='px-6 py-3 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 bg-white/10 border border-white/20 text-white/40 cursor-not-allowed'
                     >
-                      Coming Soon
+                      {!isConnected ? 'Connect Wallet' : 'Coming Soon'}
                     </button>
                   ) : null}
                 </div>
@@ -895,23 +930,30 @@ const DemoSelector = ({
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
-  const { account } = useAccount();
+  const { account, completeDemo, hasBadge, refreshAccountData } = useFirebase();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
-  const { submitFeedback, markDemoComplete, refreshStats } = useDemoStats();
-  const accountService = AccountService.getInstance();
+  // Note: submitFeedback removed from simplified Firebase context
+  // Removed old AccountService usage
   const { addToast } = useToast();
 
-  // Check if user has unlocked mini-games access (earned Nexus Master badge)
-  const hasUnlockedMiniGames = () => {
-    if (!account) return false;
+  // Check if user has unlocked mini-games access (earned all badges including Nexus Master)
+  const miniGamesUnlocked = useMemo(() => {
+    if (!account || !account.badgesEarned) return false;
 
-    // Check if user has earned the Nexus Master badge
-    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
+    // Handle both array and object formats for badgesEarned (Firebase sometimes stores arrays as objects)
+    let badgesEarnedArray: string[] = [];
+    if (Array.isArray(account.badgesEarned)) {
+      badgesEarnedArray = account.badgesEarned;
+    } else if (typeof account.badgesEarned === 'object') {
+      badgesEarnedArray = Object.values(account.badgesEarned);
+    }
 
-    return hasNexusMasterBadge;
-  };
+    // Check if user has earned all required badges
+    const requiredBadges = ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const hasAllBadges = requiredBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
 
-  const miniGamesUnlocked = hasUnlockedMiniGames();
+    return hasAllBadges;
+  }, [account]);
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
@@ -925,14 +967,7 @@ export default function HomePageContent() {
     demoName: string;
     completionTime: number;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(() => {
-    // Check if this is the first time loading the page
-    if (typeof window !== 'undefined') {
-      const hasLoadedBefore = localStorage.getItem('homePageLoaded');
-      return !hasLoadedBefore;
-    }
-    return true;
-  });
+  const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
   const [showTechTree, setShowTechTree] = useState(false);
@@ -942,11 +977,19 @@ export default function HomePageContent() {
   const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
 
-  // Initialize demo stats on app load
+  // Initialize Firebase data on app load
   useEffect(() => {
-    initializeDemoStats().catch(error => {
-      console.error('Failed to initialize demo stats:', error);
-    });
+    // Firebase initialization is handled by FirebaseContext
+  }, []);
+
+  // Check if this is the first time loading the page
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasLoadedBefore = localStorage.getItem('homePageLoaded');
+      if (hasLoadedBefore) {
+        setIsLoading(false);
+      }
+    }
   }, []);
 
   // Preloader effect - only on first load
@@ -1005,14 +1048,12 @@ export default function HomePageContent() {
     };
   }, []);
 
-  // Refresh demo stats when account changes (after demo completion)
+  // Refresh account data when account changes (after demo completion)
   useEffect(() => {
     if (account) {
-      refreshStats().catch(error => {
-        console.error('Failed to refresh demo stats:', error);
-      });
+      // Firebase data is automatically refreshed by FirebaseContext
     }
-  }, [account, refreshStats]);
+  }, [account]);
 
   // Authentication handlers
   const handleSignUpClick = () => {
@@ -1035,12 +1076,8 @@ export default function HomePageContent() {
     demoName: string,
     completionTime: number = 5
   ) => {
-    // Mark demo as complete in Firebase
-    try {
-      await markDemoComplete(demoId, demoName, completionTime);
-    } catch (error) {
-      console.error('Failed to mark demo as complete:', error);
-    }
+    // Demo completion is handled by the demo components themselves
+    // No need to manually mark demo as complete here
 
     setFeedbackDemoData({
       demoId,
@@ -1052,7 +1089,7 @@ export default function HomePageContent() {
 
   // Handle feedback submission
   const handleFeedbackSubmit = async (feedback: any) => {
-    await submitFeedback(feedback);
+    // Note: submitFeedback removed from simplified Firebase context
     setShowFeedbackModal(false);
     setFeedbackDemoData(null);
   };
@@ -1074,461 +1111,476 @@ export default function HomePageContent() {
       {/* Animated background elements */}
       <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
 
-      {/* Preloader Screen */}
-      {isLoading && (
-        <div className='fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center'>
-          {/* Animated Background */}
-          <div className='absolute inset-0 overflow-hidden'>
-            {/* Floating Energy Orbs */}
-            <div className='absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping'></div>
-            <div
-              className='absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping'
-              style={{ animationDelay: '0.5s' }}
-            ></div>
-            <div
-              className='absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping'
-              style={{ animationDelay: '1s' }}
-            ></div>
-            <div
-              className='absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping'
-              style={{ animationDelay: '1.5s' }}
-            ></div>
-
-            {/* Energy Grid */}
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse'></div>
-          </div>
-
-          {/* Main Content */}
-          <div className='relative z-10 text-center'>
-            {/* Logo Animation */}
-            <div className='mb-8 animate-bounce'>
-              <Image
-                src='/images/logo/logoicon.png'
-                alt='STELLAR NEXUS'
-                width={120}
-                height={120}
-                className='w-30 h-30'
-              />
-            </div>
-
-            {/* Loading Text */}
-            <h1 className='text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse'>
-              INITIALIZING STELLAR NEXUS EXPERIENCE
-            </h1>
-
-            {/* Subtitle */}
-            <p className='text-xl text-brand-300 mb-8 animate-pulse'>
-              Preparing your trustless work experience...
-            </p>
-
-            {/* Loading Bar */}
-            <div className='w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8'>
-              <div
-                className='h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full transition-all duration-500 ease-out'
-                style={{ width: `${loadingProgress}%` }}
-              ></div>
-            </div>
-
-            {/* Loading Steps */}
-            <div className='space-y-2 text-white/80'>
-              <p className='animate-fadeInUp' style={{ animationDelay: '0.5s' }}>
-                Connecting to Stellar Network...
-              </p>
-              <p className='animate-fadeInUp' style={{ animationDelay: '1s' }}>
-                Loading Smart Contracts...
-              </p>
-              <p className='animate-fadeInUp' style={{ animationDelay: '1.5s' }}>
-                Preparing Demo Suite...
-              </p>
-              <p className='animate-fadeInUp' style={{ animationDelay: '2s' }}>
-                Launching STELLAR NEXUS EXPERIENCE...
-              </p>
-            </div>
-
-            {/* Progress Percentage */}
-            <div className='mt-8 text-brand-300 text-lg'>
-              <span className='font-bold'>{loadingProgress}%</span> Complete
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <main
         className={`relative z-10 pt-20 ${
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
-        {/* Hero Section */}
-        <section className='container mx-auto px-4 py-16'>
-          <div className='text-center'>
-            {/* Page Header */}
-            <div className='text-center mb-16'>
-              <div className='flex justify-center mb-6'>
+        {/* Preloader Screen */}
+        {isLoading && (
+          <div className='fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center'>
+            {/* Animated Background */}
+            <div className='absolute inset-0 overflow-hidden'>
+              {/* Floating Energy Orbs */}
+              <div className='absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping'></div>
+              <div
+                className='absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping'
+                style={{ animationDelay: '0.5s' }}
+              ></div>
+              <div
+                className='absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping'
+                style={{ animationDelay: '1s' }}
+              ></div>
+              <div
+                className='absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping'
+                style={{ animationDelay: '1.5s' }}
+              ></div>
+
+              {/* Energy Grid */}
+              <div className='absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse'></div>
+            </div>
+
+            {/* Main Content */}
+            <div className='relative z-10 text-center'>
+              {/* Logo Animation */}
+              <div className='mb-8 animate-bounce'>
                 <Image
                   src='/images/logo/logoicon.png'
                   alt='STELLAR NEXUS'
-                  width={300}
-                  height={300}
-                  style={{ zIndex: -1, position: 'relative' }}
+                  width={120}
+                  height={120}
+                  className='w-30 h-30'
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </div>
 
-              {/* Epic Legendary Background for Title */}
-              <div className='relative mb-8'>
-                {/* Legendary Energy Background */}
-                <div className='absolute inset-0 flex justify-center items-center pointer-events-none'>
-                  {/* Primary Energy Core */}
-                  <div className='relative w-[500px] h-40'>
-                    {/* Inner Energy Ring */}
-                    <div className='absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/40 via-accent-500/50 to-brand-400/40 blur-lg scale-150'></div>
+              {/* Loading Text */}
+              <h1 className='text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse'>
+                INITIALIZING STELLAR NEXUS EXPERIENCE
+              </h1>
 
-                    {/* Middle Energy Ring */}
-                    <div className='absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/30 via-brand-500/40 to-accent-400/30 blur-xl scale-200'></div>
+              {/* Subtitle */}
+              <p className='text-xl text-brand-300 mb-8 animate-pulse'>
+                Preparing your trustless work experience...
+              </p>
 
-                    {/* Outer Energy Ring */}
-                    <div className='absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-accent-500/30 to-brand-300/20 blur-2xl scale-250'></div>
+              {/* Loading Bar */}
+              <div className='w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8'>
+                <div
+                  className='h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full transition-all duration-500 ease-out'
+                  style={{ width: `${loadingProgress}%` }}
+                ></div>
+              </div>
+
+              {/* Loading Steps */}
+              <div className='space-y-2 text-white/80'>
+                <p className='animate-fadeInUp' style={{ animationDelay: '0.5s' }}>
+                  Connecting to Stellar Network...
+                </p>
+                <p className='animate-fadeInUp' style={{ animationDelay: '1s' }}>
+                  Loading Smart Contracts...
+                </p>
+                <p className='animate-fadeInUp' style={{ animationDelay: '1.5s' }}>
+                  Preparing Demo Suite...
+                </p>
+                <p className='animate-fadeInUp' style={{ animationDelay: '2s' }}>
+                  Launching STELLAR NEXUS EXPERIENCE...
+                </p>
+              </div>
+
+              {/* Progress Percentage */}
+              <div className='mt-8 text-brand-300 text-lg'>
+                <span className='font-bold'>{loadingProgress}%</span> Complete
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content - Only show when not loading */}
+        {!isLoading && (
+          <>
+            {/* Hero Section */}
+            <section className='container mx-auto px-4 py-16'>
+              <div className='text-center'>
+                {/* Page Header */}
+                <div className='text-center mb-16'>
+                  <div className='flex justify-center mb-6'>
+                    <Image
+                      src='/images/logo/logoicon.png'
+                      alt='STELLAR NEXUS'
+                      width={300}
+                      height={300}
+                      priority
+                      style={{ zIndex: -1, position: 'relative', width: 'auto', height: 'auto' }}
+                    />
                   </div>
 
-                  {/* Floating Energy Particles */}
-                  <div className='absolute inset-0'>
-                    <div className='absolute top-6 left-1/4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-80'></div>
-                    <div
-                      className='absolute top-12 right-1/3 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-90'
-                      style={{ animationDelay: '0.5s' }}
-                    ></div>
-                    <div
-                      className='absolute bottom-8 left-1/3 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-70'
-                      style={{ animationDelay: '1s' }}
-                    ></div>
-                    <div
-                      className='absolute bottom-12 right-1/4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
-                      style={{ animationDelay: '1.5s' }}
-                    ></div>
-                    <div
-                      className='absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-brand-200 rounded-full animate-ping opacity-60'
-                      style={{ animationDelay: '2s' }}
-                    ></div>
-                    <div
-                      className='absolute top-1/2 right-1/6 w-2 h-2 bg-accent-200 rounded-full animate-ping opacity-75'
-                      style={{ animationDelay: '2.5s' }}
-                    ></div>
+                  {/* Epic Legendary Background for Title */}
+                  <div className='relative mb-8'>
+                    {/* Legendary Energy Background */}
+                    <div className='absolute inset-0 flex justify-center items-center pointer-events-none'>
+                      {/* Primary Energy Core */}
+                      <div className='relative w-[500px] h-40'>
+                        {/* Inner Energy Ring */}
+                        <div className='absolute inset-0 rounded-full bg-gradient-to-r from-brand-500/40 via-accent-500/50 to-brand-400/40 blur-lg scale-150'></div>
+
+                        {/* Middle Energy Ring */}
+                        <div className='absolute inset-0 rounded-full bg-gradient-to-r from-accent-500/30 via-brand-500/40 to-accent-400/30 blur-xl scale-200'></div>
+
+                        {/* Outer Energy Ring */}
+                        <div className='absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-accent-500/30 to-brand-300/20 blur-2xl scale-250'></div>
+                      </div>
+
+                      {/* Floating Energy Particles */}
+                      <div className='absolute inset-0'>
+                        <div className='absolute top-6 left-1/4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-80'></div>
+                        <div
+                          className='absolute top-12 right-1/3 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-90'
+                          style={{ animationDelay: '0.5s' }}
+                        ></div>
+                        <div
+                          className='absolute bottom-8 left-1/3 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-70'
+                          style={{ animationDelay: '1s' }}
+                        ></div>
+                        <div
+                          className='absolute bottom-12 right-1/4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
+                          style={{ animationDelay: '1.5s' }}
+                        ></div>
+                        <div
+                          className='absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-brand-200 rounded-full animate-ping opacity-60'
+                          style={{ animationDelay: '2s' }}
+                        ></div>
+                        <div
+                          className='absolute top-1/2 right-1/6 w-2 h-2 bg-accent-200 rounded-full animate-ping opacity-75'
+                          style={{ animationDelay: '2.5s' }}
+                        ></div>
+                      </div>
+
+                      {/* Energy Wave Rings */}
+                      <div className='absolute inset-0'>
+                        <div
+                          className='absolute inset-0 rounded-full border-2 border-brand-400/40 animate-ping scale-150'
+                          style={{ animationDuration: '4s' }}
+                        ></div>
+                        <div
+                          className='absolute inset-0 rounded-full border border-accent-400/30 animate-ping scale-200'
+                          style={{ animationDuration: '5s' }}
+                        ></div>
+                        <div
+                          className='absolute inset-0 rounded-full border border-brand-300/25 animate-ping scale-250'
+                          style={{ animationDuration: '6s' }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Title with Enhanced Styling */}
+                    <h1
+                      className='relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl'
+                      style={{ zIndex: 1000, marginTop: '-200px' }}
+                    >
+                      STELLAR NEXUS EXPERIENCE
+                    </h1>
                   </div>
 
-                  {/* Energy Wave Rings */}
-                  <div className='absolute inset-0'>
-                    <div
-                      className='absolute inset-0 rounded-full border-2 border-brand-400/40 animate-ping scale-150'
-                      style={{ animationDuration: '4s' }}
-                    ></div>
-                    <div
-                      className='absolute inset-0 rounded-full border border-accent-400/30 animate-ping scale-200'
-                      style={{ animationDuration: '5s' }}
-                    ></div>
-                    <div
-                      className='absolute inset-0 rounded-full border border-brand-300/25 animate-ping scale-250'
-                      style={{ animationDuration: '6s' }}
-                    ></div>
+                  <br />
+                  <br />
+
+                  <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
+                    Master the art of trustless work with our demo suite on Stellar blockchain
+                  </p>
+
+                  {/* Tutorial Buttons */}
+                  <div className='flex justify-center gap-6 mb-8'>
+                    <button
+                      onClick={() => {
+                        const tutorialSection = document.getElementById('interactive-tutorial');
+                        if (tutorialSection) {
+                          tutorialSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start',
+                          });
+                        }
+                      }}
+                      className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x3'
+                    >
+                      <span className='text-xl'>👨‍🏫&nbsp;</span>
+                      <span>Tutorial</span>
+                      <span className='text-xl'>&nbsp;→</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowTechTree(true)}
+                      disabled={false}
+                      className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                      title='Explore the Trustless Work Tech Tree'
+                    >
+                      <span>Trustless Work Tech Tree</span>
+                      <span className='text-xl'>
+                        <Image
+                          src='/images/icons/demos.png'
+                          alt='Trustless Work Tech Tree'
+                          width={50}
+                          height={20}
+                          style={{ width: 'auto', height: 'auto' }}
+                        />
+                      </span>
+                      {!isConnected && (
+                        <span className='absolute -top-1 -right-1 text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium shadow-lg'>
+                          👁️ View
+                        </span>
+                      )}
+                    </button>
+
+                    <Tooltip
+                      position='bottom'
+                      content={
+                        miniGamesUnlocked
+                          ? 'Explore the Nexus Web3 Playground'
+                          : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
+                      }
+                    >
+                      <a
+                        href={miniGamesUnlocked ? '/mini-games' : '#'}
+                        onClick={e => {
+                          if (!miniGamesUnlocked) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 transform shadow-lg border-2 ${
+                          miniGamesUnlocked
+                            ? 'bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white hover:scale-105 hover:shadow-xl border-white/20 hover:border-white/40 cursor-pointer'
+                            : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                        }`}
+                        title={
+                          miniGamesUnlocked
+                            ? 'Explore the Nexus Web3 Playground'
+                            : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
+                        }
+                      >
+                        <span>
+                          {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                        </span>
+                        <span className='text-xl'>
+                          <Image
+                            src={'/images/icons/console.png'}
+                            alt='Nexus Web3 Playground'
+                            width={50}
+                            height={20}
+                            className={miniGamesUnlocked ? '' : 'grayscale'}
+                            style={{ width: 'auto', height: 'auto' }}
+                          />
+                        </span>
+                      </a>
+                    </Tooltip>
                   </div>
                 </div>
 
-                {/* Title with Enhanced Styling */}
-                <h1
-                  className='relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl'
-                  style={{ zIndex: 1000, marginTop: '-200px' }}
-                >
-                  STELLAR NEXUS EXPERIENCE
-                </h1>
+                {/* Powered by Trustless Work */}
+                <div className='text-center mt-4'>
+                  <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
+                    Powered by <span className='text-brand-200 font-semibold'>Trustless Work</span>
+                  </p>
+                </div>
               </div>
+            </section>
 
-              <br />
-              <br />
-
-              <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
-                Master the art of trustless work with our demo suite on Stellar blockchain
-              </p>
-
-              {/* Tutorial Buttons */}
-              <div className='flex justify-center gap-6 mb-8'>
-                <button
-                  onClick={() => {
-                    const tutorialSection = document.getElementById('interactive-tutorial');
-                    if (tutorialSection) {
-                      tutorialSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start',
-                      });
-                    }
-                  }}
-                  className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x3'
-                >
-                  <span className='text-xl'>👨‍🏫&nbsp;</span>
-                  <span>Tutorial</span>
-                  <span className='text-xl'>&nbsp;→</span>
-                </button>
-
-                <button
-                  onClick={() => setShowTechTree(true)}
-                  disabled={false}
-                  className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
-                  title='Explore the Trustless Work Tech Tree'
-                >
-                  <span>Trustless Work Tech Tree</span>
-                  <span className='text-xl'>
-                    <Image
-                      src='/images/icons/demos.png'
-                      alt='Trustless Work Tech Tree'
-                      width={50}
-                      height={20}
-                    />
-                  </span>
-                  {!isConnected && (
-                    <span className='absolute -top-1 -right-1 text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium shadow-lg'>
-                      👁️ View
-                    </span>
-                  )}
-                </button>
-
-                <Tooltip
-                  content={
-                    miniGamesUnlocked
-                      ? 'Explore the Nexus Web3 Playground'
-                      : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
-                  }
-                >
-                  <a
-                    href={miniGamesUnlocked ? '/mini-games' : '#'}
-                    onClick={e => {
-                      if (!miniGamesUnlocked) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 transform shadow-lg border-2 ${
-                      miniGamesUnlocked
-                        ? 'bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white hover:scale-105 hover:shadow-xl border-white/20 hover:border-white/40 cursor-pointer'
-                        : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
-                    }`}
-                    title={
-                      miniGamesUnlocked
-                        ? 'Explore the Nexus Web3 Playground'
-                        : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
-                    }
-                  >
-                    <span>
-                      {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
-                    </span>
-                    <span className='text-xl'>
-                      <Image
-                        src='/images/icons/console.png'
-                        alt='Nexus Web3 Playground'
-                        width={50}
-                        height={20}
-                        className={miniGamesUnlocked ? '' : 'grayscale'}
-                      />
-                    </span>
-                  </a>
-                </Tooltip>
-              </div>
-            </div>
-
-            {/* Powered by Trustless Work */}
-            <div className='text-center mt-4'>
-              <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
-                Powered by <span className='text-brand-200 font-semibold'>Trustless Work</span>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className=' mx-auto px-4'>
-          <div className=' mx-auto'>
-            <DemoSelector
-              activeDemo={activeDemo}
-              setActiveDemo={setActiveDemo}
-              setShowImmersiveDemo={setShowImmersiveDemo}
-              isConnected={isConnected}
-              accountService={accountService}
-              addToast={addToast}
-            />
-          </div>
-        </section>
-
-        {/* Interactive Tutorial Section - Full Width with Irregular Shape */}
-        <section
-          id='interactive-tutorial'
-          className='relative w-full py-16 overflow-hidden -mb-20 mt-20'
-        >
-          {/* Irregular Background Shape - Full Width */}
-          <div className='absolute inset-0'>
-            {/* Main irregular shape using clip-path */}
-            <div
-              className='absolute inset-0 bg-gradient-to-br from-brand-500/20 via-accent-500/25 to-brand-400/20'
-              style={{
-                clipPath: 'polygon(0% 0%, 100% 8%, 92% 100%, 0% 92%)',
-              }}
-            ></div>
-
-            {/* Secondary irregular shape overlay */}
-            <div
-              className='absolute inset-0 bg-gradient-to-tr from-accent-500/15 via-transparent to-brand-500/15'
-              style={{
-                clipPath: 'polygon(8% 0%, 100% 0%, 88% 100%, 0% 100%)',
-              }}
-            ></div>
-
-            {/* Floating geometric elements */}
-            <div className='absolute top-16 left-16 w-40 h-40 bg-gradient-to-r from-brand-400/25 to-accent-400/25 rounded-full blur-2xl animate-pulse'></div>
-            <div
-              className='absolute top-24 right-24 w-32 h-32 bg-gradient-to-r from-accent-400/25 to-brand-400/25 rounded-full blur-2xl animate-pulse'
-              style={{ animationDelay: '1s' }}
-            ></div>
-            <div
-              className='absolute bottom-24 left-24 w-36 h-36 bg-gradient-to-r from-brand-500/25 to-accent-500/25 rounded-full blur-2xl animate-pulse'
-              style={{ animationDelay: '2s' }}
-            ></div>
-            <div
-              className='absolute bottom-16 right-16 w-28 h-28 bg-gradient-to-r from-accent-500/25 to-brand-500/25 rounded-full blur-2xl animate-pulse'
-              style={{ animationDelay: '3s' }}
-            ></div>
-
-            {/* Diagonal lines for texture */}
-            <div className='absolute inset-0 opacity-15'>
-              <div className='absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-12'></div>
-              <div className='absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-6'></div>
-              <div className='absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-8'></div>
-              <div className='absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-4'></div>
-              <div className='absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-15'></div>
-            </div>
-
-            {/* Corner accents */}
-            <div className='absolute top-0 left-0 w-40 h-40 border-l-4 border-t-4 border-brand-400/40 rounded-tl-3xl'></div>
-            <div className='absolute top-0 right-0 w-40 h-40 border-r-4 border-t-4 border-accent-400/40 rounded-tr-3xl'></div>
-            <div className='absolute bottom-0 left-0 w-40 h-40 border-l-4 border-b-4 border-accent-400/40 rounded-bl-3xl'></div>
-            <div className='absolute bottom-0 right-0 w-40 h-40 border-r-4 border-b-4 border-brand-400/40 rounded-br-3xl'></div>
-          </div>
-
-          {/* Content */}
-          <div className='relative z-10 max-w-6xl mx-auto px-4 text-center'>
-            {/* Additional Floating Decorative Elements - Repositioned for better balance */}
-            <div className='absolute top-20 left-1/4 w-6 h-6 bg-gradient-to-r from-brand-400/40 to-accent-400/40 rounded-full blur-sm animate-pulse opacity-60'></div>
-            <div
-              className='absolute top-32 right-1/3 w-4 h-4 bg-gradient-to-r from-accent-400/40 to-brand-400/40 rounded-full blur-sm animate-pulse opacity-70'
-              style={{ animationDelay: '1.5s' }}
-            ></div>
-            <div
-              className='absolute bottom-32 left-1/3 w-5 h-5 bg-gradient-to-r from-brand-500/40 to-accent-500/40 rounded-full blur-sm animate-pulse opacity-50'
-              style={{ animationDelay: '2s' }}
-            ></div>
-            <div
-              className='absolute bottom-24 right-1/4 w-4 h-4 bg-gradient-to-r from-accent-500/40 to-brand-500/40 rounded-full blur-sm animate-pulse opacity-65'
-              style={{ animationDelay: '2.5s' }}
-            ></div>
-
-            {/* Floating Character Images - Left and Right - Repositioned for bottom alignment */}
-
-            <div className='absolute bottom-8 -right-8 opacity-80 pointer-events-none'>
-              <div className='relative w-full h-full'>
-                <Image
-                  src='/images/character/character.png'
-                  alt='Guide Character Right'
-                  width={200}
-                  height={200}
-                  className='w-full h-full object-contain drop-shadow-2xl animate-float mr-40 -mb-40'
+            <section className=' mx-auto px-4'>
+              <div className=' mx-auto'>
+                <DemoSelector
+                  activeDemo={activeDemo}
+                  setActiveDemo={setActiveDemo}
+                  setShowImmersiveDemo={setShowImmersiveDemo}
+                  isConnected={isConnected}
+                  addToast={addToast}
+                  account={account}
+                  demos={demos}
+                  completeDemo={completeDemo}
+                  hasBadge={hasBadge}
+                  refreshAccountData={refreshAccountData}
                 />
-                {/* Floating sparkles around right character */}
-                <div className='absolute top-4 left-4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-70'></div>
+              </div>
+            </section>
+
+            {/* Interactive Tutorial Section - Full Width with Irregular Shape */}
+            <section
+              id='interactive-tutorial'
+              className='relative w-full py-16 overflow-hidden -mb-20 mt-20'
+            >
+              {/* Irregular Background Shape - Full Width */}
+              <div className='absolute inset-0'>
+                {/* Main irregular shape using clip-path */}
                 <div
-                  className='absolute top-8 right-6 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-80'
-                  style={{ animationDelay: '0.5s' }}
+                  className='absolute inset-0 bg-gradient-to-br from-brand-500/20 via-accent-500/25 to-brand-400/20'
+                  style={{
+                    clipPath: 'polygon(0% 0%, 100% 8%, 92% 100%, 0% 92%)',
+                  }}
                 ></div>
+
+                {/* Secondary irregular shape overlay */}
                 <div
-                  className='absolute bottom-6 left-8 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-60'
+                  className='absolute inset-0 bg-gradient-to-tr from-accent-500/15 via-transparent to-brand-500/15'
+                  style={{
+                    clipPath: 'polygon(8% 0%, 100% 0%, 88% 100%, 0% 100%)',
+                  }}
+                ></div>
+
+                {/* Floating geometric elements */}
+                <div className='absolute top-16 left-16 w-40 h-40 bg-gradient-to-r from-brand-400/25 to-accent-400/25 rounded-full blur-2xl animate-pulse'></div>
+                <div
+                  className='absolute top-24 right-24 w-32 h-32 bg-gradient-to-r from-accent-400/25 to-brand-400/25 rounded-full blur-2xl animate-pulse'
                   style={{ animationDelay: '1s' }}
                 ></div>
                 <div
-                  className='absolute bottom-8 right-4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
+                  className='absolute bottom-24 left-24 w-36 h-36 bg-gradient-to-r from-brand-500/25 to-accent-500/25 rounded-full blur-2xl animate-pulse'
+                  style={{ animationDelay: '2s' }}
+                ></div>
+                <div
+                  className='absolute bottom-16 right-16 w-28 h-28 bg-gradient-to-r from-accent-500/25 to-brand-500/25 rounded-full blur-2xl animate-pulse'
+                  style={{ animationDelay: '3s' }}
+                ></div>
+
+                {/* Diagonal lines for texture */}
+                <div className='absolute inset-0 opacity-15'>
+                  <div className='absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-12'></div>
+                  <div className='absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-6'></div>
+                  <div className='absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-8'></div>
+                  <div className='absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-4'></div>
+                  <div className='absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white to-transparent transform rotate-15'></div>
+                </div>
+
+                {/* Corner accents */}
+                <div className='absolute top-0 left-0 w-40 h-40 border-l-4 border-t-4 border-brand-400/40 rounded-tl-3xl'></div>
+                <div className='absolute top-0 right-0 w-40 h-40 border-r-4 border-t-4 border-accent-400/40 rounded-tr-3xl'></div>
+                <div className='absolute bottom-0 left-0 w-40 h-40 border-l-4 border-b-4 border-accent-400/40 rounded-bl-3xl'></div>
+                <div className='absolute bottom-0 right-0 w-40 h-40 border-r-4 border-b-4 border-brand-400/40 rounded-br-3xl'></div>
+              </div>
+
+              {/* Content */}
+              <div className='relative z-10 max-w-6xl mx-auto px-4 text-center'>
+                {/* Additional Floating Decorative Elements - Repositioned for better balance */}
+                <div className='absolute top-20 left-1/4 w-6 h-6 bg-gradient-to-r from-brand-400/40 to-accent-400/40 rounded-full blur-sm animate-pulse opacity-60'></div>
+                <div
+                  className='absolute top-32 right-1/3 w-4 h-4 bg-gradient-to-r from-accent-400/40 to-brand-400/40 rounded-full blur-sm animate-pulse opacity-70'
                   style={{ animationDelay: '1.5s' }}
                 ></div>
-              </div>
-            </div>
+                <div
+                  className='absolute bottom-32 left-1/3 w-5 h-5 bg-gradient-to-r from-brand-500/40 to-accent-500/40 rounded-full blur-sm animate-pulse opacity-50'
+                  style={{ animationDelay: '2s' }}
+                ></div>
+                <div
+                  className='absolute bottom-24 right-1/4 w-4 h-4 bg-gradient-to-r from-accent-500/40 to-brand-500/40 rounded-full blur-sm animate-pulse opacity-65'
+                  style={{ animationDelay: '2.5s' }}
+                ></div>
 
-            <div className='mb-12'>
-              <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
-                🎓 Tutorial
-              </h3>
-              <p className='text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
-                New to trustless work? <br /> Start with our tutorial to learn how
-                everything works!
-              </p>
-            </div>
+                {/* Floating Character Images - Left and Right - Repositioned for bottom alignment */}
 
-            <div className='mb-8'>
-              <button
-                onClick={() => setShowOnboarding(true)}
-                className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
-              >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/logo/logoicon.png'
-                    alt='Tutorial'
-                    width={20}
-                    height={20}
-                    className='w-5 h-5'
-                  />
-                  <span>Start Tutorial</span>
+                <div className='absolute bottom-8 -right-8 opacity-80 pointer-events-none'>
+                  <div className='relative w-full h-full'>
+                    <Image
+                      src='/images/character/character.png'
+                      alt='Guide Character Right'
+                      width={200}
+                      height={200}
+                      className='w-full h-full object-contain drop-shadow-2xl animate-float mr-40 -mb-40'
+                    />
+                    {/* Floating sparkles around right character */}
+                    <div className='absolute top-4 left-4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-70'></div>
+                    <div
+                      className='absolute top-8 right-6 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-80'
+                      style={{ animationDelay: '0.5s' }}
+                    ></div>
+                    <div
+                      className='absolute bottom-6 left-8 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-60'
+                      style={{ animationDelay: '1s' }}
+                    ></div>
+                    <div
+                      className='absolute bottom-8 right-4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
+                      style={{ animationDelay: '1.5s' }}
+                    ></div>
+                  </div>
                 </div>
-              </button>
-              {!hasSeenOnboarding && (
-                <div className='mt-4 text-center'>
-                  <p className='text-brand-300 text-sm animate-pulse'>
-                    💡 New here? Start with the tutorial to learn how everything works!
+
+                <div className='mb-12'>
+                  <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
+                    🎓 Tutorial
+                  </h3>
+                  <p className='text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
+                    New to trustless work? <br /> Start with our tutorial to learn how everything
+                    works!
                   </p>
                 </div>
-              )}
-            </div>
 
-            <div className='grid md:grid-cols-3 gap-8 text-sm'>
-              <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
-                {/* Card background effect */}
-                <div className='absolute inset-0 bg-gradient-to-br from-brand-500/5 to-accent-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                <div className='mb-8'>
+                  <button
+                    onClick={() => setShowOnboarding(true)}
+                    className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                  >
+                    <div className='flex items-center space-x-2'>
+                      <Image
+                        src='/images/logo/logoicon.png'
+                        alt='Tutorial'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5'
+                        style={{ width: 'auto', height: 'auto' }}
+                      />
+                      <span>Start Tutorial</span>
+                    </div>
+                  </button>
+                  {!hasSeenOnboarding && (
+                    <div className='mt-4 text-center'>
+                      <p className='text-brand-300 text-sm animate-pulse'>
+                        💡 New here? Start with the tutorial to learn how everything works!
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                <div className='relative z-10'>
-                  <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
-                    ⚡
+                <div className='grid md:grid-cols-3 gap-8 text-sm'>
+                  <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
+                    {/* Card background effect */}
+                    <div className='absolute inset-0 bg-gradient-to-br from-brand-500/5 to-accent-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+
+                    <div className='relative z-10'>
+                      <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
+                        ⚡
+                      </div>
+                      <div className='font-semibold text-white/90 mb-2 text-base'>Quick Start</div>
+                      <div className='text-white/70'>Learn the basics in just a few minutes</div>
+                    </div>
                   </div>
-                  <div className='font-semibold text-white/90 mb-2 text-base'>Quick Start</div>
-                  <div className='text-white/70'>Learn the basics in just a few minutes</div>
+
+                  <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
+                    {/* Card background effect */}
+                    <div className='absolute inset-0 bg-gradient-to-br from-accent-500/5 to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+
+                    <div className='relative z-10'>
+                      <div className='text-4xl mb-4 group-hover:scale-105 transition-transform duration-300'>
+                        🎯
+                      </div>
+                      <div className='font-semibold text-white/90 mb-2 text-base'>Hands-on</div>
+                      <div className='text-white/70'>Interactive examples and real scenarios</div>
+                    </div>
+                  </div>
+
+                  <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
+                    {/* Card background effect */}
+                    <div className='absolute inset-0 bg-gradient-to-br from-brand-500/5 to-accent-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+
+                    <div className='relative z-10'>
+                      <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
+                        💡
+                      </div>
+                      <div className='font-semibold text-white/90 mb-2 text-base'>Smart Tips</div>
+                      <div className='text-white/70'>Pro tips and best practices included</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
-                {/* Card background effect */}
-                <div className='absolute inset-0 bg-gradient-to-br from-accent-500/5 to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-
-                <div className='relative z-10'>
-                  <div className='text-4xl mb-4 group-hover:scale-105 transition-transform duration-300'>
-                    🎯
-                  </div>
-                  <div className='font-semibold text-white/90 mb-2 text-base'>Hands-on</div>
-                  <div className='text-white/70'>Interactive examples and real scenarios</div>
-                </div>
-              </div>
-
-              <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
-                {/* Card background effect */}
-                <div className='absolute inset-0 bg-gradient-to-br from-brand-500/5 to-accent-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-
-                <div className='relative z-10'>
-                  <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
-                    💡
-                  </div>
-                  <div className='font-semibold text-white/90 mb-2 text-base'>Smart Tips</div>
-                  <div className='text-white/70'>Pro tips and best practices included</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          </>
+        )}
       </main>
 
       {/* Footer */}
@@ -1575,10 +1627,14 @@ export default function HomePageContent() {
           demoColor={demos.find(d => d.id === activeDemo)?.color || 'from-brand-500 to-brand-400'}
           onDemoComplete={handleDemoComplete}
         >
-          {activeDemo === 'hello-milestone' && <HelloMilestoneDemo />}
+          {activeDemo === 'hello-milestone' && (
+            <HelloMilestoneDemo onDemoComplete={handleDemoComplete} />
+          )}
           {activeDemo === 'dispute-resolution' && <DisputeResolutionDemo />}
           {activeDemo === 'milestone-voting' && <MilestoneVotingDemo />}
-          {activeDemo === 'micro-marketplace' && <MicroTaskMarketplaceDemo />}
+          {activeDemo === 'micro-marketplace' && (
+            <MicroTaskMarketplaceDemo onDemoComplete={handleDemoComplete} />
+          )}
         </ImmersiveDemoModal>
       )}
 

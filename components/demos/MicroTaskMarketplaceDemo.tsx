@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 import {
@@ -16,7 +16,6 @@ import {
 } from '@/lib/mock-trustless-work';
 import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
-import { useDemoStats } from '@/hooks/useDemoStats';
 import { Tooltip } from '@/components/ui/Tooltip';
 
 interface MicroTask {
@@ -41,12 +40,16 @@ interface TaskCategory {
   color: string;
 }
 
-export const MicroTaskMarketplaceDemo = () => {
+export const MicroTaskMarketplaceDemo = ({
+  onDemoComplete,
+}: {
+  onDemoComplete?: (demoId: string, demoName: string, completionTime: number) => void;
+}) => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
-  const { completeDemo: completeDemoInAccount } = useAccount();
-  const { markDemoComplete } = useDemoStats();
+  // Demo completion tracking is now handled by FirebaseContext
+  const { completeDemo } = useFirebase();
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({
@@ -74,6 +77,7 @@ export const MicroTaskMarketplaceDemo = () => {
   const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
   const [demoStarted, setDemoStarted] = useState(false);
   const [demoCompleted, setDemoCompleted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Always use real blockchain transactions
   const hooks = {
@@ -111,17 +115,61 @@ export const MicroTaskMarketplaceDemo = () => {
   // Track if demo completion has been triggered to prevent multiple calls
   const [demoCompletionTriggered, setDemoCompletionTriggered] = useState(false);
 
-  // Check if demo can be completed (but don't auto-complete)
+  // Check if demo can be completed and auto-complete when requirements are met
   useEffect(() => {
     const canComplete = canCompleteDemo();
-    console.log('🎉 Micro Task Marketplace Demo - Can complete:', canComplete);
-    console.log('🎉 Posted tasks:', postedTasks.size, 'Completed tasks:', completedTasks.size);
 
-    if (canComplete && !demoCompleted) {
-      console.log('🎉 Demo requirements met - ready for completion!');
-      // Don't auto-complete - wait for user to click "Complete Demo" button
+    if (canComplete && !demoCompleted && !demoCompletionTriggered) {
+      setDemoCompletionTriggered(true);
+      setShowConfetti(true);
+      setIsCompleted(true); // Mark as completed to prevent multiple executions
+
+      // Complete the demo using the centralized account system
+      const completeThisDemo = async () => {
+        try {
+          const score = 90; // High score for completing micro task marketplace
+          const completionTimeInSeconds = demoStartTime
+            ? Math.floor((Date.now() - demoStartTime) / 1000)
+            : 0; // Calculate completion time in seconds
+          const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
+
+          // Use the centralized account system for completion
+          console.log('MicroTaskMarketplaceDemo: Attempting to complete demo with score:', score);
+          await completeDemo('micro-marketplace', score);
+          console.log('MicroTaskMarketplaceDemo: Demo completed successfully');
+
+          // Demo completion is now handled by FirebaseContext
+
+          // Note: Feedback modal will be triggered when user clicks "Complete Demo" button
+        } catch (error) {
+          console.error('MicroTaskMarketplaceDemo: Demo completion failed:', error);
+          addToast({
+            type: 'error',
+            title: '❌ Demo Completion Failed',
+            message: 'Failed to complete demo. Please try again.',
+            duration: 5000,
+          });
+        }
+      };
+
+      // Complete demo after a short delay
+      setTimeout(completeThisDemo, 2000);
+
+      // Hide confetti after animation
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 4000);
+      return () => clearTimeout(timer);
     }
-  }, [completedTasks, postedTasks, demoCompleted]);
+  }, [
+    completedTasks,
+    postedTasks,
+    demoCompleted,
+    demoCompletionTriggered,
+    demoStartTime,
+    completeDemo,
+    addToast,
+  ]);
 
   // Mock micro-tasks
   const [tasks, setTasks] = useState<MicroTask[]>([
@@ -240,7 +288,6 @@ export const MicroTaskMarketplaceDemo = () => {
 
       setActiveTab('browse');
     } catch (error) {
-      console.error('Failed to post task:', error);
       addToast({
         type: 'error',
         title: '❌ Task Posting Failed',
@@ -356,8 +403,6 @@ export const MicroTaskMarketplaceDemo = () => {
       // Fund the escrow
       await handleFundEscrow(result.contractId, task.budget);
     } catch (error) {
-      console.error('Failed to accept task:', error);
-
       // Update transaction status to failed
       const txHash = `failed_real_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -393,7 +438,7 @@ export const MicroTaskMarketplaceDemo = () => {
 
       await hooks.fundEscrow(payload);
     } catch (error) {
-      console.error('Failed to fund escrow:', error);
+      console.error('Error funding escrow:', error);
     }
   }
 
@@ -441,7 +486,6 @@ export const MicroTaskMarketplaceDemo = () => {
       // For demo purposes, we'll skip the milestone status change
       // as it requires real blockchain implementation
     } catch (error) {
-      console.error('Failed to submit deliverable:', error);
       addToast({
         type: 'error',
         title: '❌ Submission Failed',
@@ -500,7 +544,6 @@ export const MicroTaskMarketplaceDemo = () => {
       // Track completed task for demo completion
       setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
     } catch (error) {
-      console.error('Failed to approve task:', error);
       addToast({
         type: 'error',
         title: '❌ Approval Failed',
@@ -559,7 +602,6 @@ export const MicroTaskMarketplaceDemo = () => {
       );
       setTasks(updatedTasks);
     } catch (error) {
-      console.error('Failed to release funds:', error);
       addToast({
         type: 'error',
         title: '❌ Release Failed',
@@ -606,7 +648,6 @@ export const MicroTaskMarketplaceDemo = () => {
       // Track completed task for demo completion
       setCompletedTasks(prev => new Set(Array.from(prev).concat(taskId)));
     } catch (error) {
-      console.error('Failed to complete task:', error);
       addToast({
         type: 'error',
         title: '❌ Completion Failed',
@@ -653,70 +694,6 @@ export const MicroTaskMarketplaceDemo = () => {
     const category = categories.find(c => c.id === categoryId);
     return category?.color || 'from-gray-500 to-gray-600';
   };
-
-  async function handleCompleteDemo() {
-    if (!canCompleteDemo()) {
-      addToast({
-        type: 'warning',
-        title: '⚠️ Requirements Not Met',
-        message: 'Please complete the demo requirements before claiming completion.',
-        duration: 5000,
-      });
-      return;
-    }
-
-    if (demoCompleted) {
-      addToast({
-        type: 'info',
-        title: '✅ Already Completed',
-        message: 'This demo has already been completed.',
-        duration: 3000,
-      });
-      return;
-    }
-
-    try {
-      console.log('🎉 Manually completing Micro Task Marketplace Demo!');
-      setDemoCompleted(true);
-      setShowConfetti(true);
-
-      const score = 90; // High score for completing micro task marketplace
-      const completionTimeInSeconds = demoStartTime 
-        ? Math.floor((Date.now() - demoStartTime) / 1000) 
-        : 0; // Calculate completion time in seconds
-      const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
-
-      // Use the centralized account system for completion
-      await completeDemoInAccount('micro-marketplace', score);
-
-      // Mark demo as complete in Firebase stats (store in minutes)
-      await markDemoComplete('micro-marketplace', 'Gig Economy Madness', completionTimeInMinutes);
-
-      addToast({
-        type: 'success',
-        title: '🎉 Demo Completed!',
-        message: 'Congratulations! You have successfully completed the Gig Economy Madness demo and earned your badge!',
-        duration: 6000,
-      });
-
-      console.log('✅ Micro Task Marketplace Demo completed successfully');
-
-      // Hide confetti after animation
-      setTimeout(() => {
-        console.log('🎉 Hiding confetti for Micro Task Marketplace Demo');
-        setShowConfetti(false);
-      }, 4000);
-    } catch (error) {
-      console.error('❌ Failed to complete Micro Task Marketplace Demo:', error);
-      setDemoCompleted(false); // Reset on error
-      addToast({
-        type: 'error',
-        title: '❌ Demo Completion Failed',
-        message: 'Failed to complete demo. Please try again.',
-        duration: 5000,
-      });
-    }
-  }
 
   function resetDemo() {
     setActiveTab('browse');
@@ -857,43 +834,12 @@ export const MicroTaskMarketplaceDemo = () => {
           </div>
         </div>
 
-
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
 
         {/* Browse Tasks Tab */}
         {activeTab === 'browse' && (
           <div>
-            {/* Category Filter */}
-            <div className='mb-6'>
-              <h3 className='text-lg font-semibold text-white mb-4'>Filter by Category</h3>
-              <div className='flex flex-wrap gap-3'>
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    selectedCategory === 'all'
-                      ? 'bg-accent-500/30 border-2 border-accent-400/50 text-accent-200'
-                      : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                  }`}
-                >
-                  🌟 All Categories
-                </button>
-                {categories.map(category => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                      selectedCategory === category.id
-                        ? 'bg-accent-500/30 border-2 border-accent-400/50 text-accent-200'
-                        : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    {category.icon} {category.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Tasks Grid */}
             <div className='grid md:grid-cols-2 gap-6'>
               {filteredTasks.map(task => (
@@ -1250,9 +1196,7 @@ export const MicroTaskMarketplaceDemo = () => {
                   className='animate-bounce'
                 />
               </div>
-              <h3 className='text-xl font-bold text-green-300 mb-2'>
-                Demo Requirements Met!
-              </h3>
+              <h3 className='text-xl font-bold text-green-300 mb-2'>Demo Successfully Completed!</h3>
               <p className='text-green-200 mb-4'>
                 Congratulations! You've successfully demonstrated the micro-task marketplace
                 workflow:
@@ -1262,41 +1206,15 @@ export const MicroTaskMarketplaceDemo = () => {
                 <li>✅ Completed and approved 3 tasks</li>
                 <li>✅ Experienced the full escrow workflow</li>
               </ul>
-              <button
-                onClick={handleCompleteDemo}
-                className='px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40'
-              >
-                🏆 Complete Demo & Claim Badge
-              </button>
+              <div className='text-center'>
+                <p className='text-green-200 text-sm'>
+                  🎉 Demo completed automatically! Check the success box below.
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Demo Completion Success Box - After completion */}
-        {demoCompleted && (
-          <div className='mt-8 mb-8 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg'>
-            <div className='text-center'>
-              <div className='flex justify-center mb-4'>
-                <Image
-                  src='/images/logo/logoicon.png'
-                  alt='Stellar Nexus Logo'
-                  width={80}
-                  height={80}
-                  className='animate-bounce'
-                />
-              </div>
-              <h3 className='text-xl font-bold text-green-300 mb-2'>
-                Demo Successfully Completed!
-              </h3>
-              <p className='text-green-200 mb-4'>
-                🎉 You've earned the <strong>Gig Economy Guru</strong> badge! You've mastered the micro-task marketplace workflow.
-              </p>
-              <p className='text-green-200 text-sm'>
-                Try different roles or reset the demo to explore more scenarios.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Demo Instructions */}
         <div className='mt-8 p-6 bg-accent-500/10 border border-accent-400/30 rounded-lg'>

@@ -155,7 +155,8 @@ body {
 
 /* Enhanced Demo Card Animations */
 @keyframes glow-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
   }
   50% {
@@ -173,7 +174,8 @@ body {
 }
 
 @keyframes particle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
     opacity: 0.7;
   }
@@ -184,7 +186,8 @@ body {
 }
 
 @keyframes celebration-sparkle {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
   }
@@ -370,30 +373,33 @@ body {
 
 /* Demo Card Styles */
 .demo-card.earned-badge {
-  animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite !important;
+  animation:
+    float 3s ease-in-out infinite,
+    glow-pulse 2s ease-in-out infinite !important;
 }
 
 .demo-card.earned-badge:hover {
-  animation: float 1.5s ease-in-out infinite, glow-pulse 1s ease-in-out infinite !important;
+  animation:
+    float 1.5s ease-in-out infinite,
+    glow-pulse 1s ease-in-out infinite !important;
   transform: scale(1.05) translateY(-5px) !important;
 }
 
 .demo-card.completed.earned-badge {
-  animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite !important;
+  animation:
+    float 3s ease-in-out infinite,
+    glow-pulse 2s ease-in-out infinite !important;
 }
 
 .demo-card.completed.earned-badge:hover {
-  animation: float 1.5s ease-in-out infinite, glow-pulse 1s ease-in-out infinite !important;
+  animation:
+    float 1.5s ease-in-out infinite,
+    glow-pulse 1s ease-in-out infinite !important;
   transform: scale(1.05) translateY(-5px) !important;
 }
 
 .badge-shine {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200% 100%;
   animation: badge-shine 2s ease-in-out infinite;
 }
@@ -434,7 +440,14 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, var(--demo-color-1, #0ea5e9), var(--demo-color-2, #38bdf8), var(--demo-color-3, #7dd3fc), var(--demo-color-2, #38bdf8), var(--demo-color-1, #0ea5e9));
+  background: linear-gradient(
+    45deg,
+    var(--demo-color-1, #0ea5e9),
+    var(--demo-color-2, #38bdf8),
+    var(--demo-color-3, #7dd3fc),
+    var(--demo-color-2, #38bdf8),
+    var(--demo-color-1, #0ea5e9)
+  );
   border-radius: 14px;
   z-index: -1;
   opacity: 0;

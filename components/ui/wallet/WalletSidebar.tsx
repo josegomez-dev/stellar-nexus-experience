@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useToast } from '@/contexts/ToastContext';
 import { stellarConfig } from '@/lib/wallet-config';
@@ -29,7 +29,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
     isFreighterAvailable,
     openWalletModal,
   } = useGlobalWallet();
-  const { account } = useAccount(); // Get account to check if user exists
+  const { account } = useFirebase(); // Get account to check if user exists
   const { getRecentTransactions, transactions } = useTransactionHistory();
   const { addToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -74,6 +74,18 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       );
     }
   }, [isConnected, walletData, isFreighterAvailable]);
+
+  // Auto-close wallet sidebar when wallet connects
+  useEffect(() => {
+    if (isConnected && isOpen) {
+      // Small delay to ensure connection is complete
+      const timer = setTimeout(() => {
+        onToggle();
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, isOpen, onToggle]);
 
   // Handle escape key to close sidebar and custom event to open
   useEffect(() => {
@@ -247,6 +259,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   alt='STELLAR NEXUS'
                   width={80}
                   height={16}
+                  style={{ width: 'auto', height: 'auto' }}
                 />
                 <span className='text-xs text-white/60'>Wallet</span>
               </div>
@@ -261,9 +274,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
               }`}
               title='Close Wallet'
             >
-              <div className='transform transition-transform duration-300'>
-                ×
-              </div>
+              <div className='transform transition-transform duration-300'>×</div>
             </button>
           </div>
         </div>
@@ -273,7 +284,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
           className={`flex-1 transition-all duration-300 overflow-y-auto ${isExpanded ? 'p-4' : 'p-2'}`}
           style={{ minHeight: '400px', maxHeight: 'calc(100vh - 200px)' }}
         >
-
           {!isConnected ? (
             // Not Connected State
             <div className={isExpanded ? 'text-center' : 'text-center py-2'}>
@@ -340,7 +350,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                           onToggle();
                         }, 1500);
                       } catch (error) {
-                        console.log('Freighter connection failed, opening manual input');
                         // If Freighter fails, just expand for manual input
                         setIsExpanded(true);
                       } finally {
@@ -371,7 +380,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         try {
                           await openWalletModal(); // Use Stellar Wallets Kit modal
                         } catch (error) {
-                          console.error('Failed to open wallet modal:', error);
                           addToast({
                             type: 'error',
                             title: 'Wallet Connection Error',
@@ -506,7 +514,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     </button>
                   </div>
                 )}
-
               </div>
               <br />
               <hr />
@@ -627,8 +634,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                     • <span className='text-blue-300'>Complete Demo 3</span> → Stellar Champion
                   </div>
                   <div>
-                    • <span className='text-purple-300'>Complete Demos 1, 2, 3 </span> →
-                    Nexus Master
+                    • <span className='text-purple-300'>Complete Demos 1, 2, 3 </span> → Nexus
+                    Master
                   </div>
                 </div>
               </div>
@@ -832,12 +839,9 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                             // Auto-close sidebar after successful connection
                             setTimeout(() => {
                               onToggle();
-                            }, 1500);
+                            }, 1000);
                           } else {
                             // Just open sidebar for manual input
-                            console.log(
-                              'Freighter not available, opening sidebar for manual input'
-                            );
                           }
                         } finally {
                           setIsConnecting(false);
@@ -855,7 +859,6 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         try {
                           await openWalletModal(); // Use Stellar Wallets Kit modal
                         } catch (error) {
-                          console.error('Failed to open wallet modal:', error);
                           addToast({
                             type: 'error',
                             title: 'Wallet Connection Error',

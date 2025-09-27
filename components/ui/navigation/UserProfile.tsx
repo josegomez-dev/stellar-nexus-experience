@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAccount } from '@/contexts/AccountContext';
-import { getAllBadges, getBadgeRarityConfig } from '@/lib/badge-config';
+import { useFirebase } from '@/contexts/FirebaseContext';
+import { getAllBadges } from '@/lib/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import Image from 'next/image';
 
@@ -14,17 +14,20 @@ interface UserProfileProps {
 
 export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
   const { user, signOut, getUserStats } = useAuth();
-  const { account, getLevel, getExperienceProgress, getMainDemoProgress } = useAccount();
+  const { account } = useFirebase();
+  const { badges } = useFirebase();
   const [activeTab, setActiveTab] = useState<'stats' | 'badges' | 'progress'>('stats');
 
   if (!isOpen || (!user && !account)) return null;
 
-  // Prioritize AccountContext data for consistency with RewardsSidebar
+  // Use Firebase account data
   const stats = getUserStats();
-  const level = account ? getLevel() : stats.level;
-  const expProgress = account ? getExperienceProgress() : null;
+  const level = account?.level || stats.level;
+  const expProgress = account
+    ? { current: account.experience, next: (account.level + 1) * 1000 }
+    : null;
   const mainDemoProgress = account
-    ? getMainDemoProgress()
+    ? { completed: account.demosCompleted.length, total: 3 }
     : { completed: stats.totalDemosCompleted, total: 4 };
 
   const formatTime = (seconds: number) => {
@@ -40,8 +43,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
     if (account && expProgress) {
       return (expProgress.current / expProgress.next) * 100;
     }
-    const currentLevelXP = (stats.level - 1) * 500;
-    const nextLevelXP = stats.level * 500;
+    const currentLevelXP = (stats.level - 1) * 1000;
+    const nextLevelXP = stats.level * 1000;
     const progress = ((stats.experience - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
     return Math.min(progress, 100);
   };
@@ -94,7 +97,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                       : 'Guest User'}
                 </h2>
                 <p className='text-white/70 text-sm'>
-                  Level {level} • {account ? account.profile.experience : stats.experience} XP
+                  Level {level} • {account ? account.experience : stats.experience} XP
                 </p>
                 <p className='text-brand-300 text-xs font-mono'>
                   {user
@@ -170,7 +173,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                 <div className='grid grid-cols-2 gap-4'>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
                     <div className='text-2xl font-bold text-green-300'>
-                      {account ? account.profile.totalPoints : stats.experience}
+                      {account ? account.totalPoints : stats.experience}
                     </div>
                     <div className='text-white/70 text-sm'>Total Points</div>
                   </div>
@@ -242,9 +245,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
 
                   // Use exact same logic as RewardsSidebar
                   const earnedBadgeNames = account.badges.map(badge => badge.name);
-                  const availableBadges = getAllBadges();
+                  const availableBadges = badges.length > 0 ? badges : getAllBadges();
                   const badgesWithStatus = availableBadges.map(badge => ({
                     ...badge,
+                    createdAt: new Date(), // Add createdAt to make it a complete Badge
                     isEarned: earnedBadgeNames.includes(badge.name),
                     earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt,
                   }));

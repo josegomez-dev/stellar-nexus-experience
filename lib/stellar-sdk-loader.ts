@@ -20,16 +20,13 @@ export const loadStellarSDK = async () => {
     try {
       // Try loading the newer @stellar/stellar-sdk first
       stellarSDK = await import('@stellar/stellar-sdk');
-      console.log('✅ Loaded @stellar/stellar-sdk');
       return stellarSDK;
     } catch (error) {
       try {
         // Fallback to legacy stellar-sdk
         stellarSDK = await import('stellar-sdk');
-        console.log('✅ Loaded stellar-sdk (legacy)');
         return stellarSDK;
       } catch (fallbackError) {
-        console.error('❌ Failed to load Stellar SDK:', fallbackError);
         throw new Error('Stellar SDK not available');
       }
     }

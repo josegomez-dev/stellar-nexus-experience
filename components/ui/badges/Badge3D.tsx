@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { BADGE_RARITY } from '@/lib/badge-config';
+// Removed badge-config import - using inline rarity config
 import { Badge } from '@/lib/firebase-types';
 
 // Custom hook for 3D tilt effect
@@ -154,6 +154,21 @@ const BadgeEmblem: React.FC<{ id: string; size?: 'sm' | 'md' | 'lg' }> = ({ id, 
           <circle cx='32' cy='32' r='4' fill='#ffffff' opacity='0.8' />
         </svg>
       );
+    case 'explorer':
+      return (
+        <svg viewBox='0 0 64 64' className={sizeClass}>
+          <defs>
+            <linearGradient id={`g8-${id}`} x1='0' y1='0' x2='1' y2='1'>
+              <stop offset='0%' stopColor='#10b981' />
+              <stop offset='100%' stopColor='#059669' />
+            </linearGradient>
+          </defs>
+          <circle cx='32' cy='32' r='26' fill={`url(#g8-${id})`} opacity='0.9' />
+          <path d='M32 12l8 16 16 8-16 8-8 16-8-16-16-8 16-8 8-16z' fill='#ffffff' opacity='0.9' />
+          <circle cx='32' cy='32' r='6' fill='#ffffff' opacity='0.8' />
+          <path d='M26 26h12v12H26z' fill='#10b981' opacity='0.7' />
+        </svg>
+      );
     default:
       return (
         <div
@@ -173,8 +188,23 @@ interface Badge3DProps {
 }
 
 export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = false }) => {
-  const rarityConfig =
-    BADGE_RARITY[badge.rarity as keyof typeof BADGE_RARITY] || BADGE_RARITY.common;
+  // Inline rarity config
+  const getRarityConfig = (rarity: string) => {
+    switch (rarity) {
+      case 'common':
+        return { color: 'gray', glow: 'shadow-gray-400/20' };
+      case 'rare':
+        return { color: 'blue', glow: 'shadow-blue-400/20' };
+      case 'epic':
+        return { color: 'purple', glow: 'shadow-purple-400/20' };
+      case 'legendary':
+        return { color: 'orange', glow: 'shadow-orange-400/20' };
+      default:
+        return { color: 'gray', glow: 'shadow-gray-400/20' };
+    }
+  };
+
+  const rarityConfig = getRarityConfig(badge.rarity);
   const { ref, transform, onMouseLeave, onMouseMove } = useTilt();
 
   // Create custom badge-specific colors
@@ -230,13 +260,13 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
           className={`relative rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl p-3 ${badge.isEarned ? glow : ''}`}
         >
           <div className='flex items-center gap-3'>
-            <BadgeEmblem id={badge.id} size='sm' />
+            <BadgeEmblem id={badge.icon} size='sm' />
             <div className='min-w-0 flex-1'>
               <h4 className={`font-medium text-sm ${badge.isEarned ? text : 'text-gray-400'}`}>
                 {badge.name}
               </h4>
               <p className={`text-xs ${badge.isEarned ? 'text-white/60' : 'text-gray-500'}`}>
-                +{badge.xpReward} pts
+                +{badge.earningPoints} pts
               </p>
             </div>
             {!badge.isEarned && <div className='text-gray-400 text-xs'>🔒</div>}
@@ -294,7 +324,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
         {/* Emblem + title */}
         <div className='relative z-10 flex items-center gap-4'>
           <div className='shrink-0'>
-            <BadgeEmblem id={badge.id} size={size} />
+            <BadgeEmblem id={badge.icon} size={size} />
           </div>
           <div className='min-w-0'>
             <h3
@@ -316,7 +346,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
             {rarityLabel}
           </div>
           <div className='rounded-lg bg-white/5 px-2 py-1 border border-white/10 text-center'>
-            {badge.xpReward} pts
+            {badge.earningPoints} pts
           </div>
           <div className='rounded-lg bg-white/5 px-2 py-1 border border-white/10 text-right capitalize'>
             {badge.category}
@@ -326,7 +356,7 @@ export const Badge3D: React.FC<Badge3DProps> = ({ badge, size = 'md', compact = 
         {/* Requirement */}
         <div className='relative z-10 mt-3 text-xs text-white/70'>
           <span className='opacity-80'>{badge.isEarned ? 'Earned: ' : 'Unlock: '}</span>
-          <span className='font-medium'>{badge.requirements[0]?.type || 'Complete demo'}</span>
+          <span className='font-medium'>Complete demo</span>
         </div>
 
         {/* Shine sweep - only for earned badges */}

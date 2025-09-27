@@ -21,32 +21,32 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Initialize Analytics (only in browser and if supported)
-let analytics: any = null;
-if (typeof window !== 'undefined') {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  });
-}
-
-export { analytics };
-
-// Connect to emulators in development (only if explicitly enabled)
-if (process.env.NODE_ENV === 'development' && 
-    process.env.FIREBASE_USE_EMULATOR === 'true' && 
-    typeof window !== 'undefined') {
-  // Only connect to emulators if not already connected
+// Connect to emulators in development
+if (process.env.NODE_ENV === 'development') {
   try {
-    console.log('🔧 Connecting to Firebase emulators...');
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    connectAuthEmulator(auth, 'http://localhost:9099');
-    console.log('✅ Connected to Firebase emulators');
+    // Only connect if not already connected
+    if (!(db as any)._delegate._databaseId.projectId.includes('demo-')) {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+    }
   } catch (error) {
-    // Emulators already connected or not available
-    console.log('⚠️ Firebase emulators not available or already connected:', error);
+    // Firestore emulator already connected or not available
+  }
+
+  try {
+    // Only connect if not already connected
+    if (!auth.config.emulator) {
+      connectAuthEmulator(auth, 'http://localhost:9099');
+    }
+  } catch (error) {
+    // Auth emulator already connected or not available
   }
 }
 
-export default app;
+// Initialize Analytics
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      getAnalytics(app);
+    }
+  });
+}

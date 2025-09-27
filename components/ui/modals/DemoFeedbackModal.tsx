@@ -66,7 +66,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
 
       onClose();
     } catch (err) {
-      console.error('Error submitting feedback:', err);
+      console.error('Error in demo feedback:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -111,7 +111,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
               rating={rating}
               onRatingChange={setRating}
               maxRating={5}
-              size="lg"
+              size='lg'
               showLabels={true}
               disabled={isSubmitting}
             />
@@ -213,9 +213,7 @@ export const DemoFeedbackModal: React.FC<DemoFeedbackModalProps> = ({
             <div className='grid grid-cols-2 gap-4 text-sm'>
               <div>
                 <span className='text-white/70'>Completion Time:</span>
-                <div className='text-brand-400 font-medium'>
-                  {completionTime} minutes
-                </div>
+                <div className='text-brand-400 font-medium'>{completionTime} minutes</div>
               </div>
               <div>
                 <span className='text-white/70'>Demo:</span>

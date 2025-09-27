@@ -3,15 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { UserBadge } from '@/lib/firebase-types';
-import {
-  BADGE_CONFIG,
-  BADGE_CATEGORIES,
-  BADGE_RARITY,
-  getBadgeRarityConfig,
-  getCategoryConfig,
-} from '@/lib/badge-config';
-import { userTrackingService } from '@/lib/user-tracking-service';
+import { UserBadge, Badge, getAllBadges } from '@/lib/firebase-types';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 
 interface BadgeShowcaseProps {
@@ -20,14 +12,14 @@ interface BadgeShowcaseProps {
 }
 
 export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
-  const { userBadges, userProfile } = useFirebase();
+  const { userBadges, badges } = useFirebase();
   const { walletData } = useGlobalWallet();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [selectedBadge, setSelectedBadge] = useState<any>(null);
+  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
   const earnedBadgeIds = userBadges.map(ub => ub.badgeId);
-  const allBadges = Object.values(BADGE_CONFIG);
+  const allBadges = badges.length > 0 ? badges : getAllBadges();
 
   // Filter badges based on category and rarity
   const filteredBadges = allBadges.filter(badge => {
@@ -38,7 +30,7 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
 
   const getBadgeProgress = (badgeId: string): number => {
     const userBadge = userBadges.find(ub => ub.badgeId === badgeId);
-    return userBadge?.progress || 0;
+    return userBadge ? 100 : 0; // In new system, badges are either earned (100%) or not earned (0%)
   };
 
   const isBadgeEarned = (badgeId: string): boolean => {
@@ -47,6 +39,21 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
 
   const getCompletionPercentage = (): number => {
     return Math.round((earnedBadgeIds.length / allBadges.length) * 100);
+  };
+
+  const getRarityStyle = (rarity: string) => {
+    switch (rarity) {
+      case 'common':
+        return 'text-gray-400 bg-gray-100 border-gray-300';
+      case 'rare':
+        return 'text-blue-500 bg-blue-100 border-blue-300';
+      case 'epic':
+        return 'text-purple-500 bg-purple-100 border-purple-300';
+      case 'legendary':
+        return 'text-orange-500 bg-orange-100 border-orange-300';
+      default:
+        return 'text-gray-400 bg-gray-100 border-gray-300';
+    }
   };
 
   if (!isOpen) return null;
@@ -112,11 +119,9 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
                 className='px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-brand-400'
               >
                 <option value='all'>All Categories</option>
-                {Object.entries(BADGE_CATEGORIES).map(([key, category]) => (
-                  <option key={key} value={key}>
-                    {category.icon} {category.name}
-                  </option>
-                ))}
+                <option value='achievement'>🏆 Achievement</option>
+                <option value='demo'>🎯 Demo</option>
+                <option value='special'>⭐ Special</option>
               </select>
             </div>
 
@@ -129,11 +134,10 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
                 className='px-3 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-brand-400'
               >
                 <option value='all'>All Rarities</option>
-                {Object.entries(BADGE_RARITY).map(([key, rarity]) => (
-                  <option key={key} value={key}>
-                    {rarity.name}
-                  </option>
-                ))}
+                <option value='common'>Common</option>
+                <option value='rare'>Rare</option>
+                <option value='epic'>Epic</option>
+                <option value='legendary'>Legendary</option>
               </select>
             </div>
           </div>
@@ -146,16 +150,30 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
             {filteredBadges.map(badge => {
               const isEarned = isBadgeEarned(badge.id);
               const progress = getBadgeProgress(badge.id);
-              const rarityConfig = getBadgeRarityConfig(badge.rarity);
-              const categoryConfig = getCategoryConfig(badge.category);
+
+              // Simple rarity styling
+              const getRarityStyle = (rarity: string) => {
+                switch (rarity) {
+                  case 'common':
+                    return 'text-gray-400 bg-gray-100 border-gray-300';
+                  case 'rare':
+                    return 'text-blue-500 bg-blue-100 border-blue-300';
+                  case 'epic':
+                    return 'text-purple-500 bg-purple-100 border-purple-300';
+                  case 'legendary':
+                    return 'text-orange-500 bg-orange-100 border-orange-300';
+                  default:
+                    return 'text-gray-400 bg-gray-100 border-gray-300';
+                }
+              };
 
               return (
                 <div
                   key={badge.id}
-                  onClick={() => setSelectedBadge(badge)}
+                  onClick={() => setSelectedBadge({ ...badge, createdAt: new Date() })}
                   className={`relative p-4 rounded-xl border cursor-pointer transition-all duration-300 hover:scale-105 ${
                     isEarned
-                      ? `${rarityConfig.bgColor} ${rarityConfig.borderColor} border-2 shadow-lg ${rarityConfig.glowColor}`
+                      ? 'bg-gradient-to-br from-brand-500/20 to-accent-500/20 border-brand-400/50 border-2 shadow-lg'
                       : 'bg-white/5 border-white/20 hover:bg-white/10'
                   }`}
                 >
@@ -167,9 +185,9 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
 
                     {/* Rarity Indicator */}
                     <div
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${rarityConfig.color} ${rarityConfig.bgColor}`}
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRarityStyle(badge.rarity)}`}
                     >
-                      {rarityConfig.name}
+                      {badge.rarity.charAt(0).toUpperCase() + badge.rarity.slice(1)}
                     </div>
                   </div>
 
@@ -184,11 +202,11 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
                       {badge.description}
                     </p>
 
-                    {/* XP Reward */}
+                    {/* Points Reward */}
                     <div
                       className={`text-xs font-medium ${isEarned ? 'text-brand-300' : 'text-white/40'}`}
                     >
-                      +{badge.xpReward} XP
+                      +{badge.earningPoints} Points
                     </div>
 
                     {/* Progress Bar for unearned badges */}
@@ -235,37 +253,27 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
           <div className='bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 border border-brand-400/30 rounded-2xl shadow-2xl max-w-md w-full p-6'>
             <div className='text-center'>
               {/* Badge Icon */}
-              <div className='text-6xl mb-4'>{selectedBadge.icon}</div>
+              <div className='text-6xl mb-4'>
+                <BadgeEmblem id={selectedBadge.id} size='xl' />
+              </div>
 
               {/* Badge Name */}
               <h3 className='text-2xl font-bold text-white mb-2'>{selectedBadge.name}</h3>
 
               {/* Rarity */}
               <div
-                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${getBadgeRarityConfig(selectedBadge.rarity).color} ${getBadgeRarityConfig(selectedBadge.rarity).bgColor}`}
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${getRarityStyle(selectedBadge.rarity)}`}
               >
-                {getBadgeRarityConfig(selectedBadge.rarity).name}
+                {selectedBadge.rarity.charAt(0).toUpperCase() + selectedBadge.rarity.slice(1)}
               </div>
 
               {/* Description */}
               <p className='text-white/80 mb-6'>{selectedBadge.description}</p>
 
-              {/* Requirements */}
-              <div className='mb-6'>
-                <h4 className='text-lg font-semibold text-white mb-3'>Requirements</h4>
-                <div className='space-y-2'>
-                  {selectedBadge.requirements.map((req: any, index: number) => (
-                    <div key={index} className='p-3 bg-white/5 rounded-lg border border-white/20'>
-                      <p className='text-white/90 text-sm'>{req.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* XP Reward */}
+              {/* Points Reward */}
               <div className='p-4 bg-brand-500/20 border border-brand-400/30 rounded-lg mb-6'>
                 <div className='text-2xl font-bold text-brand-300'>
-                  +{selectedBadge.xpReward} XP
+                  +{selectedBadge.earningPoints} Points
                 </div>
                 <p className='text-white/70 text-sm'>Reward for earning this badge</p>
               </div>

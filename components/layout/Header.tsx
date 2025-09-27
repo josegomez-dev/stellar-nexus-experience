@@ -1,33 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
 import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
-import { getAllBadges } from '@/lib/badge-config';
+import { getAllBadges } from '@/lib/firebase-types';
 import Image from 'next/image';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
   const { isConnected } = useGlobalWallet();
-  const { account, loading, getLevel } = useAccount();
+  const { account, isLoading } = useFirebase();
 
-  // Check if user has unlocked mini-games access (earned Nexus Master badge)
-  const hasUnlockedMiniGames = () => {
-    if (!account) return false;
+  // Check if user has unlocked mini-games access (earned all badges including Nexus Master)
+  const miniGamesUnlocked = useMemo(() => {
+    if (!account || !account.badgesEarned) return false;
 
-    // Check if user has earned the Nexus Master badge
-    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
+    // Handle both array and object formats for badgesEarned (Firebase sometimes stores arrays as objects)
+    let badgesEarnedArray: string[] = [];
+    if (Array.isArray(account.badgesEarned)) {
+      badgesEarnedArray = account.badgesEarned;
+    } else if (typeof account.badgesEarned === 'object') {
+      badgesEarnedArray = Object.values(account.badgesEarned);
+    }
 
-    return hasNexusMasterBadge;
-  };
+    // Check if user has earned all required badges
+    const requiredBadges = ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const hasAllBadges = requiredBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
 
-  const miniGamesUnlocked = hasUnlockedMiniGames();
+    return hasAllBadges;
+  }, [account]);
 
   // Listen for custom event to toggle rewards dropdown
   useEffect(() => {
@@ -40,6 +47,18 @@ export const Header = () => {
       window.removeEventListener('toggleRewardsSidebar', handleToggleRewards);
     };
   }, []);
+
+  // Auto-open rewards sidebar when wallet connects
+  useEffect(() => {
+    if (isConnected && account) {
+      // Small delay to ensure wallet sidebar closes first
+      const timer = setTimeout(() => {
+        setIsRewardsOpen(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, account]);
 
   return (
     <header className='bg-white/10 backdrop-blur-md fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 shadow-lg'>
@@ -54,6 +73,7 @@ export const Header = () => {
                   alt='STELLAR NEXUS'
                   width={80}
                   height={24}
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </a>
               <span className='font-bold'>Web3 Experience</span>
@@ -73,15 +93,16 @@ export const Header = () => {
                 width={20}
                 height={20}
                 className='w-5 h-5'
+                style={{ width: 'auto', height: 'auto' }}
               />
               <span>Demos</span>
             </a>
             <Tooltip
-              position="bottom"
+              position='bottom'
               content={
                 miniGamesUnlocked
                   ? 'Explore the Nexus Web3 Playground'
-                  : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
+                  : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
               }
             >
               <a
@@ -103,6 +124,7 @@ export const Header = () => {
                   width={20}
                   height={20}
                   className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                  style={{ width: 'auto', height: 'auto' }}
                 />
                 <span>
                   {miniGamesUnlocked ? 'Nexus Web3 Playground' : 'Nexus Web3 Playground 🔒'}
@@ -122,11 +144,11 @@ export const Header = () => {
                     <div className='hidden sm:flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
                       <span className='text-xs text-white/70'>Points:</span>
                       <span className='text-sm font-semibold text-green-400'>
-                        {account.profile.totalPoints}
+                        {account?.totalPoints || 0}
                       </span>
                       <span className='text-xs text-white/70'>Level:</span>
                       <span className='text-sm font-semibold text-blue-400'>
-                        {getLevel()}
+                        {account?.level || 1}
                       </span>
                     </div>
 
@@ -138,19 +160,22 @@ export const Header = () => {
                           className='relative p-2 text-white/80 hover:text-white transition-colors'
                         >
                           <span className='text-xl'>🎮</span>
-                          {account.profile.totalPoints > 0 && (
+                          {account.totalPoints > 0 && (
                             <span className='absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
-                              {account.profile.totalPoints}
+                              {account.totalPoints}
                             </span>
                           )}
                         </button>
                       </Tooltip>
-                      
+
                       {/* Rewards Dropdown */}
-                      <RewardsSidebar isOpen={isRewardsOpen} onClose={() => setIsRewardsOpen(false)} />
+                      <RewardsSidebar
+                        isOpen={isRewardsOpen}
+                        onClose={() => setIsRewardsOpen(false)}
+                      />
                     </div>
                   </>
-                ) : loading ? (
+                ) : isLoading ? (
                   <div className='flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
                     <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
                     <span className='text-xs text-white/70'>Setting up account...</span>
@@ -198,6 +223,7 @@ export const Header = () => {
                   width={20}
                   height={20}
                   className='w-5 h-5'
+                  style={{ width: 'auto', height: 'auto' }}
                 />
                 <span>Demos</span>
               </div>
@@ -231,6 +257,7 @@ export const Header = () => {
                     width={20}
                     height={20}
                     className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                   <span>
                     {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
@@ -255,20 +282,9 @@ export const Header = () => {
                 <span>Docs</span>
               </div>
             </a>
-            <a
-              href='/analytics'
-              className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <div className='flex items-center space-x-2'>
-                <span className='text-lg'>📊</span>
-                <span>Analytics</span>
-              </div>
-            </a>
           </div>
         </div>
       )}
-
     </header>
   );
 };

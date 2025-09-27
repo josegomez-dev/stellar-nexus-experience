@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import Image from 'next/image';
 
@@ -11,7 +11,7 @@ interface AuthBannerProps {
 }
 
 export const AuthBanner: React.FC<AuthBannerProps> = ({ onSignUpClick, onSignInClick }) => {
-  const { account } = useAccount();
+  const { account } = useFirebase();
   const { isConnected, walletData } = useGlobalWallet();
   const [isDismissed, setIsDismissed] = useState(false);
 

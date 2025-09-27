@@ -3,42 +3,36 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { useAuth } from './AuthContext';
 import { useGlobalWallet } from './WalletContext';
 import { 
-  userService, 
-  demoProgressService, 
-  badgeService, 
-  transactionService,
-  firebaseUtils 
+  accountService,
+  firebaseUtils
 } from '../lib/firebase-service';
 import { 
-  UserProfile, 
-  DemoProgress, 
-  UserBadge, 
-  Transaction
+  Account,
+  PREDEFINED_DEMOS,
+  PREDEFINED_BADGES,
+  getBadgeById
 } from '../lib/firebase-types';
+import { useBadgeAnimation } from './BadgeAnimationContext';
+import { useToast } from './ToastContext';
 
 interface FirebaseContextType {
-  // User data
-  userProfile: UserProfile | null;
-  userBadges: UserBadge[];
-  userTransactions: Transaction[];
+  // Account data
+  account: Account | null;
   
-  // Demo progress
-  demoProgress: DemoProgress[];
-  currentDemoProgress: DemoProgress | null;
-  
-  // Leaderboard functionality removed
+  // Static data
+  demos: typeof PREDEFINED_DEMOS;
+  badges: typeof PREDEFINED_BADGES;
   
   // Loading states
   isLoading: boolean;
   isInitialized: boolean;
   
   // Actions
-  initializeUser: (username: string) => Promise<void>;
-  updateDemoProgress: (demoId: string, step: number, status?: DemoProgress['status']) => Promise<void>;
-  completeDemo: (demoId: string, demoName: string, score?: number) => Promise<void>;
-  addTransaction: (transaction: Partial<Transaction>) => Promise<string>;
-  updateUserStats: (stats: Partial<UserProfile['stats']>) => Promise<void>;
-  refreshUserData: () => Promise<void>;
+  initializeAccount: (displayName: string) => Promise<void>;
+  completeDemo: (demoId: string, score?: number) => Promise<void>;
+  hasBadge: (badgeId: string) => Promise<boolean>;
+  hasCompletedDemo: (demoId: string) => Promise<boolean>;
+  refreshAccountData: () => Promise<void>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -58,195 +52,290 @@ interface FirebaseProviderProps {
 export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) => {
   const { user } = useAuth();
   const { walletData } = useGlobalWallet();
+  const { showBadgeAnimation } = useBadgeAnimation();
+  const { addToast } = useToast();
   
   // State
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
-  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
-  // User rank removed (was tied to leaderboard)
-  const [demoProgress, setDemoProgress] = useState<DemoProgress[]>([]);
-  const [currentDemoProgress, setCurrentDemoProgress] = useState<DemoProgress | null>(null);
-  // Leaderboard state removed
+  const [account, setAccount] = useState<Account | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize user data when wallet connects
+  // Initialize account data when wallet connects
   useEffect(() => {
-    const initializeUserData = async () => {
-      if (!walletData?.publicKey || !user?.username) return;
+    const initializeFirebase = async () => {
+      if (!walletData?.publicKey) return;
       
       setIsLoading(true);
       try {
-        // Check if user exists in Firebase
-        const existingUser = await userService.getUserByWalletAddress(walletData.publicKey);
+        // Check if account exists
+        const existingAccount = await accountService.getAccountByWalletAddress(walletData.publicKey);
         
-        if (!existingUser) {
-          // Initialize new user
-          await firebaseUtils.initializeUser(
+        if (!existingAccount) {
+          // Create new account
+          await firebaseUtils.createAccount(
             walletData.publicKey,
-            user.username,
-            walletData.walletType || 'manual',
-            walletData.walletName || 'Unknown Wallet'
+            user?.username || 'Anonymous User',
+            walletData.network || 'testnet'
           );
+          
+          // Award Welcome Explorer badge for new account
+          await accountService.addEarnedBadge(walletData.publicKey, 'welcome_explorer');
+          
+          // Add experience and points for account creation
+          await accountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
+          
+          // Show Welcome badge animation
+          const welcomeBadge = getBadgeById('welcome_explorer');
+          if (welcomeBadge) {
+            showBadgeAnimation({
+              ...welcomeBadge,
+              createdAt: new Date(),
+            }, welcomeBadge.earningPoints);
+          }
         } else {
           // Update last login
-          await userService.createOrUpdateUser({
+          await accountService.createOrUpdateAccount({
             id: walletData.publicKey,
             lastLoginAt: new Date(),
           });
         }
         
-        // Load user data
-        await loadUserData();
+        // Load account data
+        await loadAccountData();
         setIsInitialized(true);
       } catch (error) {
-        console.error('Failed to initialize user data:', error);
+        addToast({
+          title: 'Error',
+          message: 'Failed to initialize account.',
+          type: 'error',
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeUserData();
-  }, [walletData?.publicKey, user?.username]);
+    initializeFirebase();
+  }, [walletData?.publicKey, user?.username, addToast]);
 
-  // Load user data
-  const loadUserData = async () => {
+  // Load account data
+  const loadAccountData = async () => {
     if (!walletData?.publicKey) return;
     
     try {
-      const [profile, badges, transactions, progress] = await Promise.all([
-        userService.getUserByWalletAddress(walletData.publicKey),
-        badgeService.getUserBadges(walletData.publicKey),
-        transactionService.getUserTransactions(walletData.publicKey),
-        demoProgressService.getUserDemoProgress(walletData.publicKey),
-      ]);
-      
-      setUserProfile(profile);
-      setUserBadges(badges);
-      setUserTransactions(transactions);
-      setDemoProgress(progress);
+      const accountData = await accountService.getAccountByWalletAddress(walletData.publicKey);
+      setAccount(accountData);
     } catch (error) {
-      console.error('Failed to load user data:', error);
+      console.error('Error loading account data:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to load account data.',
+        type: 'error',
+      });
     }
   };
 
-  // Initialize user (called from AuthModal)
-  const initializeUser = async (username: string) => {
+  // Initialize account (called from AuthModal)
+  const initializeAccount = async (displayName: string) => {
     if (!walletData?.publicKey) throw new Error('Wallet not connected');
     
     setIsLoading(true);
     try {
-      await firebaseUtils.initializeUser(
-        walletData.publicKey,
-        username,
-        walletData.walletType || 'manual',
-        walletData.walletName || 'Unknown Wallet'
-      );
+      // Check if account already exists
+      const existingAccount = await accountService.getAccountByWalletAddress(walletData.publicKey);
       
-      await loadUserData();
+      if (!existingAccount) {
+        // Create new account
+        await firebaseUtils.createAccount(
+          walletData.publicKey,
+          displayName,
+          walletData.network || 'testnet'
+        );
+        
+        // Award Welcome Explorer badge for new account
+        await accountService.addEarnedBadge(walletData.publicKey, 'welcome_explorer');
+        
+        // Add experience and points for account creation
+        await accountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
+        
+        // Show Welcome badge animation
+        const welcomeBadge = getBadgeById('welcome_explorer');
+        if (welcomeBadge) {
+          showBadgeAnimation({
+            ...welcomeBadge,
+            createdAt: new Date(),
+          }, welcomeBadge.earningPoints);
+        }
+        
+        addToast({
+          title: 'Welcome!',
+          message: `Account created for ${displayName}. You earned the Welcome Explorer badge!`,
+          type: 'success',
+        });
+      } else {
+        // Account already exists, just update last login
+        await accountService.createOrUpdateAccount({
+          id: walletData.publicKey,
+          lastLoginAt: new Date(),
+        });
+        
+        addToast({
+          title: 'Welcome Back!',
+          message: `Welcome back, ${displayName}!`,
+          type: 'success',
+        });
+      }
+      
+      await loadAccountData();
       setIsInitialized(true);
     } catch (error) {
-      console.error('Failed to initialize user:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to create account.',
+        type: 'error',
+      });
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Update demo progress
-  const updateDemoProgress = async (demoId: string, step: number, status?: DemoProgress['status']) => {
-    if (!walletData?.publicKey) return;
-    
-    try {
-      await demoProgressService.updateDemoStep(walletData.publicKey, demoId, step, status);
-      
-      // Update local state
-      const updatedProgress = await demoProgressService.getDemoProgress(walletData.publicKey, demoId);
-      setCurrentDemoProgress(updatedProgress);
-      
-      // Update demo progress list
-      await loadUserData();
-    } catch (error) {
-      console.error('Failed to update demo progress:', error);
-    }
-  };
-
   // Complete demo
-  const completeDemo = async (demoId: string, demoName: string, score?: number) => {
-    if (!walletData?.publicKey) return;
+  const completeDemo = async (demoId: string, score?: number) => {
+    if (!walletData?.publicKey || !account) return;
     
     try {
-      // Update user stats (demo progress is handled by markDemoComplete)
-      const newStats = {
-        demosCompleted: (userProfile?.stats.demosCompleted || 0) + 1,
-        totalXp: (userProfile?.stats.totalXp || 0) + (score || 50),
-        level: firebaseUtils.calculateLevel((userProfile?.stats.totalXp || 0) + (score || 50)),
-        lastActivityAt: new Date(),
-      };
+      console.log('FirebaseContext: Starting completeDemo for:', demoId, 'with score:', score);
       
-      await userService.updateUserStats(walletData.publicKey, newStats);
+      // Handle both array and object formats for demosCompleted (Firebase sometimes stores arrays as objects)
+      let demosCompletedArray: string[] = [];
+      if (Array.isArray(account.demosCompleted)) {
+        demosCompletedArray = account.demosCompleted;
+      } else if (account.demosCompleted && typeof account.demosCompleted === 'object') {
+        demosCompletedArray = Object.values(account.demosCompleted);
+      }
       
-      // Refresh data
-      await loadUserData();
-    } catch (error) {
-      console.error('Failed to complete demo:', error);
-    }
-  };
+      // Check if demo already completed
+      if (demosCompletedArray.includes(demoId)) {
+        console.log('FirebaseContext: Demo already completed, skipping');
+        return;
+      }
 
-  // Add transaction
-  const addTransaction = async (transaction: Partial<Transaction>): Promise<string> => {
-    if (!walletData?.publicKey) throw new Error('Wallet not connected');
-    
-    try {
-      const transactionId = await transactionService.createTransaction({
-        ...transaction,
-        userId: walletData.publicKey,
+      // Calculate points based on score (default 100 if no score provided)
+      const basePoints = 100;
+      const finalScore = score || 85; // Default score if not provided
+      const scoreMultiplier = Math.max(0.5, finalScore / 100);
+      const pointsEarned = Math.round(basePoints * scoreMultiplier);
+      
+      // Add demo to completed list in account (but not for nexus-master as it's not a real demo)
+      if (demoId !== 'nexus-master') {
+        console.log('FirebaseContext: Adding demo to completed list:', demoId);
+        await accountService.addCompletedDemo(walletData.publicKey, demoId);
+      }
+      
+      // Add experience and points (experience is 2x points)
+      console.log('FirebaseContext: Adding experience and points:', pointsEarned * 2, pointsEarned);
+      await accountService.addExperienceAndPoints(walletData.publicKey, pointsEarned * 2, pointsEarned);
+      
+      // Award appropriate badge based on demo
+      let badgeToAward = '';
+      switch (demoId) {
+        case 'hello-milestone':
+          badgeToAward = 'escrow_expert';
+          break;
+        case 'dispute-resolution':
+          badgeToAward = 'trust_guardian';
+          break;
+        case 'micro-marketplace':
+          badgeToAward = 'stellar_champion';
+          break;
+        case 'nexus-master':
+          badgeToAward = 'nexus_master';
+          break;
+      }
+      
+      if (badgeToAward) {
+        console.log('FirebaseContext: Awarding badge:', badgeToAward);
+        await accountService.addEarnedBadge(walletData.publicKey, badgeToAward);
+        
+        // Show badge animation
+        const badge = getBadgeById(badgeToAward);
+        if (badge) {
+          showBadgeAnimation({
+            ...badge,
+            createdAt: new Date(),
+          }, badge.earningPoints);
+        }
+      }
+
+      // Check if all 3 demos completed to unlock Nexus Master demo card
+      const updatedAccount = await accountService.getAccountByWalletAddress(walletData.publicKey);
+      
+      // Handle both array and object formats for demosCompleted
+      let updatedDemosCompletedArray: string[] = [];
+      if (Array.isArray(updatedAccount?.demosCompleted)) {
+        updatedDemosCompletedArray = updatedAccount.demosCompleted;
+      } else if (updatedAccount?.demosCompleted && typeof updatedAccount.demosCompleted === 'object') {
+        updatedDemosCompletedArray = Object.values(updatedAccount.demosCompleted);
+      }
+      
+      if (updatedAccount && updatedDemosCompletedArray.length === 3) {
+        console.log('FirebaseContext: All 3 demos completed, Nexus Master demo card should now be unlocked');
+        // Note: Nexus Master badge is NOT auto-awarded here
+        // It will only be awarded when user manually claims it from the 4th demo card
+      }
+      
+      // Refresh account data
+      console.log('FirebaseContext: Refreshing account data');
+      await loadAccountData();
+      console.log('FirebaseContext: Demo completion process finished successfully');
+    } catch (error) {
+      console.error('FirebaseContext: Demo completion failed:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to complete demo.',
+        type: 'error',
       });
-      
-      // Refresh transactions
-      const transactions = await transactionService.getUserTransactions(walletData.publicKey);
-      setUserTransactions(transactions);
-      
-      return transactionId;
-    } catch (error) {
-      console.error('Failed to add transaction:', error);
-      throw error;
     }
   };
 
-  // Update user stats
-  const updateUserStats = async (stats: Partial<UserProfile['stats']>) => {
-    if (!walletData?.publicKey) return;
+  // Check if account has badge
+  const hasBadge = async (badgeId: string): Promise<boolean> => {
+    if (!walletData?.publicKey) return false;
     
     try {
-      await userService.updateUserStats(walletData.publicKey, stats);
-      await loadUserData();
+      return await accountService.hasBadge(walletData.publicKey, badgeId);
     } catch (error) {
-      console.error('Failed to update user stats:', error);
+      return false;
     }
   };
 
-  // Refresh user data
-  const refreshUserData = async () => {
-    await loadUserData();
+  // Check if account has completed demo
+  const hasCompletedDemo = async (demoId: string): Promise<boolean> => {
+    if (!walletData?.publicKey) return false;
+    
+    try {
+      return await accountService.hasCompletedDemo(walletData.publicKey, demoId);
+    } catch (error) {
+      return false;
+    }
   };
 
-  // Leaderboard functionality removed
+  // Refresh account data
+  const refreshAccountData = async () => {
+    await loadAccountData();
+  };
 
   const value: FirebaseContextType = {
-    userProfile,
-    userBadges,
-    userTransactions,
-    demoProgress,
-    currentDemoProgress,
+    account,
+    demos: PREDEFINED_DEMOS,
+    badges: PREDEFINED_BADGES,
     isLoading,
     isInitialized,
-    initializeUser,
-    updateDemoProgress,
+    initializeAccount,
     completeDemo,
-    addTransaction,
-    updateUserStats,
-    refreshUserData,
+    hasBadge,
+    hasCompletedDemo,
+    refreshAccountData,
   };
 
   return (

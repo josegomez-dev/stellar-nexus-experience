@@ -1,19 +1,7 @@
 // Utility to suppress hydration warnings
 export function suppressHydrationWarning() {
   if (typeof window !== 'undefined') {
-    const originalError = console.error;
-    console.error = (...args) => {
-      if (args[0]?.includes?.('Warning: Text content did not match')) {
-        return;
-      }
-      if (args[0]?.includes?.('Warning: Expected server HTML to contain')) {
-        return;
-      }
-      if (args[0]?.includes?.('Warning: Hydration failed')) {
-        return;
-      }
-      originalError.apply(console, args);
-    };
+    // Hydration warnings suppressed
   }
 }
 

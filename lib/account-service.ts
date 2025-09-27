@@ -25,9 +25,8 @@ import {
   PointsTransaction,
   Achievement,
 } from '@/utils/types/account';
-import { getBadgeById } from './badge-config';
+import { getBadgeById } from './firebase-types';
 import { badgeService, demoProgressService, userService } from './firebase-service';
-import { demoStatsService } from './firebase-service';
 
 export class AccountService {
   private static instance: AccountService;
@@ -45,11 +44,7 @@ export class AccountService {
     publicKey: string,
     network: string
   ): Promise<UserAccount> {
-    console.log('🔄 AccountService: Creating account...');
-    console.log('Parameters:', { walletAddress, publicKey, network });
-
     const accountId = uuidv4();
-    console.log('Generated UUID:', accountId);
 
     const now = Timestamp.now();
 
@@ -156,26 +151,16 @@ export class AccountService {
       },
     };
 
-    console.log('📝 Saving account to Firestore...');
-    console.log('Account data:', newAccount);
-
     try {
       await setDoc(doc(db, 'accounts', accountId), newAccount);
-      console.log('✅ Account saved to Firestore successfully!');
 
       // Log the account creation and badge rewards
-      console.log('💰 Adding account creation bonus...');
       await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
-      console.log('✅ Account creation bonus added!');
 
-      console.log('🏆 Adding Welcome Explorer badge reward...');
       await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
-      console.log('✅ Welcome Explorer badge reward added!');
 
-      console.log('🎉 Account creation completed!');
       return newAccount;
     } catch (error) {
-      console.error('❌ Error saving to Firestore:', error);
       throw error;
     }
   }
@@ -272,14 +257,6 @@ export class AccountService {
       await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
     }
 
-    // Update demo stats (always increment completion count)
-    try {
-      await demoStatsService.incrementCompletion(demoId, 0); // completionTime not critical for stats
-    } catch (error) {
-      console.error('Failed to update demo stats:', error);
-      // Don't throw error - stats update failure shouldn't break demo completion
-    }
-
     // Demo progress is tracked separately by markDemoComplete to avoid duplicates
 
     // Only check for badge rewards on first completion
@@ -337,12 +314,6 @@ export class AccountService {
 
   // Award badge
   async awardBadge(accountId: string, badge: NFTBadge): Promise<void> {
-    console.log(`🏆 Awarding badge in Account Service: ${badge.name}`, {
-      accountId: accountId.substring(0, 8) + '...',
-      badgeId: badge.id,
-      pointsValue: badge.pointsValue,
-    });
-
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
       badges: arrayUnion(badge), // Add to badges array
@@ -353,9 +324,7 @@ export class AccountService {
     // Also award badge in Firebase system for consistency
     try {
       await badgeService.awardBadge(accountId, badge.id);
-      console.log(`✅ Badge also awarded in Firebase system: ${badge.name}`);
     } catch (firebaseError) {
-      console.error(`⚠️ Failed to award badge in Firebase system: ${badge.name}`, firebaseError);
       // Don't throw error - Account Service badge is the primary system
     }
 
@@ -369,23 +338,10 @@ export class AccountService {
     demoId: string,
     score: number
   ): Promise<void> {
-    console.log(`🔍 Checking badges for demo completion: ${demoId}`, {
-      accountId: accountId.substring(0, 8) + '...',
-      score,
-    });
-
     // Get the account to check current state
     const accountDoc = await getDoc(doc(db, 'accounts', accountId));
     const account = accountDoc.data() as UserAccount;
     const earnedBadgeNames = account.badges.map(b => b.name);
-
-    console.log(`📊 Current account state:`, {
-      totalBadges: account.badges.length,
-      earnedBadgeNames,
-      completedDemos: Object.keys(account.demos).filter(
-        demoId => account.demos[demoId as keyof typeof account.demos]?.status === 'completed'
-      ),
-    });
 
     // Check specific demo completions for badge awarding
     const completedDemos = this.getCompletedDemos(account);
@@ -402,11 +358,6 @@ export class AccountService {
     demoId: string,
     earnedBadgeNames: string[]
   ): Promise<void> {
-    console.log(`🔍 Checking badge eligibility for demo: ${demoId}`, {
-      accountId: accountId.substring(0, 8) + '...',
-      earnedBadgeNames,
-    });
-
     let badgeId: string | null = null;
 
     // Map demo IDs to badge IDs based on current demo configuration:
@@ -416,54 +367,37 @@ export class AccountService {
     switch (demoId) {
       case 'hello-milestone':
         badgeId = 'escrow-expert';
-        console.log(`✅ Hello milestone demo completed - awarding escrow-expert badge`);
         break;
       case 'dispute-resolution':
         badgeId = 'trust-guardian';
-        console.log(`✅ Dispute resolution demo completed - awarding trust-guardian badge`);
         break;
       case 'micro-marketplace':
         badgeId = 'stellar-champion';
-        console.log(`✅ Micro marketplace demo completed - awarding stellar-champion badge`);
         break;
       // Legacy demo IDs (keeping for backward compatibility)
       case 'demo1':
         badgeId = 'escrow-expert';
-        console.log(`✅ Demo 1 completed - awarding escrow-expert badge`);
         break;
       case 'demo3':
         badgeId = 'trust-guardian';
-        console.log(`✅ Demo 3 completed - awarding trust-guardian badge`);
         break;
       case 'demo4':
         badgeId = 'stellar-champion';
-        console.log(`✅ Demo 4 completed - awarding stellar-champion badge`);
         break;
     }
 
     if (!badgeId) {
-      console.log(`❌ No badge configured for demo: ${demoId}`);
       return;
     }
-
-    console.log(`🎯 Attempting to award badge: ${badgeId} for demo: ${demoId}`);
 
     const badgeConfig = getBadgeById(badgeId);
 
     if (!badgeConfig) {
-      console.log(`❌ Badge config not found for: ${badgeId}`);
       return;
     }
 
-    console.log(`✅ Found badge config:`, {
-      id: badgeConfig.id,
-      name: badgeConfig.name,
-      description: badgeConfig.description,
-    });
-
     // Check if badge is already earned
     if (earnedBadgeNames.includes(badgeConfig.name)) {
-      console.log(`⚠️ Badge ${badgeConfig.name} already earned`);
       return;
     }
 
@@ -479,18 +413,9 @@ export class AccountService {
       pointsValue: badgeConfig.xpReward,
     };
 
-    console.log(`🏆 Awarding badge: ${badge.name} for completing ${demoId}`, {
-      badgeId: badge.id,
-      badgeName: badge.name,
-      pointsValue: badge.pointsValue,
-      rarity: badge.rarity,
-    });
-
     try {
       await this.awardBadge(accountId, badge);
-      console.log(`✅ Successfully awarded badge: ${badge.name}`);
     } catch (error) {
-      console.error(`❌ Failed to award badge: ${badge.name}`, error);
       throw error;
     }
   }
@@ -530,7 +455,6 @@ export class AccountService {
           pointsValue: nexusBadgeConfig.xpReward,
         };
 
-        console.log(`👑 Awarding Nexus Master badge! Completed all 3 main demos.`);
         await this.awardBadge(accountId, badge);
       }
     }
@@ -576,7 +500,6 @@ export class AccountService {
           pointsValue: stellarBadgeConfig.xpReward,
         };
 
-        console.log(`🌟 Awarding Stellar Champion badge! All demos completed.`);
         await this.awardBadge(accountId, badge);
       }
     }
@@ -608,9 +531,6 @@ export class AccountService {
     reason: string,
     demoId?: string
   ): Promise<void> {
-    console.log('💰 Logging points transaction:', { userId, type, amount, reason, demoId });
-    console.log('🔍 Stack trace for points transaction creation:', new Error().stack);
-
     // Create transaction object, only including demoId if it's defined
     const transaction: PointsTransaction = {
       id: uuidv4(),
@@ -627,18 +547,8 @@ export class AccountService {
     }
 
     try {
-      console.log('📝 Adding transaction document to Firestore...');
-      console.log('Transaction data being saved:', transaction);
       const docRef = await addDoc(collection(db, 'pointsTransactions'), transaction);
-      console.log('✅ Points transaction logged successfully! Doc ID:', docRef.id);
     } catch (error) {
-      console.error('❌ Error logging points transaction:', error);
-      console.error('Transaction data:', transaction);
-      console.error('Firebase error details:', {
-        code: (error as any)?.code,
-        message: (error as any)?.message,
-        details: error,
-      });
       throw error;
     }
   }
@@ -684,6 +594,105 @@ export class AccountService {
       settings: settingsUpdates,
       updatedAt: serverTimestamp(),
     });
+  }
+
+  // Add completed demo to demosCompleted array
+  async addCompletedDemo(accountId: string, demoId: string): Promise<void> {
+    const accountRef = doc(db, 'accounts', accountId);
+
+    // Get current account to check existing demosCompleted
+    const accountSnap = await getDoc(accountRef);
+    if (!accountSnap.exists()) {
+      throw new Error('Account not found');
+    }
+
+    const accountData = accountSnap.data();
+    const currentDemosCompleted = accountData.demosCompleted || [];
+
+    // Check if demo is already completed
+    if (currentDemosCompleted.includes(demoId)) {
+      return; // Already completed
+    }
+
+    // Add demo to completed list
+    const updatedDemosCompleted = [...currentDemosCompleted, demoId];
+
+    await updateDoc(accountRef, {
+      demosCompleted: updatedDemosCompleted,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  // Add earned badge to badgesEarned array
+  async addEarnedBadge(accountId: string, badgeId: string): Promise<void> {
+    const accountRef = doc(db, 'accounts', accountId);
+
+    // Get current account to check existing badgesEarned
+    const accountSnap = await getDoc(accountRef);
+    if (!accountSnap.exists()) {
+      throw new Error('Account not found');
+    }
+
+    const accountData = accountSnap.data();
+    const currentBadgesEarned = accountData.badgesEarned || [];
+
+    // Check if badge is already earned
+    if (currentBadgesEarned.includes(badgeId)) {
+      return; // Already earned
+    }
+
+    // Add badge to earned list
+    const updatedBadgesEarned = [...currentBadgesEarned, badgeId];
+
+    await updateDoc(accountRef, {
+      badgesEarned: updatedBadgesEarned,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  // Add experience and points to account
+  async addExperienceAndPoints(
+    accountId: string,
+    experience: number,
+    points: number
+  ): Promise<void> {
+    const accountRef = doc(db, 'accounts', accountId);
+
+    // Get current account to check existing values
+    const accountSnap = await getDoc(accountRef);
+    if (!accountSnap.exists()) {
+      throw new Error('Account not found');
+    }
+
+    const accountData = accountSnap.data();
+    const currentExperience = accountData.experience || 0;
+    const currentPoints = accountData.totalPoints || 0;
+
+    // Calculate new level based on experience
+    const newExperience = currentExperience + experience;
+    const newLevel = Math.floor(newExperience / 1000) + 1;
+
+    await updateDoc(accountRef, {
+      experience: newExperience,
+      totalPoints: currentPoints + points,
+      level: newLevel,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  // Get account by wallet address
+  async getAccountByWalletAddress(walletAddress: string): Promise<any> {
+    const accountRef = doc(db, 'accounts', walletAddress);
+    const accountSnap = await getDoc(accountRef);
+
+    if (!accountSnap.exists()) {
+      return null;
+    }
+
+    return {
+      id: accountSnap.id,
+      ...accountSnap.data(),
+    };
   }
 
   // Get main demo completion count (only the 3 available demos)

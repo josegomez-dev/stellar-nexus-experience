@@ -60,7 +60,6 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
       onClose();
     } catch (err) {
-      console.error('Error submitting feedback:', err);
       alert('Failed to submit feedback. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -96,7 +95,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
               rating={rating}
               onRatingChange={setRating}
               maxRating={5}
-              size="lg"
+              size='lg'
               showLabels={true}
               disabled={isSubmitting}
             />
@@ -136,9 +135,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
           {/* Stats */}
           <div className='bg-white/5 rounded-lg p-3 text-center'>
-            <p className='text-xs text-gray-400'>
-              ⏱️ Completed in {completionTime} minutes
-            </p>
+            <p className='text-xs text-gray-400'>⏱️ Completed in {completionTime} minutes</p>
           </div>
 
           {/* Buttons */}

@@ -176,7 +176,6 @@ export const OnboardingOverlay = ({
           },
         ];
 
-
       case 'dispute-resolution':
         return [
           ...baseSteps,
@@ -524,9 +523,7 @@ export const OnboardingOverlay = ({
             })}
           </div>
           <div className='mt-2 text-center'>
-            <p className='text-xs text-gray-400'>
-              💡 All main demos are available in the tutorial
-            </p>
+            <p className='text-xs text-gray-400'>💡 All main demos are available in the tutorial</p>
           </div>
         </div>
 

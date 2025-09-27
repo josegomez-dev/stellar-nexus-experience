@@ -101,18 +101,11 @@ export const MilestoneVotingDemo = () => {
   // Trigger confetti when demo is completed
   useEffect(() => {
     const allReleased = milestones.every(m => m.status === 'released');
-    console.log('🎉 Milestone Voting Demo - All milestones released:', allReleased);
-    console.log(
-      '🎉 Milestone statuses:',
-      milestones.map(m => ({ id: m.id, status: m.status }))
-    );
 
     if (allReleased) {
-      console.log('🎉 Triggering confetti for Milestone Voting Demo!');
       setShowConfetti(true);
       // Hide confetti after animation
       const timer = setTimeout(() => {
-        console.log('🎉 Hiding confetti for Milestone Voting Demo');
         setShowConfetti(false);
       }, 4000);
       return () => clearTimeout(timer);
@@ -132,7 +125,6 @@ export const MilestoneVotingDemo = () => {
 
     try {
       setInitError(null);
-      console.log('Initializing milestone voting contract...');
 
       const txHash = `init_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -167,8 +159,6 @@ export const MilestoneVotingDemo = () => {
         icon: '✅',
         duration: 5000,
       });
-
-      console.log('Contract initialized:', result.contractId);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setInitError(error as Error);
@@ -192,8 +182,6 @@ export const MilestoneVotingDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to initialize contract:', errorMessage);
     }
   }
 
@@ -211,7 +199,6 @@ export const MilestoneVotingDemo = () => {
 
     try {
       setFundError(null);
-      console.log('Funding escrow contract...');
 
       const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -242,8 +229,6 @@ export const MilestoneVotingDemo = () => {
         icon: '💰',
         duration: 5000,
       });
-
-      console.log('Escrow funded:', result.escrow);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setFundError(error as Error);
@@ -267,8 +252,6 @@ export const MilestoneVotingDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to fund escrow:', errorMessage);
     }
   }
 
@@ -287,7 +270,6 @@ export const MilestoneVotingDemo = () => {
     try {
       setStatusError(null);
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: true }));
-      console.log(`Marking milestone as completed...`);
 
       const milestone = milestones.find(m => m.id === milestoneId);
       const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -334,8 +316,6 @@ export const MilestoneVotingDemo = () => {
         icon: '✅',
         duration: 5000,
       });
-
-      console.log(`Milestone ${milestoneId} marked as completed`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setStatusError(error as Error);
@@ -360,8 +340,6 @@ export const MilestoneVotingDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to complete milestone:', errorMessage);
     } finally {
       setMilestoneLoadingStates(prev => ({ ...prev, [milestoneId]: false }));
     }
@@ -381,7 +359,6 @@ export const MilestoneVotingDemo = () => {
 
     try {
       setApproveError(null);
-      console.log(`Processing stakeholder approval...`);
 
       const stakeholder = stakeholders.find(s => s.id === stakeholderId);
       const milestone = milestones.find(m => m.id === milestoneId);
@@ -449,8 +426,6 @@ export const MilestoneVotingDemo = () => {
           icon: '✅',
           duration: 5000,
         });
-
-        console.log(`Milestone ${milestoneId} is now approved and ready for release!`);
       } else {
         updateTransaction(
           txHash,
@@ -466,10 +441,6 @@ export const MilestoneVotingDemo = () => {
           icon: '✅',
           duration: 4000,
         });
-
-        console.log(
-          `Milestone ${milestoneId} needs more approvals: ${updatedMilestone?.approvals.length}/${updatedMilestone?.requiredApprovals}`
-        );
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -496,8 +467,6 @@ export const MilestoneVotingDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to approve milestone:', errorMessage);
     }
   }
 
@@ -518,7 +487,6 @@ export const MilestoneVotingDemo = () => {
       setReleaseError(null);
 
       const milestone = milestones.find(m => m.id === milestoneId);
-      console.log(`Releasing funds for milestone "${milestone?.title}"...`);
 
       const txHash = `release_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -561,8 +529,6 @@ export const MilestoneVotingDemo = () => {
         icon: '💰',
         duration: 6000,
       });
-
-      console.log(`Funds released successfully for milestone "${milestone?.title}"!`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setReleaseError(error as Error);
@@ -587,8 +553,6 @@ export const MilestoneVotingDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to release funds:', errorMessage);
     } finally {
       setIsReleasing(false);
     }
@@ -625,8 +589,6 @@ export const MilestoneVotingDemo = () => {
       icon: '🔄',
       duration: 4000,
     });
-
-    console.log('Demo reset successfully');
   }
 
   const getApprovalProgress = (milestone: Milestone) => {

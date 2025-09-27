@@ -6,7 +6,6 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { BadgeAnimationProvider } from '@/contexts/BadgeAnimationContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { AccountProvider } from '@/contexts/AccountContext';
 import { NetworkProvider } from '@/contexts/NetworkContext';
 import { FirebaseProvider } from '@/contexts/FirebaseContext';
 import { EscrowProvider } from '@/contexts/EscrowContext';
@@ -20,17 +19,15 @@ export const RootProviders = ({ children }: RootProvidersProps) => {
     <WalletProvider>
       <NetworkProvider>
         <AuthProvider>
-          <FirebaseProvider>
-            <TransactionProvider>
-              <ToastProvider>
+          <ToastProvider>
+            <FirebaseProvider>
+              <TransactionProvider>
                 <BadgeAnimationProvider>
-                  <EscrowProvider>
-                    <AccountProvider>{children}</AccountProvider>
-                  </EscrowProvider>
+                  <EscrowProvider>{children}</EscrowProvider>
                 </BadgeAnimationProvider>
-              </ToastProvider>
-            </TransactionProvider>
-          </FirebaseProvider>
+              </TransactionProvider>
+            </FirebaseProvider>
+          </ToastProvider>
         </AuthProvider>
       </NetworkProvider>
     </WalletProvider>

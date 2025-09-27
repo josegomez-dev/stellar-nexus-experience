@@ -5,8 +5,6 @@ import { loadStellarSDK, getStellarServer, isStellarSDKAvailable } from './stell
 // Simple Stellar SDK test to verify functionality
 export const testStellarSDK = async () => {
   try {
-    console.log('🧪 Testing Stellar SDK functionality...');
-
     if (!isStellarSDKAvailable()) {
       return {
         success: false,
@@ -20,14 +18,11 @@ export const testStellarSDK = async () => {
 
     // Test 1: Create a random keypair
     const testKeypair = Keypair.random();
-    console.log('✅ Keypair generation works:', testKeypair.publicKey());
 
     // Test 2: Connect to Horizon using optimized loader
     const server = await getStellarServer('https://horizon-testnet.stellar.org');
-    console.log('✅ Server connection created');
 
     // Test 3: Check network passphrase
-    console.log('✅ Testnet passphrase:', Networks.TESTNET);
 
     return {
       success: true,
@@ -35,7 +30,6 @@ export const testStellarSDK = async () => {
       testKeypair: testKeypair.publicKey(),
     };
   } catch (error) {
-    console.error('❌ Stellar SDK test failed:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -47,8 +41,6 @@ export const testStellarSDK = async () => {
 // Test account loading with a known testnet account
 export const testAccountLoading = async (publicKey: string) => {
   try {
-    console.log('🔍 Testing account loading for:', publicKey);
-
     let StellarSDK: any;
     try {
       StellarSDK = await import('@stellar/stellar-sdk');
@@ -60,7 +52,7 @@ export const testAccountLoading = async (publicKey: string) => {
     const server = await getStellarServer('https://horizon-testnet.stellar.org');
 
     const account = await server.loadAccount(publicKey);
-    console.log('✅ Account loaded:', {
+    console.log({
       accountId: account.accountId(),
       sequence: account.sequenceNumber(),
       balances: account.balances.length,
@@ -72,7 +64,6 @@ export const testAccountLoading = async (publicKey: string) => {
       balances: account.balances,
     };
   } catch (error) {
-    console.error('❌ Account loading failed:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

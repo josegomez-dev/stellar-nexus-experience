@@ -27,6 +27,7 @@ export const Footer = () => {
                   alt='STELLAR NEXUS'
                   width={100}
                   height={24}
+                  style={{ width: 'auto', height: 'auto' }}
                 />
                 <p className='text-sm text-white/60'>v{appConfig.version}</p>
               </div>

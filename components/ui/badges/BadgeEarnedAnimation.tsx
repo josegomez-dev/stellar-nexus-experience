@@ -1,137 +1,27 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { BADGE_RARITY } from '@/lib/badge-config';
 import { Badge } from '@/lib/firebase-types';
+import { getBadgeIcon, getBadgeColors, playBadgeSound, BADGE_SIZES } from '@/utils/constants/badges/assets';
 
-// Badge SVG emblems (reused from Badge3D component)
+// Badge SVG emblem using centralized assets
 const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
-  switch (id) {
-    case 'trust-guardian':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g1-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#00E5FF' />
-              <stop offset='100%' stopColor='#06b6d4' />
-            </linearGradient>
-          </defs>
-          <path
-            d='M32 4l20 8v14c0 14-9.2 26.7-20 34-10.8-7.3-20-20-20-34V12l20-8z'
-            fill={`url(#anim-g1-${id})`}
-            opacity='0.85'
-          />
-          <path
-            d='M22 30l8 8 12-12'
-            fill='none'
-            stroke='#fff'
-            strokeWidth='4'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          />
-        </svg>
-      );
-    case 'escrow-expert':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g2-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#67e8f9' />
-              <stop offset='100%' stopColor='#3b82f6' />
-            </linearGradient>
-          </defs>
-          <circle cx='32' cy='32' r='26' fill={`url(#anim-g2-${id})`} opacity='0.9' />
-          <path d='M18 28h28v8H18z' fill='#0ea5e9' opacity='0.8' />
-          <path d='M22 22h20v6H22zM22 36h20v6H22z' fill='#fff' opacity='0.9' />
-        </svg>
-      );
-    case 'blockchain-pioneer':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g3-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#c084fc' />
-              <stop offset='100%' stopColor='#818cf8' />
-            </linearGradient>
-          </defs>
-          <path d='M32 6l18 10v20L32 56 14 36V16z' fill={`url(#anim-g3-${id})`} opacity='0.9' />
-          <g stroke='#fff' strokeWidth='3' opacity='0.95' strokeLinecap='round'>
-            <path d='M22 24h20' />
-            <path d='M22 32h20' />
-            <path d='M22 40h20' />
-          </g>
-        </svg>
-      );
-    case 'dispute-detective':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g4-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#a78bfa' />
-              <stop offset='100%' stopColor='#22d3ee' />
-            </linearGradient>
-          </defs>
-          <circle cx='28' cy='28' r='16' fill={`url(#anim-g4-${id})`} opacity='0.9' />
-          <path d='M40 40l10 10' stroke='#fff' strokeWidth='5' strokeLinecap='round' />
-          <path d='M24 28h8M28 24v8' stroke='#fff' strokeWidth='3' strokeLinecap='round' />
-        </svg>
-      );
-    case 'gig-economy-guru':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g5-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#fde68a' />
-              <stop offset='100%' stopColor='#fb923c' />
-            </linearGradient>
-          </defs>
-          <path d='M8 44h48l-6 10H14z' fill='#fdba74' opacity='0.95' />
-          <rect x='12' y='12' width='40' height='30' rx='6' fill={`url(#anim-g5-${id})`} />
-          <path
-            d='M20 20h24M20 28h24M20 36h14'
-            stroke='#fff'
-            strokeWidth='3'
-            strokeLinecap='round'
-          />
-        </svg>
-      );
-    case 'stellar-champion':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <radialGradient id={`anim-g6-${id}`} cx='50%' cy='50%' r='50%'>
-              <stop offset='0%' stopColor='#fff7ed' />
-              <stop offset='55%' stopColor='#fbbf24' />
-              <stop offset='100%' stopColor='#fb7185' />
-            </radialGradient>
-          </defs>
-          <path d='M12 52l20-40 20 40H12z' fill={`url(#anim-g6-${id})`} opacity='0.95' />
-          <circle cx='32' cy='28' r='8' fill='#fff' opacity='0.95' />
-          <path d='M32 18v20M22 28h20' stroke='#f59e0b' strokeWidth='3' />
-        </svg>
-      );
-    case 'nexus-master':
-      return (
-        <svg viewBox='0 0 64 64' className='w-32 h-32 drop-shadow-2xl'>
-          <defs>
-            <linearGradient id={`anim-g7-${id}`} x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#10b981' />
-              <stop offset='100%' stopColor='#059669' />
-            </linearGradient>
-          </defs>
-          <circle cx='32' cy='32' r='28' fill={`url(#anim-g7-${id})`} opacity='0.9' />
-          <circle cx='32' cy='32' r='20' fill='#ffffff' opacity='0.1' />
-          <path d='M32 8l6 18 18 6-18 6-6 18-6-18-18-6 18-6 6-18z' fill='#ffffff' opacity='0.9' />
-          <circle cx='32' cy='32' r='4' fill='#ffffff' opacity='0.8' />
-        </svg>
-      );
-    default:
-      return (
-        <div className='w-32 h-32 bg-gray-600 rounded-full flex items-center justify-center text-white text-6xl drop-shadow-2xl'>
-          🏆
-        </div>
-      );
+  const icon = getBadgeIcon(id, BADGE_SIZES['3xl']);
+  
+  if (icon) {
+    return (
+      <div className='drop-shadow-2xl'>
+        {icon}
+      </div>
+    );
   }
+
+  // Fallback for unknown badges
+  return (
+    <div className='w-32 h-32 bg-gray-600 rounded-full flex items-center justify-center text-white text-6xl drop-shadow-2xl'>
+      🏆
+    </div>
+  );
 };
 
 interface BadgeEarnedAnimationProps {
@@ -141,46 +31,14 @@ interface BadgeEarnedAnimationProps {
   points?: number;
 }
 
-// Helper function to get badge-specific styles
+// Helper function to get badge-specific styles using centralized assets
 const getBadgeStyles = (badgeId: string) => {
-  switch (badgeId) {
-    case 'welcome_explorer':
-      return {
-        ring: 'from-gray-400 to-gray-600',
-        glow: 'shadow-gray-400/20',
-        text: 'text-gray-400',
-      };
-    case 'escrow-expert':
-      return {
-        ring: 'from-blue-400 to-blue-600',
-        glow: 'shadow-blue-400/20',
-        text: 'text-blue-400',
-      };
-    case 'trust-guardian':
-      return {
-        ring: 'from-orange-400 to-yellow-500',
-        glow: 'shadow-orange-400/20',
-        text: 'text-orange-400',
-      };
-    case 'stellar-champion':
-      return {
-        ring: 'from-pink-400 to-rose-500',
-        glow: 'shadow-pink-400/20',
-        text: 'text-pink-400',
-      };
-    case 'nexus-master':
-      return {
-        ring: 'from-green-400 to-emerald-500',
-        glow: 'shadow-green-400/20',
-        text: 'text-green-400',
-      };
-    default:
-      return {
-        ring: 'from-gray-400 to-gray-600',
-        glow: 'shadow-gray-400/20',
-        text: 'text-gray-400',
-      };
-  }
+  const colors = getBadgeColors(badgeId);
+  return {
+    ring: colors.gradient,
+    glow: colors.glow,
+    text: colors.text,
+  };
 };
 
 export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
@@ -199,6 +57,9 @@ export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
       setAnimationPhase('enter');
       return;
     }
+
+    // Play badge sound when animation starts
+    playBadgeSound();
 
     // Phase 1: Enter animation (0.5s)
     const enterTimer = setTimeout(() => {
@@ -325,7 +186,9 @@ export const BadgeEarnedAnimation: React.FC<BadgeEarnedAnimationProps> = ({
             >
               {badge.rarity.toUpperCase()}
             </div>
-            <div className='text-2xl font-bold text-green-400'>+{points || badge.xpReward} pts</div>
+            <div className='text-2xl font-bold text-green-400'>
+              +{points || badge.earningPoints} pts
+            </div>
           </div>
 
           {/* Progress Bar */}

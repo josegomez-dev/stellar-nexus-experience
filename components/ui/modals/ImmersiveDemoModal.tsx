@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { userTrackingService } from '@/lib/user-tracking-service';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { API_ENDPOINTS } from '@/utils/constants/api';
 import Image from 'next/image';
 
@@ -32,7 +32,6 @@ const ProgressContext = React.createContext<ProgressContextType | null>(null);
 export const useImmersiveProgress = () => {
   const context = React.useContext(ProgressContext);
   if (!context) {
-    console.warn('useImmersiveProgress must be used within an ImmersiveDemoModal');
     return { updateProgress: () => {}, markStepCompleted: () => {} };
   }
   return context;
@@ -89,7 +88,7 @@ export const ImmersiveDemoModal = ({
         'Fund Escrow',
         'Complete Milestone',
         'Approve Milestone',
-        'Release Funds'
+        'Release Funds',
       ],
       'dispute-resolution': [
         'Initialize Escrow',
@@ -97,7 +96,7 @@ export const ImmersiveDemoModal = ({
         'Complete Milestone',
         'Raise Dispute',
         'Resolve Dispute',
-        'Release Funds'
+        'Release Funds',
       ],
       'micro-marketplace': [
         'Browse Tasks',
@@ -105,21 +104,28 @@ export const ImmersiveDemoModal = ({
         'Initialize Escrow',
         'Complete Work',
         'Approve Work',
-        'Release Payment'
+        'Release Payment',
       ],
       'milestone-voting': [
         'Initialize Escrow',
         'Fund Escrow',
         'Complete Milestone',
         'Vote on Milestone',
-        'Release Funds'
-      ]
+        'Release Funds',
+      ],
     };
-    return steps[demoId as keyof typeof steps] || ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5'];
+    return (
+      steps[demoId as keyof typeof steps] || ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']
+    );
   };
 
   // Calculate meaningful progress based on steps and time
-  const calculateProgress = (completedSteps: string[], totalSteps: string[], elapsedTime: number, estimatedTime: number): number => {
+  const calculateProgress = (
+    completedSteps: string[],
+    totalSteps: string[],
+    elapsedTime: number,
+    estimatedTime: number
+  ): number => {
     const stepProgress = (completedSteps.length / totalSteps.length) * 60; // 60% from steps
     const timeProgress = Math.min((elapsedTime / (estimatedTime * 60)) * 40, 40); // 40% from time
     return Math.min(stepProgress + timeProgress, 100);
@@ -137,18 +143,18 @@ export const ImmersiveDemoModal = ({
   const updateDemoProgress = (interaction: string) => {
     // Map interactions to demo steps
     const interactionMap: Record<string, string> = {
-      'escrow_initialized': 'Initialize Escrow',
-      'escrow_funded': 'Fund Escrow',
-      'milestone_completed': 'Complete Milestone',
-      'milestone_approved': 'Approve Milestone',
-      'funds_released': 'Release Funds',
-      'dispute_raised': 'Raise Dispute',
-      'dispute_resolved': 'Resolve Dispute',
-      'task_accepted': 'Accept Task',
-      'work_completed': 'Complete Work',
-      'work_approved': 'Approve Work',
-      'payment_released': 'Release Payment',
-      'voting_completed': 'Vote on Milestone'
+      escrow_initialized: 'Initialize Escrow',
+      escrow_funded: 'Fund Escrow',
+      milestone_completed: 'Complete Milestone',
+      milestone_approved: 'Approve Milestone',
+      funds_released: 'Release Funds',
+      dispute_raised: 'Raise Dispute',
+      dispute_resolved: 'Resolve Dispute',
+      task_accepted: 'Accept Task',
+      work_completed: 'Complete Work',
+      work_approved: 'Approve Work',
+      payment_released: 'Release Payment',
+      voting_completed: 'Vote on Milestone',
     };
 
     const stepName = interactionMap[interaction];
@@ -175,7 +181,12 @@ export const ImmersiveDemoModal = ({
         setElapsedTime(elapsed);
 
         // Calculate meaningful progress based on steps and time
-        const progressPercent = calculateProgress(completedSteps, demoSteps, elapsed, estimatedTime);
+        const progressPercent = calculateProgress(
+          completedSteps,
+          demoSteps,
+          elapsed,
+          estimatedTime
+        );
         setProgress(progressPercent);
       }, 1000);
 
@@ -203,9 +214,9 @@ export const ImmersiveDemoModal = ({
     setProgress(0);
     setShowTransactionHistory(true); // Ensure transaction sidebar is always visible
 
-    // Track demo start
+    // Track demo start - now handled by FirebaseContext
     if (isConnected && walletData?.publicKey) {
-      await userTrackingService.trackDemoStart(walletData.publicKey, demoId, demoTitle);
+      // Demo tracking is now handled by FirebaseContext
     }
 
     // Open wallet sidebar for better UX
@@ -228,54 +239,31 @@ export const ImmersiveDemoModal = ({
   const handleCompleteDemo = async () => {
     // Prevent multiple simultaneous calls
     if (isCompletingDemo) {
-      console.log('🚫 Demo completion already in progress, ignoring duplicate call');
       return;
     }
 
     try {
       setIsCompletingDemo(true);
-      console.log('🎯 Complete Demo button clicked!', { demoId, demoTitle, elapsedTime });
 
       const completionTimeMinutes = Math.max(1, Math.round(elapsedTime / 60));
-      console.log('📊 Completion time:', completionTimeMinutes, 'minutes');
 
-      // Track demo completion
+      // Demo completion tracking is now handled by FirebaseContext
       if (isConnected && walletData?.publicKey) {
-        console.log('👤 Tracking demo completion for user:', walletData.publicKey);
-        try {
-          await userTrackingService.trackDemoCompletion(
-            walletData.publicKey,
-            demoId,
-            demoTitle,
-            completionTimeMinutes
-          );
-          console.log('✅ Demo completion tracked successfully');
-        } catch (trackingError) {
-          console.error('⚠️ Demo tracking failed, but continuing with completion:', trackingError);
-          // Continue with demo completion even if tracking fails
-        }
+        console.log('Demo completion with wallet connected');
       } else {
-        console.log('⚠️ No wallet connected, skipping user tracking');
+        console.log('Demo completion without wallet');
       }
 
       // Call the external feedback handler if provided
       if (onDemoComplete) {
-        console.log('🔄 Calling external demo complete handler');
         onDemoComplete(demoId, demoTitle, completionTimeMinutes);
-        console.log('✅ External handler called, closing modal');
         // Close the demo modal after completion
         handleCloseModal();
       } else {
-        console.log('🔄 No external handler, using internal feedback system');
         // Fallback to internal feedback system
         setCurrentStep('feedback');
       }
-
-      console.log('🎉 Demo completed successfully');
-
-      console.log('✅ Complete Demo process finished successfully');
     } catch (error) {
-      console.error('❌ Error in handleCompleteDemo:', error);
       addToast({
         type: 'error',
         title: '❌ Demo Completion Failed',
@@ -326,15 +314,9 @@ export const ImmersiveDemoModal = ({
     setIsSubmittingFeedback(true);
 
     try {
-      // Track feedback submission
+      // Feedback submission tracking is now handled by FirebaseContext
       if (isConnected && walletData?.publicKey) {
-        await userTrackingService.trackFeedbackSubmission(walletData.publicKey, demoId, demoTitle, {
-          rating: feedback.rating,
-          comment: feedback.comment,
-          difficulty: feedback.difficulty,
-          wouldRecommend: feedback.wouldRecommend,
-          completionTime: Math.max(1, Math.round(elapsedTime / 60)),
-        });
+        console.log('Feedback submission with wallet connected');
       }
 
       // Save feedback to localStorage as backup
@@ -689,7 +671,9 @@ export const ImmersiveDemoModal = ({
 
                 {/* Demo Content */}
                 <div className='bg-white/5 rounded-xl p-4 border border-white/20'>
-                  <ProgressContext.Provider value={{ updateProgress: updateDemoProgress, markStepCompleted }}>
+                  <ProgressContext.Provider
+                    value={{ updateProgress: updateDemoProgress, markStepCompleted }}
+                  >
                     {children}
                   </ProgressContext.Provider>
                 </div>
@@ -698,7 +682,6 @@ export const ImmersiveDemoModal = ({
                 <div className='text-center'>
                   <button
                     onClick={e => {
-                      console.log('🖱️ Complete Demo button clicked directly!', e);
                       e.preventDefault();
                       e.stopPropagation();
                       handleCompleteDemo();
@@ -1035,7 +1018,7 @@ export const ImmersiveDemoModal = ({
                     <div className='text-sm font-medium text-white'>Current Progress</div>
                     <div className='text-sm font-bold text-brand-300'>{Math.round(progress)}%</div>
                   </div>
-                  
+
                   {/* Progress Bar */}
                   <div className='w-full h-3 bg-white/10 rounded-full overflow-hidden mb-3'>
                     <div
@@ -1054,9 +1037,7 @@ export const ImmersiveDemoModal = ({
                     </div>
                     <div className='bg-white/5 rounded-lg p-2 border border-white/5'>
                       <div className='text-white/60 mb-1'>Time Spent</div>
-                      <div className='text-white font-semibold'>
-                        {formatTime(elapsedTime)}
-                      </div>
+                      <div className='text-white font-semibold'>{formatTime(elapsedTime)}</div>
                     </div>
                   </div>
 
@@ -1080,15 +1061,19 @@ export const ImmersiveDemoModal = ({
                     <div className='mt-2'>
                       <div className='text-xs text-white/60 mb-2'>Remaining Steps:</div>
                       <div className='space-y-1'>
-                        {demoSteps.filter(step => !completedSteps.includes(step)).slice(0, 3).map((step, index) => (
-                          <div key={step} className='flex items-center space-x-2'>
-                            <div className='w-1.5 h-1.5 bg-white/30 rounded-full'></div>
-                            <span className='text-xs text-white/60'>{step}</span>
-                          </div>
-                        ))}
+                        {demoSteps
+                          .filter(step => !completedSteps.includes(step))
+                          .slice(0, 3)
+                          .map((step, index) => (
+                            <div key={step} className='flex items-center space-x-2'>
+                              <div className='w-1.5 h-1.5 bg-white/30 rounded-full'></div>
+                              <span className='text-xs text-white/60'>{step}</span>
+                            </div>
+                          ))}
                         {demoSteps.filter(step => !completedSteps.includes(step)).length > 3 && (
                           <div className='text-xs text-white/40 ml-3'>
-                            +{demoSteps.filter(step => !completedSteps.includes(step)).length - 3} more steps
+                            +{demoSteps.filter(step => !completedSteps.includes(step)).length - 3}{' '}
+                            more steps
                           </div>
                         )}
                       </div>

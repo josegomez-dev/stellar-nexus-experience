@@ -1,21 +1,21 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { appConfig, stellarConfig } from '@/lib/wallet-config';
 import { UserAvatar } from './UserAvatar';
 import { generateFunnyName } from '@/lib/funny-name-generator';
 import { useToast } from '@/contexts/ToastContext';
-import { getAllBadges } from '@/lib/badge-config';
+import { getAllBadges } from '@/lib/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
   const { isConnected, walletData, disconnect, connect, isFreighterAvailable } = useGlobalWallet();
   const { isAuthenticated, user, getUserStats, updateUser } = useAuth();
-  const { account } = useAccount();
+  const { account } = useFirebase();
   const { addToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -25,16 +25,14 @@ export const UserDropdown = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user has unlocked mini-games access (earned Nexus Master badge)
-  const hasUnlockedMiniGames = () => {
-    if (!account) return false;
+  const miniGamesUnlocked = useMemo(() => {
+    if (!account || !account.badgesEarned || !Array.isArray(account.badgesEarned)) return false;
 
     // Check if user has earned the Nexus Master badge
-    const hasNexusMasterBadge = account.badges.some(userBadge => userBadge.name === 'Nexus Master');
+    const hasNexusMasterBadge = account.badgesEarned.includes('nexus_master');
 
     return hasNexusMasterBadge;
-  };
-
-  const miniGamesUnlocked = hasUnlockedMiniGames();
+  }, [account]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -70,8 +68,8 @@ export const UserDropdown = () => {
                 if (parsed.customName) return parsed.customName;
               }
             } catch (error) {
-              console.error('Error reading profile data:', error);
-            }
+      console.error('Error loading profile:', error);
+    }
           }
           return generateDisplayName(walletData?.publicKey || '');
         })();
@@ -133,7 +131,6 @@ export const UserDropdown = () => {
 
       // Keep dropdown open to show the updated profile
     } catch (error) {
-      console.error('Error updating profile:', error);
       addToast({
         type: 'error',
         title: '❌ Update Failed',
@@ -197,7 +194,6 @@ export const UserDropdown = () => {
       setIsEditingName(false);
       setTempName('');
     } catch (error) {
-      console.error('Error saving name:', error);
       addToast({
         type: 'error',
         title: '❌ Save Failed',
@@ -230,7 +226,7 @@ export const UserDropdown = () => {
             <div className='flex items-center space-x-3'>
               <div className='relative'>
                 {isConnected ? (
-                  <Tooltip content="Click to generate random name & avatar" position="right">
+                  <Tooltip content='Click to generate random name & avatar' position='right'>
                     <button
                       onClick={handleAutoGenerate}
                       disabled={isGenerating}
@@ -258,8 +254,8 @@ export const UserDropdown = () => {
                     <input
                       type='text'
                       value={tempName}
-                      onChange={(e) => setTempName(e.target.value)}
-                      onKeyDown={(e) => {
+                      onChange={e => setTempName(e.target.value)}
+                      onKeyDown={e => {
                         if (e.key === 'Enter') {
                           handleSaveName();
                         } else if (e.key === 'Escape') {
@@ -271,7 +267,7 @@ export const UserDropdown = () => {
                       autoFocus
                     />
                     {/* Save and Cancel buttons */}
-                    <Tooltip content="Save Name" position="bottom">
+                    <Tooltip content='Save Name' position='bottom'>
                       <button
                         onClick={handleSaveName}
                         disabled={isSaving}
@@ -284,7 +280,7 @@ export const UserDropdown = () => {
                         )}
                       </button>
                     </Tooltip>
-                    <Tooltip content="Cancel" position="bottom">
+                    <Tooltip content='Cancel' position='bottom'>
                       <button
                         onClick={handleCancelEditing}
                         className='p-1 text-red-400 hover:text-red-300 transition-colors duration-200'
@@ -296,11 +292,9 @@ export const UserDropdown = () => {
                 ) : (
                   <div className='flex items-center space-x-2'>
                     <Tooltip content={displayName} position='bottom'>
-                      <h3 
+                      <h3
                         className={`text-white font-semibold text-sm truncate transition-colors duration-200 ${
-                          isConnected 
-                            ? 'cursor-pointer hover:text-blue-300' 
-                            : 'cursor-default'
+                          isConnected ? 'cursor-pointer hover:text-blue-300' : 'cursor-default'
                         }`}
                         onClick={isConnected ? handleStartEditing : undefined}
                         title={isConnected ? 'Click to edit name' : 'Connect wallet to edit name'}
@@ -310,7 +304,7 @@ export const UserDropdown = () => {
                     </Tooltip>
                     {/* Small edit button */}
                     {isConnected && (
-                      <Tooltip content="Edit Name" position="left">
+                      <Tooltip content='Edit Name' position='left'>
                         <button
                           onClick={handleStartEditing}
                           className='p-1 text-white/60 hover:text-blue-300 transition-colors duration-200'
@@ -378,6 +372,7 @@ export const UserDropdown = () => {
                       alt='Web3 Playground'
                       width={50}
                       height={20}
+                      style={{ width: 'auto', height: 'auto' }}
                     />
                   </span>
                   <span>Stellar Nexus Experience</span>
@@ -410,6 +405,7 @@ export const UserDropdown = () => {
                         width={50}
                         height={20}
                         className={miniGamesUnlocked ? '' : 'grayscale'}
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     </span>
                     <span>
@@ -419,7 +415,7 @@ export const UserDropdown = () => {
                 </Tooltip>
 
                 <hr />
-                
+
                 <button
                   onClick={handleDisconnect}
                   className='w-full flex items-center space-x-3 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors duration-200 text-sm'

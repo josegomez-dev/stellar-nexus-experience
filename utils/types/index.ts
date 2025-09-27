@@ -8,12 +8,12 @@ export * from './account';
 export * from './trustless-work';
 
 // Re-export commonly used types for convenience
-export type { 
-  DemoProgress, 
-  NFTBadge, 
-  Reward, 
-  UserAccount, 
-  DemoConfig, 
-  PointsTransaction, 
-  Achievement 
+export type {
+  DemoProgress,
+  NFTBadge,
+  Reward,
+  UserAccount,
+  DemoConfig,
+  PointsTransaction,
+  Achievement,
 } from './account';

@@ -13,11 +13,9 @@ import {
 } from '@/lib/mock-trustless-work';
 import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
 import { assetConfig } from '@/lib/wallet-config';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
-import { useDemoStats } from '@/hooks/useDemoStats';
-import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
 import { Tooltip } from '@/components/ui/Tooltip';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
@@ -49,10 +47,8 @@ export const DisputeResolutionDemo = () => {
   const { walletData, isConnected } = useGlobalWallet();
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
-  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
-    useDemoCompletionHistory();
-  const { completeDemo: completeDemoInAccount } = useAccount();
-  const { markDemoComplete } = useDemoStats();
+  // Demo completion tracking is now handled by FirebaseContext
+  const { completeDemo } = useFirebase();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client');
@@ -125,36 +121,29 @@ export const DisputeResolutionDemo = () => {
   // Trigger confetti when demo is completed
   useEffect(() => {
     const allReleased = milestones.every(m => m.status === 'released');
-    console.log('🎉 Dispute Resolution Demo - All milestones released:', allReleased);
-    console.log(
-      '🎉 Milestone statuses:',
-      milestones.map(m => ({ id: m.id, status: m.status }))
-    );
 
     // Only complete if all milestones are released AND demo hasn't been completed yet
     if (allReleased && !isCompleted) {
-      console.log('🎉 Triggering confetti for Dispute Resolution Demo!');
       setShowConfetti(true);
       setIsCompleted(true); // Mark as completed to prevent multiple executions
 
       // Complete the demo using the centralized account system
-      const completeDemo = async () => {
+      const completeThisDemo = async () => {
         try {
           const score = 95; // High score for completing dispute resolution
-          const completionTimeInSeconds = demoStartTime 
-            ? Math.floor((Date.now() - demoStartTime) / 1000) 
+          const completionTimeInSeconds = demoStartTime
+            ? Math.floor((Date.now() - demoStartTime) / 1000)
             : 0; // Calculate completion time in seconds
           const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
 
           // Use the centralized account system for completion
-          await completeDemoInAccount('dispute-resolution', score);
+          console.log('DisputeResolutionDemo: Attempting to complete demo with score:', score);
+          await completeDemo('dispute-resolution', score);
+          console.log('DisputeResolutionDemo: Demo completed successfully');
 
-          // Mark demo as complete in Firebase stats (store in minutes)
-          await markDemoComplete('dispute-resolution', 'Drama Queen Escrow', completionTimeInMinutes);
-
-          console.log('✅ Dispute Resolution Demo completed successfully');
+          // Demo completion is now handled by FirebaseContext
         } catch (error) {
-          console.error('❌ Failed to complete Dispute Resolution Demo:', error);
+          console.error('DisputeResolutionDemo: Demo completion failed:', error);
           addToast({
             type: 'error',
             title: '❌ Demo Completion Failed',
@@ -165,11 +154,10 @@ export const DisputeResolutionDemo = () => {
       };
 
       // Complete demo after a short delay
-      setTimeout(completeDemo, 2000);
+      setTimeout(completeThisDemo, 2000);
 
       // Hide confetti after animation
       const timer = setTimeout(() => {
-        console.log('🎉 Hiding confetti for Dispute Resolution Demo');
         setShowConfetti(false);
       }, 4000);
       return () => clearTimeout(timer);
@@ -238,7 +226,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to initialize escrow:', error);
       const txHash = `init_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
         hash: txHash,
@@ -299,7 +286,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to fund escrow:', error);
       const txHash = `fund_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
         hash: txHash,
@@ -375,7 +361,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to complete milestone:', error);
       const milestone = milestones.find(m => m.id === milestoneId);
       const txHash = `complete_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -450,7 +435,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to approve milestone:', error);
       const milestone = milestones.find(m => m.id === milestoneId);
       const txHash = `approve_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -546,7 +530,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to start dispute:', error);
       const milestone = milestones.find(m => m.id === milestoneId);
       const txHash = `dispute_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -660,7 +643,6 @@ export const DisputeResolutionDemo = () => {
       // Clear the specific resolution reason
       setResolutionReasons(prev => ({ ...prev, [disputeId]: '' }));
     } catch (error) {
-      console.error('Failed to resolve dispute:', error);
       const dispute = disputes.find(d => d.id === disputeId);
       const milestone = milestones.find(m => m.id === dispute?.milestoneId);
       const txHash = `resolve_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -748,7 +730,6 @@ export const DisputeResolutionDemo = () => {
         duration: 5000,
       });
     } catch (error) {
-      console.error('Failed to release all funds:', error);
       const txHash = `release_all_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
         hash: txHash,
@@ -988,9 +969,7 @@ export const DisputeResolutionDemo = () => {
                         </div>
                       ) : (
                         <div className='text-center'>
-                          <div className='text-yellow-300 font-semibold mb-1'>
-                            ⏳ Processing...
-                          </div>
+                          <div className='text-yellow-300 font-semibold mb-1'>⏳ Processing...</div>
                           <div className='text-xs text-gray-300'>
                             Please wait for the funding transaction to complete
                           </div>

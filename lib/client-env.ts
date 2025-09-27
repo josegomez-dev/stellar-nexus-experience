@@ -44,7 +44,6 @@ const parseClientEnv = () => {
   try {
     return clientEnvSchema.parse(process.env);
   } catch (error) {
-    console.error('❌ Client environment validation failed:', error);
     throw new Error('Client environment validation failed');
   }
 };

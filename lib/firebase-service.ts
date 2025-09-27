@@ -1,33 +1,15 @@
 // Firebase Firestore service functions
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
   setDoc,
   updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  addDoc,
   serverTimestamp,
   Timestamp,
-  DocumentData,
-  QuerySnapshot,
-  DocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
-  UserProfile,
-  DemoProgress,
-  Badge,
-  UserBadge,
-  Transaction,
-  DemoStats,
-  DemoClap,
-  DemoFeedback,
+  Account,
   COLLECTIONS,
 } from './firebase-types';
 
@@ -46,587 +28,142 @@ const convertTimestamps = (data: any): any => {
   return converted;
 };
 
-// User Profile Operations
-export const userService = {
-  // Create or update user profile
-  async createOrUpdateUser(userData: Partial<UserProfile>): Promise<void> {
-    const userRef = doc(db, COLLECTIONS.USERS, userData.id!);
-    const userDoc = {
-      ...userData,
+// Account Service - Single service for all account operations
+export const accountService = {
+  // Create or update account
+  async createOrUpdateAccount(accountData: Partial<Account>): Promise<void> {
+    const accountRef = doc(db, COLLECTIONS.ACCOUNTS, accountData.id!);
+    const accountDoc = {
+      ...accountData,
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
     };
-    await setDoc(userRef, userDoc, { merge: true });
+    await setDoc(accountRef, accountDoc, { merge: true });
   },
 
-  // Get user profile by wallet address
-  async getUserByWalletAddress(walletAddress: string): Promise<UserProfile | null> {
-    const userRef = doc(db, COLLECTIONS.USERS, walletAddress);
-    const userSnap = await getDoc(userRef);
+  // Get account by wallet address
+  async getAccountByWalletAddress(walletAddress: string): Promise<Account | null> {
+    const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
+    const accountSnap = await getDoc(accountRef);
     
-    if (userSnap.exists()) {
-      return convertTimestamps(userSnap.data()) as UserProfile;
+    if (accountSnap.exists()) {
+      return convertTimestamps(accountSnap.data()) as Account;
     }
     return null;
   },
 
-  // Update user stats
-  async updateUserStats(walletAddress: string, stats: Partial<UserProfile['stats']>): Promise<void> {
-    const userRef = doc(db, COLLECTIONS.USERS, walletAddress);
-    await updateDoc(userRef, {
-      'stats': stats,
-      updatedAt: serverTimestamp(),
-    });
-  },
-
-  // Update user preferences
-  async updateUserPreferences(walletAddress: string, preferences: Partial<UserProfile['preferences']>): Promise<void> {
-    const userRef = doc(db, COLLECTIONS.USERS, walletAddress);
-    await updateDoc(userRef, {
-      'preferences': preferences,
-      updatedAt: serverTimestamp(),
-    });
-  },
-};
-
-// Demo Progress Operations
-export const demoProgressService = {
-  // Create or update demo progress
-  async createOrUpdateProgress(progress: Partial<DemoProgress>): Promise<void> {
-    const progressRef = doc(db, COLLECTIONS.DEMO_PROGRESS, `${progress.userId}_${progress.demoId}`);
-    const progressDoc = {
+  // Update account progress
+  async updateAccountProgress(walletAddress: string, progress: Partial<Pick<Account, 'level' | 'experience' | 'totalPoints' | 'demosCompleted' | 'badgesEarned'>>): Promise<void> {
+    const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
+    await updateDoc(accountRef, {
       ...progress,
       updatedAt: serverTimestamp(),
-    };
-    await setDoc(progressRef, progressDoc, { merge: true });
-  },
-
-  // Get user's demo progress
-  async getUserDemoProgress(userId: string): Promise<DemoProgress[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_PROGRESS),
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoProgress[];
-  },
-
-  // Get specific demo progress
-  async getDemoProgress(userId: string, demoId: string): Promise<DemoProgress | null> {
-    const progressRef = doc(db, COLLECTIONS.DEMO_PROGRESS, `${userId}_${demoId}`);
-    const progressSnap = await getDoc(progressRef);
-    
-    if (progressSnap.exists()) {
-      return convertTimestamps({ id: progressSnap.id, ...progressSnap.data() }) as DemoProgress;
-    }
-    return null;
-  },
-
-  // Update demo step
-  async updateDemoStep(userId: string, demoId: string, step: number, status?: DemoProgress['status']): Promise<void> {
-    const progressRef = doc(db, COLLECTIONS.DEMO_PROGRESS, `${userId}_${demoId}`);
-    const updateData: any = {
-      currentStep: step,
-      updatedAt: serverTimestamp(),
-    };
-    
-    if (status) {
-      updateData.status = status;
-      if (status === 'completed') {
-        updateData.completedAt = serverTimestamp();
-      }
-    }
-    
-    await updateDoc(progressRef, updateData);
-  },
-};
-
-// Badge Operations
-export const badgeService = {
-  // Get all available badges
-  async getAllBadges(): Promise<Badge[]> {
-    const q = query(collection(db, COLLECTIONS.BADGES), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as Badge[];
-  },
-
-  // Get user's earned badges
-  async getUserBadges(userId: string): Promise<UserBadge[]> {
-    const q = query(
-      collection(db, COLLECTIONS.USER_BADGES),
-      where('userId', '==', userId),
-      orderBy('earnedAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as UserBadge[];
-  },
-
-  // Award badge to user
-  async awardBadge(userId: string, badgeId: string): Promise<void> {
-    console.log(`🏆 Awarding badge in Firebase: ${badgeId} to user: ${userId.substring(0, 8)}...`);
-    
-    // First ensure the badge exists in the badges collection
-    await this.ensureBadgeExists(badgeId);
-    
-    const badgeRef = doc(db, COLLECTIONS.USER_BADGES, `${userId}_${badgeId}`);
-    await setDoc(badgeRef, {
-      userId,
-      badgeId,
-      earnedAt: serverTimestamp(),
-      progress: 100,
-      isCompleted: true,
     });
-    
-    console.log(`✅ Badge awarded in Firebase: ${badgeId}`);
   },
 
-  // Ensure badge exists in badges collection
-  async ensureBadgeExists(badgeId: string): Promise<void> {
-    const badgeRef = doc(db, COLLECTIONS.BADGES, badgeId);
-    const badgeSnap = await getDoc(badgeRef);
-    
-    if (!badgeSnap.exists()) {
-      console.log(`⚠️ Badge ${badgeId} not found in Firebase, creating from config...`);
+  // Add completed demo
+  async addCompletedDemo(walletAddress: string, demoId: string): Promise<void> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    if (account) {
+      let currentDemosCompleted: string[] = [];
       
-      // Import badge config dynamically to avoid circular dependencies
-      const { BADGE_CONFIG } = await import('./badge-config');
-      const badgeConfig = BADGE_CONFIG[badgeId];
+      if (Array.isArray(account.demosCompleted)) {
+        currentDemosCompleted = account.demosCompleted;
+      } else if (account.demosCompleted && typeof account.demosCompleted === 'object') {
+        // Convert object to array (Firebase sometimes stores arrays as objects)
+        currentDemosCompleted = Object.values(account.demosCompleted);
+      }
       
-      if (badgeConfig) {
-        await setDoc(badgeRef, {
-          ...badgeConfig,
-          createdAt: serverTimestamp(),
+      if (!currentDemosCompleted.includes(demoId)) {
+        const updatedDemosCompleted = [...currentDemosCompleted, demoId];
+        await this.updateAccountProgress(walletAddress, {
+          demosCompleted: updatedDemosCompleted,
         });
-        console.log(`✅ Created badge in Firebase: ${badgeConfig.name}`);
-      } else {
-        console.error(`❌ Badge config not found for: ${badgeId}`);
-        throw new Error(`Badge config not found for: ${badgeId}`);
       }
     }
   },
 
-  // Update badge progress
-  async updateBadgeProgress(userId: string, badgeId: string, progress: number): Promise<void> {
-    const badgeRef = doc(db, COLLECTIONS.USER_BADGES, `${userId}_${badgeId}`);
-    await setDoc(badgeRef, {
-      userId,
-      badgeId,
-      progress,
-      isCompleted: progress >= 100,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
-  },
-};
-
-// Transaction Operations
-export const transactionService = {
-  // Create transaction record
-  async createTransaction(transaction: Partial<Transaction>): Promise<string> {
-    const transactionRef = await addDoc(collection(db, COLLECTIONS.TRANSACTIONS), {
-      ...transaction,
-      createdAt: serverTimestamp(),
-    });
-    return transactionRef.id;
-  },
-
-  // Update transaction status
-  async updateTransactionStatus(transactionId: string, status: Transaction['status']): Promise<void> {
-    const transactionRef = doc(db, COLLECTIONS.TRANSACTIONS, transactionId);
-    const updateData: any = {
-      status,
-      updatedAt: serverTimestamp(),
-    };
-    
-    if (status === 'completed') {
-      updateData.completedAt = serverTimestamp();
+  // Add earned badge
+  async addEarnedBadge(walletAddress: string, badgeId: string): Promise<void> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    if (account) {
+      let currentBadgesEarned: string[] = [];
+      
+      if (Array.isArray(account.badgesEarned)) {
+        currentBadgesEarned = account.badgesEarned;
+      } else if (account.badgesEarned && typeof account.badgesEarned === 'object') {
+        // Convert object to array (Firebase sometimes stores arrays as objects)
+        currentBadgesEarned = Object.values(account.badgesEarned);
+      }
+      
+      if (!currentBadgesEarned.includes(badgeId)) {
+        const updatedBadgesEarned = [...currentBadgesEarned, badgeId];
+        await this.updateAccountProgress(walletAddress, {
+          badgesEarned: updatedBadgesEarned,
+        });
+      }
     }
-    
-    await updateDoc(transactionRef, updateData);
   },
 
-  // Get user transactions
-  async getUserTransactions(userId: string, limitCount: number = 50): Promise<Transaction[]> {
-    const q = query(
-      collection(db, COLLECTIONS.TRANSACTIONS),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as Transaction[];
+  // Add experience and points
+  async addExperienceAndPoints(walletAddress: string, experience: number, points: number): Promise<void> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    if (account) {
+      const newExperience = account.experience + experience;
+      const newTotalPoints = account.totalPoints + points;
+      const newLevel = Math.floor(newExperience / 1000) + 1;
+      
+      await this.updateAccountProgress(walletAddress, {
+        experience: newExperience,
+        totalPoints: newTotalPoints,
+        level: newLevel,
+      });
+    }
   },
 
-  // Get demo transactions
-  async getDemoTransactions(demoId: string): Promise<Transaction[]> {
-    const q = query(
-      collection(db, COLLECTIONS.TRANSACTIONS),
-      where('demoId', '==', demoId),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as Transaction[];
+  // Check if account has badge
+  async hasBadge(walletAddress: string, badgeId: string): Promise<boolean> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    return account && account.badgesEarned && Array.isArray(account.badgesEarned) 
+      ? account.badgesEarned.includes(badgeId) 
+      : false;
+  },
+
+  // Check if account has completed demo
+  async hasCompletedDemo(walletAddress: string, demoId: string): Promise<boolean> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    return account && account.demosCompleted && Array.isArray(account.demosCompleted) 
+      ? account.demosCompleted.includes(demoId) 
+      : false;
   },
 };
 
-// Leaderboard functionality removed - will be derived from users collection in the future
+// Firebase Utility Functions
 
 // Utility functions
 export const firebaseUtils = {
-  // Check if user exists
-  async userExists(walletAddress: string): Promise<boolean> {
-    const user = await userService.getUserByWalletAddress(walletAddress);
-    return user !== null;
+  // Calculate level from experience (1000 XP per level)
+  calculateLevel(experience: number): number {
+    return Math.floor(experience / 1000) + 1;
   },
 
-  // Initialize user data
-  async initializeUser(walletAddress: string, username: string, walletType: string, walletName: string): Promise<void> {
-    const userData: Partial<UserProfile> = {
+  // Create account
+  async createAccount(walletAddress: string, displayName: string, network: string = 'testnet'): Promise<void> {
+    const accountData: Partial<Account> = {
       id: walletAddress,
-      username,
+      displayName,
       walletAddress,
-      walletType: walletType as UserProfile['walletType'],
-      walletName,
+      network,
+      level: 1,
+      experience: 0,
+      totalPoints: 0,
+      demosCompleted: [],
+      badgesEarned: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       lastLoginAt: new Date(),
-      isActive: true,
-      preferences: {
-        theme: 'auto',
-        language: 'en',
-        notifications: {
-          email: false,
-          push: true,
-          demoUpdates: true,
-          badgeEarned: true,
-        },
-        privacy: {
-          showProfile: true,
-          showStats: true,
-          showBadges: true,
-        },
-      },
-      stats: {
-        totalXp: 0,
-        level: 1,
-        demosCompleted: 0,
-        badgesEarned: 0,
-        totalTimeSpent: 0,
-        streak: 0,
-        lastActivityAt: new Date(),
-      },
     };
 
-    await userService.createOrUpdateUser(userData);
-  },
-
-  // Calculate user level from XP
-  calculateLevel(totalXp: number): number {
-    // Simple level calculation: 100 XP per level
-    return Math.floor(totalXp / 100) + 1;
-  },
-
-  // Calculate XP needed for next level
-  calculateXpToNextLevel(totalXp: number): number {
-    const currentLevel = this.calculateLevel(totalXp);
-    const nextLevelXp = currentLevel * 100;
-    return nextLevelXp - totalXp;
-  },
-};
-
-// Demo Stats Operations
-export const demoStatsService = {
-  // Get demo stats by demo ID
-  async getDemoStats(demoId: string): Promise<DemoStats | null> {
-    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
-    const statsSnap = await getDoc(statsRef);
-    
-    if (statsSnap.exists()) {
-      return convertTimestamps({ id: statsSnap.id, ...statsSnap.data() }) as DemoStats;
-    }
-    return null;
-  },
-
-  // Get all demo stats (for analytics)
-  async getAllDemoStats(): Promise<DemoStats[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_STATS),
-      orderBy('totalCompletions', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoStats[];
-  },
-
-
-  // Initialize demo stats (create if not exists)
-  async initializeDemoStats(demoId: string, demoName: string): Promise<void> {
-    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
-    const statsSnap = await getDoc(statsRef);
-    
-    if (!statsSnap.exists()) {
-      await setDoc(statsRef, {
-        id: demoId,
-        demoId,
-        demoName,
-        totalCompletions: 0,
-        totalClaps: 0,
-        averageRating: 0,
-        totalRatings: 0,
-        averageCompletionTime: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    }
-  },
-
-  // Increment demo completion count
-  async incrementCompletion(demoId: string, completionTime: number): Promise<void> {
-    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
-    const statsSnap = await getDoc(statsRef);
-    
-    if (statsSnap.exists()) {
-      const currentStats = statsSnap.data() as DemoStats;
-      const newTotalCompletions = currentStats.totalCompletions + 1;
-      const newAverageTime = ((currentStats.averageCompletionTime * currentStats.totalCompletions) + completionTime) / newTotalCompletions;
-      
-      await updateDoc(statsRef, {
-        totalCompletions: newTotalCompletions,
-        averageCompletionTime: newAverageTime,
-        updatedAt: serverTimestamp(),
-      });
-    }
-  },
-
-  // Increment demo clap count
-  async incrementClaps(demoId: string): Promise<void> {
-    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
-    const statsSnap = await getDoc(statsRef);
-    
-    if (statsSnap.exists()) {
-      const currentStats = statsSnap.data() as DemoStats;
-      await updateDoc(statsRef, {
-        totalClaps: currentStats.totalClaps + 1,
-        updatedAt: serverTimestamp(),
-      });
-    }
-  },
-
-  // Update demo rating
-  async updateRating(demoId: string, newRating: number): Promise<void> {
-    const statsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
-    const statsSnap = await getDoc(statsRef);
-    
-    if (statsSnap.exists()) {
-      const currentStats = statsSnap.data() as DemoStats;
-      const newTotalRatings = currentStats.totalRatings + 1;
-      const newAverageRating = ((currentStats.averageRating * currentStats.totalRatings) + newRating) / newTotalRatings;
-      
-      await updateDoc(statsRef, {
-        averageRating: newAverageRating,
-        totalRatings: newTotalRatings,
-        updatedAt: serverTimestamp(),
-      });
-    }
-  },
-};
-
-// Demo Claps Operations
-export const demoClapService = {
-  // Add clap for demo
-  async addClap(userId: string, demoId: string): Promise<void> {
-    const clapId = `${userId}_${demoId}`;
-    const clapRef = doc(db, COLLECTIONS.DEMO_CLAPS, clapId);
-    
-    // Check if user already clapped
-    const clapSnap = await getDoc(clapRef);
-    if (clapSnap.exists()) {
-      throw new Error('User has already clapped for this demo');
-    }
-    
-    // Add clap record
-    await setDoc(clapRef, {
-      id: clapId,
-      userId,
-      demoId,
-      createdAt: serverTimestamp(),
-    });
-    
-    // Increment clap count in demo stats
-    await demoStatsService.incrementClaps(demoId);
-  },
-
-  // Check if user has clapped for demo
-  async hasUserClapped(userId: string, demoId: string): Promise<boolean> {
-    const clapId = `${userId}_${demoId}`;
-    const clapRef = doc(db, COLLECTIONS.DEMO_CLAPS, clapId);
-    const clapSnap = await getDoc(clapRef);
-    
-    return clapSnap.exists();
-  },
-
-  // Get all claps for a demo
-  async getDemoClaps(demoId: string): Promise<DemoClap[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_CLAPS),
-      where('demoId', '==', demoId),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoClap[];
-  },
-
-  // Get user's claps
-  async getUserClaps(userId: string): Promise<DemoClap[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_CLAPS),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoClap[];
-  },
-};
-
-// Demo Feedback Operations
-export const demoFeedbackService = {
-  // Submit feedback for demo
-  async submitFeedback(feedback: Partial<DemoFeedback>): Promise<string> {
-    try {
-      // Ensure demo stats exist before updating rating
-      if (feedback.rating && feedback.demoId) {
-        await demoStatsService.initializeDemoStats(feedback.demoId, feedback.demoName || 'Unknown Demo');
-      }
-      
-      const feedbackRef = await addDoc(collection(db, COLLECTIONS.DEMO_FEEDBACK), {
-        ...feedback,
-        createdAt: serverTimestamp(),
-      });
-      
-      // Update demo rating in stats
-      if (feedback.rating && feedback.demoId) {
-        await demoStatsService.updateRating(feedback.demoId, feedback.rating);
-      }
-      
-      return feedbackRef.id;
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      throw new Error(`Failed to submit feedback: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  },
-
-  // Get feedback for a demo
-  async getDemoFeedback(demoId: string, limitCount: number = 50): Promise<DemoFeedback[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_FEEDBACK),
-      where('demoId', '==', demoId),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoFeedback[];
-  },
-
-  // Get user's feedback
-  async getUserFeedback(userId: string): Promise<DemoFeedback[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_FEEDBACK),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoFeedback[];
-  },
-
-  // Get all feedback (for analytics)
-  async getAllFeedback(): Promise<DemoFeedback[]> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_FEEDBACK),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => 
-      convertTimestamps({ id: doc.id, ...doc.data() })
-    ) as DemoFeedback[];
-  },
-
-  // Check if user has submitted feedback for demo
-  async hasUserSubmittedFeedback(userId: string, demoId: string): Promise<boolean> {
-    const q = query(
-      collection(db, COLLECTIONS.DEMO_FEEDBACK),
-      where('userId', '==', userId),
-      where('demoId', '==', demoId),
-      limit(1)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    return !querySnapshot.empty;
-  },
-
-  // Get feedback statistics for a demo
-  async getFeedbackStats(demoId: string): Promise<{
-    totalFeedback: number;
-    averageRating: number;
-    difficultyBreakdown: Record<string, number>;
-    recommendationRate: number;
-  }> {
-    const feedback = await this.getDemoFeedback(demoId, 1000); // Get more for stats
-    
-    if (feedback.length === 0) {
-      return {
-        totalFeedback: 0,
-        averageRating: 0,
-        difficultyBreakdown: {},
-        recommendationRate: 0,
-      };
-    }
-    
-    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
-    const averageRating = totalRating / feedback.length;
-    
-    const difficultyBreakdown = feedback.reduce((acc, f) => {
-      acc[f.difficulty] = (acc[f.difficulty] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const recommendCount = feedback.filter(f => f.wouldRecommend).length;
-    const recommendationRate = (recommendCount / feedback.length) * 100;
-    
-    return {
-      totalFeedback: feedback.length,
-      averageRating,
-      difficultyBreakdown,
-      recommendationRate,
-    };
+    await accountService.createOrUpdateAccount(accountData);
   },
 };

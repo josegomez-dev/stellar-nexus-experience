@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useGlobalWallet } from './WalletContext';
-import { userTrackingService } from '@/lib/user-tracking-service';
+// Removed user-tracking-service import
 
 export interface User {
   id: string;
@@ -92,12 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userData = JSON.parse(existingUser);
           setUser(userData);
-          console.log(
-            '✅ Auto-signed in existing user:',
-            userData.username || userData.walletAddress
-          );
         } catch (err) {
-          console.error('Error parsing user data:', err);
         }
       } else {
         // Auto-create user account when wallet connects
@@ -110,9 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               walletData.walletType || 'manual',
               walletData.walletName || 'Unknown Wallet'
             );
-            console.log('✅ Auto-created user account for wallet connection');
           } catch (error) {
-            console.error('Failed to auto-create user account:', error);
           }
         };
         
@@ -157,7 +150,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(`user_${walletAddress}`, JSON.stringify(newUser));
       setUser(newUser);
 
-      console.log('✅ User created successfully:', newUser.username);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create account';
       setError(errorMessage);
@@ -184,7 +176,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(`user_${walletAddress}`, JSON.stringify(user));
       setUser(user);
 
-      console.log('✅ User signed in successfully:', user.username);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
       setError(errorMessage);
@@ -198,9 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setUser(null);
       setError(null);
-      console.log('✅ User signed out');
     } catch (err) {
-      console.error('Error signing out:', err);
     }
   };
 
@@ -211,9 +200,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...user, ...updates };
       localStorage.setItem(`user_${user.walletAddress}`, JSON.stringify(updatedUser));
       setUser(updatedUser);
-      console.log('✅ User updated successfully');
     } catch (err) {
-      console.error('Error updating user:', err);
       throw new Error('Failed to update user');
     }
   };
@@ -252,9 +239,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(`user_${user.walletAddress}`, JSON.stringify(updatedUser));
       setUser(updatedUser);
 
-      console.log('✅ Demo progress updated:', demoId, progress);
     } catch (err) {
-      console.error('Error updating demo progress:', err);
       throw new Error('Failed to update demo progress');
     }
   };
@@ -271,7 +256,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Check if badge already exists
       const existingBadge = user.badges.find(b => b.id === badge.id);
       if (existingBadge) {
-        console.log('Badge already earned:', badge.name);
         return;
       }
 
@@ -284,9 +268,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(`user_${user.walletAddress}`, JSON.stringify(updatedUser));
       setUser(updatedUser);
 
-      console.log('✅ Badge earned:', badge.name);
     } catch (err) {
-      console.error('Error adding badge:', err);
       throw new Error('Failed to add badge');
     }
   };
@@ -345,9 +327,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem(`user_${walletData.publicKey}`, JSON.stringify(newUser));
       setUser(newUser);
       
-      console.log('✅ User initialized with Firebase:', username);
     } catch (err) {
-      console.error('Error initializing user with Firebase:', err);
       throw new Error('Failed to initialize user');
     } finally {
       setIsLoading(false);

@@ -57,7 +57,6 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
         setCompletionHistory([]);
       }
     } catch (err) {
-      console.error('Error loading completion history:', err);
       setError(err instanceof Error ? err.message : 'Failed to load completion history');
       setCompletionHistory([]);
     } finally {
@@ -72,7 +71,6 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
       }
     } catch (err) {
-      console.error('Error saving completion history:', err);
       setError(err instanceof Error ? err.message : 'Failed to save completion history');
     }
   };
@@ -103,7 +101,6 @@ export const useDemoCompletionHistory = (): UseDemoCompletionHistoryReturn => {
 
       // Note: Demo completion notifications are handled by AccountContext.tsx
     } catch (err) {
-      console.error('Error adding completion:', err);
       setError(err instanceof Error ? err.message : 'Failed to add completion');
       addToast({
         type: 'error',

@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 
 export const AccountStatusIndicator: React.FC = () => {
-  const { account, loading } = useAccount();
+  const { account, isLoading } = useFirebase();
   const { isConnected } = useGlobalWallet();
   const [showAccountReady, setShowAccountReady] = useState(false);
   const [progress, setProgress] = useState(100);
 
   // Show account ready notification when account is first created/loaded
   useEffect(() => {
-    if (account && !loading) {
+    if (account && !isLoading) {
       setShowAccountReady(true);
       setProgress(100);
 
@@ -31,7 +31,7 @@ export const AccountStatusIndicator: React.FC = () => {
 
       return () => clearInterval(interval);
     }
-  }, [account, loading]);
+  }, [account, isLoading]);
 
   const handleClose = () => {
     setShowAccountReady(false);
@@ -43,7 +43,7 @@ export const AccountStatusIndicator: React.FC = () => {
 
   return (
     <div className='fixed top-20 right-4 z-40'>
-      {loading && !account && (
+      {isLoading && !account && (
         <div className='bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse flex items-center space-x-2'>
           <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
           <span className='text-sm font-medium'>Creating account...</span>
@@ -67,7 +67,7 @@ export const AccountStatusIndicator: React.FC = () => {
               <div className='text-sm'>
                 <div className='font-medium'>Account Ready</div>
                 <div className='text-xs opacity-90'>
-                  {account.profile.totalPoints} points • Level {account.profile.level}
+                  {account.totalPoints || 0} points • Level {account.level || 1}
                 </div>
               </div>
             </div>

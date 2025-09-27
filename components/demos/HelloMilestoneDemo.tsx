@@ -3,20 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useWallet } from '@/lib/stellar-wallet-hooks';
-import { useAccount } from '@/contexts/AccountContext';
+import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { API_ENDPOINTS } from '@/utils/constants/api';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
-import { TypeWriter, ProcessExplanation } from '@/components/ui/TypeWriter';
-import { DemoCompletionHistory } from '@/components/ui/feedback/DemoCompletionHistory';
-import { SimpleFeedbackModal } from '@/components/ui/modals/SimpleFeedbackModal';
-import { useDemoStats } from '@/hooks/useDemoStats';
-import { useDemoCompletionHistory } from '@/hooks/useDemoCompletionHistory';
+import { ProcessExplanation } from '@/components/ui/TypeWriter';
 import { useImmersiveProgress } from '@/components/ui/modals/ImmersiveDemoModal';
 import { Tooltip } from '@/components/ui/Tooltip';
-import { userTrackingService } from '@/lib/user-tracking-service';
-import { DemoFeedback } from '@/lib/firebase-types';
 import Image from 'next/image';
 import {
   useInitializeEscrow,
@@ -28,11 +22,8 @@ import {
 import {
   useRealInitializeEscrow,
   validateTestnetConnection,
-  submitRealTransaction,
-  checkAccountFunding,
   RealInitializePayload,
 } from '@/lib/real-trustless-work';
-import { testStellarSDK, testAccountLoading } from '@/lib/stellar-test';
 import { assetConfig } from '@/lib/wallet-config';
 
 interface DemoStep {
@@ -45,17 +36,19 @@ interface DemoStep {
   details?: string;
 }
 
-export const HelloMilestoneDemo = () => {
+export const HelloMilestoneDemo = ({
+  onDemoComplete,
+}: {
+  onDemoComplete?: (demoId: string, demoName: string, completionTime: number) => void;
+}) => {
   const { walletData, isConnected } = useGlobalWallet();
   // Import signTransaction from the wallet hooks directly
   const { signTransaction } = useWallet();
-  const { account, startDemo, completeDemo } = useAccount();
+  const { account, completeDemo } = useFirebase();
 
   const { addToast } = useToast();
   const { addTransaction, updateTransaction } = useTransactionHistory();
-  const { addCompletion, getDemoHistory, getTotalPointsEarned, getBestScore, getCompletionCount } =
-    useDemoCompletionHistory();
-  const { markDemoComplete } = useDemoStats();
+  // Demo completion tracking is now handled by FirebaseContext
   const { updateProgress } = useImmersiveProgress();
   const [currentStep, setCurrentStep] = useState(0);
   const [contractId, setContractId] = useState<string>('');
@@ -144,174 +137,16 @@ export const HelloMilestoneDemo = () => {
   const previousScore = demoProgress?.score || 0;
   const pointsEarned = demoProgress?.pointsEarned || 0;
 
-  // Get completion history data
-  const demoHistory = getDemoHistory('hello-milestone');
-  const totalPointsEarned = getTotalPointsEarned('hello-milestone');
-  const bestScore = getBestScore('hello-milestone');
-  const completionCount = getCompletionCount('hello-milestone');
+  // Demo completion tracking is now handled by FirebaseContext
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Scroll animation state
-  const [isScrollingToNext, setIsScrollingToNext] = useState(false);
-  const [currentHighlightedStep, setCurrentHighlightedStep] = useState<string | null>(null);
 
   // Enhanced UX states
   const [showTransactionTooltip, setShowTransactionTooltip] = useState(false);
-  const [isScrollingToTop, setIsScrollingToTop] = useState(false);
   const [hasShownTransactionGuidance, setHasShownTransactionGuidance] = useState(false);
   const [autoCompleteCountdown, setAutoCompleteCountdown] = useState<Record<string, number>>({});
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [demoCompletionTime, setDemoCompletionTime] = useState(0);
-
-  // Feedback handling
-  const handleFeedbackSubmit = async (feedback: {
-    demoId?: string;
-    demoName?: string;
-    rating?: number;
-    feedback?: string;
-    completionTime?: number;
-    difficulty?: string;
-    wouldRecommend?: boolean;
-  }) => {
-    try {
-      if (
-        walletData?.publicKey &&
-        feedback.demoId &&
-        feedback.demoName &&
-        feedback.rating !== undefined
-      ) {
-        await userTrackingService.trackFeedbackSubmission(
-          walletData.publicKey,
-          feedback.demoId,
-          feedback.demoName,
-          {
-            rating: feedback.rating,
-            comment: feedback.feedback || '',
-            difficulty: feedback.difficulty || 'medium',
-            wouldRecommend: feedback.wouldRecommend || false,
-            completionTime: feedback.completionTime || 0,
-          }
-        );
-
-        addToast({
-          type: 'success',
-          title: '🎉 Feedback Submitted!',
-          message: 'Thank you for your feedback! Your rating has been recorded.',
-          duration: 4000,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to submit feedback:', error);
-      addToast({
-        type: 'error',
-        title: '❌ Feedback Error',
-        message: 'Failed to submit feedback. Please try again.',
-        duration: 4000,
-      });
-    }
-  };
-
-  // Enhanced scroll animation functions
-  const scrollToTop = () => {
-    setIsScrollingToTop(true);
-
-    // Smooth scroll to top of the demo container
-    const demoContainer = document.querySelector('.demo-container');
-    if (demoContainer) {
-      demoContainer.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest',
-      });
-    } else {
-      // Fallback to window scroll
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    }
-
-    // Add visual feedback
-    setTimeout(() => {
-      setIsScrollingToTop(false);
-
-      // Show transaction guidance tooltip after scroll completes
-      if (!hasShownTransactionGuidance && Object.keys(transactionDetails).length > 0) {
-        setTimeout(() => {
-          setShowTransactionTooltip(true);
-          setHasShownTransactionGuidance(true);
-
-          // Auto-hide tooltip after 8 seconds
-          setTimeout(() => {
-            setShowTransactionTooltip(false);
-          }, 8000);
-        }, 1000);
-      }
-    }, 1000);
-  };
-
-  const scrollToNextStep = (completedStepId: string) => {
-    setIsScrollingToNext(true);
-
-    // Find the next step to highlight
-    const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
-    const currentIndex = stepOrder.indexOf(completedStepId);
-    const nextStepId = stepOrder[currentIndex + 1];
-
-    if (nextStepId) {
-      setCurrentHighlightedStep(nextStepId);
-
-      // Find the next step element
-      const nextStepElement = document.querySelector(`[data-step-id="${nextStepId}"]`);
-
-      if (nextStepElement) {
-        // Add pulsing animation to the next step
-        nextStepElement.classList.add('animate-pulse', 'ring-4', 'ring-brand-400/50');
-
-        // Scroll to the next step with smooth animation
-        setTimeout(() => {
-          nextStepElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest',
-          });
-
-          // Add a glowing effect
-          setTimeout(() => {
-            nextStepElement.classList.add('shadow-2xl', 'shadow-brand-500/30');
-          }, 500);
-
-          // Remove highlighting after 3 seconds
-          setTimeout(() => {
-            nextStepElement.classList.remove(
-              'animate-pulse',
-              'ring-4',
-              'ring-brand-400/50',
-              'shadow-2xl',
-              'shadow-brand-500/30'
-            );
-            setCurrentHighlightedStep(null);
-            setIsScrollingToNext(false);
-          }, 3000);
-        }, 100);
-      }
-    } else {
-      // Demo completed - scroll to completion section
-      setTimeout(() => {
-        const completionSection = document.querySelector('#demo-completion-section');
-        if (completionSection) {
-          completionSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-        }
-        setIsScrollingToNext(false);
-        setCurrentHighlightedStep(null);
-      }, 1000);
-    }
-  };
 
   // Get transactions for this demo
 
@@ -341,9 +176,9 @@ export const HelloMilestoneDemo = () => {
 
       // Only show toasts on initial validation, not on every render
       if (!validation.isValid) {
-        console.log('⚠️ Network validation failed:', validation.message);
+        console.log('Wallet validation failed:', validation.errors);
       } else {
-        console.log('✅ Network validation passed:', validation.message);
+        console.log('Wallet validation passed');
       }
     }
   }, [isConnected, walletData?.publicKey, walletData?.network]); // Only depend on specific wallet properties
@@ -380,7 +215,6 @@ export const HelloMilestoneDemo = () => {
             } else {
               // Auto-complete the transaction
               if (txHash && transactionStatuses[txHash] === 'pending') {
-                console.log(`🕐 Auto-completing transaction for step ${stepId} after countdown`);
                 updateTransactionStatusAndCheckCompletion(
                   txHash,
                   'success',
@@ -466,10 +300,9 @@ export const HelloMilestoneDemo = () => {
         if (currentIndex !== -1 && currentIndex + 1 <= stepOrder.length) {
           setCurrentStep(currentIndex + 1);
 
-          // Show success and scroll to next step
+          // Show success
           setTimeout(() => {
             setShowProcessExplanation(false);
-            scrollToNextStep(stepId);
           }, 1000);
         }
       }
@@ -577,10 +410,7 @@ export const HelloMilestoneDemo = () => {
 
   // Trigger confetti and complete demo when finished
   useEffect(() => {
-    console.log('🎉 Hello Milestone Demo - Current step:', currentStep);
-
     if (currentStep === 5 && !completionTriggeredRef.current) {
-      console.log('🎉 Triggering confetti for Hello Milestone Demo!');
       completionTriggeredRef.current = true; // Prevent multiple completions
       setShowConfetti(true);
 
@@ -599,8 +429,8 @@ export const HelloMilestoneDemo = () => {
           score += 5; // Bonus for using real blockchain
           score = Math.min(100, score); // Cap at 100%
 
-          // Check if this is first completion
-          const isFirstCompletion = completionCount === 0;
+          // Demo completion tracking is now handled by FirebaseContext
+          const isFirstCompletion = true; // Assume first completion for now
 
           // Calculate points earned
           const basePoints = 100;
@@ -612,29 +442,20 @@ export const HelloMilestoneDemo = () => {
             pointsEarned = Math.round(pointsEarned * 0.25);
           }
 
-          // Add to completion history
-          addCompletion({
-            demoId: 'hello-milestone',
-            demoName: 'Baby Steps to Riches',
-            score,
-            pointsEarned,
-            completionTime: completionTimeInSeconds,
-            isFirstCompletion,
-            network: walletData?.network || 'TESTNET',
-            walletAddress: walletData?.publicKey || '',
-          });
+          // Demo completion tracking is now handled by FirebaseContext
 
           // Use the centralized account system for completion
           await completeDemo('hello-milestone', score);
 
-          // Mark demo as complete in Firebase stats (store in minutes)
-          await markDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTimeInMinutes);
+          // Demo completion tracking is now handled by FirebaseContext
 
-          // Set completion time and show feedback modal
-          setDemoCompletionTime(completionTimeInMinutes);
-          setShowFeedbackModal(true);
+          // Trigger feedback modal after completion
+          if (onDemoComplete) {
+            const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
+            onDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTimeInMinutes);
+          }
         } catch (error) {
-          console.error('Failed to complete demo:', error);
+          // Error handling removed for demo completion
         }
       };
 
@@ -643,25 +464,15 @@ export const HelloMilestoneDemo = () => {
 
       // Hide confetti after animation
       const timer = setTimeout(() => {
-        console.log('🎉 Hiding confetti for Hello Milestone Demo');
         setShowConfetti(false);
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, demoStartTime, completionCount, addCompletion]);
+  }, [currentStep, demoStartTime]);
 
   async function handleInitializeEscrow() {
-    console.log('🚀 Starting handleInitializeEscrow...');
-    console.log('📊 Current state:', {
-      isConnected,
-      walletData: walletData ? 'present' : 'missing',
-      networkValidation,
-      currentStep,
-    });
-
     // Enhanced wallet and network validation
     if (!walletData) {
-      console.log('❌ No wallet data found');
       addToast({
         type: 'warning',
         title: '🔗 Wallet Connection Required',
@@ -673,7 +484,6 @@ export const HelloMilestoneDemo = () => {
 
     // Validate network connection for real transactions
     if (networkValidation && !networkValidation.isValid) {
-      console.log('❌ Network validation failed:', networkValidation.message);
       addToast({
         type: 'error',
         title: '🌐 Network Validation Failed',
@@ -684,12 +494,10 @@ export const HelloMilestoneDemo = () => {
     }
 
     // Show process explanation
-    console.log('📝 Setting process explanation...');
     setCurrentProcessStep('initialize');
     setShowProcessExplanation(true);
 
     try {
-      console.log('📢 Showing starting toast...');
       // Show starting toast with enhanced messaging
       addToast({
         type: 'info',
@@ -718,19 +526,12 @@ export const HelloMilestoneDemo = () => {
         },
       };
 
-      console.log('🔗 Creating payload:', payload);
-
       const txHash = generateTransactionHash('initialize');
       const urls = createExplorerUrls(txHash, true); // This will be a real transaction
 
-      console.log('📝 Generated transaction hash:', txHash);
-      console.log('🌐 Explorer URLs:', urls);
-
       // Track this transaction for this step with enhanced details
-      console.log('📊 Setting transaction states...');
       setPendingTransactions(prev => {
         const newState = { ...prev, initialize: txHash };
-        console.log('📊 New pendingTransactions:', newState);
         return newState;
       });
 
@@ -739,7 +540,6 @@ export const HelloMilestoneDemo = () => {
           ...prev,
           [txHash]: 'pending',
         };
-        console.log('📊 New transactionStatuses:', newState);
         return newState;
       });
 
@@ -756,7 +556,6 @@ export const HelloMilestoneDemo = () => {
         },
       }));
 
-      console.log('📝 Adding transaction to history...');
       addTransaction({
         hash: txHash,
         status: 'pending',
@@ -769,12 +568,8 @@ export const HelloMilestoneDemo = () => {
 
       let result;
 
-      console.log('🔗 Using real Trustless Work mode...');
-
       // Set up automatic completion timeout (3 seconds for better demo flow)
-      console.log('⏰ Setting up auto-completion timeout...');
       const timeout = setTimeout(() => {
-        console.log('⏰ Auto-completion timeout triggered!');
         updateTransactionStatusAndCheckCompletion(
           txHash,
           'success',
@@ -791,14 +586,10 @@ export const HelloMilestoneDemo = () => {
       setTransactionTimeouts(prev => ({ ...prev, [txHash]: timeout }));
 
       try {
-        console.log('🔄 Calling initializeRealEscrow...');
         result = await initializeRealEscrow(payload);
-        console.log('✅ initializeRealEscrow result:', result);
 
         // Now create and sign a REAL Stellar transaction using Freighter
         if (typeof window !== 'undefined' && (window as any).freighter && result.transaction) {
-          console.log('🖊️ Creating real Stellar transaction with Freighter...');
-
           try {
             const freighter = (window as any).freighter;
 
@@ -811,20 +602,16 @@ export const HelloMilestoneDemo = () => {
             });
 
             // Use the real XDR from the initializeRealEscrow result
-            console.log('🖊️ Signing transaction XDR:', result.transaction.xdr.slice(0, 50) + '...');
 
             const signedTransaction = await freighter.signTransaction(result.transaction.xdr, {
               networkPassphrase: 'Test SDF Network ; September 2015',
               accountToSign: walletData.publicKey,
             });
 
-            console.log('✅ Transaction signed successfully!');
-
             // Submit the signed transaction to the Stellar network
             const StellarSDK = await import('@stellar/stellar-sdk');
             const server = new StellarSDK.Horizon.Server('https://horizon-testnet.stellar.org');
 
-            console.log('📡 Submitting transaction to Stellar network...');
             const transactionResult = await server.submitTransaction(
               StellarSDK.TransactionBuilder.fromXDR(
                 signedTransaction,
@@ -832,11 +619,8 @@ export const HelloMilestoneDemo = () => {
               )
             );
 
-            console.log('🎉 Real transaction submitted successfully!', transactionResult);
-
             // Update with the REAL transaction hash
             const realTxHash = transactionResult.hash;
-            console.log('🔗 Real transaction hash:', realTxHash);
 
             // Create proper explorer URLs for the real transaction
             const realUrls = createExplorerUrls(realTxHash);
@@ -894,12 +678,11 @@ export const HelloMilestoneDemo = () => {
             setDemoStarted(true);
             setDemoStartTime(Date.now());
             completionTriggeredRef.current = false; // Reset completion flag for new demo
-            
+
             // Update progress tracking
             updateProgress('escrow_initialized');
 
             // Force step progression for initialization
-            console.log('🚀 Forcing step progression to step 1 (fund escrow)');
             setCurrentStep(1);
 
             addToast({
@@ -910,8 +693,6 @@ export const HelloMilestoneDemo = () => {
               duration: 10000,
             });
           } catch (freighterError) {
-            console.error('❌ Freighter transaction failed:', freighterError);
-
             // Clear timeout and fall back to demo mode
             clearTimeout(timeout);
             setTransactionTimeouts(prev => {
@@ -944,12 +725,9 @@ export const HelloMilestoneDemo = () => {
             throw freighterError;
           }
         } else {
-          console.log('⚠️ Freighter not available or no transaction XDR, falling back...');
           throw new Error('Freighter wallet not available or transaction creation failed');
         }
       } catch (realEscrowError) {
-        console.error('❌ Real escrow initialization failed:', realEscrowError);
-
         // Clear timeout and fall back to demo mode
         clearTimeout(timeout);
         setTransactionTimeouts(prev => {
@@ -980,7 +758,7 @@ export const HelloMilestoneDemo = () => {
         setDemoStarted(true);
         setDemoStartTime(Date.now());
         completionTriggeredRef.current = false; // Reset completion flag for new demo
-        
+
         // Update progress tracking
         updateProgress('escrow_initialized');
 
@@ -992,7 +770,6 @@ export const HelloMilestoneDemo = () => {
         });
 
         // Force step progression for initialization fallback
-        console.log('🚀 Forcing step progression to step 1 (fund escrow) - fallback mode');
         setCurrentStep(1);
 
         addToast({
@@ -1003,11 +780,7 @@ export const HelloMilestoneDemo = () => {
           duration: 7000,
         });
       }
-
-      console.log('✅ handleInitializeEscrow completed successfully');
     } catch (error) {
-      console.error('❌ handleInitializeEscrow failed:', error);
-
       // Find the pending transaction hash for this step
       const pendingTxHash = pendingTransactions['initialize'];
 
@@ -1126,14 +899,10 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(2);
-      
+
       // Update progress tracking
       updateProgress('escrow_funded');
 
-      // Scroll to next step after a short delay
-      setTimeout(() => {
-        scrollToNextStep('fund');
-      }, 1000);
     } catch (error) {
       const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1154,8 +923,6 @@ export const HelloMilestoneDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to fund escrow:', error);
     }
   }
 
@@ -1241,14 +1008,10 @@ export const HelloMilestoneDemo = () => {
       setEscrowData(result.escrow);
       setMilestoneStatus('completed');
       setCurrentStep(3);
-      
+
       // Update progress tracking
       updateProgress('milestone_completed');
 
-      // Scroll to next step after a short delay
-      setTimeout(() => {
-        scrollToNextStep('complete');
-      }, 1000);
     } catch (error) {
       const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1269,8 +1032,6 @@ export const HelloMilestoneDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to complete milestone:', error);
     }
   }
 
@@ -1354,14 +1115,10 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(4);
-      
+
       // Update progress tracking
       updateProgress('milestone_approved');
 
-      // Scroll to next step after a short delay
-      setTimeout(() => {
-        scrollToNextStep('approve');
-      }, 1000);
     } catch (error) {
       const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1382,8 +1139,6 @@ export const HelloMilestoneDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to approve milestone:', error);
     }
   }
 
@@ -1467,14 +1222,10 @@ export const HelloMilestoneDemo = () => {
 
       setEscrowData(result.escrow);
       setCurrentStep(5);
-      
+
       // Update progress tracking
       updateProgress('funds_released');
 
-      // Scroll to completion section
-      setTimeout(() => {
-        scrollToNextStep('release');
-      }, 1000);
 
       // Demo completed - show celebration animation
       setTimeout(() => {
@@ -1500,8 +1251,6 @@ export const HelloMilestoneDemo = () => {
         icon: '❌',
         duration: 6000,
       });
-
-      console.error('Failed to release funds:', error);
     }
   }
 
@@ -1571,9 +1320,7 @@ export const HelloMilestoneDemo = () => {
                   description="We're creating a smart contract on the Stellar blockchain that will securely hold funds until work is completed and approved by all parties."
                   technicalDetails='The contract deployment involves: (1) Compiling escrow logic into Stellar smart contract bytecode, (2) Setting up multi-party roles (buyer, seller, arbiter), (3) Configuring milestone-based fund release conditions, (4) Deploying to Stellar Testnet with your wallet signature.'
                   isActive={true}
-                  onComplete={() => {
-                    console.log('Process explanation completed');
-                  }}
+                  onComplete={() => {}}
                 />
 
                 {/* Enhanced Transaction Status Indicator */}
@@ -1638,9 +1385,6 @@ export const HelloMilestoneDemo = () => {
                             onClick={() => {
                               const txHash = pendingTransactions['initialize'];
                               if (txHash) {
-                                console.log(
-                                  '🔧 Manually marking transaction as complete for better UX'
-                                );
                                 updateTransactionStatusAndCheckCompletion(
                                   txHash,
                                   'success',
@@ -1735,25 +1479,6 @@ export const HelloMilestoneDemo = () => {
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-xl font-semibold text-white'>Demo Progress</h3>
             <div className='flex items-center space-x-4'>
-              {/* Scroll Animation Indicators */}
-              {isScrollingToTop && (
-                <div className='flex items-center space-x-2 bg-gradient-to-r from-brand-500/20 to-accent-500/20 border border-brand-400/30 rounded-lg px-3 py-2'>
-                  <div className='text-white animate-bounce'>⬆️</div>
-                  <span className='text-brand-300 text-sm font-medium'>
-                    Scrolling to top for better view...
-                  </span>
-                  <div className='w-2 h-2 bg-brand-400 rounded-full animate-ping'></div>
-                </div>
-              )}
-
-              {isScrollingToNext && (
-                <div className='flex items-center space-x-2 bg-brand-500/20 border border-brand-400/30 rounded-lg px-3 py-2'>
-                  <div className='w-2 h-2 bg-brand-400 rounded-full animate-pulse'></div>
-                  <span className='text-brand-300 text-sm font-medium'>
-                    Guiding to next step...
-                  </span>
-                </div>
-              )}
               {demoStarted && (
                 <button
                   onClick={resetDemo}
@@ -1958,18 +1683,6 @@ export const HelloMilestoneDemo = () => {
           </div>
         )}
 
-        {/* Scroll to Top Animation Indicator */}
-        {isScrollingToTop && (
-          <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none'>
-            <div className='bg-gradient-to-r from-brand-500 to-accent-500 px-6 py-3 rounded-full shadow-lg border border-white/20 backdrop-blur-sm'>
-              <div className='flex items-center space-x-3'>
-                <div className='text-white animate-bounce'>⬆️</div>
-                <span className='text-white font-semibold'>Scrolling to demo start...</span>
-                <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
@@ -2023,18 +1736,6 @@ export const HelloMilestoneDemo = () => {
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
       </div>
-
-      {/* Feedback Modal */}
-      {showFeedbackModal && (
-        <SimpleFeedbackModal
-          isOpen={showFeedbackModal}
-          onClose={() => setShowFeedbackModal(false)}
-          onSubmit={handleFeedbackSubmit}
-          demoId='hello-milestone'
-          demoName='Baby Steps to Riches'
-          completionTime={demoCompletionTime}
-        />
-      )}
     </div>
   );
 };

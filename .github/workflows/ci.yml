@@ -30,7 +30,6 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-
   build:
     name: Build Application
     runs-on: ubuntu-latest
