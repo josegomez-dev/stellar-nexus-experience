@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 // Removed badge-config import - using inline rarity config
-import { Badge } from '@/lib/firebase-types';
+import { Badge } from '@/lib/firebase/firebase-types';
 
 // Custom hook for 3D tilt effect
 function useTilt() {

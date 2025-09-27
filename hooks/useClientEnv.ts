@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import clientEnv from '@/lib/client-env';
+import clientEnv from '@/lib/utils/client-env';
 
 export function useClientEnv() {
   const [isClient, setIsClient] = useState(false);

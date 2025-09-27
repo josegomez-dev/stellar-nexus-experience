@@ -10,9 +10,9 @@ import {
   useReleaseFunds as useMockReleaseFunds,
   useStartDispute as useMockStartDispute,
   useResolveDispute as useMockResolveDispute,
-} from '@/lib/mock-trustless-work';
-import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
-import { assetConfig } from '@/lib/wallet-config';
+} from '@/lib/services/trustless-work/mock-trustless-work';
+import { useRealInitializeEscrow } from '@/lib/services/trustless-work/real-trustless-work';
+import { assetConfig } from '@/lib/stellar/wallet-config';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';

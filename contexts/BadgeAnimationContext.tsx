@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Badge } from '@/lib/firebase-types';
+import { Badge } from '@/lib/firebase/firebase-types';
 import { BadgeEarnedAnimation } from '@/components/ui/badges/BadgeEarnedAnimation';
 
 interface BadgeAnimationState {

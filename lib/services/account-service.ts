@@ -15,7 +15,7 @@ import {
   increment,
   arrayUnion,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from '../firebase/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import {
   UserAccount,
@@ -25,8 +25,8 @@ import {
   PointsTransaction,
   Achievement,
 } from '@/utils/types/account';
-import { getBadgeById } from './firebase-types';
-import { badgeService, demoProgressService, userService } from './firebase-service';
+import { getBadgeById } from '../firebase/firebase-types';
+import { badgeService, demoProgressService, userService } from '../firebase/firebase-service';
 
 export class AccountService {
   private static instance: AccountService;

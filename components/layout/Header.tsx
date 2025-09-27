@@ -3,12 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { appConfig, stellarConfig } from '@/lib/wallet-config';
+import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
 import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
-import { getAllBadges } from '@/lib/firebase-types';
+import { getAllBadges } from '@/lib/firebase/firebase-types';
 import Image from 'next/image';
 
 export const Header = () => {

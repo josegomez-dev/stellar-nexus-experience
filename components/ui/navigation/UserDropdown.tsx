@@ -4,11 +4,11 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { appConfig, stellarConfig } from '@/lib/wallet-config';
+import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
 import { UserAvatar } from './UserAvatar';
-import { generateFunnyName } from '@/lib/funny-name-generator';
+import { generateFunnyName } from '@/lib/utils/funny-name-generator';
 import { useToast } from '@/contexts/ToastContext';
-import { getAllBadges } from '@/lib/firebase-types';
+import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
 

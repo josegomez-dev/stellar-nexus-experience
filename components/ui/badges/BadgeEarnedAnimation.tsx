@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Badge } from '@/lib/firebase-types';
+import { Badge } from '@/lib/firebase/firebase-types';
 import { getBadgeIcon, getBadgeColors, playBadgeSound, BADGE_SIZES } from '@/utils/constants/badges/assets';
 
 // Badge SVG emblem using centralized assets

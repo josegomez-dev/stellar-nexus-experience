@@ -5,13 +5,13 @@ import { useGlobalWallet } from './WalletContext';
 import { 
   accountService,
   firebaseUtils
-} from '../lib/firebase-service';
+} from '../lib/firebase/firebase-service';
 import { 
   Account,
   PREDEFINED_DEMOS,
   PREDEFINED_BADGES,
   getBadgeById
-} from '../lib/firebase-types';
+} from '../lib/firebase/firebase-types';
 import { useBadgeAnimation } from './BadgeAnimationContext';
 import { useToast } from './ToastContext';
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { getAllBadges, Badge } from '@/lib/firebase-types';
+import { getAllBadges, Badge } from '@/lib/firebase/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { getBadgeColors, BADGE_COLORS } from '@/utils/constants/badges/assets';

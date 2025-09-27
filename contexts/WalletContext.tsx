@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useWallet } from '@/lib/stellar-wallet-hooks';
+import { useWallet } from '@/lib/stellar/stellar-wallet-hooks';
 
 interface WalletContextType {
   walletData: any;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { assetConfig } from './wallet-config';
+import { assetConfig } from '../../stellar/wallet-config';
 import { MOCK_DATA, MOCK_DELAYS } from '@/utils/constants/mock-data';
 
 // Mock types for development

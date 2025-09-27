@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DemoFeedback } from '@/lib/firebase-types';
+import { DemoFeedback } from '@/lib/firebase/firebase-types';
 import { StarRating } from '@/components/ui/common';
 
 interface SimpleFeedbackModalProps {

@@ -26,8 +26,8 @@ import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
 import Image from 'next/image';
-import { nexusCodex } from '@/lib/newsData';
-import { getBadgeById } from '@/lib/firebase-types';
+import { nexusCodex } from '@/lib/utils/newsData';
+import { getBadgeById } from '@/lib/firebase/firebase-types';
 import { getBadgeIcon, getBadgeColors, BADGE_SIZES } from '@/utils/constants/badges/assets';
 
 // Demo Selection Component
@@ -1277,7 +1277,7 @@ export default function HomePageContent() {
                     {/* Title with Enhanced Styling */}
                     <h1
                       className='relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl'
-                      style={{ zIndex: 1000, marginTop: '-200px' }}
+                      style={{ zIndex: 1000, marginTop: '-250px' }}
                     >
                       STELLAR NEXUS EXPERIENCE
                     </h1>

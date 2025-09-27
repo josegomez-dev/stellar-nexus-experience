@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { UserBadge, Badge, getAllBadges } from '@/lib/firebase-types';
+import { UserBadge, Badge, getAllBadges } from '@/lib/firebase/firebase-types';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 
 interface BadgeShowcaseProps {

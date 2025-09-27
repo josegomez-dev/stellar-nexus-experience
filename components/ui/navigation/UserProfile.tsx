@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { getAllBadges } from '@/lib/firebase-types';
+import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Badge3D, Badge3DStyles } from '@/components/ui/badges/Badge3D';
 import Image from 'next/image';
 

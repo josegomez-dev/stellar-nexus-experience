@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { config } from '@/lib/config';
-import { suppressHydrationWarning } from '@/lib/suppress-hydration';
+import { suppressHydrationWarning } from '@/lib/utils/suppress-hydration';
 import { RootProviders } from './root';
 
 const inter = Inter({ subsets: ['latin'] });

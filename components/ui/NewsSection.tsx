@@ -1,5 +1,5 @@
 import React from 'react';
-import { NewsArticle } from '@/lib/newsData';
+import { NewsArticle } from '@/lib/utils/newsData';
 
 interface NewsSectionProps {
   title: string;

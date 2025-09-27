@@ -5,7 +5,7 @@ import { useGlobalWallet } from '@/contexts/WalletContext';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
 import { useToast } from '@/contexts/ToastContext';
-import { stellarConfig } from '@/lib/wallet-config';
+import { stellarConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '../Tooltip';
 import Image from 'next/image';
 import { Web3OnboardingModal } from '../modals/Web3OnboardingModal';

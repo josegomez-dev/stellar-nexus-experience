@@ -1,4 +1,4 @@
-import clientEnv from './client-env';
+import clientEnv from './utils/client-env';
 
 // Centralized configuration for the Trustless Work application
 // This file provides a single source of truth for all environment variables

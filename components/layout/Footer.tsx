@@ -1,6 +1,6 @@
 'use client';
 
-import { appConfig, stellarConfig } from '@/lib/wallet-config';
+import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
 import Image from 'next/image';
 
 export const Footer = () => {

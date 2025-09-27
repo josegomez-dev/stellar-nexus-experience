@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useGlobalWallet } from '@/contexts/WalletContext';
-import { useWallet } from '@/lib/stellar-wallet-hooks';
+import { useWallet } from '@/lib/stellar/stellar-wallet-hooks';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useTransactionHistory } from '@/contexts/TransactionContext';
@@ -18,13 +18,13 @@ import {
   useChangeMilestoneStatus,
   useApproveMilestone,
   useReleaseFunds,
-} from '@/lib/mock-trustless-work';
+} from '@/lib/services/trustless-work/mock-trustless-work';
 import {
   useRealInitializeEscrow,
   validateTestnetConnection,
   RealInitializePayload,
-} from '@/lib/real-trustless-work';
-import { assetConfig } from '@/lib/wallet-config';
+} from '@/lib/services/trustless-work/real-trustless-work';
+import { assetConfig } from '@/lib/stellar/wallet-config';
 
 interface DemoStep {
   id: string;
@@ -1478,7 +1478,7 @@ export const HelloMilestoneDemo = ({
         <div className='mb-8'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-xl font-semibold text-white'>Demo Progress</h3>
-            <div className='flex items-center space-x-4'>
+            {/* <div className='flex items-center space-x-4'>
               {demoStarted && (
                 <button
                   onClick={resetDemo}
@@ -1487,7 +1487,7 @@ export const HelloMilestoneDemo = ({
                   🔄 Reset Demo
                 </button>
               )}
-            </div>
+            </div> */}
           </div>
 
           <div className='space-y-4'>

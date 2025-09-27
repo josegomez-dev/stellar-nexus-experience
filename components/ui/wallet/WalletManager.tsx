@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useWallet } from '@/lib/stellar-wallet-hooks';
+import { useWallet } from '@/lib/stellar/stellar-wallet-hooks';
 import { API_ENDPOINTS } from '@/utils/constants/api';
 import {
   validateStellarAddress,
   sanitizeStellarAddressInput,
   generateTestStellarAddress,
-} from '@/lib/stellar-address-validation';
+} from '@/lib/stellar/stellar-address-validation';
 
 export const WalletManager = () => {
   const {

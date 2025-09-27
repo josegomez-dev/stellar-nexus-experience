@@ -12,7 +12,7 @@ import {
   changeMilestoneStatus,
   approveMilestone,
   releaseFunds,
-} from '@/lib/mock-trustless-work';
+} from '@/lib/services/trustless-work/mock-trustless-work';
 
 interface Stakeholder {
   id: string;

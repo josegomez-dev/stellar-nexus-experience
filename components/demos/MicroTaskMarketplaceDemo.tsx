@@ -13,9 +13,9 @@ import {
   useChangeMilestoneStatus,
   useApproveMilestone,
   useReleaseFunds,
-} from '@/lib/mock-trustless-work';
-import { useRealInitializeEscrow } from '@/lib/real-trustless-work';
-import { assetConfig } from '@/lib/wallet-config';
+} from '@/lib/services/trustless-work/mock-trustless-work';
+import { useRealInitializeEscrow } from '@/lib/services/trustless-work/real-trustless-work';
+import { assetConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 
 interface MicroTask {
