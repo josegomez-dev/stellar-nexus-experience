@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useDemoCompletionHistory, DemoCompletionRecord } from '@/hooks/useDemoCompletionHistory';
+import { useDemoCompletionHistory, DemoCompletionRecord } from '@/hooks/demo/useDemoCompletionHistory';
 import { formatDistanceToNow } from 'date-fns';
 
 interface DemoCompletionHistoryProps {
