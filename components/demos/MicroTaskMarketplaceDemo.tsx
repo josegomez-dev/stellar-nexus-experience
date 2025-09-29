@@ -62,6 +62,10 @@ export const MicroTaskMarketplaceDemo = ({
   // Per-task deliverable states to prevent sharing state between tasks
   const [taskDeliverables, setTaskDeliverables] = useState<Record<string, string>>({});
   const [selectedTask, setSelectedTask] = useState<MicroTask | null>(null);
+  
+  // Marketplace initialization and funding states
+  const [contractId, setContractId] = useState<string>('');
+  const [escrowData, setEscrowData] = useState<any>(null);
 
   // Progress tracking for demo completion
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
@@ -724,6 +728,8 @@ export const MicroTaskMarketplaceDemo = ({
     setPostedTasks(new Set());
     setTaskDeliverables({});
     setDemoCompleted(false);
+    setContractId('');
+    setEscrowData(null);
 
     addToast({
       type: 'warning',
