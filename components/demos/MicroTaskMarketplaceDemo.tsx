@@ -8,7 +8,6 @@ import { useFirebase } from '@/contexts/data/FirebaseContext';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
 import Image from 'next/image';
 import {
-  useInitializeEscrow,
   useFundEscrow,
   useChangeMilestoneStatus,
   useApproveMilestone,
@@ -443,6 +442,148 @@ export const MicroTaskMarketplaceDemo = ({
       await hooks.fundEscrow(payload);
     } catch (error) {
       console.error('Error funding escrow:', error);
+    }
+  }
+
+  // Initialize Marketplace function
+  async function handleInitializeMarketplace() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to initialize the marketplace',
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      addTransaction({
+        hash: `init_marketplace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'pending',
+        message: 'Initializing Microtask Marketplace...',
+        type: 'escrow',
+        demoId: 'micro-marketplace',
+      });
+
+      const payload = {
+        escrowType: 'multi-release' as const,
+        releaseMode: 'multi-release' as const,
+        asset: {
+          code: 'USDC',
+          issuer: assetConfig.USDC.issuer,
+          decimals: 7,
+        },
+        amount: '50000000', // 500 USDC total budget for marketplace
+        platformFee: 0.01,
+        buyer: walletData.publicKey,
+        seller: walletData.publicKey,
+        arbiter: walletData.publicKey,
+        terms: 'Microtask marketplace terms',
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        metadata: {
+          name: 'Microtask Marketplace',
+          description: 'Decentralized marketplace for micro-tasks',
+          category: 'marketplace'
+        }
+      };
+
+      const result = await hooks.initializeEscrow(payload);
+      setContractId(result.contractId);
+      setEscrowData(result.escrow);
+
+      addTransaction({
+        hash: `init_marketplace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'success',
+        message: 'Marketplace initialized successfully!',
+        type: 'escrow',
+        demoId: 'micro-marketplace',
+        amount: '500.0',
+        asset: 'USDC',
+      });
+
+      addToast({
+        type: 'success',
+        title: '🎉 Marketplace Initialized!',
+        message: 'Microtask marketplace contract created successfully',
+        duration: 5000,
+      });
+
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: '❌ Initialization Failed',
+        message: 'Failed to initialize the marketplace. Please try again.',
+        duration: 5000,
+      });
+    }
+  }
+
+  // Fund Marketplace Escrow function
+  async function handleFundMarketplaceEscrow() {
+    if (!walletData) {
+      addToast({
+        type: 'warning',
+        title: '🔗 Wallet Connection Required',
+        message: 'Please connect your Stellar wallet to fund the marketplace',
+        duration: 5000,
+      });
+      return;
+    }
+    if (!contractId) return;
+
+    try {
+      const txHash = `fund_marketplace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'pending',
+        message: 'Funding marketplace escrow with 500 USDC...',
+        type: 'fund',
+        demoId: 'micro-marketplace',
+        amount: '500.0',
+        asset: 'USDC',
+      });
+
+      const payload = {
+        contractId,
+        amount: '50000000', // 500 USDC
+        releaseMode: 'multi-release',
+      };
+
+      const result = await hooks.fundEscrow(payload);
+      setEscrowData(result.escrow);
+
+      updateTransaction(txHash, 'success', 'Marketplace escrow funded successfully');
+
+      addToast({
+        type: 'success',
+        title: '💰 Marketplace Funded!',
+        message: 'Marketplace escrow funded with 500 USDC. Tasks are now available!',
+        duration: 5000,
+      });
+
+      // Start demo timing when marketplace is funded
+      if (!demoStarted) {
+        setDemoStarted(true);
+        setDemoStartTime(Date.now());
+      }
+
+    } catch (error) {
+      const txHash = `fund_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        status: 'failed',
+        message: `Failed to fund marketplace: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: 'fund',
+        demoId: 'micro-marketplace',
+      });
+
+      addToast({
+        type: 'error',
+        title: '❌ Funding Failed',
+        message: 'Failed to fund the marketplace escrow. Please try again.',
+        duration: 5000,
+      });
     }
   }
 
