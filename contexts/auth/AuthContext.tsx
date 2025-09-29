@@ -99,12 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const autoCreateUser = async () => {
           try {
             const defaultUsername = `User_${walletData.publicKey.slice(0, 8)}`;
-            await userTrackingService.createUserAccount(
-              walletData.publicKey,
-              defaultUsername,
-              walletData.walletType || 'manual',
-              walletData.walletName || 'Unknown Wallet'
-            );
+            // Auto-create account is handled by Firebase context
+            console.log('Account will be auto-created by Firebase context');
           } catch (error) {
           }
         };

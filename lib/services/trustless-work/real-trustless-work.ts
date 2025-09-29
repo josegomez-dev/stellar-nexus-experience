@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
-import { loadStellarSDK, getStellarServer, isStellarSDKAvailable } from '../../stellar/stellar-sdk-loader';
+import {
+  loadStellarSDK,
+  getStellarServer,
+  isStellarSDKAvailable,
+} from '../../stellar/stellar-sdk-loader';
 
 // Real Trustless Work Integration Types
 export interface RealInitializePayload {

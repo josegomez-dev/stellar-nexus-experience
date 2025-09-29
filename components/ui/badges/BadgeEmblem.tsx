@@ -21,13 +21,9 @@ export const BadgeEmblem: React.FC<BadgeEmblemProps> = ({ id, size = 'md', class
 
   // Use the centralized SVG icons from the constants file
   const svgIcon = getBadgeIcon(id, sizeClass);
-  
+
   if (svgIcon) {
-    return (
-      <div className={className}>
-        {svgIcon}
-      </div>
-    );
+    return <div className={className}>{svgIcon}</div>;
   }
 
   // Fallback for unknown badges

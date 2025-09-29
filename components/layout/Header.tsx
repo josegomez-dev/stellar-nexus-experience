@@ -55,7 +55,7 @@ export const Header = () => {
       const timer = setTimeout(() => {
         setIsRewardsOpen(true);
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isConnected, account]);

@@ -73,7 +73,7 @@ export const useWallet = (): UseWalletReturn => {
   // Use refs to prevent repeated checks
   const hasCheckedFreighter = useRef(false);
   const checkInterval = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Periodic Freighter availability check
   useEffect(() => {
     const checkFreighterPeriodically = () => {
@@ -87,7 +87,7 @@ export const useWallet = (): UseWalletReturn => {
 
     // Check every 2 seconds for Freighter availability
     const interval = setInterval(checkFreighterPeriodically, 2000);
-    
+
     return () => clearInterval(interval);
   }, [isFreighterAvailable]);
 
@@ -111,9 +111,13 @@ export const useWallet = (): UseWalletReturn => {
         isInitializing = true;
 
         // Check if custom elements are already defined (prevents HMR issues)
-        const customElementsToCheck = ['stellar-wallets-modal', 'stellar-wallets-button', 'stellar-accounts-selector'];
+        const customElementsToCheck = [
+          'stellar-wallets-modal',
+          'stellar-wallets-button',
+          'stellar-accounts-selector',
+        ];
         const alreadyDefined = customElementsToCheck.some(name => customElements.get(name));
-        
+
         if (alreadyDefined) {
           isInitializing = false;
           return;
@@ -154,13 +158,11 @@ export const useWallet = (): UseWalletReturn => {
         isInitializing = false;
 
         // Fallback to direct Freighter detection
-        const freighterDetected = typeof window !== 'undefined' && 
-          ((window as any).stellar || (window as any).freighter);
+        const freighterDetected =
+          typeof window !== 'undefined' && ((window as any).stellar || (window as any).freighter);
         setIsFreighterAvailable(freighterDetected);
 
-        if (freighterDetected) {
-        } else {
-        }
+        // Freighter availability is set above
       }
     };
 
@@ -203,6 +205,8 @@ export const useWallet = (): UseWalletReturn => {
           });
         }
       } catch (error) {
+        // Connection check failed, continue without error
+        console.warn('Failed to check connection status:', error);
       }
     };
 
@@ -226,7 +230,7 @@ export const useWallet = (): UseWalletReturn => {
       try {
         // Ensure we have a wallet kit available
         let currentKit = walletKit || globalWalletKit;
-        
+
         // If no kit is available, try to initialize one
         if (!currentKit && !isInitializing) {
           try {
@@ -241,10 +245,12 @@ export const useWallet = (): UseWalletReturn => {
               network: WalletNetwork.TESTNET,
               modules,
             });
-            
+
             globalWalletKit = currentKit;
             setWalletKit(currentKit);
           } catch (initError) {
+            // Wallet kit initialization failed, continue without kit
+            console.warn('Failed to initialize wallet kit:', initError);
           }
         }
 
@@ -303,11 +309,16 @@ export const useWallet = (): UseWalletReturn => {
             });
             return;
           } catch (kitError) {
+            // Kit connection failed, continue to fallback
+            console.warn('Kit connection failed:', kitError);
           }
         }
 
         // Fallback to direct Freighter API
-        if (typeof window !== 'undefined' && ((window as any).stellar || (window as any).freighter)) {
+        if (
+          typeof window !== 'undefined' &&
+          ((window as any).stellar || (window as any).freighter)
+        ) {
           const stellar = (window as any).stellar || (window as any).freighter;
 
           // Request access to Freighter
@@ -350,42 +361,42 @@ export const useWallet = (): UseWalletReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      
       // Enhanced Freighter detection
       const isFreighterAvailable = () => {
         if (typeof window === 'undefined') return false;
-        
+
         // Check multiple possible ways Freighter might be available
         const stellar = (window as any).stellar;
         const freighter = (window as any).freighter;
-        
+
         return !!(stellar || freighter);
       };
-      
+
       if (!isFreighterAvailable()) {
         throw new Error('Freighter wallet not detected. Please install Freighter extension.');
       }
 
-      
       // Try to get the stellar object from window
       const stellar = (window as any).stellar || (window as any).freighter;
-      
+
       if (!stellar) {
-        throw new Error('Freighter API not accessible. Please ensure the extension is properly installed and enabled.');
+        throw new Error(
+          'Freighter API not accessible. Please ensure the extension is properly installed and enabled.'
+        );
       }
-      
+
       // Request access to Freighter
       await stellar.requestAccess();
-      
+
       // Get public key
       const publicKey = await stellar.getPublicKey();
-      
+
       // Get network
       const network = await stellar.getNetwork();
       setCurrentNetwork(network);
-      
+
       const networkConfig = getNetworkConfig(network);
-      
+
       setWalletData({
         publicKey,
         network,
@@ -397,7 +408,6 @@ export const useWallet = (): UseWalletReturn => {
         walletType: 'freighter',
         walletId: 'freighter',
       });
-      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       const error = new Error(`Failed to connect Freighter: ${errorMessage}`);
@@ -413,7 +423,6 @@ export const useWallet = (): UseWalletReturn => {
     setError(null);
 
     try {
-
       // For manual addresses, we'll simulate a connection by setting the wallet data directly
       // This is useful for testing or when users want to use a specific address
       const network = 'TESTNET'; // Default to testnet for manual addresses
@@ -431,7 +440,6 @@ export const useWallet = (): UseWalletReturn => {
         walletType: 'manual',
         walletId: 'manual',
       });
-
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       const error = new Error(`Failed to connect manual address: ${errorMessage}`);
@@ -449,8 +457,7 @@ export const useWallet = (): UseWalletReturn => {
         await currentKit.disconnect();
       }
       setWalletData(null);
-    } catch (err) {
-    }
+    } catch (err) {}
   }, [walletKit]);
 
   const signTransaction = useCallback(
@@ -461,7 +468,6 @@ export const useWallet = (): UseWalletReturn => {
       }
 
       try {
-
         const result = await currentKit.signTransaction(xdr, {
           networkPassphrase: walletData.networkPassphrase,
           address: walletData.publicKey,
@@ -556,7 +562,6 @@ export const useWallet = (): UseWalletReturn => {
     }
 
     try {
-
       // Get current network from wallet kit
       const networkResponse = await currentKit.getNetwork();
 
@@ -588,8 +593,7 @@ export const useWallet = (): UseWalletReturn => {
           })
         );
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   }, [walletKit, walletData, currentNetwork]);
 
   // Network switching function
@@ -600,7 +604,6 @@ export const useWallet = (): UseWalletReturn => {
       }
 
       try {
-
         // Update the wallet kit network
         const walletNetwork = network === 'TESTNET' ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC;
 
@@ -640,7 +643,6 @@ export const useWallet = (): UseWalletReturn => {
             },
           })
         );
-
       } catch (err) {
         throw err;
       }

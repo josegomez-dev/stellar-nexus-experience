@@ -132,16 +132,12 @@ export const HelloMilestoneDemo = ({
   };
 
   // Check if demo was already completed
-  const demoProgress = account?.demos?.['hello-milestone'];
-  const isCompleted = demoProgress?.status === 'completed';
-  const previousScore = demoProgress?.score || 0;
-  const pointsEarned = demoProgress?.pointsEarned || 0;
+  const isCompleted = account?.demosCompleted?.includes('hello-milestone') || false;
 
   // Demo completion tracking is now handled by FirebaseContext
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
-
 
   // Enhanced UX states
   const [showTransactionTooltip, setShowTransactionTooltip] = useState(false);
@@ -176,9 +172,9 @@ export const HelloMilestoneDemo = ({
 
       // Only show toasts on initial validation, not on every render
       if (!validation.isValid) {
-        console.log('Wallet validation failed:', validation.errors);
+        // Wallet validation failed - handled silently
       } else {
-        console.log('Wallet validation passed');
+        // Wallet validation passed
       }
     }
   }, [isConnected, walletData?.publicKey, walletData?.network]); // Only depend on specific wallet properties
@@ -243,7 +239,13 @@ export const HelloMilestoneDemo = ({
         if (interval) clearInterval(interval);
       });
     };
-  }, [pendingTransactions, transactionStatuses, autoCompleteCountdown]);
+  }, [
+    pendingTransactions,
+    transactionStatuses,
+    autoCompleteCountdown,
+    addToast,
+    updateTransactionStatusAndCheckCompletion,
+  ]);
 
   // Helper function to check if a step can proceed based on transaction status
   const canProceedToNextStep = (stepId: string): boolean => {
@@ -899,7 +901,6 @@ export const HelloMilestoneDemo = ({
 
       // Update progress tracking
       updateProgress('escrow_funded');
-
     } catch (error) {
       const txHash = `fund_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1008,7 +1009,6 @@ export const HelloMilestoneDemo = ({
 
       // Update progress tracking
       updateProgress('milestone_completed');
-
     } catch (error) {
       const txHash = `complete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1115,7 +1115,6 @@ export const HelloMilestoneDemo = ({
 
       // Update progress tracking
       updateProgress('milestone_approved');
-
     } catch (error) {
       const txHash = `approve_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       addTransaction({
@@ -1222,7 +1221,6 @@ export const HelloMilestoneDemo = ({
 
       // Update progress tracking
       updateProgress('funds_released');
-
 
       // Demo completed - show celebration animation
       setTimeout(() => {
@@ -1670,7 +1668,6 @@ export const HelloMilestoneDemo = ({
           </div>
         )}
 
-
         {/* Error Display */}
         {(initError || fundError || statusError || approveError || releaseError) && (
           <div className='mb-8 p-4 bg-danger-500/20 border border-danger-400/30 rounded-lg'>
@@ -1725,24 +1722,30 @@ export const HelloMilestoneDemo = ({
           <h3 className='text-lg font-semibold text-brand-300 mb-3'>📚 How This Demo Works</h3>
           <ul className='text-brand-200 text-sm space-y-2'>
             <li>
-              • <strong>Initialize Escrow:</strong> Deploy a smart contract on Stellar Testnet that will hold funds securely
+              • <strong>Initialize Escrow:</strong> Deploy a smart contract on Stellar Testnet that
+              will hold funds securely
             </li>
             <li>
-              • <strong>Fund Escrow:</strong> Transfer USDC from your wallet into the locked escrow contract
+              • <strong>Fund Escrow:</strong> Transfer USDC from your wallet into the locked escrow
+              contract
             </li>
             <li>
-              • <strong>Complete Milestone:</strong> Worker signals work completion, updating contract state
+              • <strong>Complete Milestone:</strong> Worker signals work completion, updating
+              contract state
             </li>
             <li>
-              • <strong>Client Approval:</strong> Client reviews deliverables and approves the completed work
+              • <strong>Client Approval:</strong> Client reviews deliverables and approves the
+              completed work
             </li>
             <li>
-              • <strong>Fund Release:</strong> Smart contract automatically releases funds to worker upon approval
+              • <strong>Fund Release:</strong> Smart contract automatically releases funds to worker
+              upon approval
             </li>
           </ul>
           <p className='text-brand-200 text-sm mt-3'>
-            This demonstrates the core trustless escrow mechanism that powers decentralized work platforms,
-            ensuring fair payment distribution without requiring intermediaries or trust between parties.
+            This demonstrates the core trustless escrow mechanism that powers decentralized work
+            platforms, ensuring fair payment distribution without requiring intermediaries or trust
+            between parties.
           </p>
         </div>
 

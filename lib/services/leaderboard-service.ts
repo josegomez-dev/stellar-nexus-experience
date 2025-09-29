@@ -44,40 +44,38 @@ export class LeaderboardService {
   async getTopUsers(limitCount: number = 10): Promise<LeaderboardEntry[]> {
     try {
       const accountsRef = collection(db, 'accounts');
-      
+
       // Try to query by profile.totalPoints first (UserAccount structure)
-      let q = query(
-        accountsRef,
-        orderBy('profile.totalPoints', 'desc'),
-        limit(limitCount)
-      );
+      let q = query(accountsRef, orderBy('profile.totalPoints', 'desc'), limit(limitCount));
 
       let querySnapshot = await getDocs(q);
-      console.log(`Leaderboard: Found ${querySnapshot.docs.length} users with profile.totalPoints structure`);
-      
+      console.log(
+        `Leaderboard: Found ${querySnapshot.docs.length} users with profile.totalPoints structure`
+      );
+
       // If no results, try querying by totalPoints directly (Account structure)
       if (querySnapshot.empty) {
         console.log('No results with profile.totalPoints, trying totalPoints directly...');
-        q = query(
-          accountsRef,
-          orderBy('totalPoints', 'desc'),
-          limit(limitCount)
-        );
+        q = query(accountsRef, orderBy('totalPoints', 'desc'), limit(limitCount));
         querySnapshot = await getDocs(q);
-        console.log(`Leaderboard: Found ${querySnapshot.docs.length} users with totalPoints structure`);
+        console.log(
+          `Leaderboard: Found ${querySnapshot.docs.length} users with totalPoints structure`
+        );
       }
 
       const entries: LeaderboardEntry[] = [];
 
       querySnapshot.docs.forEach((doc, index) => {
         const account = doc.data();
-        console.log(`Leaderboard: User ${index + 1} - Wallet: ${account.walletAddress}, Points: ${account.profile?.totalPoints || account.totalPoints || 0}`);
+        console.log(
+          `Leaderboard: User ${index + 1} - Wallet: ${account.walletAddress}, Points: ${account.profile?.totalPoints || account.totalPoints || 0}`
+        );
         console.log(`Leaderboard: User ${index + 1} - Name fields:`, {
           displayName: account.displayName,
           username: account.username,
           customName: account.customName,
           profileDisplayName: account.profile?.displayName,
-          profileUsername: account.profile?.username
+          profileUsername: account.profile?.username,
         });
         const entry = this.transformAccountToLeaderboardEntry(account, index + 1);
         entries.push(entry);
@@ -130,22 +128,18 @@ export class LeaderboardService {
   async getUserRank(walletAddress: string): Promise<number | undefined> {
     try {
       const accountsRef = collection(db, 'accounts');
-      
+
       // Try to query by profile.totalPoints first (UserAccount structure)
-      let q = query(
-        accountsRef,
-        orderBy('profile.totalPoints', 'desc')
-      );
+      let q = query(accountsRef, orderBy('profile.totalPoints', 'desc'));
 
       let querySnapshot = await getDocs(q);
-      
+
       // If no results, try querying by totalPoints directly (Account structure)
       if (querySnapshot.empty) {
-        console.log('No results with profile.totalPoints in getUserRank, trying totalPoints directly...');
-        q = query(
-          accountsRef,
-          orderBy('totalPoints', 'desc')
+        console.log(
+          'No results with profile.totalPoints in getUserRank, trying totalPoints directly...'
         );
+        q = query(accountsRef, orderBy('totalPoints', 'desc'));
         querySnapshot = await getDocs(q);
       }
 
@@ -154,7 +148,9 @@ export class LeaderboardService {
       for (const doc of querySnapshot.docs) {
         rank++;
         const account = doc.data();
-        console.log(`Leaderboard: Checking user ${rank} - Wallet: ${account.walletAddress}, Looking for: ${walletAddress}`);
+        console.log(
+          `Leaderboard: Checking user ${rank} - Wallet: ${account.walletAddress}, Looking for: ${walletAddress}`
+        );
         if (account.walletAddress === walletAddress) {
           console.log(`Leaderboard: Found user at rank ${rank}`);
           return rank;
@@ -197,24 +193,18 @@ export class LeaderboardService {
       const endRank = currentUserRank + range;
 
       const accountsRef = collection(db, 'accounts');
-      
+
       // Try to query by profile.totalPoints first (UserAccount structure)
-      let q = query(
-        accountsRef,
-        orderBy('profile.totalPoints', 'desc'),
-        limit(endRank)
-      );
+      let q = query(accountsRef, orderBy('profile.totalPoints', 'desc'), limit(endRank));
 
       let querySnapshot = await getDocs(q);
-      
+
       // If no results, try querying by totalPoints directly (Account structure)
       if (querySnapshot.empty) {
-        console.log('No results with profile.totalPoints in getUsersAroundUser, trying totalPoints directly...');
-        q = query(
-          accountsRef,
-          orderBy('totalPoints', 'desc'),
-          limit(endRank)
+        console.log(
+          'No results with profile.totalPoints in getUsersAroundUser, trying totalPoints directly...'
         );
+        q = query(accountsRef, orderBy('totalPoints', 'desc'), limit(endRank));
         querySnapshot = await getDocs(q);
       }
 
@@ -244,16 +234,19 @@ export class LeaderboardService {
     // Handle both account structures
     const totalPoints = account.profile?.totalPoints || account.totalPoints || 0;
     const level = account.profile?.level || account.level || 1;
-    
+
     // Try multiple name fields in order of preference
-    const displayName = account.profile?.displayName || 
-                       account.profile?.username || 
-                       account.displayName || 
-                       account.username || 
-                       account.customName;
-    
-    console.log(`Leaderboard Transform: Wallet ${account.walletAddress} - Selected display name: "${displayName}"`);
-    
+    const displayName =
+      account.profile?.displayName ||
+      account.profile?.username ||
+      account.displayName ||
+      account.username ||
+      account.customName;
+
+    console.log(
+      `Leaderboard Transform: Wallet ${account.walletAddress} - Selected display name: "${displayName}"`
+    );
+
     // Calculate demos completed - handle both structures
     let demosCompleted = 0;
     if (account.demos && typeof account.demos === 'object') {
@@ -284,11 +277,13 @@ export class LeaderboardService {
 
     // Format wallet address for display
     const formattedAddress = this.formatWalletAddress(account.walletAddress);
-    
+
     // Use the best available name, fallback to formatted address
     const finalDisplayName = displayName || formattedAddress || 'Anonymous User';
-    
-    console.log(`Leaderboard Transform: Final display name for ${account.walletAddress}: "${finalDisplayName}"`);
+
+    console.log(
+      `Leaderboard Transform: Final display name for ${account.walletAddress}: "${finalDisplayName}"`
+    );
 
     return {
       id: account.id,
@@ -306,7 +301,7 @@ export class LeaderboardService {
   private formatWalletAddress(address: string): string {
     if (!address) return 'Unknown';
     if (address.length <= 12) return address;
-    
+
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   }
 

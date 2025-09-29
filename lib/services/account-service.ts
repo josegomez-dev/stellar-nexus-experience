@@ -17,16 +17,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  UserAccount,
-  DemoProgress,
-  NFTBadge,
-  Reward,
-  PointsTransaction,
-  Achievement,
-} from '@/utils/types/account';
+import { UserAccount } from '@/utils/types/account';
 import { getBadgeById } from '../firebase/firebase-types';
-import { badgeService, demoProgressService, userService } from '../firebase/firebase-service';
+// Removed unused service imports
 
 export class AccountService {
   private static instance: AccountService;
@@ -151,18 +144,14 @@ export class AccountService {
       },
     };
 
-    try {
-      await setDoc(doc(db, 'accounts', accountId), newAccount);
+    await setDoc(doc(db, 'accounts', accountId), newAccount);
 
-      // Log the account creation and badge rewards
-      await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
+    // Log the account creation and badge rewards
+    await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
 
-      await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
+    await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
 
-      return newAccount;
-    } catch (error) {
-      throw error;
-    }
+    return newAccount;
   }
 
   // Get account by wallet address
@@ -313,23 +302,22 @@ export class AccountService {
   }
 
   // Award badge
-  async awardBadge(accountId: string, badge: NFTBadge): Promise<void> {
+  async awardBadge(accountId: string, badgeId: string): Promise<void> {
+    const badge = getBadgeById(badgeId);
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
-      badges: arrayUnion(badge), // Add to badges array
-      'profile.totalPoints': increment(badge.pointsValue),
+      badgesEarned: arrayUnion(badgeId), // Add to badges array
+      'profile.totalPoints': increment(badge?.earningPoints || 0),
       updatedAt: serverTimestamp(),
     });
 
-    // Also award badge in Firebase system for consistency
-    try {
-      await badgeService.awardBadge(accountId, badge.id);
-    } catch (firebaseError) {
-      // Don't throw error - Account Service badge is the primary system
-    }
-
     // Log points transaction
-    await this.logPointsTransaction(accountId, 'earn', badge.pointsValue, `Badge: ${badge.name}`);
+    await this.logPointsTransaction(
+      accountId,
+      'earn',
+      badge?.earningPoints || 0,
+      `Badge: ${badge?.name || badgeId}`
+    );
   }
 
   // Check and award badges based on demo completion order
@@ -401,23 +389,8 @@ export class AccountService {
       return;
     }
 
-    // Create the badge to award
-    const badge: NFTBadge = {
-      id: uuidv4(),
-      name: badgeConfig.name,
-      description: badgeConfig.description,
-      imageUrl: badgeConfig.icon || '',
-      rarity: badgeConfig.rarity,
-      earnedAt: Timestamp.now(),
-      demoId,
-      pointsValue: badgeConfig.xpReward,
-    };
-
-    try {
-      await this.awardBadge(accountId, badge);
-    } catch (error) {
-      throw error;
-    }
+    // Award the badge using badgeId
+    await this.awardBadge(accountId, badgeConfig.id);
   }
 
   // Check if user deserves Nexus Master badge (completing demos 1, 3, and 4)
@@ -445,17 +418,7 @@ export class AccountService {
     if (hasRequiredDemos && !earnedBadgeNames.includes('Nexus Master')) {
       const nexusBadgeConfig = getBadgeById('nexus-master');
       if (nexusBadgeConfig) {
-        const badge: NFTBadge = {
-          id: uuidv4(),
-          name: nexusBadgeConfig.name,
-          description: nexusBadgeConfig.description,
-          imageUrl: nexusBadgeConfig.icon || '',
-          rarity: nexusBadgeConfig.rarity,
-          earnedAt: Timestamp.now(),
-          pointsValue: nexusBadgeConfig.xpReward,
-        };
-
-        await this.awardBadge(accountId, badge);
+        await this.awardBadge(accountId, 'nexus-master');
       }
     }
   }
@@ -490,17 +453,7 @@ export class AccountService {
     if (allDemosCompleted && hasInvitedFriend && !earnedBadgeNames.includes('Stellar Champion')) {
       const stellarBadgeConfig = getBadgeById('stellar-champion');
       if (stellarBadgeConfig) {
-        const badge: NFTBadge = {
-          id: uuidv4(),
-          name: stellarBadgeConfig.name,
-          description: stellarBadgeConfig.description,
-          imageUrl: stellarBadgeConfig.icon || '',
-          rarity: stellarBadgeConfig.rarity,
-          earnedAt: Timestamp.now(),
-          pointsValue: stellarBadgeConfig.xpReward,
-        };
-
-        await this.awardBadge(accountId, badge);
+        await this.awardBadge(accountId, 'stellar-champion');
       }
     }
   }
@@ -532,7 +485,7 @@ export class AccountService {
     demoId?: string
   ): Promise<void> {
     // Create transaction object, only including demoId if it's defined
-    const transaction: PointsTransaction = {
+    const transaction: any = {
       id: uuidv4(),
       userId,
       type,
@@ -546,18 +499,11 @@ export class AccountService {
       transaction.demoId = demoId;
     }
 
-    try {
-      const docRef = await addDoc(collection(db, 'pointsTransactions'), transaction);
-    } catch (error) {
-      throw error;
-    }
+    await addDoc(collection(db, 'pointsTransactions'), transaction);
   }
 
   // Get points transactions for user
-  async getPointsTransactions(
-    userId: string,
-    limitCount: number = 50
-  ): Promise<PointsTransaction[]> {
+  async getPointsTransactions(userId: string, limitCount: number = 50): Promise<any[]> {
     const transactionsRef = collection(db, 'pointsTransactions');
     const q = query(
       transactionsRef,
@@ -567,7 +513,7 @@ export class AccountService {
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data() as PointsTransaction);
+    return querySnapshot.docs.map(doc => doc.data());
   }
 
   // Leaderboard functionality removed - will be derived from accounts collection in the future

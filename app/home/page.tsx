@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -28,9 +28,9 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import { PreloaderScreen } from '@/components/ui/PreloaderScreen';
 import Image from 'next/image';
-import { nexusCodex } from '@/lib/utils/newsData';
-import { getBadgeById } from '@/lib/firebase/firebase-types';
-import { getBadgeIcon, getBadgeColors, BADGE_SIZES } from '@/utils/constants/badges/assets';
+// Remove unused nexusCodex import
+import { getBadgeById, Account, DemoStats, PREDEFINED_DEMOS } from '@/lib/firebase/firebase-types';
+import { getBadgeIcon, BADGE_SIZES } from '@/utils/constants/badges/assets';
 
 // Demo Selection Component
 interface DemoCard {
@@ -111,10 +111,14 @@ const DemoSelector = ({
   setActiveDemo: (demo: string) => void;
   setShowImmersiveDemo: (show: boolean) => void;
   isConnected: boolean;
-  addToast: (toast: any) => void;
-  account: any;
-  demos: any;
-  demoStats: any[];
+  addToast: (toast: {
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+  }) => void;
+  account: Account | null;
+  demos: typeof PREDEFINED_DEMOS;
+  demoStats: DemoStats[];
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
   hasClappedDemo: (demoId: string) => Promise<boolean>;
@@ -122,12 +126,12 @@ const DemoSelector = ({
   refreshAccountData: () => Promise<void>;
 }) => {
   // Removed old AccountContext usage
-  const { showBadgeAnimation } = useBadgeAnimation();
+  // Removed unused showBadgeAnimation
   const [isClaimingNexusMaster, setIsClaimingNexusMaster] = useState(false);
-  
+
   // State for clap animations
   const [clapAnimations, setClapAnimations] = useState<Record<string, boolean>>({});
-  
+
   // State for tracking which demos user has clapped for
   const [userClappedDemos, setUserClappedDemos] = useState<string[]>([]);
 
@@ -147,10 +151,10 @@ const DemoSelector = ({
         } else if (account.clappedDemos && typeof account.clappedDemos === 'object') {
           clappedArray = Object.values(account.clappedDemos) as string[];
         }
-        
+
         setUserClappedDemos(clappedArray);
       } catch (error) {
-        console.error('Error loading clapped demos:', error);
+        // Error loading clapped demos - silently handled
         setUserClappedDemos([]);
       }
     };
@@ -163,11 +167,11 @@ const DemoSelector = ({
     // Play clap sound
     const audio = new Audio('/sounds/clapSound.mp3');
     audio.volume = 0.6; // Adjust volume
-    audio.play().catch(console.error); // Silent fallback if audio fails
-    
+    audio.play().catch(() => {}); // Silent fallback if audio fails
+
     // Trigger visual animation
     setClapAnimations(prev => ({ ...prev, [demoId]: true }));
-    
+
     // Hide animation after 1.5 seconds
     setTimeout(() => {
       setClapAnimations(prev => ({ ...prev, [demoId]: false }));
@@ -175,7 +179,7 @@ const DemoSelector = ({
 
     // Call the backend clap function
     await clapDemo(demoId);
-    
+
     // Update local state to reflect the new clap
     setUserClappedDemos(prev => [...prev, demoId]);
   };
@@ -197,18 +201,7 @@ const DemoSelector = ({
   }, []);
 
   // Check if user has earned the badge for this demo
-  const hasEarnedBadge = async (demoId: string) => {
-    const badgeMap: Record<string, string> = {
-      'hello-milestone': 'escrow_expert',
-      'dispute-resolution': 'trust_guardian',
-      'micro-marketplace': 'stellar_champion',
-    };
-
-    const badgeId = badgeMap[demoId];
-    if (!badgeId) return false;
-
-    return await hasBadge(badgeId);
-  };
+  // Removed unused hasEarnedBadge function
 
   const getClapStats = (demoId: string) => {
     const demo = demos.find((d: DemoCard) => d.id === demoId);
@@ -406,9 +399,7 @@ const DemoSelector = ({
     }
   };
 
-  const handleArticleClick = (link: string) => {
-    window.open(link, '_blank', 'noopener,noreferrer');
-  };
+  // Removed unused handleArticleClick function
 
   return (
     <div className='space-y-8'>
@@ -517,7 +508,9 @@ const DemoSelector = ({
                     <div
                       className={`bg-gradient-to-r ${getDemoBadgeColors(demo.color).gradient} text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2`}
                     >
-                      {getBadgeIcon('escrow_expert', BADGE_SIZES.sm) || <BadgeEmblem id='escrow_expert' size='sm' className='text-white' />}
+                      {getBadgeIcon('escrow_expert', BADGE_SIZES.sm) || (
+                        <BadgeEmblem id='escrow_expert' size='sm' className='text-white' />
+                      )}
                       <span>Completed</span>
                     </div>
                   )}
@@ -529,7 +522,9 @@ const DemoSelector = ({
                 <div className='absolute top-4 right-4 z-50'>
                   <div className='bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 badge-shine'>
                     <div className='badge-icon-bounce'>
-                      {getBadgeIcon('nexus_master', BADGE_SIZES.sm) || <BadgeEmblem id='nexus-master' size='sm' className='text-white' />}
+                      {getBadgeIcon('nexus_master', BADGE_SIZES.sm) || (
+                        <BadgeEmblem id='nexus-master' size='sm' className='text-white' />
+                      )}
                     </div>
                     <span>Nexus Master</span>
                   </div>
@@ -575,13 +570,17 @@ const DemoSelector = ({
                           className='absolute bottom-8 left-8 floating-particle opacity-60'
                           style={{ animationDelay: '1s' }}
                         >
-                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />}
+                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || (
+                            <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
+                          )}
                         </div>
                         <div
                           className='absolute bottom-4 right-4 floating-particle opacity-90'
                           style={{ animationDelay: '1.5s' }}
                         >
-                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || <BadgeEmblem id={badgeId} size='sm' className='text-orange-300' />}
+                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || (
+                            <BadgeEmblem id={badgeId} size='sm' className='text-orange-300' />
+                          )}
                         </div>
                       </>
                     );
@@ -633,24 +632,35 @@ const DemoSelector = ({
                                       : 'Clap for this demo!'
                                 }
                               >
-                                <div className={`text-lg font-bold transition-transform duration-200 ${
-                                  clapAnimations[demo.id] ? 'animate-pulse' : ''
-                                }`}>
+                                <div
+                                  className={`text-lg font-bold transition-transform duration-200 ${
+                                    clapAnimations[demo.id] ? 'animate-pulse' : ''
+                                  }`}
+                                >
                                   {stats.hasClapped ? '✓' : '👏🏻'}
                                 </div>
                                 <div className='text-xs text-white/60'>
                                   {stats.hasClapped ? 'Clapped!' : 'Clap'}
                                 </div>
                               </button>
-                              
+
                               {/* Animated sparks effect */}
                               {clapAnimations[demo.id] && (
                                 <>
                                   <div className='absolute inset-0 pointer-events-none'>
                                     <div className='absolute top-0 left-1/2 w-1 h-1 bg-yellow-400 rounded-full animate-ping'></div>
-                                    <div className='absolute top-1 left-1/3 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping' style={{animationDelay: '0.1s'}}></div>
-                                    <div className='absolute top-1 right-1/3 w-0.5 h-0.5 bg-yellow-300 rounded-full animate-ping' style={{animationDelay: '0.2s'}}></div>
-                                    <div className='absolute bottom-0 left-1/2 w-1 h-1 bg-emerald-400 rounded-full animate-ping' style={{animationDelay: '0.3s'}}></div>
+                                    <div
+                                      className='absolute top-1 left-1/3 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping'
+                                      style={{ animationDelay: '0.1s' }}
+                                    ></div>
+                                    <div
+                                      className='absolute top-1 right-1/3 w-0.5 h-0.5 bg-yellow-300 rounded-full animate-ping'
+                                      style={{ animationDelay: '0.2s' }}
+                                    ></div>
+                                    <div
+                                      className='absolute bottom-0 left-1/2 w-1 h-1 bg-emerald-400 rounded-full animate-ping'
+                                      style={{ animationDelay: '0.3s' }}
+                                    ></div>
                                   </div>
                                 </>
                               )}
@@ -983,8 +993,18 @@ const DemoSelector = ({
 
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
-  const { isAuthenticated, user } = useAuth();
-  const { account, demoStats, completeDemo, hasBadge, hasClappedDemo, clapDemo, refreshAccountData, isLoading: firebaseLoading, isInitialized } = useFirebase();
+  // Removed unused authentication variables
+  const {
+    account,
+    demoStats,
+    completeDemo,
+    hasBadge,
+    hasClappedDemo,
+    clapDemo,
+    refreshAccountData,
+    isLoading: firebaseLoading,
+    isInitialized,
+  } = useFirebase();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
   // Note: submitFeedback removed from simplified Firebase context
   // Removed old AccountService usage
@@ -1121,9 +1141,7 @@ export default function HomePageContent() {
     setShowAuthModal(true);
   };
 
-  const handleUserProfileClick = () => {
-    setShowUserProfile(true);
-  };
+  // Removed unused handleUserProfileClick function
 
   // Handle demo completion and show feedback modal
   const handleDemoComplete = async (
@@ -1143,16 +1161,20 @@ export default function HomePageContent() {
   };
 
   // Handle feedback submission
-  const handleFeedbackSubmit = async (feedback: any) => {
+  const handleFeedbackSubmit = async (feedback: {
+    score?: number;
+    rating?: number;
+    comment?: string;
+  }) => {
     try {
       if (feedbackDemoData) {
         // Complete the demo with the feedback score and completion time
         await completeDemo(
-          feedbackDemoData.demoId, 
+          feedbackDemoData.demoId,
           feedback.score || 85, // Default score if not provided
           feedbackDemoData.completionTime
         );
-        
+
         addToast({
           title: '🎉 Demo Completed!',
           message: `Great job completing ${feedbackDemoData.demoName}!`,
@@ -1161,7 +1183,7 @@ export default function HomePageContent() {
         });
       }
     } catch (error) {
-      console.error('Failed to complete demo:', error);
+      // Failed to complete demo - error is shown in toast
       addToast({
         title: 'Error',
         message: 'Failed to complete demo. Please try again.',
@@ -1197,10 +1219,7 @@ export default function HomePageContent() {
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
         {/* Preloader Screen */}
-        <PreloaderScreen
-          isLoading={isLoading}
-          loadingProgress={loadingProgress}
-        />
+        <PreloaderScreen isLoading={isLoading} loadingProgress={loadingProgress} />
 
         {/* Main Content - Only show when not loading */}
         {!isLoading && (
@@ -1412,22 +1431,30 @@ export default function HomePageContent() {
                     <div className='inline-block'>
                       <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mb-4'></div>
                     </div>
-                    
+
                     {/* Loading Title */}
-                    <h3 className='text-lg font-semibold text-white mb-2'>Loading Your Account...</h3>
-                    
+                    <h3 className='text-lg font-semibold text-white mb-2'>
+                      Loading Your Account...
+                    </h3>
+
                     {/* Loading Description */}
                     <p className='text-white/70 text-sm mb-6'>
                       Preparing demo cards and loading your progress data
                     </p>
-                    
+
                     {/* Animated Loading Dots */}
                     <div className='flex justify-center items-center space-x-2'>
                       <div className='animate-pulse bg-blue-400/30 rounded-full h-3 w-3'></div>
-                      <div className='animate-pulse bg-blue-400/50 rounded-full h-3 w-3' style={{ animationDelay: '0.3s' }}></div>
-                      <div className='animate-pulse bg-blue-400/30 rounded-full h-3 w-3' style={{ animationDelay: '0.6s' }}></div>
+                      <div
+                        className='animate-pulse bg-blue-400/50 rounded-full h-3 w-3'
+                        style={{ animationDelay: '0.3s' }}
+                      ></div>
+                      <div
+                        className='animate-pulse bg-blue-400/30 rounded-full h-3 w-3'
+                        style={{ animationDelay: '0.6s' }}
+                      ></div>
                     </div>
-                    
+
                     {/* Progress Steps */}
                     <div className='mt-6 space-y-2'>
                       <div className='text-xs text-white/60'>• Loading account information</div>
@@ -1436,7 +1463,7 @@ export default function HomePageContent() {
                     </div>
                   </div>
                 )}
-                
+
                 {(!isConnected || !firebaseLoading || isInitialized) && (
                   <DemoSelector
                     activeDemo={activeDemo}

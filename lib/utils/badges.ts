@@ -3,6 +3,7 @@ export interface BadgeDefinition {
   name: string;
   description: string;
   icon: string; // Keep for backward compatibility, but prefer using BadgeEmblem component
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
   category: 'demo' | 'milestone' | 'achievement' | 'special';
   requirements: {
     type: 'demo_completion' | 'milestone_completion' | 'time_spent' | 'level_reached' | 'custom';

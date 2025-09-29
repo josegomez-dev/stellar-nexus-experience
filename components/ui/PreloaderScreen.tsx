@@ -71,9 +71,7 @@ export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
         </h1>
 
         {/* Subtitle */}
-        <p className='text-xl text-brand-300 mb-8 animate-pulse'>
-          {subtitle}
-        </p>
+        <p className='text-xl text-brand-300 mb-8 animate-pulse'>{subtitle}</p>
 
         {/* Loading Bar */}
         <div className='w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8'>
@@ -86,10 +84,10 @@ export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
         {/* Loading Steps */}
         <div className='space-y-2 text-white/80'>
           {loadingSteps.map((step, index) => (
-            <p 
+            <p
               key={index}
-              className='animate-fadeInUp' 
-              style={{ animationDelay: `${0.5 + (index * 0.5)}s` }}
+              className='animate-fadeInUp'
+              style={{ animationDelay: `${0.5 + index * 0.5}s` }}
             >
               {step}
             </p>

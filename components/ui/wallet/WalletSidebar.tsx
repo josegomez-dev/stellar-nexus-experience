@@ -83,19 +83,19 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       // Ensure badgesEarned is an array before calling includes
       const badgesEarned = Array.isArray(account.badgesEarned) ? account.badgesEarned : [];
       const isFirstTimeUser = badgesEarned.includes('welcome_explorer');
-      
+
       // Only auto-close for first-time users who just created their account
       if (isFirstTimeUser) {
         // Check if account was just created (within last 30 seconds)
-        const accountAge = Date.now() - (account.createdAt?.toDate?.()?.getTime() || account.createdAt?.getTime() || 0);
+        const accountAge = Date.now() - (account.createdAt?.getTime() || 0);
         const isRecentlyCreated = accountAge < 30000; // 30 seconds
-        
+
         if (isRecentlyCreated) {
           // Small delay to ensure connection and account creation is complete
           const timer = setTimeout(() => {
             onToggle();
           }, 1500); // Slightly longer delay for first-time users
-          
+
           return () => clearTimeout(timer);
         }
       }
@@ -674,7 +674,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         transactions={recentTransactions}
                         compact={true}
                         limit={5}
-                        emptyMessage="No recent session transactions"
+                        emptyMessage='No recent session transactions'
                       />
                     </div>
                   )}
@@ -685,7 +685,8 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         onClick={() => setShowTransactionHistory(true)}
                         className='text-xs text-white/60 hover:text-white/80 transition-colors underline'
                       >
-                        View {transactions.length} session transaction{transactions.length !== 1 ? 's' : ''}
+                        View {transactions.length} session transaction
+                        {transactions.length !== 1 ? 's' : ''}
                       </button>
                     </div>
                   )}

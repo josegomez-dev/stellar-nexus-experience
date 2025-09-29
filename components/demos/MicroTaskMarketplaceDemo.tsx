@@ -51,7 +51,7 @@ export const MicroTaskMarketplaceDemo = ({
   // Demo completion tracking is now handled by FirebaseContext
   const { completeDemo } = useFirebase();
   const { updateProgress } = useImmersiveProgress();
-  
+
   // Smart step tracking for micro-task marketplace
   const [tasksPosted, setTasksPosted] = useState(0);
   const [tasksAccepted, setTasksAccepted] = useState(0);
@@ -279,7 +279,7 @@ export const MicroTaskMarketplaceDemo = ({
       // Track progress milestone - task posting
       const newTaskCount = tasksPosted + 1;
       setTasksPosted(newTaskCount);
-      
+
       if (newTaskCount === 1) {
         updateProgress('task_posted');
       }
@@ -389,7 +389,7 @@ export const MicroTaskMarketplaceDemo = ({
       // Track progress milestone - accept task
       const newAcceptCount = tasksAccepted + 1;
       setTasksAccepted(newAcceptCount);
-      
+
       if (newAcceptCount === 1) {
         updateProgress('task_accepted');
       } else if (newAcceptCount === 2) {
@@ -465,8 +465,6 @@ export const MicroTaskMarketplaceDemo = ({
     }
   }
 
-
-
   async function handleSubmitDeliverable(taskId: string) {
     if (!walletData) {
       addToast({
@@ -503,7 +501,7 @@ export const MicroTaskMarketplaceDemo = ({
       // Track progress milestone - complete work
       const newCompleteCount = tasksCompleted + 1;
       setTasksCompleted(newCompleteCount);
-      
+
       if (newCompleteCount === 1) {
         updateProgress('work_completed');
       } else if (newCompleteCount === 2) {
@@ -807,7 +805,6 @@ export const MicroTaskMarketplaceDemo = ({
               </button>
             </div>
           )}
-
         </div>
 
         <div className='mb-8'>
@@ -815,12 +812,19 @@ export const MicroTaskMarketplaceDemo = ({
           <div className='mb-4 p-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-lg'>
             <h4 className='text-purple-300 font-semibold mb-2'>🚀 Demo Flow Guide</h4>
             <div className='text-purple-200 text-sm space-y-1'>
-              <p>1️⃣ <strong>Post Task:</strong> Create a task as a client to complete the demo</p>
-              <p>2️⃣ <strong>Browse Tasks:</strong> Accept tasks AND submit deliverables (submit 3+ to complete demo)</p>
-              <p>3️⃣ <strong>My Tasks:</strong> View posted tasks and track progress</p>
+              <p>
+                1️⃣ <strong>Post Task:</strong> Create a task as a client to complete the demo
+              </p>
+              <p>
+                2️⃣ <strong>Browse Tasks:</strong> Accept tasks AND submit deliverables (submit 3+ to
+                complete demo)
+              </p>
+              <p>
+                3️⃣ <strong>My Tasks:</strong> View posted tasks and track progress
+              </p>
             </div>
           </div>
-          
+
           <div className='flex space-x-2 bg-white/5 rounded-lg p-1'>
             {(['browse', 'my-tasks', 'post-task'] as const).map(tab => (
               <button
@@ -851,9 +855,12 @@ export const MicroTaskMarketplaceDemo = ({
             {completedTasks.size < 3 && (
               <div className='mb-6 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg'>
                 <p className='text-yellow-300 text-sm'>
-                  🎯 <strong>Demo Progress:</strong> Accept tasks AND submit deliverables for at least 3 tasks to finish the demo!
+                  🎯 <strong>Demo Progress:</strong> Accept tasks AND submit deliverables for at
+                  least 3 tasks to finish the demo!
                   <br />
-                  <span className='text-yellow-200 float-right'>Current progress: {completedTasks.size}/3 tasks completed ✅</span>
+                  <span className='text-yellow-200 float-right'>
+                    Current progress: {completedTasks.size}/3 tasks completed ✅
+                  </span>
                 </p>
                 <br />
               </div>
@@ -985,7 +992,8 @@ export const MicroTaskMarketplaceDemo = ({
               {postedTasks.size > 0 && (
                 <div className='p-3 bg-green-500/20 border border-green-400/30 rounded-lg'>
                   <p className='text-green-300 text-sm'>
-                    ✅ <strong>Great!</strong> You've posted {postedTasks.size} task{postedTasks.size === 1 ? '' : 's'}. Check them out below!
+                    ✅ <strong>Great!</strong> You've posted {postedTasks.size} task
+                    {postedTasks.size === 1 ? '' : 's'}. Check them out below!
                   </p>
                 </div>
               )}
@@ -1016,7 +1024,11 @@ export const MicroTaskMarketplaceDemo = ({
                               task.status.replace('-', ' ').slice(1)}
                           </span>
                           <span className='text-white/50'>
-                            {task.client === walletData?.publicKey ? '👔 Client' : task.worker === walletData?.publicKey ? '👷 Worker' : '👤 Other'}
+                            {task.client === walletData?.publicKey
+                              ? '👔 Client'
+                              : task.worker === walletData?.publicKey
+                                ? '👷 Worker'
+                                : '👤 Other'}
                           </span>
                         </div>
                       </div>
@@ -1073,7 +1085,7 @@ export const MicroTaskMarketplaceDemo = ({
             <br />
             <div className='flex items-center justify-between mb-6'>
               <div>
-                <h3 className='text-lg font-semibold text-white'>Post New Task</h3> 
+                <h3 className='text-lg font-semibold text-white'>Post New Task</h3>
               </div>
               <button
                 onClick={() => {
@@ -1233,7 +1245,9 @@ export const MicroTaskMarketplaceDemo = ({
                   className='animate-bounce'
                 />
               </div>
-              <h3 className='text-xl font-bold text-green-300 mb-2'>Demo Successfully Completed!</h3>
+              <h3 className='text-xl font-bold text-green-300 mb-2'>
+                Demo Successfully Completed!
+              </h3>
               <p className='text-green-200 mb-4'>
                 Congratulations! You've successfully demonstrated the micro-task marketplace
                 workflow:

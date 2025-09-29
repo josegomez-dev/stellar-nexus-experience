@@ -168,7 +168,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     if (message && message !== currentMessage) {
       setMessageQueue(prev => [...(prev || []), message]);
     }
-  }, [currentPage, currentDemo, walletConnected]);
+  }, [currentPage, currentDemo, walletConnected, currentMessage]);
 
   useEffect(() => {
     if (messageQueue && messageQueue.length > 0 && !isTyping) {

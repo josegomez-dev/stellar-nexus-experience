@@ -34,10 +34,7 @@ if (process.env.NODE_ENV === 'development' && process.env.FIREBASE_USE_EMULATOR 
   }
 
   try {
-    // Only connect if not already connected
-    if (!auth.config.emulator) {
-      connectAuthEmulator(auth, 'http://localhost:9099');
-    }
+    connectAuthEmulator(auth, 'http://localhost:9099');
   } catch (error) {
     // Auth emulator already connected or not available
   }

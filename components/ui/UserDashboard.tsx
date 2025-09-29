@@ -228,9 +228,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                     <div className='flex items-center justify-between mb-4'>
                       <h4 className='font-semibold text-white capitalize'>{demo.name}</h4>
                       <div className='flex items-center space-x-2'>
-                        <span className='text-brand-300 text-sm'>
-                          {demo.totalCompletions} completions
-                        </span>
+                        <span className='text-brand-300 text-sm'>Available Demo</span>
                         <button
                           onClick={() => {
                             /* Handle clap */
@@ -248,7 +246,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                       </div>
                       <div className='flex justify-between text-sm text-white/70'>
                         <span>Total Claps</span>
-                        <span>{demo.totalClaps}</span>
+                        <span>0</span>
                       </div>
                     </div>
                   </div>
@@ -269,7 +267,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 </button>
               </div>
 
-              {userBadges.length === 0 ? (
+              {!account || account.badgesEarned.length === 0 ? (
                 <div className='text-center py-12'>
                   <div className='text-6xl mb-4'>🏆</div>
                   <h4 className='text-xl font-semibold text-white mb-2'>No Badges Yet</h4>
@@ -277,16 +275,18 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 </div>
               ) : (
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                  {userBadges.slice(0, 6).map(userBadge => (
+                  {account?.badgesEarned.slice(0, 6).map(badgeId => (
                     <div
-                      key={userBadge.id}
+                      key={badgeId}
                       className='bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-xl p-4'
                     >
                       <div className='text-center'>
                         <div className='text-3xl mb-2'>🏆</div>
-                        <h4 className='font-semibold text-white text-sm'>Badge Earned</h4>
+                        <h4 className='font-semibold text-white text-sm'>
+                          {badgeId.replace('_', ' ')}
+                        </h4>
                         <p className='text-yellow-300 text-xs mt-1'>
-                          {new Date(userBadge.earnedAt).toLocaleDateString()}
+                          {new Date().toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -319,7 +319,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Progress</h4>
                   <div className='text-3xl font-bold text-accent-300 mb-2'>
-                    {user ? Math.round((user.demosCompleted.length / 3) * 100) : 0}%
+                    {account ? Math.round((account.demosCompleted.length / 3) * 100) : 0}%
                   </div>
                   <p className='text-white/70 text-sm'>Completion Rate</p>
                 </div>
@@ -327,7 +327,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
                   <h4 className='font-semibold text-white mb-4'>Completion Rate</h4>
                   <div className='text-3xl font-bold text-warning-300 mb-2'>
-                    {user ? ((user.demosCompleted.length / 3) * 100).toFixed(1) : 0}%
+                    {account ? ((account.demosCompleted.length / 3) * 100).toFixed(1) : 0}%
                   </div>
                   <p className='text-white/70 text-sm'>Demo success rate</p>
                 </div>

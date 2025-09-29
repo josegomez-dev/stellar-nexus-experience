@@ -427,6 +427,10 @@ export const DisputeResolutionDemo = () => {
         demoId: 'dispute-resolution',
         amount: milestone?.amount,
         asset: 'USDC',
+        type: 'approve',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
+        asset: 'USDC',
       });
 
       const payload = {
@@ -475,6 +479,8 @@ export const DisputeResolutionDemo = () => {
         demoId: 'dispute-resolution',
         amount: milestone?.amount,
         asset: 'USDC',
+        type: 'approve',
+        demoId: 'dispute-resolution',
       });
 
       addToast({
@@ -515,6 +521,10 @@ export const DisputeResolutionDemo = () => {
         type: 'dispute',
         demoId: 'dispute-resolution',
         amount: milestone?.amount,
+        asset: 'USDC',
+        type: 'dispute',
+        demoId: 'dispute-resolution',
+        amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
         asset: 'USDC',
       });
 
@@ -575,6 +585,8 @@ export const DisputeResolutionDemo = () => {
         demoId: 'dispute-resolution',
         amount: milestone?.amount,
         asset: 'USDC',
+        type: 'dispute',
+        demoId: 'dispute-resolution',
       });
 
       addToast({

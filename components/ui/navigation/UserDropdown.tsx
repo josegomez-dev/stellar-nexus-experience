@@ -96,7 +96,7 @@ export const UserDropdown = () => {
 
   const handleAutoGenerate = async () => {
     console.log('handleAutoGenerate called');
-    
+
     if (!walletData?.publicKey) {
       addToast({
         type: 'error',
@@ -138,7 +138,7 @@ export const UserDropdown = () => {
           displayName: newName,
           walletAddress: walletData.publicKey,
         });
-        
+
         // Refresh Firebase account data to reflect changes immediately
         await refreshAccountData();
       }
@@ -170,7 +170,7 @@ export const UserDropdown = () => {
 
   const handleSaveName = async () => {
     console.log('handleSaveName called with tempName:', tempName);
-    
+
     if (!tempName.trim()) {
       addToast({
         type: 'error',
@@ -194,7 +194,7 @@ export const UserDropdown = () => {
     setIsSaving(true);
     try {
       const displayName = tempName.trim();
-      
+
       if (user) {
         // Update existing user in Auth context
         await updateUser({
@@ -212,18 +212,18 @@ export const UserDropdown = () => {
       // Always save to Firebase regardless of authentication status
       if (walletData?.publicKey) {
         console.log('Saving to Firebase:', { id: walletData.publicKey, displayName });
-        
+
         await accountService.createOrUpdateAccount({
           id: walletData.publicKey,
           displayName: displayName,
           walletAddress: walletData.publicKey,
         });
-        
+
         console.log('Firebase save completed, refreshing account data...');
-        
+
         // Refresh Firebase account data to reflect changes immediately
         await refreshAccountData();
-        
+
         console.log('Account data refreshed');
       }
 
@@ -444,8 +444,8 @@ export const UserDropdown = () => {
                       !miniGamesUnlocked
                         ? 'text-white/40 cursor-not-allowed'
                         : pathname === '/mini-games'
-                        ? 'text-white bg-purple-500/20 border border-purple-500/30'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                          ? 'text-white bg-purple-500/20 border border-purple-500/30'
+                          : 'text-white/80 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <span className='text-lg'>

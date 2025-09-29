@@ -7,7 +7,15 @@ export interface TransactionRecord {
   status: 'pending' | 'success' | 'failed';
   message: string;
   timestamp: Date;
-  type: 'escrow' | 'milestone' | 'fund' | 'approve' | 'release' | 'dispute' | 'demo_completion' | 'badge_earned';
+  type:
+    | 'escrow'
+    | 'milestone'
+    | 'fund'
+    | 'approve'
+    | 'release'
+    | 'dispute'
+    | 'demo_completion'
+    | 'badge_earned';
   demoId?: string;
   amount?: string;
   asset?: string;
@@ -27,7 +35,7 @@ export interface Account {
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
-  
+
   // Progress tracking
   level: number;
   experience: number; // XP points
@@ -35,7 +43,7 @@ export interface Account {
   demosCompleted: string[]; // Array of demo IDs completed
   badgesEarned: string[]; // Array of badge IDs earned
   clappedDemos: string[]; // Array of demo IDs that the user has clapped for
-  
+
   // Transaction history - now stored in separate collection
 }
 
@@ -66,21 +74,37 @@ export const PREDEFINED_DEMOS = [
     id: 'hello-milestone',
     name: 'Baby Steps to Riches',
     subtitle: 'Learn the basics of milestone-based escrow',
-    description: 'Master the fundamental escrow flow with milestone payments. Perfect for beginners to understand how trustless transactions work.',
+    description:
+      'Master the fundamental escrow flow with milestone payments. Perfect for beginners to understand how trustless transactions work.',
   },
   {
     id: 'dispute-resolution',
     name: 'Drama Queen Escrow',
     subtitle: 'Navigate complex dispute scenarios',
-    description: 'Experience real-world dispute resolution scenarios. Learn how to handle conflicts and make fair decisions in escrow disputes.',
+    description:
+      'Experience real-world dispute resolution scenarios. Learn how to handle conflicts and make fair decisions in escrow disputes.',
   },
   {
     id: 'micro-marketplace',
     name: 'Gig Economy Madness',
     subtitle: 'Build a micro-task marketplace',
-    description: 'Create and manage a micro-task marketplace. Learn about task creation, worker assignment, and payment distribution.',
+    description:
+      'Create and manage a micro-task marketplace. Learn about task creation, worker assignment, and payment distribution.',
   },
 ];
+
+// Demo feedback interface
+export interface DemoFeedback {
+  rating: number; // 1-5 stars
+  feedback: string; // Text feedback
+  difficulty: 'easy' | 'medium' | 'hard'; // Difficulty level
+  wouldRecommend: boolean; // Would recommend to others
+  mostHelpfulFeature: string; // Most helpful feature
+  suggestions: string; // Suggestions for improvement
+  demoId: string; // Associated demo ID
+  demoName: string; // Demo name for context
+  completionTime?: number; // Time taken in minutes
+}
 
 // Predefined badges configuration (static data)
 export const PREDEFINED_BADGES = [

@@ -1,6 +1,11 @@
 import React, { useRef, useState } from 'react';
 // Removed badge-config import - using inline rarity config
-import { Badge } from '@/lib/firebase/firebase-types';
+import { Badge } from '@/contexts/auth/AuthContext';
+
+// Extend Badge interface to include earningPoints
+interface BadgeWithPoints extends Badge {
+  earningPoints: number;
+}
 
 // Custom hook for 3D tilt effect
 function useTilt() {
@@ -181,8 +186,9 @@ const BadgeEmblem: React.FC<{ id: string; size?: 'sm' | 'md' | 'lg' }> = ({ id, 
 };
 
 // 3D Badge Card Component
+
 interface Badge3DProps {
-  badge: Badge & { isEarned?: boolean };
+  badge: BadgeWithPoints & { isEarned?: boolean };
   size?: 'sm' | 'md' | 'lg';
   compact?: boolean;
 }

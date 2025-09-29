@@ -1,19 +1,25 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Badge } from '@/lib/firebase/firebase-types';
-import { getBadgeIcon, getBadgeColors, playBadgeSound, BADGE_SIZES } from '@/utils/constants/badges/assets';
+import { Badge } from '@/contexts/auth/AuthContext';
+
+// Extend Badge interface to include earningPoints
+interface BadgeWithPoints extends Badge {
+  earningPoints: number;
+}
+import {
+  getBadgeIcon,
+  getBadgeColors,
+  playBadgeSound,
+  BADGE_SIZES,
+} from '@/utils/constants/badges/assets';
 
 // Badge SVG emblem using centralized assets
 const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
   const icon = getBadgeIcon(id, BADGE_SIZES['3xl']);
-  
+
   if (icon) {
-    return (
-      <div className='drop-shadow-2xl'>
-        {icon}
-      </div>
-    );
+    return <div className='drop-shadow-2xl'>{icon}</div>;
   }
 
   // Fallback for unknown badges
@@ -25,7 +31,7 @@ const BadgeEmblem: React.FC<{ id: string }> = ({ id }) => {
 };
 
 interface BadgeEarnedAnimationProps {
-  badge: Badge;
+  badge: BadgeWithPoints;
   isVisible: boolean;
   onComplete: () => void;
   points?: number;

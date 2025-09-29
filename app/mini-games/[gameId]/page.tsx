@@ -226,10 +226,7 @@ export default function GamePage() {
     }
   };
 
-  const handlePlayGame = () => {
-    // Launch the actual game
-    alert(`🎮 ${game.title} is launching! Get ready to learn and earn rewards!`);
-  };
+  // Removed unused handlePlayGame function
 
   if (!game) {
     return (

@@ -15,17 +15,12 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import {
-  Account,
-  TransactionRecord,
-  DemoStats,
-  COLLECTIONS,
-} from './firebase-types';
+import { Account, TransactionRecord, DemoStats, COLLECTIONS } from './firebase-types';
 
 // Helper function to convert Firestore timestamps to Date objects
 const convertTimestamps = (data: any): any => {
   if (!data) return data;
-  
+
   const converted = { ...data };
   Object.keys(converted).forEach(key => {
     if (converted[key] instanceof Timestamp) {
@@ -54,7 +49,7 @@ export const accountService = {
   async getAccountByWalletAddress(walletAddress: string): Promise<Account | null> {
     const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
     const accountSnap = await getDoc(accountRef);
-    
+
     if (accountSnap.exists()) {
       return convertTimestamps(accountSnap.data()) as Account;
     }
@@ -62,7 +57,15 @@ export const accountService = {
   },
 
   // Update account progress
-  async updateAccountProgress(walletAddress: string, progress: Partial<Pick<Account, 'level' | 'experience' | 'totalPoints' | 'demosCompleted' | 'badgesEarned' | 'clappedDemos'>>): Promise<void> {
+  async updateAccountProgress(
+    walletAddress: string,
+    progress: Partial<
+      Pick<
+        Account,
+        'level' | 'experience' | 'totalPoints' | 'demosCompleted' | 'badgesEarned' | 'clappedDemos'
+      >
+    >
+  ): Promise<void> {
     const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
     await updateDoc(accountRef, {
       ...progress,
@@ -75,14 +78,14 @@ export const accountService = {
     const account = await this.getAccountByWalletAddress(walletAddress);
     if (account) {
       let currentDemosCompleted: string[] = [];
-      
+
       if (Array.isArray(account.demosCompleted)) {
         currentDemosCompleted = account.demosCompleted;
       } else if (account.demosCompleted && typeof account.demosCompleted === 'object') {
         // Convert object to array (Firebase sometimes stores arrays as objects)
         currentDemosCompleted = Object.values(account.demosCompleted);
       }
-      
+
       if (!currentDemosCompleted.includes(demoId)) {
         const updatedDemosCompleted = [...currentDemosCompleted, demoId];
         await this.updateAccountProgress(walletAddress, {
@@ -97,14 +100,14 @@ export const accountService = {
     const account = await this.getAccountByWalletAddress(walletAddress);
     if (account) {
       let currentBadgesEarned: string[] = [];
-      
+
       if (Array.isArray(account.badgesEarned)) {
         currentBadgesEarned = account.badgesEarned;
       } else if (account.badgesEarned && typeof account.badgesEarned === 'object') {
         // Convert object to array (Firebase sometimes stores arrays as objects)
         currentBadgesEarned = Object.values(account.badgesEarned);
       }
-      
+
       if (!currentBadgesEarned.includes(badgeId)) {
         const updatedBadgesEarned = [...currentBadgesEarned, badgeId];
         await this.updateAccountProgress(walletAddress, {
@@ -115,13 +118,17 @@ export const accountService = {
   },
 
   // Add experience and points
-  async addExperienceAndPoints(walletAddress: string, experience: number, points: number): Promise<void> {
+  async addExperienceAndPoints(
+    walletAddress: string,
+    experience: number,
+    points: number
+  ): Promise<void> {
     const account = await this.getAccountByWalletAddress(walletAddress);
     if (account) {
       const newExperience = account.experience + experience;
       const newTotalPoints = account.totalPoints + points;
       const newLevel = Math.floor(newExperience / 1000) + 1;
-      
+
       await this.updateAccountProgress(walletAddress, {
         experience: newExperience,
         totalPoints: newTotalPoints,
@@ -133,16 +140,16 @@ export const accountService = {
   // Check if account has badge
   async hasBadge(walletAddress: string, badgeId: string): Promise<boolean> {
     const account = await this.getAccountByWalletAddress(walletAddress);
-    return account && account.badgesEarned && Array.isArray(account.badgesEarned) 
-      ? account.badgesEarned.includes(badgeId) 
+    return account && account.badgesEarned && Array.isArray(account.badgesEarned)
+      ? account.badgesEarned.includes(badgeId)
       : false;
   },
 
   // Check if account has completed demo
   async hasCompletedDemo(walletAddress: string, demoId: string): Promise<boolean> {
     const account = await this.getAccountByWalletAddress(walletAddress);
-    return account && account.demosCompleted && Array.isArray(account.demosCompleted) 
-      ? account.demosCompleted.includes(demoId) 
+    return account && account.demosCompleted && Array.isArray(account.demosCompleted)
+      ? account.demosCompleted.includes(demoId)
       : false;
   },
 
@@ -151,14 +158,14 @@ export const accountService = {
     const account = await this.getAccountByWalletAddress(walletAddress);
     if (account) {
       let currentClappedDemos: string[] = [];
-      
+
       if (Array.isArray(account.clappedDemos)) {
         currentClappedDemos = account.clappedDemos;
       } else if (account.clappedDemos && typeof account.clappedDemos === 'object') {
         // Convert object to array (Firebase sometimes stores arrays as objects)
         currentClappedDemos = Object.values(account.clappedDemos);
       }
-      
+
       if (!currentClappedDemos.includes(demoId)) {
         const updatedClappedDemos = [...currentClappedDemos, demoId];
         await this.updateAccountProgress(walletAddress, {
@@ -171,9 +178,9 @@ export const accountService = {
   // Check if account has clapped for demo
   async hasClappedDemo(walletAddress: string, demoId: string): Promise<boolean> {
     const account = await this.getAccountByWalletAddress(walletAddress);
-    
+
     if (!account || !account.clappedDemos) return false;
-    
+
     // Handle both array and object formats
     if (Array.isArray(account.clappedDemos)) {
       return account.clappedDemos.includes(demoId);
@@ -181,12 +188,15 @@ export const accountService = {
       const clappedDemosArray = Object.values(account.clappedDemos);
       return clappedDemosArray.includes(demoId);
     }
-    
+
     return false;
   },
 
   // Add transaction to user's history
-  async addTransaction(walletAddress: string, transaction: Omit<TransactionRecord, 'timestamp' | 'walletAddress'>): Promise<void> {
+  async addTransaction(
+    walletAddress: string,
+    transaction: Omit<TransactionRecord, 'timestamp' | 'walletAddress'>
+  ): Promise<void> {
     const account = await this.getAccountByWalletAddress(walletAddress);
     if (!account) {
       throw new Error('Account not found');
@@ -207,7 +217,12 @@ export const accountService = {
   },
 
   // Update transaction status
-  async updateTransaction(walletAddress: string, transactionHash: string, status: 'success' | 'failed', message: string): Promise<void> {
+  async updateTransaction(
+    walletAddress: string,
+    transactionHash: string,
+    status: 'success' | 'failed',
+    message: string
+  ): Promise<void> {
     // Find the transaction in the transactions collection
     const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
     const q = query(
@@ -215,7 +230,7 @@ export const accountService = {
       where('walletAddress', '==', walletAddress),
       where('hash', '==', transactionHash)
     );
-    
+
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
       const transactionDoc = querySnapshot.docs[0];
@@ -228,7 +243,10 @@ export const accountService = {
   },
 
   // Get user's transaction history
-  async getUserTransactions(walletAddress: string, limitCount?: number): Promise<TransactionRecord[]> {
+  async getUserTransactions(
+    walletAddress: string,
+    limitCount?: number
+  ): Promise<TransactionRecord[]> {
     const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
     let q = query(
       transactionsRef,
@@ -243,7 +261,7 @@ export const accountService = {
     const querySnapshot = await getDocs(q);
     const transactions: TransactionRecord[] = [];
 
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(doc => {
       const data = doc.data();
       transactions.push({
         id: doc.id,
@@ -255,7 +273,10 @@ export const accountService = {
   },
 
   // Get transactions by type
-  async getTransactionsByType(walletAddress: string, type: TransactionRecord['type']): Promise<TransactionRecord[]> {
+  async getTransactionsByType(
+    walletAddress: string,
+    type: TransactionRecord['type']
+  ): Promise<TransactionRecord[]> {
     const transactionsRef = collection(db, COLLECTIONS.TRANSACTIONS);
     const q = query(
       transactionsRef,
@@ -267,7 +288,7 @@ export const accountService = {
     const querySnapshot = await getDocs(q);
     const transactions: TransactionRecord[] = [];
 
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(doc => {
       const data = doc.data();
       transactions.push({
         id: doc.id,
@@ -291,7 +312,7 @@ export const accountService = {
     const querySnapshot = await getDocs(q);
     const transactions: TransactionRecord[] = [];
 
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(doc => {
       const data = doc.data();
       transactions.push({
         id: doc.id,
@@ -309,7 +330,7 @@ export const demoStatsService = {
   async getDemoStats(demoId: string): Promise<DemoStats | null> {
     const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
     const demoStatsSnap = await getDoc(demoStatsRef);
-    
+
     if (demoStatsSnap.exists()) {
       return convertTimestamps(demoStatsSnap.data()) as DemoStats;
     }
@@ -322,7 +343,7 @@ export const demoStatsService = {
     const querySnapshot = await getDocs(demoStatsRef);
     const stats: DemoStats[] = [];
 
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(doc => {
       const data = doc.data();
       stats.push({
         id: doc.id,
@@ -337,7 +358,7 @@ export const demoStatsService = {
   async initializeDemoStats(demoId: string, demoName: string): Promise<void> {
     const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
     const existingStats = await this.getDemoStats(demoId);
-    
+
     if (!existingStats) {
       const newStats: Omit<DemoStats, 'id'> = {
         demoId,
@@ -360,10 +381,14 @@ export const demoStatsService = {
   },
 
   // Increment completion count
-  async incrementCompletion(demoId: string, completionTimeMinutes?: number, rating?: number): Promise<void> {
+  async incrementCompletion(
+    demoId: string,
+    completionTimeMinutes?: number,
+    rating?: number
+  ): Promise<void> {
     const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
     const existingStats = await this.getDemoStats(demoId);
-    
+
     if (!existingStats) {
       // Initialize if doesn't exist
       const demoName = this.getDemoName(demoId);
@@ -376,8 +401,9 @@ export const demoStatsService = {
 
     // Calculate new averages
     const newTotalCompletions = currentStats.totalCompletions + 1;
-    const newTotalRatings = rating !== undefined ? currentStats.totalRatings + 1 : currentStats.totalRatings;
-    
+    const newTotalRatings =
+      rating !== undefined ? currentStats.totalRatings + 1 : currentStats.totalRatings;
+
     // Calculate new average rating
     let newAverageRating = currentStats.averageRating;
     if (rating !== undefined) {
@@ -388,8 +414,10 @@ export const demoStatsService = {
     // Calculate new average completion time
     let newAverageCompletionTime = currentStats.averageCompletionTime;
     if (completionTimeMinutes !== undefined) {
-      const totalCompletionTime = currentStats.averageCompletionTime * currentStats.totalCompletions + completionTimeMinutes;
-      newAverageCompletionTime = newTotalCompletions > 0 ? totalCompletionTime / newTotalCompletions : 0;
+      const totalCompletionTime =
+        currentStats.averageCompletionTime * currentStats.totalCompletions + completionTimeMinutes;
+      newAverageCompletionTime =
+        newTotalCompletions > 0 ? totalCompletionTime / newTotalCompletions : 0;
     }
 
     await updateDoc(demoStatsRef, {
@@ -411,7 +439,7 @@ export const demoStatsService = {
 
     const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
     const existingStats = await this.getDemoStats(demoId);
-    
+
     if (!existingStats) {
       // Initialize if doesn't exist
       const demoName = this.getDemoName(demoId);
@@ -451,7 +479,11 @@ export const firebaseUtils = {
   },
 
   // Create account
-  async createAccount(walletAddress: string, displayName: string, network: string = 'testnet'): Promise<void> {
+  async createAccount(
+    walletAddress: string,
+    displayName: string,
+    network: string = 'testnet'
+  ): Promise<void> {
     const accountData: Partial<Account> = {
       id: walletAddress,
       displayName,

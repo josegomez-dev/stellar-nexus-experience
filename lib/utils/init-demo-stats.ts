@@ -12,7 +12,7 @@ export const initializeAllDemoStats = async () => {
   ];
 
   console.log('Initializing demo stats for all demos...');
-  
+
   for (const demo of demos) {
     try {
       await demoStatsService.initializeDemoStats(demo.id, demo.name);
@@ -21,7 +21,7 @@ export const initializeAllDemoStats = async () => {
       console.error(`❌ Failed to initialize stats for ${demo.name} (${demo.id}):`, error);
     }
   }
-  
+
   console.log('Demo stats initialization complete!');
 };
 

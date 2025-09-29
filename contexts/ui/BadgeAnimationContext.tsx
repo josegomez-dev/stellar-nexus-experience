@@ -1,11 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Badge } from '@/lib/firebase/firebase-types';
+import { Badge } from '@/contexts/auth/AuthContext';
 import { BadgeEarnedAnimation } from '@/components/ui/badges/BadgeEarnedAnimation';
 
+// Extend Badge interface to include earningPoints
+interface BadgeWithPoints extends Badge {
+  earningPoints: number;
+}
+
 interface BadgeAnimationState {
-  badge: Badge;
+  badge: BadgeWithPoints;
   points?: number;
 }
 
@@ -38,7 +43,12 @@ export const BadgeAnimationProvider: React.FC<BadgeAnimationProviderProps> = ({ 
   const [isVisible, setIsVisible] = useState(false);
 
   const showBadgeAnimation = (badge: Badge, points?: number) => {
-    setAnimationState({ badge, points });
+    // Create a BadgeWithPoints by adding the earningPoints property
+    const badgeWithPoints: BadgeWithPoints = {
+      ...badge,
+      earningPoints: points || 0
+    };
+    setAnimationState({ badge: badgeWithPoints, points });
     setIsVisible(true);
   };
 

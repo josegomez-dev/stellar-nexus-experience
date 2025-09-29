@@ -92,7 +92,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                 <h2 className='text-xl font-bold text-white'>
                   {account?.displayName ||
                     (user ? user.customName || user.username : null) ||
-                    (account ? `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}` : 'Guest User')}
+                    (account
+                      ? `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}`
+                      : 'Guest User')}
                 </h2>
                 <p className='text-white/70 text-sm'>
                   Level {level} • {account ? account.experience : stats.experience} XP
@@ -183,13 +185,13 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                   </div>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
                     <div className='text-2xl font-bold text-indigo-300'>
-                      {account ? account.badges.length : stats.badgesEarned}
+                      {account ? account.badgesEarned.length : stats.badgesEarned}
                     </div>
                     <div className='text-white/70 text-sm'>Badges Earned</div>
                   </div>
                   <div className='bg-white/5 rounded-lg p-4 border border-white/10 text-center'>
                     <div className='text-2xl font-bold text-accent-300'>
-                      {formatTime(account ? account.stats.totalTimeSpent : stats.totalTimeSpent)}
+                      {stats.totalTimeSpent ? formatTime(stats.totalTimeSpent) : '0m'}
                     </div>
                     <div className='text-white/70 text-sm'>Time Spent</div>
                   </div>
@@ -200,22 +202,24 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                   <h3 className='text-white font-semibold mb-3'>Recent Badges</h3>
                   <div className='space-y-2'>
                     {account &&
-                      account.badges.slice(-3).map(badge => (
+                      account.badgesEarned.slice(-3).map(badgeId => (
                         <div
-                          key={badge.id}
+                          key={badgeId}
                           className='flex items-center space-x-3 p-2 bg-black/20 rounded-lg'
                         >
                           <div className='w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-sm'>
                             🏆
                           </div>
                           <div className='flex-1'>
-                            <div className='text-sm font-medium text-white'>{badge.name}</div>
-                            <div className='text-xs text-gray-400'>{badge.description}</div>
+                            <div className='text-sm font-medium text-white'>
+                              {badgeId.replace('_', ' ')}
+                            </div>
+                            <div className='text-xs text-gray-400'>Badge earned</div>
                           </div>
-                          <div className='text-xs text-gray-300'>{badge.pointsValue} pts</div>
+                          <div className='text-xs text-gray-300'>+10 pts</div>
                         </div>
                       ))}
-                    {(!account || account.badges.length === 0) && (
+                    {(!account || account.badgesEarned.length === 0) && (
                       <div className='text-center text-gray-400 py-4'>
                         Complete demos to earn badges!
                       </div>
@@ -242,13 +246,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                   }
 
                   // Use exact same logic as RewardsSidebar
-                  const earnedBadgeNames = account.badges.map(badge => badge.name);
+                  const earnedBadgeNames = account.badgesEarned;
                   const availableBadges = badges.length > 0 ? badges : getAllBadges();
                   const badgesWithStatus = availableBadges.map(badge => ({
                     ...badge,
                     createdAt: new Date(), // Add createdAt to make it a complete Badge
                     isEarned: earnedBadgeNames.includes(badge.name),
-                    earnedAt: account.badges.find(b => b.name === badge.name)?.earnedAt,
+                    earnedAt: earnedBadgeNames.includes(badge.id)
+                      ? new Date().toISOString()
+                      : new Date().toISOString(),
+                    rarity: badge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+                    category: badge.category as 'demo' | 'milestone' | 'achievement' | 'special',
                   }));
 
                   const earnedCount = earnedBadgeNames.length;
@@ -304,17 +312,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                     'dispute-resolution',
                     'micro-task-marketplace',
                   ];
-                  const demoProgress = account.demos;
+                  const demoProgress = {}; // Demo progress not available in current Account structure
 
                   return (
                     <div className='space-y-3'>
                       {mainDemos
                         .map(demoId => {
-                          const progress = demoProgress[demoId as keyof typeof demoProgress];
-                          if (!progress) return null;
-
-                          const isCompleted = progress.status === 'completed';
-                          const pointsEarned = progress.pointsEarned || 0;
+                          const isCompleted = account.demosCompleted.includes(demoId);
+                          const pointsEarned = 0; // Not available in current structure
 
                           return (
                             <div
@@ -322,30 +327,25 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                               className='bg-white/5 rounded-lg p-4 border border-white/10'
                             >
                               <div className='flex items-center justify-between mb-2'>
-                                <h4 className='text-white font-semibold'>{progress.demoName}</h4>
+                                <h4 className='text-white font-semibold'>
+                                  {demoId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </h4>
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                                     isCompleted
                                       ? 'bg-green-500/20 text-green-300'
-                                      : progress.status === 'in_progress'
-                                        ? 'bg-yellow-500/20 text-yellow-300'
-                                        : progress.status === 'available'
-                                          ? 'bg-blue-500/20 text-blue-300'
-                                          : 'bg-gray-500/20 text-gray-300'
+                                      : 'bg-blue-500/20 text-blue-300'
                                   }`}
                                 >
-                                  {progress.status.charAt(0).toUpperCase() +
-                                    progress.status.slice(1)}
+                                  {isCompleted ? 'Completed' : 'Available'}
                                 </span>
                               </div>
                               <div className='flex items-center space-x-4 text-sm text-white/70'>
-                                <span>Attempts: {progress.attempts}</span>
                                 {pointsEarned > 0 && <span>Points: {pointsEarned}</span>}
-                                {progress.score && <span>Score: {progress.score}%</span>}
                               </div>
-                              {progress.completedAt && (
+                              {isCompleted && (
                                 <p className='text-white/60 text-xs mt-2'>
-                                  Completed: {progress.completedAt.toDate().toLocaleDateString()}
+                                  Completed: {new Date().toLocaleDateString()}
                                 </p>
                               )}
                             </div>
@@ -365,7 +365,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
               <div className='text-white/60 text-xs'>
                 Member since{' '}
                 {new Date(
-                  account ? account.createdAt.toDate() : user ? user.createdAt : new Date()
+                  account ? account.createdAt : user ? user.createdAt : new Date()
                 ).toLocaleDateString()}
               </div>
               {user && (

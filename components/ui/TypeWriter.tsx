@@ -62,7 +62,7 @@ export const TypeWriter = ({
         }, 2000);
       }
     }
-  }, [currentIndex, text, speed, isTyping, onComplete, loop]);
+  }, [currentIndex, text, speed, isTyping, loop]);
 
   useEffect(() => {
     if (!showCursor) return;

@@ -37,6 +37,18 @@ export const useImmersiveProgress = () => {
   return context;
 };
 
+// Calculate meaningful progress based on steps and time
+const calculateProgress = (
+  completedSteps: string[],
+  totalSteps: string[],
+  elapsedTime: number,
+  estimatedTime: number
+): number => {
+  const stepProgress = (completedSteps.length / totalSteps.length) * 60; // 60% from steps
+  const timeProgress = Math.min((elapsedTime / (estimatedTime * 60)) * 40, 40); // 40% from time
+  return Math.min(stepProgress + timeProgress, 100);
+};
+
 interface FeedbackData {
   rating: number;
   comment: string;
@@ -102,7 +114,7 @@ export const ImmersiveDemoModal = ({
         'Post Task',
         'Accept Task #1',
         'Complete Work #1',
-        'Accept Task #2', 
+        'Accept Task #2',
         'Complete Work #2',
         'Accept Task #3',
       ],
@@ -119,17 +131,6 @@ export const ImmersiveDemoModal = ({
     );
   };
 
-  // Calculate meaningful progress based on steps and time
-  const calculateProgress = (
-    completedSteps: string[],
-    totalSteps: string[],
-    elapsedTime: number,
-    estimatedTime: number
-  ): number => {
-    const stepProgress = (completedSteps.length / totalSteps.length) * 60; // 60% from steps
-    const timeProgress = Math.min((elapsedTime / (estimatedTime * 60)) * 40, 40); // 40% from time
-    return Math.min(stepProgress + timeProgress, 100);
-  };
 
   // Function to mark a demo step as completed
   const markStepCompleted = (stepName: string) => {
@@ -514,24 +515,29 @@ export const ImmersiveDemoModal = ({
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
-                  <div className='text-sm text-white/70'>{estimatedTime} mins&nbsp;</div>
-                  |
-                  <div className={`text-sm flex items-center space-x-1 ${
-                    completedSteps.length === 0 
-                      ? 'text-gray-400' 
-                      : completedSteps.length === demoSteps.length
-                        ? 'text-green-400'
-                        : 'text-brand-300'
-                  }`}>
+                  <div className='text-sm text-white/70'>{estimatedTime} mins&nbsp;</div>|
+                  <div
+                    className={`text-sm flex items-center space-x-1 ${
+                      completedSteps.length === 0
+                        ? 'text-gray-400'
+                        : completedSteps.length === demoSteps.length
+                          ? 'text-green-400'
+                          : 'text-brand-300'
+                    }`}
+                  >
                     {completedSteps.length === demoSteps.length ? (
                       <>
-                        <span className='font-semibold text-green-300'>({completedSteps.length}/{demoSteps.length} steps)</span>
+                        <span className='font-semibold text-green-300'>
+                          ({completedSteps.length}/{demoSteps.length} steps)
+                        </span>
                         <span className='text-green-400'>✅</span>
                       </>
                     ) : (
                       <>
                         <span className='w-2 h-2 rounded-full bg-current mr-1'></span>
-                        <span>({completedSteps.length}/{demoSteps.length} steps)</span>
+                        <span>
+                          ({completedSteps.length}/{demoSteps.length} steps)
+                        </span>
                       </>
                     )}
                   </div>
@@ -707,7 +713,9 @@ export const ImmersiveDemoModal = ({
                     }}
                     disabled={isCompletingDemo || completedSteps.length < demoSteps.length}
                     className={`px-8 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer relative z-10 ${
-                      isCompletingDemo || completedSteps.length < demoSteps.length ? 'opacity-50 cursor-not-allowed' : ''
+                      isCompletingDemo || completedSteps.length < demoSteps.length
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
                     }`}
                     style={{ pointerEvents: 'auto' }}
                     type='button'
@@ -729,8 +737,8 @@ export const ImmersiveDemoModal = ({
                     {isCompletingDemo
                       ? 'Processing demo completion...'
                       : completedSteps.length < demoSteps.length
-                      ? `Complete all ${demoSteps.length} steps to enable demo completion`
-                      : 'Click to complete the demo and provide feedback'}
+                        ? `Complete all ${demoSteps.length} steps to enable demo completion`
+                        : 'Click to complete the demo and provide feedback'}
                   </p>
                 </div>
               </div>

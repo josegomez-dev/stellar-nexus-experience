@@ -176,7 +176,12 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
             badge => badge.name === 'Welcome Explorer'
           );
           if (welcomeExplorerBadge) {
-            showBadgeAnimation(welcomeExplorerBadge, 50);
+            showBadgeAnimation({
+              ...welcomeExplorerBadge,
+              earnedAt: new Date().toISOString(),
+              rarity: welcomeExplorerBadge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+              category: welcomeExplorerBadge.category as 'demo' | 'milestone' | 'achievement' | 'special'
+            }, 50);
           }
         }, 1000);
       }
@@ -325,7 +330,12 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
               () => {
                 const badgeConfig = getAllBadges().find(b => b.name === badge.name);
                 if (badgeConfig) {
-                  showBadgeAnimation(badgeConfig, badge.pointsValue);
+                  showBadgeAnimation({
+                    ...badgeConfig,
+                    earnedAt: new Date().toISOString(),
+                    rarity: badgeConfig.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+                    category: badgeConfig.category as 'demo' | 'milestone' | 'achievement' | 'special'
+                  }, badge.pointsValue);
                 }
               },
               2000 + index * 5500

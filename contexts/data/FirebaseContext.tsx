@@ -97,7 +97,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           if (welcomeBadge) {
             showBadgeAnimation({
               ...welcomeBadge,
-              createdAt: new Date(),
+              earnedAt: new Date().toISOString(),
+              rarity: welcomeBadge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+              category: welcomeBadge.category as 'demo' | 'milestone' | 'achievement' | 'special'
             }, welcomeBadge.earningPoints);
           }
         } else {
@@ -181,7 +183,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         if (welcomeBadge) {
           showBadgeAnimation({
             ...welcomeBadge,
-            createdAt: new Date(),
+            earnedAt: new Date().toISOString(),
+            rarity: welcomeBadge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+            category: welcomeBadge.category as 'demo' | 'milestone' | 'achievement' | 'special'
           }, welcomeBadge.earningPoints);
         }
         
@@ -290,7 +294,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         if (badge) {
           showBadgeAnimation({
             ...badge,
-            createdAt: new Date(),
+            earnedAt: new Date().toISOString(),
+            rarity: badge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+            category: badge.category as 'demo' | 'milestone' | 'achievement' | 'special'
           }, badge.earningPoints);
         }
       }
@@ -325,13 +331,14 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
         // Add badge earning transaction if badge was awarded
         if (badgeToAward) {
+          const earnedBadge = getBadgeById(badgeToAward);
           await addTransaction({
             hash: `badge-earned-${badgeToAward}-${Date.now()}`,
             status: 'success',
             message: `Earned ${badgeToAward.replace('_', ' ')} badge`,
             type: 'badge_earned',
             badgeId: badgeToAward,
-            points: badge ? badge.earningPoints : 0,
+            points: earnedBadge ? earnedBadge.earningPoints : 0,
           });
         }
       } catch (transactionError) {

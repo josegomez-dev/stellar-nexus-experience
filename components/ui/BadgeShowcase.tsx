@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
-import { UserBadge, Badge, getAllBadges } from '@/lib/firebase/firebase-types';
+import { Badge } from '@/contexts/auth/AuthContext';
+import { getAllBadges } from '@/lib/firebase/firebase-types';
+
+// Extend Badge interface to include earningPoints
+interface BadgeWithPoints extends Badge {
+  earningPoints: number;
+}
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 
 interface BadgeShowcaseProps {
@@ -12,13 +18,14 @@ interface BadgeShowcaseProps {
 }
 
 export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
-  const { userBadges, badges } = useFirebase();
+  const { account, badges } = useFirebase();
+  const userBadges = account?.badgesEarned || [];
   const { walletData } = useGlobalWallet();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<BadgeWithPoints | null>(null);
 
-  const earnedBadgeIds = userBadges.map(ub => ub.badgeId);
+  const earnedBadgeIds = userBadges;
   const allBadges = badges.length > 0 ? badges : getAllBadges();
 
   // Filter badges based on category and rarity
@@ -29,8 +36,8 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
   });
 
   const getBadgeProgress = (badgeId: string): number => {
-    const userBadge = userBadges.find(ub => ub.badgeId === badgeId);
-    return userBadge ? 100 : 0; // In new system, badges are either earned (100%) or not earned (0%)
+    const isEarned = userBadges.includes(badgeId);
+    return isEarned ? 100 : 0; // In new system, badges are either earned (100%) or not earned (0%)
   };
 
   const isBadgeEarned = (badgeId: string): boolean => {
@@ -170,7 +177,15 @@ export const BadgeShowcase = ({ isOpen, onClose }: BadgeShowcaseProps) => {
               return (
                 <div
                   key={badge.id}
-                  onClick={() => setSelectedBadge({ ...badge, createdAt: new Date() })}
+                  onClick={() =>
+                    setSelectedBadge({
+                      ...badge,
+                      earnedAt: new Date().toISOString(),
+                      icon: 'trophy',
+                      rarity: badge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
+                      category: badge.category as 'demo' | 'milestone' | 'achievement' | 'special',
+                    })
+                  }
                   className={`relative p-4 rounded-xl border cursor-pointer transition-all duration-300 hover:scale-105 ${
                     isEarned
                       ? 'bg-gradient-to-br from-brand-500/20 to-accent-500/20 border-brand-400/50 border-2 shadow-lg'

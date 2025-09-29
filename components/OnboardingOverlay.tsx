@@ -16,16 +16,15 @@ interface OnboardingStep {
 interface OnboardingOverlayProps {
   isActive: boolean;
   onComplete: () => void;
-  currentDemo: string;
+  // currentDemo prop removed as unused
 }
 
 export const OnboardingOverlay = ({
   isActive,
   onComplete,
-  currentDemo,
 }: OnboardingOverlayProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [highlightedElement, setHighlightedElement] = useState<HTMLElement | null>(null);
+  // Removed unused highlightedElement state
   const [activeTab, setActiveTab] = useState('hello-milestone');
   const [ttsEnabled, setIsTtsEnabled] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -419,7 +418,7 @@ export const OnboardingOverlay = ({
       const step = steps[currentStep];
       speakMessage(`${step.title}. ${step.description}`);
     }
-  }, [currentStep, activeTab, isActive, ttsEnabled]);
+  }, [currentStep, activeTab, isActive, ttsEnabled, speakMessage, steps]);
 
   // Cleanup TTS on unmount
   useEffect(() => {
