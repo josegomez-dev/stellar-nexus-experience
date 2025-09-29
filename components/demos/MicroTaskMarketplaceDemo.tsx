@@ -6,6 +6,7 @@ import { useToast } from '@/contexts/ui/ToastContext';
 import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
+import { useImmersiveProgress } from '@/components/ui/modals/ImmersiveDemoModal';
 import Image from 'next/image';
 import {
   useFundEscrow,
@@ -49,6 +50,12 @@ export const MicroTaskMarketplaceDemo = ({
   const { addTransaction, updateTransaction } = useTransactionHistory();
   // Demo completion tracking is now handled by FirebaseContext
   const { completeDemo } = useFirebase();
+  const { updateProgress } = useImmersiveProgress();
+  
+  // Smart step tracking for micro-task marketplace
+  const [tasksPosted, setTasksPosted] = useState(0);
+  const [tasksAccepted, setTasksAccepted] = useState(0);
+  const [tasksCompleted, setTasksCompleted] = useState(0);
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({
@@ -269,6 +276,14 @@ export const MicroTaskMarketplaceDemo = ({
         asset: 'USDC',
       });
 
+      // Track progress milestone - task posting
+      const newTaskCount = tasksPosted + 1;
+      setTasksPosted(newTaskCount);
+      
+      if (newTaskCount === 1) {
+        updateProgress('task_posted');
+      }
+
       addToast({
         type: 'success',
         title: '✅ Task Posted!',
@@ -370,6 +385,18 @@ export const MicroTaskMarketplaceDemo = ({
           : t
       );
       setTasks(updatedTasks);
+
+      // Track progress milestone - accept task
+      const newAcceptCount = tasksAccepted + 1;
+      setTasksAccepted(newAcceptCount);
+      
+      if (newAcceptCount === 1) {
+        updateProgress('task_accepted');
+      } else if (newAcceptCount === 2) {
+        updateProgress('task_accepted_2');
+      } else if (newAcceptCount === 3) {
+        updateProgress('task_accepted_3');
+      }
 
       addToast({
         type: 'success',
@@ -473,6 +500,16 @@ export const MicroTaskMarketplaceDemo = ({
         asset: 'USDC',
       });
 
+      // Track progress milestone - complete work
+      const newCompleteCount = tasksCompleted + 1;
+      setTasksCompleted(newCompleteCount);
+      
+      if (newCompleteCount === 1) {
+        updateProgress('work_completed');
+      } else if (newCompleteCount === 2) {
+        updateProgress('work_completed_2');
+      }
+
       addToast({
         type: 'success',
         title: '✅ Deliverable Submitted!',
@@ -528,6 +565,8 @@ export const MicroTaskMarketplaceDemo = ({
         amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
         asset: 'USDC',
       });
+
+      // Note: Approval tracking removed since it's not required for demo completion
 
       addToast({
         type: 'success',
@@ -589,6 +628,8 @@ export const MicroTaskMarketplaceDemo = ({
         amount: `${(parseInt(task.budget) / 100000).toFixed(1)} USDC`,
         asset: 'USDC',
       });
+
+      // Note: Payment release tracking removed since it's not required for demo completion
 
       addToast({
         type: 'success',
@@ -722,8 +763,6 @@ export const MicroTaskMarketplaceDemo = ({
     setPostedTasks(new Set());
     setTaskDeliverables({});
     setDemoCompleted(false);
-    setContractId('');
-    setEscrowData(null);
 
     addToast({
       type: 'warning',
@@ -977,7 +1016,7 @@ export const MicroTaskMarketplaceDemo = ({
                               task.status.replace('-', ' ').slice(1)}
                           </span>
                           <span className='text-white/50'>
-                            {task.client === walletData?.publicKey ? '👔 Client' : '👷 Worker'}
+                            {task.client === walletData?.publicKey ? '👔 Client' : task.worker === walletData?.publicKey ? '👷 Worker' : '👤 Other'}
                           </span>
                         </div>
                       </div>

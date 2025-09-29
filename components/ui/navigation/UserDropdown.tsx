@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
@@ -17,6 +18,7 @@ export const UserDropdown = () => {
   const { isAuthenticated, user, getUserStats, updateUser } = useAuth();
   const { account } = useFirebase();
   const { addToast } = useToast();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -364,7 +366,11 @@ export const UserDropdown = () => {
               <>
                 <a
                   href='/'
-                  className='w-full flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm ${
+                    pathname === '/'
+                      ? 'text-white bg-blue-500/20 border border-blue-500/30'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
                 >
                   <span className='text-lg'>
                     <Image
@@ -393,9 +399,11 @@ export const UserDropdown = () => {
                       }
                     }}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm mb-2 ${
-                      miniGamesUnlocked
-                        ? 'text-white/80 hover:text-white hover:bg-white/10'
-                        : 'text-white/40 cursor-not-allowed'
+                      !miniGamesUnlocked
+                        ? 'text-white/40 cursor-not-allowed'
+                        : pathname === '/mini-games'
+                        ? 'text-white bg-purple-500/20 border border-purple-500/30'
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <span className='text-lg'>

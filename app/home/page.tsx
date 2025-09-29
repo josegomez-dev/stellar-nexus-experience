@@ -102,6 +102,7 @@ const DemoSelector = ({
   demoStats,
   completeDemo,
   hasBadge,
+  hasClappedDemo,
   clapDemo,
   refreshAccountData,
 }: {
@@ -115,16 +116,67 @@ const DemoSelector = ({
   demoStats: any[];
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
+  hasClappedDemo: (demoId: string) => Promise<boolean>;
   clapDemo: (demoId: string) => Promise<void>;
   refreshAccountData: () => Promise<void>;
 }) => {
   // Removed old AccountContext usage
   const { showBadgeAnimation } = useBadgeAnimation();
   const [isClaimingNexusMaster, setIsClaimingNexusMaster] = useState(false);
+  
+  // State for clap animations
+  const [clapAnimations, setClapAnimations] = useState<Record<string, boolean>>({});
+  
+  // State for tracking which demos user has clapped for
+  const [userClappedDemos, setUserClappedDemos] = useState<string[]>([]);
 
-  // Handle demo clapping
+  // Load clapped demos when component mounts or account changes
+  useEffect(() => {
+    const loadClappedDemos = async () => {
+      if (!isConnected || !account) {
+        setUserClappedDemos([]);
+        return;
+      }
+
+      try {
+        // Extract clapped demos from account.clappedDemos
+        let clappedArray: string[] = [];
+        if (Array.isArray(account.clappedDemos)) {
+          clappedArray = account.clappedDemos;
+        } else if (account.clappedDemos && typeof account.clappedDemos === 'object') {
+          clappedArray = Object.values(account.clappedDemos) as string[];
+        }
+        
+        setUserClappedDemos(clappedArray);
+      } catch (error) {
+        console.error('Error loading clapped demos:', error);
+        setUserClappedDemos([]);
+      }
+    };
+
+    loadClappedDemos();
+  }, [isConnected, account]);
+
+  // Handle demo clapping with enhanced animations and sound
   const handleClapDemo = async (demoId: string, demoTitle: string) => {
+    // Play clap sound
+    const audio = new Audio('/sounds/clapSound.mp3');
+    audio.volume = 0.6; // Adjust volume
+    audio.play().catch(console.error); // Silent fallback if audio fails
+    
+    // Trigger visual animation
+    setClapAnimations(prev => ({ ...prev, [demoId]: true }));
+    
+    // Hide animation after 1.5 seconds
+    setTimeout(() => {
+      setClapAnimations(prev => ({ ...prev, [demoId]: false }));
+    }, 1500);
+
+    // Call the backend clap function
     await clapDemo(demoId);
+    
+    // Update local state to reflect the new clap
+    setUserClappedDemos(prev => [...prev, demoId]);
   };
 
   // Get badge information for each demo - memoized to prevent setState during render
@@ -171,18 +223,18 @@ const DemoSelector = ({
     // Find the demo stats from Firebase
     const stats = demoStats.find(stat => stat.demoId === demoId);
 
-    // Show "???" for curiosity when wallet is not connected
+    // Show stats for non-connected users too (but no clap functionality)
     if (!isConnected) {
       return {
-        claps: 0,
+        claps: stats?.totalClaps || 0, // Show actual claps even when not connected
         hasClapped: false,
-        completions: '???',
+        completions: stats?.totalCompletions || 0, // Show actual completions even when not connected
       };
     }
 
     return {
       claps: stats?.totalClaps || 0,
-      hasClapped: false, // TODO: Implement per-user clap tracking
+      hasClapped: userClappedDemos.includes(demoId),
       completions: stats?.totalCompletions || 0,
     };
   };
@@ -558,7 +610,7 @@ const DemoSelector = ({
                               </div>
                               <div className='text-xs text-white/60'>Completions:</div>
                             </div>
-                            <div>
+                            <div className='relative'>
                               <button
                                 onClick={e => {
                                   e.stopPropagation();
@@ -571,7 +623,7 @@ const DemoSelector = ({
                                     : !isConnected
                                       ? 'text-gray-500 cursor-not-allowed'
                                       : 'text-emerald-400 hover:text-emerald-300'
-                                }`}
+                                } ${clapAnimations[demo.id] ? 'animate-bounce' : ''}`}
                                 title={
                                   stats.hasClapped
                                     ? 'Already clapped!'
@@ -580,13 +632,27 @@ const DemoSelector = ({
                                       : 'Clap for this demo!'
                                 }
                               >
-                                <div className='text-lg font-bold'>
+                                <div className={`text-lg font-bold transition-transform duration-200 ${
+                                  clapAnimations[demo.id] ? 'animate-pulse' : ''
+                                }`}>
                                   {stats.hasClapped ? '✓' : '👏🏻'}
                                 </div>
                                 <div className='text-xs text-white/60'>
                                   {stats.hasClapped ? 'Clapped!' : 'Clap'}
                                 </div>
                               </button>
+                              
+                              {/* Animated sparks effect */}
+                              {clapAnimations[demo.id] && (
+                                <>
+                                  <div className='absolute inset-0 pointer-events-none'>
+                                    <div className='absolute top-0 left-1/2 w-1 h-1 bg-yellow-400 rounded-full animate-ping'></div>
+                                    <div className='absolute top-1 left-1/3 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping' style={{animationDelay: '0.1s'}}></div>
+                                    <div className='absolute top-1 right-1/3 w-0.5 h-0.5 bg-yellow-300 rounded-full animate-ping' style={{animationDelay: '0.2s'}}></div>
+                                    <div className='absolute bottom-0 left-1/2 w-1 h-1 bg-emerald-400 rounded-full animate-ping' style={{animationDelay: '0.3s'}}></div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         );
@@ -894,18 +960,6 @@ const DemoSelector = ({
                             <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                           )}
                         </button>
-
-                        {/* Rotating Nexus Logo */}
-                        <div className='absolute -right-20 bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>
-                          <Image
-                            src='/images/logo/logoicon.png'
-                            alt='Nexus Logo'
-                            width={100}
-                            height={100}
-                            className='animate-spin'
-                            style={{ animationDuration: '2s', width: 'auto', height: 'auto' }}
-                          />
-                        </div>
                       </div>
                     )
                   ) : !isNexusMasterCard ? (
@@ -929,7 +983,7 @@ const DemoSelector = ({
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
-  const { account, demoStats, completeDemo, hasBadge, clapDemo, refreshAccountData } = useFirebase();
+  const { account, demoStats, completeDemo, hasBadge, hasClappedDemo, clapDemo, refreshAccountData, isLoading: firebaseLoading, isInitialized } = useFirebase();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
   // Note: submitFeedback removed from simplified Firebase context
   // Removed old AccountService usage
@@ -1301,7 +1355,7 @@ export default function HomePageContent() {
                     {/* Title with Enhanced Styling */}
                     <h1
                       className='relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl'
-                      style={{ zIndex: 1000, marginTop: '-250px' }}
+                      style={{ zIndex: 1000, marginTop: '-243.5px' }}
                     >
                       STELLAR NEXUS EXPERIENCE
                     </h1>
@@ -1316,54 +1370,59 @@ export default function HomePageContent() {
 
                   {/* Tutorial Buttons */}
                   <div className='flex justify-center gap-6 mb-8'>
-                    <button
-                      onClick={() => {
-                        const tutorialSection = document.getElementById('interactive-tutorial');
-                        if (tutorialSection) {
-                          tutorialSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start',
-                          });
-                        }
-                      }}
-                      className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x3'
-                    >
-                      <span className='text-xl'>👨‍🏫&nbsp;</span>
-                      <span>Tutorial</span>
-                      <span className='text-xl'>&nbsp;→</span>
-                    </button>
+                    <Tooltip content='Scroll down to the tutorial section'>
+                      <button
+                        onClick={() => {
+                          const tutorialSection = document.getElementById('interactive-tutorial');
+                          if (tutorialSection) {
+                            tutorialSection.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'start',
+                            });
+                          }
+                        }}
+                        className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                      >
+                        <span className='text-xl'>👨‍🏫&nbsp;</span>
+                        <span>Tutorial</span>
+                        <span className='text-xl'>&nbsp;→</span>
+                      </button>
+                    </Tooltip>
 
-                    <button
-                      onClick={() => setLeaderboardSidebarOpen(true)}
-                      className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
-                    >
-                      <span className='text-xl'>🏆&nbsp;</span>
-                      <span>Leaderboard</span>
-                      <span className='text-xl'>&nbsp;→</span>
-                    </button>
+                    <Tooltip content='Join the Challenge!'>
+                      <button
+                        onClick={() => setLeaderboardSidebarOpen(true)}
+                        className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                      >
+                        <span className='text-xl'>🏆&nbsp;</span>
+                        <span>Leaderboard</span>
+                        <span className='text-xl'>&nbsp;→</span>
+                      </button>
+                    </Tooltip>
 
-                    <button
-                      onClick={() => setShowTechTree(true)}
-                      disabled={false}
-                      className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
-                      title='Explore the Trustless Work Tech Tree'
-                    >
-                      <span>Trustless Work Tech Tree</span>
-                      <span className='text-xl'>
-                        <Image
-                          src='/images/icons/demos.png'
-                          alt='Trustless Work Tech Tree'
-                          width={50}
-                          height={20}
-                          style={{ width: 'auto', height: 'auto' }}
-                        />
-                      </span>
-                      {!isConnected && (
-                        <span className='absolute -top-1 -right-1 text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium shadow-lg'>
-                          👁️ View
+                    <Tooltip content='Explore the Trustless Work Tech Tree'>
+                      <button
+                        onClick={() => setShowTechTree(true)}
+                        disabled={false}
+                        className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                      >
+                        <span>Trustless Work Tech Tree</span>
+                        <span className='text-xl'>
+                          <Image
+                            src='/images/icons/demos.png'
+                            alt='Trustless Work Tech Tree'
+                            width={50}
+                            height={20}
+                            style={{ width: 'auto', height: 'auto' }}
+                          />
                         </span>
-                      )}
-                    </button>
+                        {!isConnected && (
+                          <span className='absolute -top-1 -right-1 text-xs bg-blue-500 text-white px-2 py-1 rounded-full font-medium shadow-lg'>
+                            👁️ View
+                          </span>
+                        )}
+                      </button>
+                    </Tooltip>
 
                     <Tooltip
                       position='bottom'
@@ -1420,20 +1479,54 @@ export default function HomePageContent() {
 
             <section className=' mx-auto px-4'>
               <div className=' mx-auto'>
-                <DemoSelector
-                  activeDemo={activeDemo}
-                  setActiveDemo={setActiveDemo}
-                  setShowImmersiveDemo={setShowImmersiveDemo}
-                  isConnected={isConnected}
-                  addToast={addToast}
-                  account={account}
-                  demos={demos}
-                  demoStats={demoStats}
-                  completeDemo={completeDemo}
-                  hasBadge={hasBadge}
-                  clapDemo={clapDemo}
-                  refreshAccountData={refreshAccountData}
-                />
+                {isConnected && firebaseLoading && !isInitialized && (
+                  <div className='text-center py-16'>
+                    {/* Loading Spinner */}
+                    <div className='inline-block'>
+                      <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mb-4'></div>
+                    </div>
+                    
+                    {/* Loading Title */}
+                    <h3 className='text-lg font-semibold text-white mb-2'>Loading Your Account...</h3>
+                    
+                    {/* Loading Description */}
+                    <p className='text-white/70 text-sm mb-6'>
+                      Preparing demo cards and loading your progress data
+                    </p>
+                    
+                    {/* Animated Loading Dots */}
+                    <div className='flex justify-center items-center space-x-2'>
+                      <div className='animate-pulse bg-blue-400/30 rounded-full h-3 w-3'></div>
+                      <div className='animate-pulse bg-blue-400/50 rounded-full h-3 w-3' style={{ animationDelay: '0.3s' }}></div>
+                      <div className='animate-pulse bg-blue-400/30 rounded-full h-3 w-3' style={{ animationDelay: '0.6s' }}></div>
+                    </div>
+                    
+                    {/* Progress Steps */}
+                    <div className='mt-6 space-y-2'>
+                      <div className='text-xs text-white/60'>• Loading account information</div>
+                      <div className='text-xs text-white/60'>• Fetching demo statistics</div>
+                      <div className='text-xs text-white/60'>• Preparing demo interfaces</div>
+                    </div>
+                  </div>
+                )}
+                
+                {(!isConnected || !firebaseLoading || isInitialized) && (
+                  <DemoSelector
+                    activeDemo={activeDemo}
+                    setActiveDemo={setActiveDemo}
+                    setShowImmersiveDemo={setShowImmersiveDemo}
+                    isConnected={isConnected}
+                    addToast={addToast}
+                    account={account}
+                    demos={demos}
+                    demoStats={demoStats}
+                    completeDemo={completeDemo}
+                    hasBadge={hasBadge}
+                    hasClappedDemo={hasClappedDemo}
+                    clapDemo={clapDemo}
+                    refreshAccountData={refreshAccountData}
+                  />
+                )}
               </div>
             </section>
 
@@ -1706,32 +1799,6 @@ export default function HomePageContent() {
         isOpen={leaderboardSidebarOpen}
         onClose={() => setLeaderboardSidebarOpen(false)}
       />
-
-      {/* Floating Leaderboard Button */}
-      {!leaderboardSidebarOpen && (
-        <div className="fixed right-4 z-30" style={{ top: '22%' }}>
-          <Tooltip content="Join the Challenge!" position="left">
-              <button
-                onClick={() => setLeaderboardSidebarOpen(true)}
-                className="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-110 border-2 border-white/20 hover:border-white/40 p-0"
-                title="View Global Leaderboard"
-              >
-                <div className="flex flex-col items-center space-y-1">
-                  <span className="text-2xl">🏆</span>
-                  <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                    Leaderboard
-                  </span>
-                </div>
-                
-                {/* Animated ring */}
-                <div className="absolute inset-0 rounded-full border-2 border-purple-400/50 animate-ping"></div>
-                
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-lg group-hover:blur-xl transition-all duration-300"></div>
-              </button>
-            </Tooltip>
-        </div>
-      )}
 
       {/* Toast Container */}
       <ToastContainer />

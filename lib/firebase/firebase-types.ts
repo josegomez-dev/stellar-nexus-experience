@@ -34,6 +34,7 @@ export interface Account {
   totalPoints: number; // Accumulated points from badges
   demosCompleted: string[]; // Array of demo IDs completed
   badgesEarned: string[]; // Array of badge IDs earned
+  clappedDemos: string[]; // Array of demo IDs that the user has clapped for
   
   // Transaction history - now stored in separate collection
 }

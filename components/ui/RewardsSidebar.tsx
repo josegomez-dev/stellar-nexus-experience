@@ -375,7 +375,10 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
           <div className='space-y-3'>
             <div
               className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
-              onClick={() => setIsMainAchievementsCollapsed(!isMainAchievementsCollapsed)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMainAchievementsCollapsed(!isMainAchievementsCollapsed);
+              }}
             >
               <div className='w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full'></div>
               <h3 className='text-lg font-semibold text-white'>Demo Badges</h3>
@@ -439,11 +442,14 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         <div>
           <div className='text-lg font-semibold text-white'>Transaction History</div>
           <div className='text-sm text-gray-400'>
-            {transactions.length} total transactions
+            {transactions.length} session transactions
           </div>
         </div>
         <button
-          onClick={refreshTransactions}
+          onClick={(e) => {
+            e.stopPropagation();
+            refreshTransactions();
+          }}
           disabled={isLoading}
           className='px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors disabled:opacity-50'
         >
@@ -451,12 +457,23 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         </button>
       </div>
 
+      {/* Session Info Banner */}
+      <div className='bg-blue-500/10 border border-blue-500/20 rounded-lg p-3'>
+        <div className='flex items-center space-x-2 mb-1'>
+          <span className='text-blue-400 text-sm'>ℹ️</span>
+          <span className='text-blue-300 text-sm font-medium'>Live Session Data</span>
+        </div>
+        <p className='text-blue-200/80 text-xs'>
+          Transactions shown here are from your current browsing session and reset when you refresh the page.
+        </p>
+      </div>
+
       <div className='max-h-96 overflow-y-auto'>
         <TransactionList
           transactions={transactions}
           isLoading={isLoading}
           showFilters={true}
-          emptyMessage="No transactions found. Complete some demos to see your transaction history!"
+          emptyMessage="No transactions in this session yet. Your demo interactions will appear here."
         />
       </div>
     </div>
@@ -484,6 +501,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
       {isOpen && (
         <div
           ref={dropdownRef}
+          onClick={(e) => e.stopPropagation()}
           className='absolute right-0 mt-2 w-80 bg-black/80 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[80vh]'
         >
           {/* Enhanced background blur overlay */}
@@ -493,7 +511,13 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
           {/* Header */}
           <div className='relative z-10 flex items-center justify-between p-4 border-b border-white/10'>
             <h2 className='text-xl font-bold text-white'>Nexus Account</h2>
-            <button onClick={onClose} className='text-gray-400 hover:text-white transition-colors'>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }} 
+              className='text-gray-400 hover:text-white transition-colors'
+            >
               ✕
             </button>
           </div>
@@ -503,7 +527,10 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
             {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab(tab.id as any);
+                }}
                 className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-white bg-white/10 border-b-2 border-blue-500'

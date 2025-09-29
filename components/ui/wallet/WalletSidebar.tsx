@@ -674,7 +674,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         transactions={recentTransactions}
                         compact={true}
                         limit={5}
-                        emptyMessage="No recent transactions"
+                        emptyMessage="No recent session transactions"
                       />
                     </div>
                   )}
@@ -685,7 +685,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         onClick={() => setShowTransactionHistory(true)}
                         className='text-xs text-white/60 hover:text-white/80 transition-colors underline'
                       >
-                        View {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+                        View {transactions.length} session transaction{transactions.length !== 1 ? 's' : ''}
                       </button>
                     </div>
                   )}
@@ -693,7 +693,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                   {transactions.length === 0 && (
                     <div className='text-center py-4'>
                       <div className='text-2xl mb-2'>📝</div>
-                      <p className='text-xs text-gray-400'>No transactions yet</p>
+                      <p className='text-xs text-gray-400'>No transactions in this session</p>
                     </div>
                   )}
                 </div>
@@ -718,7 +718,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       </div>
 
       {/* Floating Wallet Control Buttons - Always show, different styling based on connection */}
-      <div className='fixed top-20 right-4 z-30 flex flex-col space-y-3'>
+      <div className='fixed top-36 right-4 z-30 flex flex-col space-y-3'>
         {/* Open Wallet Button */}
         {!isOpen && (
           <>

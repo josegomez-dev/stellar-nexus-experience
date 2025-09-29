@@ -62,7 +62,7 @@ export const accountService = {
   },
 
   // Update account progress
-  async updateAccountProgress(walletAddress: string, progress: Partial<Pick<Account, 'level' | 'experience' | 'totalPoints' | 'demosCompleted' | 'badgesEarned'>>): Promise<void> {
+  async updateAccountProgress(walletAddress: string, progress: Partial<Pick<Account, 'level' | 'experience' | 'totalPoints' | 'demosCompleted' | 'badgesEarned' | 'clappedDemos'>>): Promise<void> {
     const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
     await updateDoc(accountRef, {
       ...progress,
@@ -144,6 +144,45 @@ export const accountService = {
     return account && account.demosCompleted && Array.isArray(account.demosCompleted) 
       ? account.demosCompleted.includes(demoId) 
       : false;
+  },
+
+  // Add clapped demo
+  async addClappedDemo(walletAddress: string, demoId: string): Promise<void> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    if (account) {
+      let currentClappedDemos: string[] = [];
+      
+      if (Array.isArray(account.clappedDemos)) {
+        currentClappedDemos = account.clappedDemos;
+      } else if (account.clappedDemos && typeof account.clappedDemos === 'object') {
+        // Convert object to array (Firebase sometimes stores arrays as objects)
+        currentClappedDemos = Object.values(account.clappedDemos);
+      }
+      
+      if (!currentClappedDemos.includes(demoId)) {
+        const updatedClappedDemos = [...currentClappedDemos, demoId];
+        await this.updateAccountProgress(walletAddress, {
+          clappedDemos: updatedClappedDemos,
+        });
+      }
+    }
+  },
+
+  // Check if account has clapped for demo
+  async hasClappedDemo(walletAddress: string, demoId: string): Promise<boolean> {
+    const account = await this.getAccountByWalletAddress(walletAddress);
+    
+    if (!account || !account.clappedDemos) return false;
+    
+    // Handle both array and object formats
+    if (Array.isArray(account.clappedDemos)) {
+      return account.clappedDemos.includes(demoId);
+    } else if (typeof account.clappedDemos === 'object') {
+      const clappedDemosArray = Object.values(account.clappedDemos);
+      return clappedDemosArray.includes(demoId);
+    }
+    
+    return false;
   },
 
   // Add transaction to user's history
@@ -363,7 +402,13 @@ export const demoStatsService = {
   },
 
   // Increment clap count
-  async incrementClap(demoId: string): Promise<void> {
+  async incrementClap(demoId: string, walletAddress: string): Promise<void> {
+    // Check if user has already clapped for this demo
+    const hasClapped = await accountService.hasClappedDemo(walletAddress, demoId);
+    if (hasClapped) {
+      throw new Error('User has already clapped for this demo');
+    }
+
     const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
     const existingStats = await this.getDemoStats(demoId);
     
@@ -373,10 +418,15 @@ export const demoStatsService = {
       await this.initializeDemoStats(demoId, demoName);
     }
 
+    // Add clap to demo stats
+    const updatedStats = await this.getDemoStats(demoId);
     await updateDoc(demoStatsRef, {
-      totalClaps: existingStats ? existingStats.totalClaps + 1 : 1,
+      totalClaps: updatedStats ? updatedStats.totalClaps + 1 : 1,
       updatedAt: serverTimestamp(),
     });
+
+    // Add clap to user's clapped demos list
+    await accountService.addClappedDemo(walletAddress, demoId);
   },
 
   // Helper function to get demo name
@@ -412,6 +462,7 @@ export const firebaseUtils = {
       totalPoints: 0,
       demosCompleted: [],
       badgesEarned: [],
+      clappedDemos: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       lastLoginAt: new Date(),

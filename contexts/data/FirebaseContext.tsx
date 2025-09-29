@@ -36,6 +36,7 @@ interface FirebaseContextType {
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
   hasCompletedDemo: (demoId: string) => Promise<boolean>;
+  hasClappedDemo: (demoId: string) => Promise<boolean>;
   refreshAccountData: () => Promise<void>;
   clapDemo: (demoId: string) => Promise<void>;
 }
@@ -374,6 +375,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     }
   };
 
+  // Check if account has clapped for demo
+  const hasClappedDemo = async (demoId: string): Promise<boolean> => {
+    if (!walletData?.publicKey) return false;
+    
+    try {
+      return await accountService.hasClappedDemo(walletData.publicKey, demoId);
+    } catch (error) {
+      return false;
+    }
+  };
+
   // Refresh account data
   const refreshAccountData = async () => {
     await Promise.all([loadAccountData(), loadDemoStats()]);
@@ -381,9 +393,18 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Clap a demo
   const clapDemo = async (demoId: string) => {
+    if (!walletData?.publicKey) {
+      addToast({
+        title: 'Error',
+        message: 'Please connect your wallet to clap for demos.',
+        type: 'error',
+      });
+      return;
+    }
+
     try {
-      await demoStatsService.incrementClap(demoId);
-      await loadDemoStats(); // Refresh demo stats
+      await demoStatsService.incrementClap(demoId, walletData.publicKey);
+      await Promise.all([loadAccountData(), loadDemoStats()]); // Refresh both account data and demo stats
       
       addToast({
         title: '👏 Demo Clapped!',
@@ -393,9 +414,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       });
     } catch (error) {
       console.error('Failed to clap demo:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to clap demo. Please try again.';
       addToast({
         title: 'Error',
-        message: 'Failed to clap demo. Please try again.',
+        message: errorMessage,
         type: 'error',
       });
     }
@@ -412,6 +434,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     completeDemo,
     hasBadge,
     hasCompletedDemo,
+    hasClappedDemo,
     refreshAccountData,
     clapDemo,
   };
