@@ -449,11 +449,8 @@ export const HelloMilestoneDemo = ({
 
           // Demo completion tracking is now handled by FirebaseContext
 
-          // Trigger feedback modal after completion
-          if (onDemoComplete) {
-            const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
-            onDemoComplete('hello-milestone', 'Baby Steps to Riches', completionTimeInMinutes);
-          }
+          // Note: Feedback modal will be triggered when user clicks "Complete Demo" button
+          // in the Immersive Demo Modal, not here when the demo steps complete
         } catch (error) {
           // Error handling removed for demo completion
         }
