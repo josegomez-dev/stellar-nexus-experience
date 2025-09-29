@@ -99,12 +99,12 @@ export const ImmersiveDemoModal = ({
         'Release Funds',
       ],
       'micro-marketplace': [
-        'Browse Tasks',
-        'Accept Task',
-        'Initialize Escrow',
-        'Complete Work',
-        'Approve Work',
-        'Release Payment',
+        'Post Task',
+        'Accept Task #1',
+        'Complete Work #1',
+        'Accept Task #2', 
+        'Complete Work #2',
+        'Accept Task #3',
       ],
       'milestone-voting': [
         'Initialize Escrow',
@@ -150,10 +150,12 @@ export const ImmersiveDemoModal = ({
       funds_released: 'Release Funds',
       dispute_raised: 'Raise Dispute',
       dispute_resolved: 'Resolve Dispute',
-      task_accepted: 'Accept Task',
-      work_completed: 'Complete Work',
-      work_approved: 'Approve Work',
-      payment_released: 'Release Payment',
+      task_posted: 'Post Task',
+      task_accepted: 'Accept Task #1',
+      work_completed: 'Complete Work #1',
+      task_accepted_2: 'Accept Task #2',
+      work_completed_2: 'Complete Work #2',
+      task_accepted_3: 'Accept Task #3',
       voting_completed: 'Vote on Milestone',
     };
 
@@ -512,9 +514,26 @@ export const ImmersiveDemoModal = ({
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
-                  <div className='text-sm text-white/70'>{Math.round(progress)}%</div>
-                  <div className='text-xs text-white/50'>
-                    ({completedSteps.length}/{demoSteps.length} steps)
+                  <div className='text-sm text-white/70'>{estimatedTime} mins&nbsp;</div>
+                  |
+                  <div className={`text-sm flex items-center space-x-1 ${
+                    completedSteps.length === 0 
+                      ? 'text-gray-400' 
+                      : completedSteps.length === demoSteps.length
+                        ? 'text-green-400'
+                        : 'text-brand-300'
+                  }`}>
+                    {completedSteps.length === demoSteps.length ? (
+                      <>
+                        <span className='font-semibold text-green-300'>({completedSteps.length}/{demoSteps.length} steps)</span>
+                        <span className='text-green-400'>✅</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className='w-2 h-2 rounded-full bg-current mr-1'></span>
+                        <span>({completedSteps.length}/{demoSteps.length} steps)</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -686,9 +705,9 @@ export const ImmersiveDemoModal = ({
                       e.stopPropagation();
                       handleCompleteDemo();
                     }}
-                    disabled={isCompletingDemo}
+                    disabled={isCompletingDemo || completedSteps.length < demoSteps.length}
                     className={`px-8 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer relative z-10 ${
-                      isCompletingDemo ? 'opacity-50 cursor-not-allowed' : ''
+                      isCompletingDemo || completedSteps.length < demoSteps.length ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                     style={{ pointerEvents: 'auto' }}
                     type='button'
@@ -698,6 +717,10 @@ export const ImmersiveDemoModal = ({
                         <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
                         <span>Completing Demo...</span>
                       </div>
+                    ) : completedSteps.length < demoSteps.length ? (
+                      <div className='flex items-center space-x-2'>
+                        <span>⏳ Complete Steps First</span>
+                      </div>
                     ) : (
                       '🎉 Complete Demo'
                     )}
@@ -705,6 +728,8 @@ export const ImmersiveDemoModal = ({
                   <p className='text-xs text-white/50 mt-2'>
                     {isCompletingDemo
                       ? 'Processing demo completion...'
+                      : completedSteps.length < demoSteps.length
+                      ? `Complete all ${demoSteps.length} steps to enable demo completion`
                       : 'Click to complete the demo and provide feedback'}
                   </p>
                 </div>

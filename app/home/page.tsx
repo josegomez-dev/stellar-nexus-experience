@@ -740,17 +740,8 @@ const DemoSelector = ({
                             setIsClaimingNexusMaster(true);
                             try {
                               // Use the completeDemo function to properly award the Nexus Master badge
+                              // Note: completeDemo will automatically show the badge animation
                               await completeDemo('nexus-master', 100, 1); // Complete Nexus Master demo with perfect score and 1 minute completion time
-
-                              // Show badge animation
-                              const nexusMasterBadgeConfig = getBadgeById('nexus_master');
-                              if (nexusMasterBadgeConfig) {
-                                const fullBadge = {
-                                  ...nexusMasterBadgeConfig,
-                                  createdAt: new Date(),
-                                };
-                                showBadgeAnimation(fullBadge, 200);
-                              }
 
                               // Show success toast
                               addToast({

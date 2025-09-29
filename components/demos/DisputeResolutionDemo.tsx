@@ -18,6 +18,7 @@ import { useToast } from '@/contexts/ui/ToastContext';
 import { useTransactionHistory } from '@/contexts/data/TransactionContext';
 import { Tooltip } from '@/components/ui/Tooltip';
 import ConfettiAnimation from '@/components/ui/animations/ConfettiAnimation';
+import { useImmersiveProgress } from '@/components/ui/modals/ImmersiveDemoModal';
 import Image from 'next/image';
 
 interface Dispute {
@@ -49,6 +50,7 @@ export const DisputeResolutionDemo = () => {
   const { addTransaction, updateTransaction } = useTransactionHistory();
   // Demo completion tracking is now handled by FirebaseContext
   const { completeDemo } = useFirebase();
+  const { updateProgress } = useImmersiveProgress();
   const [contractId, setContractId] = useState<string>('');
   const [escrowData, setEscrowData] = useState<any>(null);
   const [currentRole, setCurrentRole] = useState<'client' | 'worker' | 'arbitrator'>('client');
@@ -232,6 +234,9 @@ export const DisputeResolutionDemo = () => {
 
       updateTransaction(txHash, 'success', 'Dispute resolution escrow initialized successfully');
 
+      // Track progress milestone
+      updateProgress('escrow_initialized');
+
       addToast({
         type: 'success',
         title: 'Escrow Initialized!',
@@ -291,6 +296,9 @@ export const DisputeResolutionDemo = () => {
       setEscrowData(result.escrow);
 
       updateTransaction(txHash, 'success', 'Dispute resolution escrow funded with 10 USDC');
+
+      // Track progress milestone
+      updateProgress('escrow_funded');
 
       addToast({
         type: 'success',
@@ -366,6 +374,9 @@ export const DisputeResolutionDemo = () => {
         'success',
         `Milestone "${milestone?.title}" completed successfully`
       );
+
+      // Track progress milestone
+      updateProgress('milestone_completed');
 
       addToast({
         type: 'success',
@@ -546,6 +557,9 @@ export const DisputeResolutionDemo = () => {
         `Dispute raised for "${milestone?.title}" - awaiting arbitrator resolution`
       );
 
+      // Track progress milestone
+      updateProgress('dispute_raised');
+
       addToast({
         type: 'warning',
         title: 'Dispute Raised!',
@@ -655,6 +669,9 @@ export const DisputeResolutionDemo = () => {
         'success',
         `Dispute for "${milestone?.title}" resolved: ${resolution}`
       );
+
+      // Track progress milestone
+      updateProgress('dispute_resolved');
 
       addToast({
         type: 'success',
@@ -774,6 +791,9 @@ export const DisputeResolutionDemo = () => {
       setMilestones(updatedMilestones);
 
       updateTransaction(txHash, 'success', 'All funds released successfully');
+
+      // Track progress milestone
+      updateProgress('funds_released');
 
       addToast({
         type: 'success',
@@ -1218,14 +1238,6 @@ export const DisputeResolutionDemo = () => {
                     </p>
                   </div>
                 )}
-                {/* Notification for client role when milestones are completed */}
-                {currentRole !== 'client' && milestones.some(m => m.status === 'completed') && (
-                  <div className='px-4 py-2 bg-green-500/10 border border-green-400/30 rounded-lg'>
-                    <p className='text-green-300 text-sm'>
-                      👔 Switch to <strong>Client</strong> role to approve or dispute milestones
-                    </p>
-                  </div>
-                )}
                 {/* Notification for arbitrator role when disputes exist */}
                 {currentRole !== 'arbitrator' && disputes.some(d => d.status === 'open') && (
                   <div className='px-4 py-2 bg-orange-500/10 border border-orange-400/30 rounded-lg'>
@@ -1235,6 +1247,7 @@ export const DisputeResolutionDemo = () => {
                   </div>
                 )}
               </div>
+              
               <div className='space-y-6'>
                 {milestones.map(milestone => (
                   <div
@@ -1271,16 +1284,33 @@ export const DisputeResolutionDemo = () => {
                         )}
 
 
-                        {/* Client Actions */}
+                        {/* Client Actions - Demo Focus: Dispute Resolution */}
                         {currentRole === 'client' && milestone.status === 'completed' && (
-                          <div className='space-y-2'>
+                          <div className='space-y-3'>
+                            {/* UI Guide for demo */}
+                            <div className='px-3 py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg'>
+                              <p className='text-blue-300 text-xs'>
+                                💡 <strong>Demo Focus:</strong> Experience the dispute resolution process!
+                              </p>
+                            </div>
+                            
+                            {/* Approved button - disabled for demo flow */}
                             <button
-                              onClick={() => handleApproveMilestone(milestone.id)}
-                              disabled={milestoneLoadingStates[milestone.id]}
-                              className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
+                              onClick={() => {
+                                addToast({
+                                  type: 'info',
+                                  title: '🚫 Approve Disabled',
+                                  message: 'For this demo, please use the dispute resolution flow to complete the full arbitration experience',
+                                  duration: 5000,
+                                });
+                              }}
+                              disabled
+                              className='px-4 py-2 bg-gray-500/20 border border-gray-400/30 rounded-lg text-gray-400 cursor-not-allowed transition-colors block w-full opacity-60'
                             >
-                              {milestoneLoadingStates[milestone.id] ? 'Approving...' : 'Approve'}
+                              Approve (Disabled for Demo)
                             </button>
+                            
+                            {/* Dispute button - main action for demo */}
                             <button
                               onClick={() => handleStartDispute(milestone.id)}
                               disabled={
@@ -1289,7 +1319,7 @@ export const DisputeResolutionDemo = () => {
                               }
                               className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors block w-full'
                             >
-                              {milestoneLoadingStates[milestone.id] ? 'Starting...' : 'Dispute'}
+                              {milestoneLoadingStates[milestone.id] ? 'Starting Dispute...' : '🚨 Raise Dispute (Demo)'}
                             </button>
                           </div>
                         )}
@@ -1347,48 +1377,12 @@ export const DisputeResolutionDemo = () => {
                         </div>
                       </div>
 
-                      {/* Arbitrator Actions */}
-                      {currentRole === 'arbitrator' && dispute.status === 'open' && (
-                        <div className='space-y-2'>
-                          <div className='mb-3'>
-                            <input
-                              type='text'
-                              value={resolutionReasons[dispute.id] || ''}
-                              onChange={e =>
-                                setResolutionReasons(prev => ({
-                                  ...prev,
-                                  [dispute.id]: e.target.value,
-                                }))
-                              }
-                              placeholder='Enter resolution reason...'
-                              className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-400/50'
-                            />
-                          </div>
-                          <div className='grid grid-cols-3 gap-2'>
-                            <button
-                              onClick={() => handleResolveDispute(dispute.id, 'approve')}
-                              disabled={hooks.resolveDispute.isLoading}
-                              className='px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm'
-                            >
-                              {hooks.resolveDispute.isLoading ? '...' : 'Approve'}
-                            </button>
-                            <button
-                              onClick={() => handleResolveDispute(dispute.id, 'reject')}
-                              disabled={hooks.resolveDispute.isLoading}
-                              className='px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors text-sm'
-                            >
-                              {hooks.resolveDispute.isLoading ? '...' : 'Reject'}
-                            </button>
-                            <button
-                              onClick={() => handleResolveDispute(dispute.id, 'modify')}
-                              disabled={hooks.resolveDispute.isLoading}
-                              className='px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-yellow-200 transition-colors text-sm'
-                            >
-                              {hooks.resolveDispute.isLoading ? '...' : 'Modify'}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      {/* View-only for non-arbitrators */}
+                      <div className='px-3 py-2 bg-orange-500/10 border border-orange-400/30 rounded-lg'>
+                        <p className='text-orange-300 text-sm'>
+                          ⚖️ <strong>Switch to Arbitrator role</strong> to resolve this dispute
+                        </p>
+                      </div>
 
                       {/* Resolved Dispute Info */}
                       {dispute.status === 'resolved' && (
