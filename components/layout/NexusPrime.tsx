@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 
 interface NexusPrimeProps {
@@ -105,7 +105,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   };
 
   // Character messages based on context
-  const characterMessages = {
+  const characterMessages = useMemo(() => ({
     home: {
       welcome:
         'Greetings, mortal! I am NEXUS PRIME, guardian of the STELLAR NEXUS. Ready to explore the ESCROW ARSENAL?',
@@ -129,7 +129,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       disconnected:
         'A Stellar wallet connection is required to access the ESCROW ARSENAL. Connect to proceed!',
     },
-  };
+  }), []);
 
   // Get appropriate message based on current context
   const getContextMessage = useCallback(() => {
@@ -430,7 +430,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                           <span className='inline-block w-2 h-4 bg-cyan-400 ml-1'></span>
                         )}
                       </p>
-
                     </div>
                   )}
                 </div>
