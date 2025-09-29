@@ -1475,16 +1475,6 @@ export const HelloMilestoneDemo = ({
         <div className='mb-8'>
           <div className='flex items-center justify-between mb-4'>
             <h3 className='text-xl font-semibold text-white'>Demo Progress</h3>
-            {/* <div className='flex items-center space-x-4'>
-              {demoStarted && (
-                <button
-                  onClick={resetDemo}
-                  className='px-4 py-2 bg-danger-500/20 hover:bg-danger-500/30 border border-danger-400/30 rounded-lg text-danger-300 hover:text-danger-200 transition-colors'
-                >
-                  🔄 Reset Demo
-                </button>
-              )}
-            </div> */}
           </div>
 
           <div className='space-y-4'>
@@ -1729,6 +1719,32 @@ export const HelloMilestoneDemo = ({
             </div>
           </div>
         )}
+
+        {/* Demo Instructions */}
+        <div className='mt-8 p-6 bg-brand-500/10 border border-brand-400/30 rounded-lg'>
+          <h3 className='text-lg font-semibold text-brand-300 mb-3'>📚 How This Demo Works</h3>
+          <ul className='text-brand-200 text-sm space-y-2'>
+            <li>
+              • <strong>Initialize Escrow:</strong> Deploy a smart contract on Stellar Testnet that will hold funds securely
+            </li>
+            <li>
+              • <strong>Fund Escrow:</strong> Transfer USDC from your wallet into the locked escrow contract
+            </li>
+            <li>
+              • <strong>Complete Milestone:</strong> Worker signals work completion, updating contract state
+            </li>
+            <li>
+              • <strong>Client Approval:</strong> Client reviews deliverables and approves the completed work
+            </li>
+            <li>
+              • <strong>Fund Release:</strong> Smart contract automatically releases funds to worker upon approval
+            </li>
+          </ul>
+          <p className='text-brand-200 text-sm mt-3'>
+            This demonstrates the core trustless escrow mechanism that powers decentralized work platforms,
+            ensuring fair payment distribution without requiring intermediaries or trust between parties.
+          </p>
+        </div>
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
