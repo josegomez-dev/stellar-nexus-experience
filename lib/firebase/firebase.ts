@@ -6,13 +6,14 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nexus-55966.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nexus-55966",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nexus-55966.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "48419163339",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:48419163339:web:637eadbce2dadb24605f4e",
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-80T26CG9PM"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCVq9jAmW912-4SClPuip6bbPy5fnWE7no',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'nexus-55966.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'nexus-55966',
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'nexus-55966.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '48419163339',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:48419163339:web:637eadbce2dadb24605f4e',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-80T26CG9PM',
 };
 
 const app = initializeApp(firebaseConfig);
@@ -21,8 +22,8 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Connect to emulators in development
-if (process.env.NODE_ENV === 'development') {
+// Connect to emulators in development (only if explicitly enabled)
+if (process.env.NODE_ENV === 'development' && process.env.FIREBASE_USE_EMULATOR === 'true') {
   try {
     // Only connect if not already connected
     if (!(db as any)._delegate._databaseId.projectId.includes('demo-')) {
@@ -44,7 +45,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Initialize Analytics
 if (typeof window !== 'undefined') {
-  isSupported().then((supported) => {
+  isSupported().then(supported => {
     if (supported) {
       getAnalytics(app);
     }
