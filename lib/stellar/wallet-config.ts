@@ -17,6 +17,17 @@ export const assetConfig = {
   defaultAsset: config.asset.defaultAsset,
   platformFee: config.asset.platformFee,
   defaultEscrowDeadlineDays: config.asset.defaultEscrowDeadlineDays,
+  // Supported assets for demos
+  USDC: {
+    code: 'USDC',
+    issuer: 'GCKFBEIYTKP6RK4ZPRPZQK7S6KU5KBM5V4ZQIT7I4GVJPZDFHYMEL3B', // Testnet USDC issuer
+    decimals: 7,
+  },
+  XLM: {
+    code: 'XLM',
+    issuer: 'native',
+    decimals: 7,
+  },
 };
 
 // App configuration
