@@ -161,7 +161,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     return String(message)
       .replace(/undefined/g, '')
       .trim();
-  }, [currentPage, currentDemo, walletConnected]);
+  }, [currentPage, currentDemo, walletConnected, characterMessages]);
 
   // Simple typewriter effect for messages
   const startTypewriter = useCallback((message: string) => {
