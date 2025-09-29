@@ -189,6 +189,57 @@ export const HelloMilestoneDemo = ({
     };
   }, [transactionTimeouts]);
 
+  // Helper function to update transaction status and check for step completion
+  const updateTransactionStatusAndCheckCompletion = (
+    txHash: string,
+    status: 'pending' | 'success' | 'failed',
+    message: string
+  ) => {
+    // Only update transaction with success/failed status (updateTransaction expects these)
+    if (status === 'success' || status === 'failed') {
+      updateTransaction(txHash, status, message);
+    }
+    setTransactionStatuses(prev => ({ ...prev, [txHash]: status }));
+
+    if (status === 'success') {
+      // Clear any pending timeout for this transaction
+      const timeout = transactionTimeouts[txHash];
+      if (timeout) {
+        clearTimeout(timeout);
+        setTransactionTimeouts(prev => {
+          const newTimeouts = { ...prev };
+          delete newTimeouts[txHash];
+          return newTimeouts;
+        });
+      }
+
+      // Find which step this transaction belongs to
+      const stepId = Object.keys(pendingTransactions).find(
+        key => pendingTransactions[key] === txHash
+      );
+      if (stepId) {
+        // Remove from pending
+        setPendingTransactions(prev => {
+          const newPending = { ...prev };
+          delete newPending[stepId];
+          return newPending;
+        });
+
+        // Allow progression to next step
+        const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
+        const currentIndex = stepOrder.indexOf(stepId);
+        if (currentIndex !== -1 && currentIndex + 1 <= stepOrder.length) {
+          setCurrentStep(currentIndex + 1);
+
+          // Show success
+          setTimeout(() => {
+            setShowProcessExplanation(false);
+          }, 1000);
+        }
+      }
+    }
+  };
+
   // Auto-completion countdown effect for better UX
   useEffect(() => {
     const intervals: Record<string, NodeJS.Timeout> = {};
@@ -258,57 +309,6 @@ export const HelloMilestoneDemo = ({
 
     const status = transactionStatuses[txHash];
     return status === 'success';
-  };
-
-  // Helper function to update transaction status and check for step completion
-  const updateTransactionStatusAndCheckCompletion = (
-    txHash: string,
-    status: 'pending' | 'success' | 'failed',
-    message: string
-  ) => {
-    // Only update transaction with success/failed status (updateTransaction expects these)
-    if (status === 'success' || status === 'failed') {
-      updateTransaction(txHash, status, message);
-    }
-    setTransactionStatuses(prev => ({ ...prev, [txHash]: status }));
-
-    if (status === 'success') {
-      // Clear any pending timeout for this transaction
-      const timeout = transactionTimeouts[txHash];
-      if (timeout) {
-        clearTimeout(timeout);
-        setTransactionTimeouts(prev => {
-          const newTimeouts = { ...prev };
-          delete newTimeouts[txHash];
-          return newTimeouts;
-        });
-      }
-
-      // Find which step this transaction belongs to
-      const stepId = Object.keys(pendingTransactions).find(
-        key => pendingTransactions[key] === txHash
-      );
-      if (stepId) {
-        // Remove from pending
-        setPendingTransactions(prev => {
-          const newPending = { ...prev };
-          delete newPending[stepId];
-          return newPending;
-        });
-
-        // Allow progression to next step
-        const stepOrder = ['initialize', 'fund', 'complete', 'approve', 'release'];
-        const currentIndex = stepOrder.indexOf(stepId);
-        if (currentIndex !== -1 && currentIndex + 1 <= stepOrder.length) {
-          setCurrentStep(currentIndex + 1);
-
-          // Show success
-          setTimeout(() => {
-            setShowProcessExplanation(false);
-          }, 1000);
-        }
-      }
-    }
   };
 
   const getStepStatus = (

@@ -235,7 +235,7 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                 {demos.map(demo => (
                   <div key={demo.id} className='bg-white/5 rounded-xl p-6 border border-white/20'>
                     <div className='flex items-center justify-between mb-4'>
-                      <h4 className='font-semibold text-white capitalize'>{demo.name}</h4>
+                      <h4 className='font-semibold text-white capitalize'>{demo.title}</h4>
                       <div className='flex items-center space-x-2'>
                         <span className='text-brand-300 text-sm'>Available Demo</span>
                         <button

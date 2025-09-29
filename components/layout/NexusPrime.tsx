@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 
 interface NexusPrimeProps {
@@ -16,12 +16,13 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentMessage, setCurrentMessage] = useState('');
-  const [messageQueue, setMessageQueue] = useState<string[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(true);
+  const lastProcessedMessageRef = useRef('');
+  const typewriterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Tutorial steps for interactive guidance
   const tutorialSteps = [
@@ -131,7 +132,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   };
 
   // Get appropriate message based on current context
-  const getContextMessage = () => {
+  const getContextMessage = useCallback(() => {
     let message = '';
 
     if (currentPage === 'home') {
@@ -160,41 +161,54 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     return String(message)
       .replace(/undefined/g, '')
       .trim();
-  };
+  }, [currentPage, currentDemo, walletConnected]);
 
-  // Typewriter effect for messages
+  // Simple typewriter effect for messages
+  const startTypewriter = useCallback((message: string) => {
+    // Clear any existing timeout
+    if (typewriterTimeoutRef.current) {
+      clearTimeout(typewriterTimeoutRef.current);
+    }
+
+    setCurrentMessage('');
+    setIsTyping(true);
+
+    let index = 0;
+    const typeNextChar = () => {
+      if (index < message.length) {
+        const char = message[index];
+        if (char && char !== 'undefined') {
+          setCurrentMessage(prev => prev + char);
+        }
+        index++;
+        typewriterTimeoutRef.current = setTimeout(typeNextChar, 50);
+      } else {
+        setIsTyping(false);
+        typewriterTimeoutRef.current = null;
+      }
+    };
+
+    // Start typing after a small delay
+    typewriterTimeoutRef.current = setTimeout(typeNextChar, 100);
+  }, []);
+
+  // Effect to trigger typewriter when context changes
   useEffect(() => {
     const message = getContextMessage();
-    if (message && message !== currentMessage) {
-      setMessageQueue(prev => [...(prev || []), message]);
+    if (message && message !== lastProcessedMessageRef.current) {
+      lastProcessedMessageRef.current = message;
+      startTypewriter(message);
     }
-  }, [currentPage, currentDemo, walletConnected, currentMessage]);
+  }, [getContextMessage, startTypewriter]);
 
+  // Cleanup timeout on unmount
   useEffect(() => {
-    if (messageQueue && messageQueue.length > 0 && !isTyping) {
-      const nextMessage = messageQueue[0];
-      if (nextMessage) {
-        setMessageQueue(prev => prev.slice(1));
-        setCurrentMessage('');
-        setIsTyping(true);
-
-        let index = 0;
-        const typeInterval = setInterval(() => {
-          if (index < nextMessage.length) {
-            const char = nextMessage[index];
-            // Only add valid characters, skip undefined or null
-            if (char && char !== 'undefined') {
-              setCurrentMessage(prev => prev + char);
-            }
-            index++;
-          } else {
-            setIsTyping(false);
-            clearInterval(typeInterval);
-          }
-        }, 50);
+    return () => {
+      if (typewriterTimeoutRef.current) {
+        clearTimeout(typewriterTimeoutRef.current);
       }
-    }
-  }, [messageQueue, isTyping]);
+    };
+  }, []);
 
   // Removed problematic auto-hide mechanism that was causing button to disappear
 
@@ -417,50 +431,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                         )}
                       </p>
 
-                      {/* TTS Controls for Regular Chat */}
-                      <div className='mt-2 flex items-center justify-between'>
-                        <span className='text-xs text-white/60'>Voice Assistant:</span>
-                        <div className='flex items-center space-x-2'>
-                          {/* Play Button */}
-                          <button
-                            onClick={() => {
-                              if (ttsEnabled && currentMessage) {
-                                speakMessage(currentMessage);
-                              }
-                            }}
-                            disabled={!ttsEnabled || !currentMessage || isSpeaking}
-                            className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
-                              !ttsEnabled || !currentMessage || isSpeaking
-                                ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                            }`}
-                            title={
-                              !ttsEnabled
-                                ? 'Voice is disabled'
-                                : !currentMessage
-                                  ? 'No message to play'
-                                  : isSpeaking
-                                    ? 'Already speaking'
-                                    : 'Play message with voice'
-                            }
-                          >
-                            {isSpeaking ? '⏸️' : '▶️'}
-                          </button>
-
-                          {/* TTS Toggle */}
-                          <button
-                            onClick={toggleTts}
-                            className={`px-3 py-1 rounded-lg transition-all duration-200 hover:scale-105 text-xs ${
-                              ttsEnabled
-                                ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                                : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                            }`}
-                            title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-                          >
-                            {ttsEnabled ? '🔊 ON' : '🔇 OFF'}
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </div>

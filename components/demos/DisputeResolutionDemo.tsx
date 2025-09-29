@@ -616,10 +616,6 @@ export const DisputeResolutionDemo = () => {
         message: `Resolving dispute for "${milestone?.title}" (${resolution})...`,
         type: 'dispute',
         demoId: 'dispute-resolution',
-        amount: milestone?.amount,
-        asset: 'USDC',
-        type: 'dispute',
-        demoId: 'dispute-resolution',
         amount: milestone?.amount ? (parseInt(milestone.amount) / 100000).toFixed(1) : '0',
         asset: 'USDC',
       });
@@ -725,8 +721,6 @@ export const DisputeResolutionDemo = () => {
         demoId: 'dispute-resolution',
         amount: milestone?.amount,
         asset: 'USDC',
-        type: 'dispute',
-        demoId: 'dispute-resolution',
       });
 
       addToast({
@@ -779,10 +773,6 @@ export const DisputeResolutionDemo = () => {
         message: 'Releasing all funds...',
         type: 'release',
         demoId: 'dispute-resolution',
-        amount: '10',
-        asset: 'USDC',
-        type: 'release',
-        demoId: 'dispute-resolution',
         amount: milestones.reduce((total, m) => total + parseInt(m.amount) / 100000, 0).toFixed(1),
         asset: 'USDC',
       });
@@ -821,8 +811,6 @@ export const DisputeResolutionDemo = () => {
         demoId: 'dispute-resolution',
         amount: '10',
         asset: 'USDC',
-        type: 'release',
-        demoId: 'dispute-resolution',
       });
 
       addToast({
@@ -848,8 +836,6 @@ export const DisputeResolutionDemo = () => {
     setEscrowData(null);
     setCurrentRole('client');
     setDisputes([]);
-    setNewDisputeReason('');
-    setResolutionReason('');
 
     // Reset milestone statuses
     const resetMilestones = milestones.map(m => ({ ...m, status: 'pending' as const }));

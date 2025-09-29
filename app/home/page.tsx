@@ -826,7 +826,6 @@ const DemoSelector = ({
                                 title: '👑 Nexus Master Unlocked!',
                                 message:
                                   'You have mastered all trustless work demos! Earned 200 XP and the legendary Nexus Master badge!',
-                                duration: 6000,
                               });
 
                               // Refresh account data to update UI
@@ -836,7 +835,6 @@ const DemoSelector = ({
                                 type: 'error',
                                 title: '❌ Claim Failed',
                                 message: 'Failed to claim Nexus Master badge. Please try again.',
-                                duration: 4000,
                               });
                             } finally {
                               setIsClaimingNexusMaster(false);
@@ -1005,10 +1003,10 @@ export default function HomePageContent() {
     isLoading: firebaseLoading,
     isInitialized,
   } = useFirebase();
+  const { addToast: addToastHook } = useToast();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
   // Note: submitFeedback removed from simplified Firebase context
   // Removed old AccountService usage
-  const { addToast } = useToast();
 
   // Check if user has unlocked mini-games access (earned all badges including Nexus Master)
   const miniGamesUnlocked = useMemo(() => {
@@ -1194,7 +1192,7 @@ export default function HomePageContent() {
           feedbackDemoData.completionTime
         );
 
-        addToast({
+        addToastHook({
           title: '🎉 Demo Completed!',
           message: `Great job completing ${feedbackDemoData.demoName}!`,
           type: 'success',
@@ -1203,7 +1201,7 @@ export default function HomePageContent() {
       }
     } catch (error) {
       // Failed to complete demo - error is shown in toast
-      addToast({
+      addToastHook({
         title: 'Error',
         message: 'Failed to complete demo. Please try again.',
         type: 'error',
@@ -1502,7 +1500,7 @@ export default function HomePageContent() {
                     setActiveDemo={setActiveDemo}
                     setShowImmersiveDemo={setShowImmersiveDemo}
                     isConnected={isConnected}
-                    addToast={addToast}
+                    addToast={(toast) => addToastHook({ ...toast, duration: 5000 })}
                     account={account}
                     demos={demos}
                     demoStats={demoStats}
@@ -1724,7 +1722,6 @@ export default function HomePageContent() {
           setShowOnboarding(false);
           setHasSeenOnboarding(true);
         }}
-        currentDemo={activeDemo}
       />
 
       {/* Immersive Demo Modal */}
