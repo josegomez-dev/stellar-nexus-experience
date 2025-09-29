@@ -117,7 +117,7 @@ const DemoSelector = ({
     type: 'success' | 'error' | 'info' | 'warning';
   }) => void;
   account: Account | null;
-  demos: typeof PREDEFINED_DEMOS;
+  demos: DemoCard[];
   demoStats: DemoStats[];
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
@@ -204,7 +204,7 @@ const DemoSelector = ({
   // Removed unused hasEarnedBadge function
 
   const getClapStats = (demoId: string) => {
-    const demo = demos.find((d: DemoCard) => d.id === demoId);
+    const demo = demos.find((d) => d.id === demoId);
 
     if (!demo) {
       return {
@@ -1044,6 +1044,7 @@ export default function HomePageContent() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
   const [showTechTree, setShowTechTree] = useState(false);
 
@@ -1067,36 +1068,54 @@ export default function HomePageContent() {
     }
   }, []);
 
-  // Preloader effect - only on first load
+  // Preloader effect - track actual loading progress
   useEffect(() => {
     if (!isLoading) return; // Skip if already loaded
 
     const loadingSteps = [
-      { progress: 20, message: 'Initializing Demo Suite...' },
-      { progress: 40, message: 'Loading Smart Contracts...' },
-      { progress: 60, message: 'Preparing Interactive Demos...' },
-      { progress: 80, message: 'Setting up Wallet Integration...' },
+      { progress: 10, message: 'Initializing STELLAR NEXUS...' },
+      { progress: 25, message: 'Connecting to Stellar Network...' },
+      { progress: 40, message: 'Loading Demo Suite...' },
+      { progress: 60, message: 'Fetching Demo Statistics...' },
+      { progress: 80, message: 'Preparing Smart Contracts...' },
+      { progress: 95, message: 'Finalizing Experience...' },
       { progress: 100, message: 'Ready to Launch!' },
     ];
 
     let currentStep = 0;
     const interval = setInterval(() => {
       if (currentStep < loadingSteps.length) {
+        setLoadingStep(currentStep);
         setLoadingProgress(loadingSteps[currentStep].progress);
         currentStep++;
       } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsLoading(false);
-          // Mark that the page has been loaded
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('homePageLoaded', 'true');
-          }
-        }, 500);
+        // Wait for Firebase initialization and demo stats to complete
+        if (isInitialized && demoStats.length >= 0) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsLoading(false);
+            // Mark that the page has been loaded
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('homePageLoaded', 'true');
+            }
+          }, 500);
+        }
       }
-    }, 800);
+    }, 1000);
 
     return () => clearInterval(interval);
+  }, [isLoading, isInitialized, demoStats]);
+
+  // Fallback timeout to ensure preloader doesn't get stuck
+  useEffect(() => {
+    if (isLoading) {
+      const timeout = setTimeout(() => {
+        console.log('Preloader timeout - forcing completion');
+        setIsLoading(false);
+      }, 15000); // 15 second timeout
+
+      return () => clearTimeout(timeout);
+    }
   }, [isLoading]);
 
   // Listen for wallet sidebar state changes
@@ -1219,7 +1238,20 @@ export default function HomePageContent() {
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
         {/* Preloader Screen */}
-        <PreloaderScreen isLoading={isLoading} loadingProgress={loadingProgress} />
+        <PreloaderScreen 
+          isLoading={isLoading} 
+          loadingProgress={loadingProgress}
+          loadingSteps={[
+            'Initializing STELLAR NEXUS...',
+            'Connecting to Stellar Network...',
+            'Loading Demo Suite...',
+            'Fetching Demo Statistics...',
+            'Preparing Smart Contracts...',
+            'Finalizing Experience...',
+            'Ready to Launch!',
+          ]}
+          currentStep={loadingStep}
+        />
 
         {/* Main Content - Only show when not loading */}
         {!isLoading && (

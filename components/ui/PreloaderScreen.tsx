@@ -10,6 +10,7 @@ interface PreloaderScreenProps {
   loadingSteps?: string[];
   logoPath?: string;
   logoAlt?: string;
+  currentStep?: number;
 }
 
 export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
@@ -25,6 +26,7 @@ export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
   ],
   logoPath = '/images/logo/logoicon.png',
   logoAlt = 'STELLAR NEXUS',
+  currentStep = 0,
 }) => {
   if (!isLoading) return null;
 
@@ -73,24 +75,49 @@ export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
         {/* Subtitle */}
         <p className='text-xl text-brand-300 mb-8 animate-pulse'>{subtitle}</p>
 
-        {/* Loading Bar */}
-        <div className='w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto mb-8'>
+        {/* Enhanced Loading Bar */}
+        <div className='w-96 h-4 bg-white/10 rounded-full overflow-hidden mx-auto mb-8 relative'>
           <div
-            className='h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full transition-all duration-500 ease-out'
+            className='h-full bg-gradient-to-r from-brand-500 via-brand-600 to-accent-600 rounded-full transition-all duration-700 ease-out relative'
+            style={{ width: `${loadingProgress}%` }}
+          >
+            {/* Shimmer effect */}
+            <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse'></div>
+          </div>
+          {/* Progress bar glow */}
+          <div 
+            className='absolute top-0 h-full bg-gradient-to-r from-brand-400/50 to-accent-400/50 rounded-full blur-sm transition-all duration-700 ease-out'
             style={{ width: `${loadingProgress}%` }}
           ></div>
         </div>
 
-        {/* Loading Steps */}
-        <div className='space-y-2 text-white/80'>
+        {/* Current Loading Step */}
+        <div className='mb-6'>
+          <p className='text-lg text-brand-300 font-medium animate-pulse'>
+            {loadingSteps[currentStep] || loadingSteps[loadingSteps.length - 1]}
+          </p>
+        </div>
+
+        {/* Loading Steps Progress */}
+        <div className='space-y-1 text-white/60 max-w-md mx-auto'>
           {loadingSteps.map((step, index) => (
-            <p
+            <div
               key={index}
-              className='animate-fadeInUp'
-              style={{ animationDelay: `${0.5 + index * 0.5}s` }}
+              className={`flex items-center space-x-2 transition-all duration-300 ${
+                index <= currentStep ? 'text-brand-300' : 'text-white/40'
+              }`}
             >
-              {step}
-            </p>
+              <div
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index < currentStep 
+                    ? 'bg-brand-400' 
+                    : index === currentStep 
+                    ? 'bg-brand-400 animate-pulse' 
+                    : 'bg-white/20'
+                }`}
+              ></div>
+              <span className='text-sm'>{step}</span>
+            </div>
           ))}
         </div>
 

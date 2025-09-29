@@ -25,5 +25,23 @@ export const initializeAllDemoStats = async () => {
   console.log('Demo stats initialization complete!');
 };
 
+// Function to check and display current demo stats
+export const checkDemoStats = async () => {
+  try {
+    const stats = await demoStatsService.getAllDemoStats();
+    console.log('Current demo stats:', stats);
+    return stats;
+  } catch (error) {
+    console.error('Error checking demo stats:', error);
+    return [];
+  }
+};
+
 // Call this function to initialize demo stats
 // initializeAllDemoStats().catch(console.error);
+
+// Make functions available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).initializeAllDemoStats = initializeAllDemoStats;
+  (window as any).checkDemoStats = checkDemoStats;
+}

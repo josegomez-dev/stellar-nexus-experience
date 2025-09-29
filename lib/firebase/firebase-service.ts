@@ -345,10 +345,11 @@ export const demoStatsService = {
 
     querySnapshot.forEach(doc => {
       const data = doc.data();
-      stats.push({
+      const processedStat = {
         id: doc.id,
         ...convertTimestamps(data),
-      } as DemoStats);
+      } as DemoStats;
+      stats.push(processedStat);
     });
 
     return stats;

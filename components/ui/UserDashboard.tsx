@@ -12,7 +12,7 @@ interface UserDashboardProps {
 }
 
 export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
-  const { account, demos } = useFirebase();
+  const { account, demos, demoStats } = useFirebase();
   const { walletData, isConnected } = useGlobalWallet();
   // Leaderboard functionality removed
   const [showBadges, setShowBadges] = useState(false);
@@ -27,6 +27,15 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
       return `${(xp / 1000).toFixed(1)}k`;
     }
     return xp.toString();
+  };
+
+  // Helper function to get demo stats
+  const getDemoStats = (demoId: string) => {
+    const stats = demoStats.find(stat => stat.demoId === demoId);
+    return {
+      totalClaps: stats?.totalClaps || 0,
+      totalCompletions: stats?.totalCompletions || 0,
+    };
   };
 
   const formatTime = (minutes: number) => {
@@ -246,7 +255,11 @@ export const UserDashboard = ({ isOpen, onClose }: UserDashboardProps) => {
                       </div>
                       <div className='flex justify-between text-sm text-white/70'>
                         <span>Total Claps</span>
-                        <span>0</span>
+                        <span>{getDemoStats(demo.id).totalClaps}</span>
+                      </div>
+                      <div className='flex justify-between text-sm text-white/70'>
+                        <span>Total Completions</span>
+                        <span>{getDemoStats(demo.id).totalCompletions}</span>
                       </div>
                     </div>
                   </div>

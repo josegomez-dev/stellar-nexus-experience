@@ -14,6 +14,18 @@ import {
   PREDEFINED_BADGES,
   getBadgeById
 } from '../../lib/firebase/firebase-types';
+
+// DemoCard interface
+interface DemoCard {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  color: string;
+  isReady: boolean;
+  multiStakeholderRequired: boolean;
+}
 import { useBadgeAnimation } from '../ui/BadgeAnimationContext';
 import { useToast } from '../ui/ToastContext';
 import { useTransactionHistory } from './TransactionContext';
@@ -23,7 +35,7 @@ interface FirebaseContextType {
   account: Account | null;
   
   // Static data
-  demos: typeof PREDEFINED_DEMOS;
+  demos: DemoCard[];
   badges: typeof PREDEFINED_BADGES;
   demoStats: DemoStats[];
   
@@ -71,7 +83,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   // Initialize account data when wallet connects
   useEffect(() => {
     const initializeFirebase = async () => {
-      if (!walletData?.publicKey) return;
+      // Always load demo stats (public data)
+      try {
+        await loadDemoStats();
+      } catch (error) {
+        console.error('Error loading demo stats:', error);
+      }
+      
+      if (!walletData?.publicKey) {
+        setIsInitialized(true);
+        return;
+      }
       
       setIsLoading(true);
       try {
@@ -110,8 +132,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           });
         }
         
-        // Load account data and demo stats
-        await Promise.all([loadAccountData(), loadDemoStats()]);
+        // Load account data (demo stats already loaded above)
+        await loadAccountData();
         setIsInitialized(true);
       } catch (error) {
         addToast({
@@ -147,7 +169,31 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   // Load demo stats
   const loadDemoStats = async () => {
     try {
-      const stats = await demoStatsService.getAllDemoStats();
+      let stats = await demoStatsService.getAllDemoStats();
+      
+      // If no stats exist, initialize them for all demos
+      if (stats.length === 0) {
+        console.log('No demo stats found, initializing...');
+        const demos = [
+          { id: 'hello-milestone', name: 'Baby Steps to Riches' },
+          { id: 'dispute-resolution', name: 'Drama Queen Escrow' },
+          { id: 'micro-marketplace', name: 'Gig Economy Madness' },
+          { id: 'nexus-master', name: 'Nexus Master Achievement' },
+        ];
+        
+        for (const demo of demos) {
+          try {
+            await demoStatsService.initializeDemoStats(demo.id, demo.name);
+            console.log(`✅ Initialized stats for ${demo.name} (${demo.id})`);
+          } catch (error) {
+            console.error(`❌ Failed to initialize stats for ${demo.name} (${demo.id}):`, error);
+          }
+        }
+        
+        // Reload stats after initialization
+        stats = await demoStatsService.getAllDemoStats();
+      }
+      
       setDemoStats(stats);
     } catch (error) {
       console.error('Error loading demo stats:', error);
@@ -261,7 +307,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
       // Update demo stats for global tracking
       try {
-        console.log('FirebaseContext: Updating demo stats for:', demoId);
         await demoStatsService.incrementCompletion(demoId, completionTimeMinutes, finalScore);
       } catch (statsError) {
         console.error('FirebaseContext: Failed to update demo stats:', statsError);
@@ -430,9 +475,53 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     }
   };
 
+  // Convert PREDEFINED_DEMOS to DemoCard format
+  const demos: DemoCard[] = [
+    {
+      id: 'hello-milestone',
+      title: '1. Baby Steps to Riches',
+      subtitle: 'Basic Escrow Flow Demo',
+      description: PREDEFINED_DEMOS[0].description,
+      icon: '🎮',
+      color: 'from-brand-500 to-brand-400',
+      isReady: true,
+      multiStakeholderRequired: false,
+    },
+    {
+      id: 'dispute-resolution',
+      title: '2. Drama Queen Escrow',
+      subtitle: 'Dispute Resolution & Arbitration',
+      description: PREDEFINED_DEMOS[1].description,
+      icon: '🎮',
+      color: 'from-warning-500 to-warning-400',
+      isReady: true,
+      multiStakeholderRequired: false,
+    },
+    {
+      id: 'micro-marketplace',
+      title: '3. Gig Economy Madness',
+      subtitle: 'Micro-Task Marketplace',
+      description: PREDEFINED_DEMOS[2].description,
+      icon: '🎮',
+      color: 'from-accent-500 to-accent-400',
+      isReady: true,
+      multiStakeholderRequired: false,
+    },
+    {
+      id: 'nexus-master',
+      title: 'Nexus Master Achievement',
+      subtitle: 'Complete All Main Badges',
+      description: 'The ultimate achievement! Complete all three main demos to unlock the legendary Nexus Master badge and claim your place among the elite.',
+      icon: '/images/demos/economy.png',
+      color: 'from-gray-500 to-gray-400',
+      isReady: false,
+      multiStakeholderRequired: false,
+    },
+  ];
+
   const value: FirebaseContextType = {
     account,
-    demos: PREDEFINED_DEMOS,
+    demos,
     badges: PREDEFINED_BADGES,
     demoStats,
     isLoading,
