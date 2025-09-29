@@ -70,6 +70,19 @@ export const DisputeResolutionDemo = () => {
   const [demoStartTime, setDemoStartTime] = useState<number | null>(null);
   const [demoStarted, setDemoStarted] = useState(false);
 
+  // Smooth scroll to release funds section
+  const scrollToReleaseFunds = () => {
+    setTimeout(() => {
+      const releaseSection = document.querySelector('[data-section="release-funds"]');
+      if (releaseSection) {
+        releaseSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }, 1500); // Wait for UI updates to complete
+  };
+
   // Mock hooks
   const mockHooks = {
     initializeEscrow: useMockInitializeEscrow(),
@@ -434,6 +447,16 @@ export const DisputeResolutionDemo = () => {
         message: `${milestone?.title} has been approved and is ready for fund release.`,
         duration: 5000,
       });
+
+      // Check if all milestones are approved (no disputes) to scroll to release funds
+      const updatedMilestonesAfterApproval = [...milestones.filter(m => m.id !== milestoneId), 
+        { ...milestones.find(m => m.id === milestoneId)!, status: 'approved' as const }];
+      const allApproved = updatedMilestonesAfterApproval.every(m => m.status === 'approved');
+      const noOpenDisputes = !disputes.some(d => d.status === 'open');
+      
+      if (allApproved && noOpenDisputes) {
+        scrollToReleaseFunds();
+      }
     } catch (error) {
       const milestone = milestones.find(m => m.id === milestoneId);
       const txHash = `approve_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -642,6 +665,35 @@ export const DisputeResolutionDemo = () => {
 
       // Clear the specific resolution reason
       setResolutionReasons(prev => ({ ...prev, [disputeId]: '' }));
+
+      // Check if all disputes are resolved and milestones are ready for fund release
+      const updatedMilestonesAfterResolution = milestones.map(m => {
+        if (m.id === dispute.milestoneId) {
+          if (resolution === 'approve') {
+            return { ...m, status: 'approved' as const };
+          } else if (resolution === 'reject') {
+            return { ...m, status: 'cancelled' as const };
+          } else {
+            return { ...m, status: 'pending' as const };
+          }
+        }
+        return m;
+      });
+      
+      const updatedDisputesAfterResolution = disputes.map(d =>
+        d.id === disputeId
+          ? { ...d, status: 'resolved' as const }
+          : d
+      );
+      
+      const allMilestonesApprovedOrCancelled = updatedMilestonesAfterResolution.every(m => 
+        m.status === 'approved' || m.status === 'cancelled'
+      );
+      const noOpenDisputes = !updatedDisputesAfterResolution.some(d => d.status === 'open');
+      
+      if (allMilestonesApprovedOrCancelled && noOpenDisputes) {
+        scrollToReleaseFunds();
+      }
     } catch (error) {
       const dispute = disputes.find(d => d.id === disputeId);
       const milestone = milestones.find(m => m.id === dispute?.milestoneId);
@@ -826,30 +878,93 @@ export const DisputeResolutionDemo = () => {
 
           {/* Main Demo Content */}
 
-          {/* Role Selection */}
-          <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
+          {/* Role Selection - Only show after escrow is funded */}
+          {contractId && escrowData?.metadata?.funded && (
+            <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
             <h3 className='text-xl font-semibold text-white mb-4'>👤 Select Your Role</h3>
             <div className='flex space-x-4'>
-              {(['client', 'worker', 'arbitrator'] as const).map(role => (
-                <button
-                  key={role}
-                  onClick={() => setCurrentRole(role)}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                    currentRole === role
-                      ? 'bg-warning-500/30 border-2 border-warning-400/50 text-warning-200'
-                      : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
-                  }`}
-                >
-                  {role === 'client' && '👔 Client'}
-                  {role === 'worker' && '👷 Worker'}
-                  {role === 'arbitrator' && '⚖️ Arbitrator'}
-                </button>
-              ))}
+              {(['client', 'worker', 'arbitrator'] as const).map(role => {
+                // Check if worker button should be highlighted (user needs to switch to worker for pending milestones)
+                const hasPendingMilestones = milestones.some(m => m.status === 'pending');
+                const hasCompletedMilestones = milestones.some(m => m.status === 'completed');
+                const hasActiveDisputes = disputes.some(d => d.status === 'open');
+                const allMilestonesCompleted = milestones.length > 0 && milestones.every(m => m.status === 'completed' || m.status === 'approved' || m.status === 'released');
+                
+                const shouldHighlightWorker = 
+                  role === 'worker' && 
+                  hasPendingMilestones && 
+                  currentRole !== 'worker' &&
+                  contractId && 
+                  escrowData?.metadata?.funded;
+                
+                const shouldHighlightClient = 
+                  role === 'client' && 
+                  hasCompletedMilestones && 
+                  currentRole !== 'client' &&
+                  contractId && 
+                  escrowData?.metadata?.funded;
+                
+                const shouldHighlightArbitrator = 
+                  role === 'arbitrator' && 
+                  hasActiveDisputes && 
+                  currentRole !== 'arbitrator' &&
+                  contractId && 
+                  escrowData?.metadata?.funded;
+                
+                const isHighlighted = shouldHighlightWorker || shouldHighlightClient || shouldHighlightArbitrator;
+                
+                return (
+                  <div key={role} className={isHighlighted ? 'relative' : ''}>
+                    <button
+                      onClick={() => setCurrentRole(role)}
+                      className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                        currentRole === role
+                          ? 'bg-warning-500/30 border-2 border-warning-400/50 text-warning-200'
+                          : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
+                      } ${
+                        shouldHighlightWorker
+                          ? 'animate-pulse bg-blue-500/20 border-2 border-blue-400/70 text-blue-300 hover:bg-blue-500/30'
+                          : shouldHighlightClient
+                          ? 'animate-pulse bg-green-500/20 border-2 border-green-400/70 text-green-300 hover:bg-green-500/30'
+                          : shouldHighlightArbitrator
+                          ? 'animate-pulse bg-orange-500/20 border-2 border-orange-400/70 text-orange-300 hover:bg-orange-500/30'
+                          : ''
+                      }`}
+                    >
+                      {role === 'client' && '👔 Client'}
+                      {role === 'worker' && '👷 Worker'}
+                      {role === 'arbitrator' && '⚖️ Arbitrator'}
+                    </button>
+                    
+                    {/* Animated notification badge for worker button */}
+                    {shouldHighlightWorker && (
+                      <div className='absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        Complete tasks!
+                      </div>
+                    )}
+                    
+                    {/* Animated notification badge for client button */}
+                    {shouldHighlightClient && (
+                      <div className='absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        Review & Approve!
+                      </div>
+                    )}
+                    
+                    {/* Animated notification badge for arbitrator button */}
+                    {shouldHighlightArbitrator && (
+                      <div className='absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        Resolve Disputes!
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <p className='text-sm text-white/60 mt-3'>
               Current role: <span className='text-warning-300 capitalize'>{currentRole}</span>
             </p>
-          </div>
+            </div>
+          )}
 
           {/* Demo Setup */}
           {!contractId && (
@@ -991,10 +1106,135 @@ export const DisputeResolutionDemo = () => {
             </div>
           )}
 
+          {/* Active Disputes - Show first when user is Arbitrator */}
+          {contractId && escrowData?.metadata?.funded && disputes.length > 0 && currentRole === 'arbitrator' && (
+            <div className='mb-8'>
+              <h3 className='text-xl font-semibold text-white mb-6'>⚖️ Active Disputes</h3>
+              <div className='space-y-4'>
+                {disputes.map(dispute => (
+                  <div
+                    key={dispute.id}
+                    className='p-6 bg-white/5 rounded-lg border border-white/20'
+                  >
+                    <div className='flex items-start justify-between mb-4'>
+                      <div className='flex-1'>
+                        <h4 className='text-lg font-semibold text-white mb-2'>
+                          Dispute for {milestones.find(m => m.id === dispute.milestoneId)?.title}
+                        </h4>
+                        <p className='text-white/70 mb-3'>{dispute.reason}</p>
+                        <div className='flex items-center space-x-4 text-sm'>
+                          <span className='text-red-300'>Raised by: {dispute.raisedBy}</span>
+                          <span className='text-red-300'>Status: {dispute.status}</span>
+                          <span className='text-red-300'>
+                            Raised: {new Date(dispute.raisedAt).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Arbitrator Actions */}
+                      {dispute.status === 'open' && (
+                        <div className='space-y-2'>
+                          <div className='mb-3'>
+                            <input
+                              type='text'
+                              value={resolutionReasons[dispute.id] || ''}
+                              onChange={e =>
+                                setResolutionReasons(prev => ({
+                                  ...prev,
+                                  [dispute.id]: e.target.value,
+                                }))
+                              }
+                              placeholder='Enter resolution reason...'
+                              className='w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-400/50'
+                            />
+                          </div>
+                          <div className='grid grid-cols-3 gap-2'>
+                            <button
+                              onClick={() => handleResolveDispute(dispute.id, 'approve')}
+                              disabled={hooks.resolveDispute.isLoading}
+                              className='px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm'
+                            >
+                              {hooks.resolveDispute.isLoading ? '...' : 'Approve'}
+                            </button>
+                            <button
+                              onClick={() => handleResolveDispute(dispute.id, 'reject')}
+                              disabled={hooks.resolveDispute.isLoading}
+                              className='px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors text-sm'
+                            >
+                              {hooks.resolveDispute.isLoading ? '...' : 'Reject'}
+                            </button>
+                            <button
+                              onClick={() => handleResolveDispute(dispute.id, 'modify')}
+                              disabled={hooks.resolveDispute.isLoading}
+                              className='px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-yellow-200 transition-colors text-sm'
+                            >
+                              {hooks.resolveDispute.isLoading ? '...' : 'Modify'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Resolved Dispute Info */}
+                      {dispute.status === 'resolved' && (
+                        <div className='text-right'>
+                          <div
+                            className={`px-3 py-2 rounded text-sm ${
+                              dispute.resolution === 'approve'
+                                ? 'bg-green-500/20 text-green-300'
+                                : dispute.resolution === 'reject'
+                                  ? 'bg-red-500/20 text-red-300'
+                                  : 'bg-yellow-500/20 text-yellow-300'
+                            }`}
+                          >
+                            {dispute.resolution?.toUpperCase()}
+                          </div>
+                          <p className='text-xs text-white/60 mt-1'>
+                            Resolved by {dispute.arbitrator}
+                          </p>
+                          <p className='text-xs text-white/60'>
+                            {dispute.resolvedAt
+                              ? new Date(dispute.resolvedAt).toLocaleString()
+                              : ''}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Milestones Management */}
           {contractId && escrowData?.metadata?.funded && (
             <div className='mb-8'>
-              <h3 className='text-xl font-semibold text-white mb-6'>📋 Milestones Management</h3>
+              <div className='flex items-center justify-between mb-6'>
+                <h3 className='text-xl font-semibold text-white'>📋 Milestones Management</h3>
+                {/* Single notification for role guidance */}
+                {currentRole !== 'worker' && milestones.some(m => m.status === 'pending') && (
+                  <div className='px-4 py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg'>
+                    <p className='text-blue-300 text-sm'>
+                      👷 Switch to <strong>Worker</strong> role to complete milestones
+                    </p>
+                  </div>
+                )}
+                {/* Notification for client role when milestones are completed */}
+                {currentRole !== 'client' && milestones.some(m => m.status === 'completed') && (
+                  <div className='px-4 py-2 bg-green-500/10 border border-green-400/30 rounded-lg'>
+                    <p className='text-green-300 text-sm'>
+                      👔 Switch to <strong>Client</strong> role to approve or dispute milestones
+                    </p>
+                  </div>
+                )}
+                {/* Notification for arbitrator role when disputes exist */}
+                {currentRole !== 'arbitrator' && disputes.some(d => d.status === 'open') && (
+                  <div className='px-4 py-2 bg-orange-500/10 border border-orange-400/30 rounded-lg'>
+                    <p className='text-orange-300 text-sm'>
+                      ⚖️ Switch to <strong>Arbitrator</strong> role to resolve disputes
+                    </p>
+                  </div>
+                )}
+              </div>
               <div className='space-y-6'>
                 {milestones.map(milestone => (
                   <div
@@ -1029,6 +1269,7 @@ export const DisputeResolutionDemo = () => {
                               : 'Mark Complete'}
                           </button>
                         )}
+
 
                         {/* Client Actions */}
                         {currentRole === 'client' && milestone.status === 'completed' && (
@@ -1082,7 +1323,7 @@ export const DisputeResolutionDemo = () => {
           )}
 
           {/* Disputes Management */}
-          {disputes.length > 0 && (
+          {disputes.length > 0 && currentRole !== 'arbitrator' && (
             <div className='mb-8'>
               <h3 className='text-xl font-semibold text-white mb-6'>⚖️ Active Disputes</h3>
               <div className='space-y-4'>
@@ -1184,7 +1425,10 @@ export const DisputeResolutionDemo = () => {
           {contractId &&
             escrowData?.metadata?.funded &&
             !milestones.every(m => m.status === 'released') && (
-              <div className='mb-8 p-6 bg-gradient-to-r from-warning-500/20 to-warning-600/20 border border-warning-400/30 rounded-lg text-center'>
+              <div 
+                data-section="release-funds"
+                className='mb-8 p-6 bg-gradient-to-r from-warning-500/20 to-warning-600/20 border border-warning-400/30 rounded-lg text-center'
+              >
                 <h3 className='text-xl font-semibold text-warning-300 mb-4'>
                   💰 Release All Funds
                 </h3>
