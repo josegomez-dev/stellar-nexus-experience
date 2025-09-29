@@ -50,8 +50,6 @@ export const MicroTaskMarketplaceDemo = ({
   const { addTransaction, updateTransaction } = useTransactionHistory();
   // Demo completion tracking is now handled by FirebaseContext
   const { completeDemo } = useFirebase();
-  const [contractId, setContractId] = useState<string>('');
-  const [escrowData, setEscrowData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'browse' | 'my-tasks' | 'post-task'>('browse');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [newTask, setNewTask] = useState({
@@ -697,150 +695,6 @@ export const MicroTaskMarketplaceDemo = ({
     return category?.color || 'from-gray-500 to-gray-600';
   };
 
-  // Initialize Marketplace function
-  async function handleInitializeMarketplace() {
-    if (!walletData) {
-      addToast({
-        type: 'warning',
-        title: '🔗 Wallet Connection Required',
-        message: 'Please connect your Stellar wallet to initialize the marketplace',
-        duration: 5000,
-      });
-      return;
-    }
-
-    try {
-      const txHash = `init_marketplace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      addTransaction({
-        hash: txHash,
-        status: 'pending',
-        message: 'Initializing Microtask Marketplace...',
-        type: 'escrow',
-        demoId: 'micro-marketplace',
-      });
-
-      const payload = {
-        escrowType: 'multi-release' as const,
-        releaseMode: 'multi-release' as const,
-        asset: {
-          code: 'USDC',
-          issuer: assetConfig.USDC.issuer,
-          decimals: 7,
-        },
-        amount: '50000000', // 500 USDC total budget for marketplace
-        platformFee: 0.01,
-        buyer: walletData.publicKey,
-        seller: walletData.publicKey,
-        arbiter: walletData.publicKey,
-        terms: 'Microtask marketplace terms',
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        metadata: {
-          name: 'Microtask Marketplace',
-          description: 'Decentralized marketplace for micro-tasks',
-          category: 'marketplace'
-        }
-      };
-
-      const result = await hooks.initializeEscrow(payload);
-      setContractId(result.contractId);
-      setEscrowData(result.escrow);
-
-      updateTransaction(txHash, 'success', 'Microtask Marketplace initialized successfully');
-
-      addToast({
-        type: 'success',
-        title: '🚀 Marketplace Initialized!',
-        message: 'Microtask marketplace is ready. Now fund the escrow to activate tasks.',
-        duration: 5000,
-      });
-
-    } catch (error) {
-      const txHash = `init_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      addTransaction({
-        hash: txHash,
-        status: 'failed',
-        message: `Failed to initialize marketplace: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        type: 'escrow',
-        demoId: 'micro-marketplace',
-      });
-
-      addToast({
-        type: 'error',
-        title: '❌ Initialization Failed',
-        message: 'Failed to initialize the marketplace. Please try again.',
-        duration: 5000,
-      });
-    }
-  }
-
-  // Fund Escrow function
-  async function handleFundMarketplaceEscrow() {
-    if (!walletData) {
-      addToast({
-        type: 'warning',
-        title: '🔗 Wallet Connection Required',
-        message: 'Please connect your Stellar wallet to fund the marketplace',
-        duration: 5000,
-      });
-      return;
-    }
-    if (!contractId) return;
-
-    try {
-      const txHash = `fund_marketplace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      addTransaction({
-        hash: txHash,
-        status: 'pending',
-        message: 'Funding marketplace escrow with 500 USDC...',
-        type: 'fund',
-        demoId: 'micro-marketplace',
-        amount: '500.0',
-        asset: 'USDC',
-      });
-
-      const payload = {
-        contractId,
-        amount: '50000000', // 500 USDC
-        releaseMode: 'multi-release',
-      };
-
-      const result = await hooks.fundEscrow(payload);
-      setEscrowData(result.escrow);
-
-      updateTransaction(txHash, 'success', 'Marketplace escrow funded successfully');
-
-      addToast({
-        type: 'success',
-        title: '💰 Marketplace Funded!',
-        message: 'Marketplace escrow funded with 500 USDC. Tasks are now available!',
-        duration: 5000,
-      });
-
-      // Start demo timing when marketplace is funded
-      if (!demoStarted) {
-        setDemoStarted(true);
-        setDemoStartTime(Date.now());
-      }
-
-    } catch (error) {
-      const txHash = `fund_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      addTransaction({
-        hash: txHash,
-        status: 'failed',
-        message: `Failed to fund marketplace: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        type: 'fund',
-        demoId: 'micro-marketplace',
-      });
-
-      addToast({
-        type: 'error',
-        title: '❌ Funding Failed',
-        message: 'Failed to fund the marketplace escrow. Please try again.',
-        duration: 5000,
-      });
-    }
-  }
-
   function resetDemo() {
     setActiveTab('browse');
     setSelectedCategory('all');
@@ -870,8 +724,6 @@ export const MicroTaskMarketplaceDemo = ({
     setPostedTasks(new Set());
     setTaskDeliverables({});
     setDemoCompleted(false);
-    setContractId('');
-    setEscrowData(null);
 
     addToast({
       type: 'warning',
@@ -925,53 +777,12 @@ export const MicroTaskMarketplaceDemo = ({
 
           {/* Demo Setup */}
           {!contractId && (
-            <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
+            <div className='mt-8 p-6 bg-white/5 rounded-lg border border-white/20'>
               <h3 className='text-xl font-semibold text-white mb-4'>🚀 Setup Demo</h3>
 
-              {/* Wallet Connection Required Message */}
-              {!isConnected && (
-                <div className='mb-6 p-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-lg text-center'>
-                  <div className='flex items-center justify-center space-x-2 mb-3'>
-                    <span className='text-2xl'>🔐</span>
-                    <h4 className='text-lg font-semibold text-cyan-300'>
-                      Wallet Connection Required
-                    </h4>
-                  </div>
-                  <p className='text-white/80 text-sm mb-4'>
-                    You need to connect your Stellar wallet to initialize the marketplace contract and
-                    use this demo.
-                  </p>
-                  <button
-                    onClick={() => {
-                      // Dispatch custom event to open wallet sidebar
-                      window.dispatchEvent(new CustomEvent('toggleWalletSidebar'));
-                    }}
-                    className='px-6 py-2 bg-gradient-to-r from-cyan-500 to-accent-600 hover:from-cyan-600 hover:to-accent-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40'
-                  >
-                    🔗 Connect Wallet
-                  </button>
-                </div>
-              )}
-
               {/* Initialize Marketplace Button */}
               {isConnected && !hooks.isLoading && (
-                <div className='text-center'>
-                  <button
-                    onClick={handleInitializeMarketplace}
-                    disabled={hooks.isLoading}
-                    className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 border-accent-400 hover:border-accent-300 hover:scale-105 hover:shadow-accent-500/50 disabled:hover:scale-100 disabled:cursor-not-allowed'
-                  >
-                    {hooks.isLoading ? '⚡ Initializing...' : '🏪 Initialize Microtask Marketplace'}
-                  </button>
-                  <p className='text-white/60 text-sm mt-3'>
-                    Create the marketplace infrastructure for micro tasks
-                  </p>
-                </div>
-              )}
-
-              {/* Initialize Marketplace Button */}
-              {isConnected && !hooks.isLoading && (
-                <div className='text-center'>
+                <div className='text-center mb-6'>
                   <button
                     onClick={handleInitializeMarketplace}
                     disabled={hooks.isLoading}
@@ -987,7 +798,7 @@ export const MicroTaskMarketplaceDemo = ({
 
               {/* Fund Marketplace Button */}
               {contractId && !escrowData?.metadata?.funded && (
-                <div className='text-center mt-6'>
+                <div className='text-center'>
                   <button
                     onClick={handleFundMarketplaceEscrow}
                     disabled={hooks.isLoading}
@@ -999,12 +810,9 @@ export const MicroTaskMarketplaceDemo = ({
                     Fund the marketplace with escrow to enable task posting and completion
                   </p>
                 </div>
-
-
               )}
             </div>
           )}
-
         </div>
 
         {/* Navigation Tabs - Only show after marketplace is funded */}
@@ -1030,8 +838,7 @@ export const MicroTaskMarketplaceDemo = ({
         </div>
         )}
 
-        {/* Demo Progress Indicator - Only show after marketplace is funded */}
-        {escrowData?.metadata?.funded && (
+        {/* Demo Progress Indicator */}
         <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
           <h3 className='text-lg font-semibold text-white mb-4'>📊 Demo Progress</h3>
           <div className='space-y-4'>
@@ -1067,14 +874,14 @@ export const MicroTaskMarketplaceDemo = ({
             </div>
           </div>
         </div>
-        )}
 
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
 
-        {/* Browse Tasks Tab - Only show after marketplace is funded */}
+        {/* Tab Content - Only show after marketplace is funded */}
         {escrowData?.metadata?.funded && (
           <>
+            {/* Browse Tasks Tab */}
             {activeTab === 'browse' && (
           <div>
             {/* Tasks Grid */}
@@ -1450,8 +1257,9 @@ export const MicroTaskMarketplaceDemo = ({
               </div>
             </div>
           </div>
+            )}
+          </>
         )}
-
 
         {/* Demo Instructions */}
         <div className='mt-8 p-6 bg-accent-500/10 border border-accent-400/30 rounded-lg'>
