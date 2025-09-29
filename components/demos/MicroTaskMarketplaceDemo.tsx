@@ -777,7 +777,7 @@ export const MicroTaskMarketplaceDemo = ({
             <h4 className='text-purple-300 font-semibold mb-2'>🚀 Demo Flow Guide</h4>
             <div className='text-purple-200 text-sm space-y-1'>
               <p>1️⃣ <strong>Post Task:</strong> Create a task as a client to complete the demo</p>
-              <p>2️⃣ <strong>Browse Tasks:</strong> Accept tasks as a worker AND submit deliverables (submit 3+ to complete demo)</p>
+              <p>2️⃣ <strong>Browse Tasks:</strong> Accept tasks AND submit deliverables (submit 3+ to complete demo)</p>
               <p>3️⃣ <strong>My Tasks:</strong> View posted tasks and track progress</p>
             </div>
           </div>
@@ -816,6 +816,7 @@ export const MicroTaskMarketplaceDemo = ({
                   <br />
                   <span className='text-yellow-200 float-right'>Current progress: {completedTasks.size}/3 tasks completed ✅</span>
                 </p>
+                <br />
               </div>
             )}
             {/* Tasks Grid */}
@@ -1023,16 +1024,17 @@ export const MicroTaskMarketplaceDemo = ({
         {/* Post Task Tab */}
         {activeTab === 'post-task' && (
           <div className='max-w-2xl mx-auto'>
+            {postedTasks.size === 0 && (
+              <div className='mt-2 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg'>
+                <p className='text-blue-300 text-sm'>
+                  💡 <strong>Demo Completion:</strong> Post at least 1 task to complete this demo!
+                </p>
+              </div>
+            )}
+            <br />
             <div className='flex items-center justify-between mb-6'>
               <div>
-                <h3 className='text-lg font-semibold text-white'>Post New Task</h3>
-                {postedTasks.size === 0 && (
-                  <div className='mt-2 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg'>
-                    <p className='text-blue-300 text-sm'>
-                      💡 <strong>Demo Completion:</strong> Post at least 1 task to complete this demo!
-                    </p>
-                  </div>
-                )}
+                <h3 className='text-lg font-semibold text-white'>Post New Task</h3> 
               </div>
               <button
                 onClick={() => {
@@ -1237,16 +1239,6 @@ export const MicroTaskMarketplaceDemo = ({
             This demonstrates how a marketplace can integrate with Stellar escrow functionality,
             providing trustless payment processing for micro-tasks and gig work.
           </p>
-          <div className='mt-4 p-3 bg-accent-500/20 rounded-lg'>
-            <p className='text-accent-200 text-sm font-medium mb-2'>
-              🎯 Demo Completion Requirements:
-            </p>
-            <ul className='text-accent-200 text-xs space-y-1'>
-              <li>• Post at least 1 task (any task counts)</li>
-              <li>• Complete and approve 3 tasks (any tasks count)</li>
-              <li>• All tasks, including template tasks, count toward completion</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>

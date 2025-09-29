@@ -1726,8 +1726,7 @@ export default function HomePageContent() {
                 title="View Global Leaderboard"
               >
                 <div className="flex flex-col items-center space-y-1">
-                  <br />
-                  <span className="text-4xl">🏆</span>
+                  <span className="text-2xl">🏆</span>
                   <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                     Leaderboard
                   </span>
