@@ -741,12 +741,6 @@ export const MicroTaskMarketplaceDemo = ({
       <div className='bg-gradient-to-br from-accent-500/20 to-accent-600/20 backdrop-blur-sm border border-accent-400/30 rounded-xl shadow-2xl p-8'>
         <div className='text-center mb-8'>
           <div className='flex items-center justify-between mb-4'>
-            <button
-              onClick={resetDemo}
-              className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors'
-            >
-              🔄 Reset Demo
-            </button>
             <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-500'>
               🛒 Micro-Task Marketplace Demo
             </h2>
@@ -781,6 +775,16 @@ export const MicroTaskMarketplaceDemo = ({
         </div>
 
         <div className='mb-8'>
+          {/* Demo Flow Guidance */}
+          <div className='mb-4 p-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-lg'>
+            <h4 className='text-purple-300 font-semibold mb-2'>🚀 Demo Flow Guide</h4>
+            <div className='text-purple-200 text-sm space-y-1'>
+              <p>1️⃣ <strong>Post Task:</strong> Create a task as a client to complete the demo</p>
+              <p>2️⃣ <strong>Browse Tasks:</strong> Accept tasks as a worker (accept 3+ to complete demo)</p>
+              <p>3️⃣ <strong>My Tasks:</strong> View posted tasks and track progress</p>
+            </div>
+          </div>
+          
           <div className='flex space-x-2 bg-white/5 rounded-lg p-1'>
             {(['browse', 'my-tasks', 'post-task'] as const).map(tab => (
               <button
@@ -800,50 +804,23 @@ export const MicroTaskMarketplaceDemo = ({
           </div>
         </div>
 
-        {/* Demo Progress Indicator */}
-        <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
-          <h3 className='text-lg font-semibold text-white mb-4'>📊 Demo Progress</h3>
-          <div className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <span className='text-white/70'>Overall Progress</span>
-              <span className='text-accent-300 font-semibold'>
-                {Math.round(getDemoProgress())}%
-              </span>
-            </div>
-            <div className='w-full bg-white/10 rounded-full h-3'>
-              <div
-                className='bg-gradient-to-r from-accent-400 to-accent-500 h-3 rounded-full transition-all duration-500 ease-out'
-                style={{ width: `${getDemoProgress()}%` }}
-              ></div>
-            </div>
-            <div className='grid grid-cols-2 gap-4 text-sm'>
-              <div className='flex items-center justify-between'>
-                <span className='text-white/60'>Tasks Posted:</span>
-                <span
-                  className={`font-semibold ${postedTasks.size >= 1 ? 'text-green-400' : 'text-white/40'}`}
-                >
-                  {postedTasks.size}/1 ✅
-                </span>
-              </div>
-              <div className='flex items-center justify-between'>
-                <span className='text-white/60'>Tasks Completed:</span>
-                <span
-                  className={`font-semibold ${completedTasks.size >= 3 ? 'text-green-400' : 'text-white/40'}`}
-                >
-                  {completedTasks.size}/3 ✅
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Confetti Animation */}
         <ConfettiAnimation isActive={showConfetti} />
 
         {/* Tab Content */}
-            {/* Browse Tasks Tab */}
-            {activeTab === 'browse' && (
+        {/* Browse Tasks Tab */}
+        {activeTab === 'browse' && (
           <div>
+            {/* Browse Tasks Guidance */}
+            {completedTasks.size < 3 && (
+              <div className='mb-6 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg'>
+                <p className='text-yellow-300 text-sm'>
+                  🎯 <strong>Demo Progress:</strong> Accept and complete at least 3 tasks to finish the demo!
+                  <br />
+                  <span className='text-yellow-200'>Current progress: {completedTasks.size}/3 tasks completed ✅</span>
+                </p>
+              </div>
+            )}
             {/* Tasks Grid */}
             <div className='grid md:grid-cols-2 gap-6'>
               {filteredTasks.map(task => (
@@ -966,7 +943,16 @@ export const MicroTaskMarketplaceDemo = ({
         {/* My Tasks Tab */}
         {activeTab === 'my-tasks' && (
           <div>
-            <h3 className='text-lg font-semibold text-white mb-6'>My Tasks</h3>
+            <div className='flex items-center justify-between mb-6'>
+              <h3 className='text-lg font-semibold text-white'>My Tasks</h3>
+              {postedTasks.size > 0 && (
+                <div className='p-3 bg-green-500/20 border border-green-400/30 rounded-lg'>
+                  <p className='text-green-300 text-sm'>
+                    ✅ <strong>Great!</strong> You've posted {postedTasks.size} task{postedTasks.size === 1 ? '' : 's'}. Check them out below!
+                  </p>
+                </div>
+              )}
+            </div>
             {myTasks.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='text-4xl mb-4'>📋</div>
@@ -1041,7 +1027,16 @@ export const MicroTaskMarketplaceDemo = ({
         {activeTab === 'post-task' && (
           <div className='max-w-2xl mx-auto'>
             <div className='flex items-center justify-between mb-6'>
-              <h3 className='text-lg font-semibold text-white'>Post New Task</h3>
+              <div>
+                <h3 className='text-lg font-semibold text-white'>Post New Task</h3>
+                {postedTasks.size === 0 && (
+                  <div className='mt-2 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg'>
+                    <p className='text-blue-300 text-sm'>
+                      💡 <strong>Demo Completion:</strong> Post at least 1 task to complete this demo!
+                    </p>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => {
                   setNewTask({
@@ -1178,6 +1173,44 @@ export const MicroTaskMarketplaceDemo = ({
             </div>
           </div>
         )}
+
+        <br />
+        {/* Demo Progress Indicator */}
+        <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
+          <h3 className='text-lg font-semibold text-white mb-4'>📊 Demo Progress</h3>
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <span className='text-white/70'>Overall Progress</span>
+              <span className='text-accent-300 font-semibold'>
+                {Math.round(getDemoProgress())}%
+              </span>
+            </div>
+            <div className='w-full bg-white/10 rounded-full h-3'>
+              <div
+                className='bg-gradient-to-r from-accent-400 to-accent-500 h-3 rounded-full transition-all duration-500 ease-out'
+                style={{ width: `${getDemoProgress()}%` }}
+              ></div>
+            </div>
+            <div className='grid grid-cols-2 gap-4 text-sm'>
+              <div className='flex items-center justify-between'>
+                <span className='text-white/60'>Tasks Posted:</span>
+                <span
+                  className={`font-semibold ${postedTasks.size >= 1 ? 'text-green-400' : 'text-white/40'}`}
+                >
+                  {postedTasks.size}/1 ✅
+                </span>
+              </div>
+              <div className='flex items-center justify-between'>
+                <span className='text-white/60'>Tasks Completed:</span>
+                <span
+                  className={`font-semibold ${completedTasks.size >= 3 ? 'text-green-400' : 'text-white/40'}`}
+                >
+                  {completedTasks.size}/3 ✅
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Error Display */}
         {hooks.error && (
