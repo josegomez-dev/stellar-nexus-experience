@@ -25,6 +25,7 @@ import { AuthModal } from '@/components/ui/auth/AuthModal';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import Image from 'next/image';
 import { nexusCodex } from '@/lib/utils/newsData';
 import { getBadgeById } from '@/lib/firebase/firebase-types';
@@ -98,8 +99,10 @@ const DemoSelector = ({
   addToast,
   account,
   demos,
+  demoStats,
   completeDemo,
   hasBadge,
+  clapDemo,
   refreshAccountData,
 }: {
   activeDemo: string;
@@ -109,17 +112,19 @@ const DemoSelector = ({
   addToast: (toast: any) => void;
   account: any;
   demos: any;
-  completeDemo: (demoId: string) => Promise<void>;
+  demoStats: any[];
+  completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
+  clapDemo: (demoId: string) => Promise<void>;
   refreshAccountData: () => Promise<void>;
 }) => {
   // Removed old AccountContext usage
   const { showBadgeAnimation } = useBadgeAnimation();
   const [isClaimingNexusMaster, setIsClaimingNexusMaster] = useState(false);
 
-  // Placeholder clap function - TODO: Implement clap functionality
-  const clapDemo = (demoId: string, demoTitle: string) => {
-    // TODO: Implement clap functionality with Firebase
+  // Handle demo clapping
+  const handleClapDemo = async (demoId: string, demoTitle: string) => {
+    await clapDemo(demoId);
   };
 
   // Get badge information for each demo - memoized to prevent setState during render
@@ -163,6 +168,9 @@ const DemoSelector = ({
       };
     }
 
+    // Find the demo stats from Firebase
+    const stats = demoStats.find(stat => stat.demoId === demoId);
+
     // Show "???" for curiosity when wallet is not connected
     if (!isConnected) {
       return {
@@ -173,9 +181,9 @@ const DemoSelector = ({
     }
 
     return {
-      claps: demo.totalClaps || 0,
-      hasClapped: false, // TODO: Implement clap tracking
-      completions: demo.totalCompletions || 0,
+      claps: stats?.totalClaps || 0,
+      hasClapped: false, // TODO: Implement per-user clap tracking
+      completions: stats?.totalCompletions || 0,
     };
   };
 
@@ -554,7 +562,7 @@ const DemoSelector = ({
                               <button
                                 onClick={e => {
                                   e.stopPropagation();
-                                  clapDemo(demo.id, demo.title);
+                                  handleClapDemo(demo.id, demo.title);
                                 }}
                                 disabled={stats.hasClapped || !isConnected}
                                 className={`w-full transition-all duration-200 hover:scale-105 ${
@@ -732,7 +740,7 @@ const DemoSelector = ({
                             setIsClaimingNexusMaster(true);
                             try {
                               // Use the completeDemo function to properly award the Nexus Master badge
-                              await completeDemo('nexus-master'); // Complete Nexus Master demo
+                              await completeDemo('nexus-master', 100, 1); // Complete Nexus Master demo with perfect score and 1 minute completion time
 
                               // Show badge animation
                               const nexusMasterBadgeConfig = getBadgeById('nexus_master');
@@ -930,7 +938,7 @@ const DemoSelector = ({
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
   const { isAuthenticated, user } = useAuth();
-  const { account, completeDemo, hasBadge, refreshAccountData } = useFirebase();
+  const { account, demoStats, completeDemo, hasBadge, clapDemo, refreshAccountData } = useFirebase();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
   // Note: submitFeedback removed from simplified Firebase context
   // Removed old AccountService usage
@@ -957,6 +965,7 @@ export default function HomePageContent() {
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
+  const [leaderboardSidebarOpen, setLeaderboardSidebarOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
@@ -1089,9 +1098,33 @@ export default function HomePageContent() {
 
   // Handle feedback submission
   const handleFeedbackSubmit = async (feedback: any) => {
-    // Note: submitFeedback removed from simplified Firebase context
-    setShowFeedbackModal(false);
-    setFeedbackDemoData(null);
+    try {
+      if (feedbackDemoData) {
+        // Complete the demo with the feedback score and completion time
+        await completeDemo(
+          feedbackDemoData.demoId, 
+          feedback.score || 85, // Default score if not provided
+          feedbackDemoData.completionTime
+        );
+        
+        addToast({
+          title: '🎉 Demo Completed!',
+          message: `Great job completing ${feedbackDemoData.demoName}!`,
+          type: 'success',
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to complete demo:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to complete demo. Please try again.',
+        type: 'error',
+      });
+    } finally {
+      setShowFeedbackModal(false);
+      setFeedbackDemoData(null);
+    }
   };
 
   // Close feedback modal
@@ -1310,6 +1343,15 @@ export default function HomePageContent() {
                     </button>
 
                     <button
+                      onClick={() => setLeaderboardSidebarOpen(true)}
+                      className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                    >
+                      <span className='text-xl'>🏆&nbsp;</span>
+                      <span>Leaderboard</span>
+                      <span className='text-xl'>&nbsp;→</span>
+                    </button>
+
+                    <button
                       onClick={() => setShowTechTree(true)}
                       disabled={false}
                       className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
@@ -1395,8 +1437,10 @@ export default function HomePageContent() {
                   addToast={addToast}
                   account={account}
                   demos={demos}
+                  demoStats={demoStats}
                   completeDemo={completeDemo}
                   hasBadge={hasBadge}
+                  clapDemo={clapDemo}
                   refreshAccountData={refreshAccountData}
                 />
               </div>
@@ -1664,6 +1708,39 @@ export default function HomePageContent() {
           demoName={feedbackDemoData.demoName}
           completionTime={feedbackDemoData.completionTime}
         />
+      )}
+
+      {/* Leaderboard Sidebar */}
+      <LeaderboardSidebar
+        isOpen={leaderboardSidebarOpen}
+        onClose={() => setLeaderboardSidebarOpen(false)}
+      />
+
+      {/* Floating Leaderboard Button */}
+      {!leaderboardSidebarOpen && (
+        <div className="fixed right-4 z-30" style={{ top: '22%' }}>
+          <Tooltip content="Join the Challenge!" position="left">
+              <button
+                onClick={() => setLeaderboardSidebarOpen(true)}
+                className="group relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-110 border-2 border-white/20 hover:border-white/40 p-0"
+                title="View Global Leaderboard"
+              >
+                <div className="flex flex-col items-center space-y-1">
+                  <br />
+                  <span className="text-4xl">🏆</span>
+                  <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                    Leaderboard
+                  </span>
+                </div>
+                
+                {/* Animated ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-purple-400/50 animate-ping"></div>
+                
+                {/* Glow effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-lg group-hover:blur-xl transition-all duration-300"></div>
+              </button>
+            </Tooltip>
+        </div>
       )}
 
       {/* Toast Container */}

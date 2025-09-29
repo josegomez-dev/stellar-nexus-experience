@@ -38,10 +38,25 @@ export interface Account {
   // Transaction history - now stored in separate collection
 }
 
+// Demo statistics for tracking completion and engagement
+export interface DemoStats {
+  id: string; // demoId
+  demoId: string;
+  demoName: string;
+  totalCompletions: number;
+  totalClaps: number;
+  totalRatings: number;
+  averageRating: number;
+  averageCompletionTime: number; // in minutes
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Collection names
 export const COLLECTIONS = {
   ACCOUNTS: 'accounts',
   TRANSACTIONS: 'transactions',
+  DEMO_STATS: 'demo_stats',
 } as const;
 
 // Predefined demos configuration (static data)

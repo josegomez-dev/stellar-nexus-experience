@@ -83,7 +83,7 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
-            <a
+            {/* <a
               href='/'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
@@ -96,41 +96,44 @@ export const Header = () => {
                 style={{ width: 'auto', height: 'auto' }}
               />
               <span>Demos</span>
-            </a>
-            <Tooltip
-              position='bottom'
-              content={
-                miniGamesUnlocked
-                  ? 'Explore the Nexus Web3 Playground'
-                  : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
-              }
-            >
-              <a
-                href={miniGamesUnlocked ? '/mini-games' : '#'}
-                onClick={e => {
-                  if (!miniGamesUnlocked) {
-                    e.preventDefault();
-                  }
-                }}
-                className={`transition-colors flex items-center space-x-2 ${
+            </a> */}
+            {/* Only show Nexus Web3 Playground when wallet is connected */}
+            {isConnected && (
+              <Tooltip
+                position='bottom'
+                content={
                   miniGamesUnlocked
-                    ? 'text-white/80 hover:text-white cursor-pointer'
-                    : 'text-white/40 cursor-not-allowed'
-                }`}
+                    ? 'Explore the Nexus Web3 Playground'
+                    : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
+                }
               >
-                <Image
-                  src='/images/icons/console.png'
-                  alt='Nexus Web3 Playground'
-                  width={20}
-                  height={20}
-                  className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
-                  style={{ width: 'auto', height: 'auto' }}
-                />
-                <span>
-                  {miniGamesUnlocked ? 'Nexus Web3 Playground' : 'Nexus Web3 Playground 🔒'}
-                </span>
-              </a>
-            </Tooltip>
+                <a
+                  href={miniGamesUnlocked ? '/mini-games' : '#'}
+                  onClick={e => {
+                    if (!miniGamesUnlocked) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className={`transition-colors flex items-center space-x-2 ${
+                    miniGamesUnlocked
+                      ? 'text-white/80 hover:text-white cursor-pointer'
+                      : 'text-white/40 cursor-not-allowed'
+                  }`}
+                >
+                  <Image
+                    src='/images/icons/console.png'
+                    alt='Nexus Web3 Playground'
+                    width={20}
+                    height={20}
+                    className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                    style={{ width: 'auto', height: 'auto' }}
+                  />
+                  <span>
+                    {miniGamesUnlocked ? 'Nexus Web3 Playground' : 'Nexus Web3 Playground 🔒'}
+                  </span>
+                </a>
+              </Tooltip>
+            )}
           </nav>
 
           {/* Header Controls */}
@@ -193,8 +196,8 @@ export const Header = () => {
               <NetworkIndicator className='scale-90' showSwitchButton={true} />
             </div> */}
 
-            {/* User Dropdown */}
-            <UserDropdown />
+            {/* User Dropdown - Only show when wallet is connected */}
+            {isConnected && <UserDropdown />}
 
             {/* Mobile Menu Button */}
             <button
@@ -228,43 +231,46 @@ export const Header = () => {
                 <span>Demos</span>
               </div>
             </a>
-            <Tooltip
-              content={
-                miniGamesUnlocked
-                  ? 'Explore the Nexus Web3 Playground'
-                  : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
-              }
-            >
-              <a
-                href={miniGamesUnlocked ? '/mini-games' : '#'}
-                onClick={e => {
-                  if (!miniGamesUnlocked) {
-                    e.preventDefault();
-                  } else {
-                    setIsMenuOpen(false);
-                  }
-                }}
-                className={`block px-3 py-2 rounded-md transition-colors ${
+            {/* Only show Nexus Web3 Playground in mobile menu when wallet is connected */}
+            {isConnected && (
+              <Tooltip
+                content={
                   miniGamesUnlocked
-                    ? 'text-white/80 hover:text-white hover:bg-white/10'
-                    : 'text-white/40 cursor-not-allowed'
-                }`}
+                    ? 'Explore the Nexus Web3 Playground'
+                    : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
+                }
               >
-                <div className='flex items-center space-x-2'>
-                  <Image
-                    src='/images/icons/console.png'
-                    alt='Nexus Web3 Playground'
-                    width={20}
-                    height={20}
-                    className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
-                    style={{ width: 'auto', height: 'auto' }}
-                  />
-                  <span>
-                    {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
-                  </span>
-                </div>
-              </a>
-            </Tooltip>
+                <a
+                  href={miniGamesUnlocked ? '/mini-games' : '#'}
+                  onClick={e => {
+                    if (!miniGamesUnlocked) {
+                      e.preventDefault();
+                    } else {
+                      setIsMenuOpen(false);
+                    }
+                  }}
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    miniGamesUnlocked
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-white/40 cursor-not-allowed'
+                  }`}
+                >
+                  <div className='flex items-center space-x-2'>
+                    <Image
+                      src='/images/icons/console.png'
+                      alt='Nexus Web3 Playground'
+                      width={20}
+                      height={20}
+                      className={`w-5 h-5 ${miniGamesUnlocked ? '' : 'grayscale'}`}
+                      style={{ width: 'auto', height: 'auto' }}
+                    />
+                    <span>
+                      {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                    </span>
+                  </div>
+                </a>
+              </Tooltip>
+            )}
 
             <a
               href='/docs'

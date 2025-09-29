@@ -18,6 +18,7 @@ import { db } from './firebase';
 import {
   Account,
   TransactionRecord,
+  DemoStats,
   COLLECTIONS,
 } from './firebase-types';
 
@@ -260,6 +261,133 @@ export const accountService = {
     });
 
     return transactions;
+  },
+};
+
+// Demo Stats Service - for tracking demo completion and engagement statistics
+export const demoStatsService = {
+  // Get demo stats by demo ID
+  async getDemoStats(demoId: string): Promise<DemoStats | null> {
+    const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const demoStatsSnap = await getDoc(demoStatsRef);
+    
+    if (demoStatsSnap.exists()) {
+      return convertTimestamps(demoStatsSnap.data()) as DemoStats;
+    }
+    return null;
+  },
+
+  // Get all demo stats
+  async getAllDemoStats(): Promise<DemoStats[]> {
+    const demoStatsRef = collection(db, COLLECTIONS.DEMO_STATS);
+    const querySnapshot = await getDocs(demoStatsRef);
+    const stats: DemoStats[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      stats.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as DemoStats);
+    });
+
+    return stats;
+  },
+
+  // Initialize demo stats for a demo (called when demo is first accessed)
+  async initializeDemoStats(demoId: string, demoName: string): Promise<void> {
+    const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const existingStats = await this.getDemoStats(demoId);
+    
+    if (!existingStats) {
+      const newStats: Omit<DemoStats, 'id'> = {
+        demoId,
+        demoName,
+        totalCompletions: 0,
+        totalClaps: 0,
+        totalRatings: 0,
+        averageRating: 0,
+        averageCompletionTime: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await setDoc(demoStatsRef, {
+        ...newStats,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+
+  // Increment completion count
+  async incrementCompletion(demoId: string, completionTimeMinutes?: number, rating?: number): Promise<void> {
+    const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const existingStats = await this.getDemoStats(demoId);
+    
+    if (!existingStats) {
+      // Initialize if doesn't exist
+      const demoName = this.getDemoName(demoId);
+      await this.initializeDemoStats(demoId, demoName);
+    }
+
+    // Get updated stats after initialization
+    const currentStats = await this.getDemoStats(demoId);
+    if (!currentStats) return;
+
+    // Calculate new averages
+    const newTotalCompletions = currentStats.totalCompletions + 1;
+    const newTotalRatings = rating !== undefined ? currentStats.totalRatings + 1 : currentStats.totalRatings;
+    
+    // Calculate new average rating
+    let newAverageRating = currentStats.averageRating;
+    if (rating !== undefined) {
+      const totalRatingPoints = currentStats.averageRating * currentStats.totalRatings + rating;
+      newAverageRating = newTotalRatings > 0 ? totalRatingPoints / newTotalRatings : 0;
+    }
+
+    // Calculate new average completion time
+    let newAverageCompletionTime = currentStats.averageCompletionTime;
+    if (completionTimeMinutes !== undefined) {
+      const totalCompletionTime = currentStats.averageCompletionTime * currentStats.totalCompletions + completionTimeMinutes;
+      newAverageCompletionTime = newTotalCompletions > 0 ? totalCompletionTime / newTotalCompletions : 0;
+    }
+
+    await updateDoc(demoStatsRef, {
+      totalCompletions: newTotalCompletions,
+      totalRatings: newTotalRatings,
+      averageRating: newAverageRating,
+      averageCompletionTime: newAverageCompletionTime,
+      updatedAt: serverTimestamp(),
+    });
+  },
+
+  // Increment clap count
+  async incrementClap(demoId: string): Promise<void> {
+    const demoStatsRef = doc(db, COLLECTIONS.DEMO_STATS, demoId);
+    const existingStats = await this.getDemoStats(demoId);
+    
+    if (!existingStats) {
+      // Initialize if doesn't exist
+      const demoName = this.getDemoName(demoId);
+      await this.initializeDemoStats(demoId, demoName);
+    }
+
+    await updateDoc(demoStatsRef, {
+      totalClaps: existingStats ? existingStats.totalClaps + 1 : 1,
+      updatedAt: serverTimestamp(),
+    });
+  },
+
+  // Helper function to get demo name
+  getDemoName(demoId: string): string {
+    const demoNames: Record<string, string> = {
+      'hello-milestone': 'Baby Steps to Riches',
+      'dispute-resolution': 'Drama Queen Escrow',
+      'micro-marketplace': 'Gig Economy Madness',
+      'nexus-master': 'Nexus Master Achievement',
+    };
+    return demoNames[demoId] || demoId;
   },
 };
 

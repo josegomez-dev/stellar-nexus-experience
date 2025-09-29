@@ -4,10 +4,12 @@ import { useAuth } from '../auth/AuthContext';
 import { useGlobalWallet } from '../wallet/WalletContext';
 import { 
   accountService,
+  demoStatsService,
   firebaseUtils
 } from '../../lib/firebase/firebase-service';
 import { 
   Account,
+  DemoStats,
   PREDEFINED_DEMOS,
   PREDEFINED_BADGES,
   getBadgeById
@@ -23,6 +25,7 @@ interface FirebaseContextType {
   // Static data
   demos: typeof PREDEFINED_DEMOS;
   badges: typeof PREDEFINED_BADGES;
+  demoStats: DemoStats[];
   
   // Loading states
   isLoading: boolean;
@@ -30,10 +33,11 @@ interface FirebaseContextType {
   
   // Actions
   initializeAccount: (displayName: string) => Promise<void>;
-  completeDemo: (demoId: string, score?: number) => Promise<void>;
+  completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
   hasCompletedDemo: (demoId: string) => Promise<boolean>;
   refreshAccountData: () => Promise<void>;
+  clapDemo: (demoId: string) => Promise<void>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -59,6 +63,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   
   // State
   const [account, setAccount] = useState<Account | null>(null);
+  const [demoStats, setDemoStats] = useState<DemoStats[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -102,8 +107,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           });
         }
         
-        // Load account data
-        await loadAccountData();
+        // Load account data and demo stats
+        await Promise.all([loadAccountData(), loadDemoStats()]);
         setIsInitialized(true);
       } catch (error) {
         addToast({
@@ -133,6 +138,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         message: 'Failed to load account data.',
         type: 'error',
       });
+    }
+  };
+
+  // Load demo stats
+  const loadDemoStats = async () => {
+    try {
+      const stats = await demoStatsService.getAllDemoStats();
+      setDemoStats(stats);
+    } catch (error) {
+      console.error('Error loading demo stats:', error);
+      // Don't show error toast for demo stats as it's not critical
     }
   };
 
@@ -187,7 +203,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         });
       }
       
-      await loadAccountData();
+      await Promise.all([loadAccountData(), loadDemoStats()]);
       setIsInitialized(true);
     } catch (error) {
       addToast({
@@ -202,11 +218,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   };
 
   // Complete demo
-  const completeDemo = async (demoId: string, score?: number) => {
+  const completeDemo = async (demoId: string, score?: number, completionTimeMinutes?: number) => {
     if (!walletData?.publicKey || !account) return;
     
     try {
-      console.log('FirebaseContext: Starting completeDemo for:', demoId, 'with score:', score);
+      console.log('FirebaseContext: Starting completeDemo for:', demoId, 'with score:', score, 'completion time:', completionTimeMinutes);
       
       // Handle both array and object formats for demosCompleted (Firebase sometimes stores arrays as objects)
       let demosCompletedArray: string[] = [];
@@ -237,6 +253,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       // Add experience and points (experience is 2x points)
       console.log('FirebaseContext: Adding experience and points:', pointsEarned * 2, pointsEarned);
       await accountService.addExperienceAndPoints(walletData.publicKey, pointsEarned * 2, pointsEarned);
+
+      // Update demo stats for global tracking
+      try {
+        console.log('FirebaseContext: Updating demo stats for:', demoId);
+        await demoStatsService.incrementCompletion(demoId, completionTimeMinutes, finalScore);
+      } catch (statsError) {
+        console.error('FirebaseContext: Failed to update demo stats:', statsError);
+        // Don't fail the demo completion if stats tracking fails
+      }
       
       // Award appropriate badge based on demo
       let badgeToAward = '';
@@ -313,9 +338,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         // Don't fail the demo completion if transaction logging fails
       }
       
-      // Refresh account data
-      console.log('FirebaseContext: Refreshing account data');
-      await loadAccountData();
+      // Refresh account data and demo stats
+      console.log('FirebaseContext: Refreshing account data and demo stats');
+      await Promise.all([loadAccountData(), loadDemoStats()]);
       console.log('FirebaseContext: Demo completion process finished successfully');
     } catch (error) {
       console.error('FirebaseContext: Demo completion failed:', error);
@@ -351,13 +376,36 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Refresh account data
   const refreshAccountData = async () => {
-    await loadAccountData();
+    await Promise.all([loadAccountData(), loadDemoStats()]);
+  };
+
+  // Clap a demo
+  const clapDemo = async (demoId: string) => {
+    try {
+      await demoStatsService.incrementClap(demoId);
+      await loadDemoStats(); // Refresh demo stats
+      
+      addToast({
+        title: '👏 Demo Clapped!',
+        message: 'Thanks for showing your appreciation!',
+        type: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Failed to clap demo:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to clap demo. Please try again.',
+        type: 'error',
+      });
+    }
   };
 
   const value: FirebaseContextType = {
     account,
     demos: PREDEFINED_DEMOS,
     badges: PREDEFINED_BADGES,
+    demoStats,
     isLoading,
     isInitialized,
     initializeAccount,
@@ -365,6 +413,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     hasBadge,
     hasCompletedDemo,
     refreshAccountData,
+    clapDemo,
   };
 
   return (
