@@ -510,22 +510,11 @@ export const MicroTaskMarketplaceDemo = ({
       });
 
     } catch (error) {
-      console.error('Marketplace initialization error:', error);
-      
-      // Add failed transaction to history
-      addTransaction({
-        hash: `init_failed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'failed',
-        message: `Initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        type: 'escrow',
-        demoId: 'micro-marketplace',
-      });
-
       addToast({
         type: 'error',
         title: '❌ Initialization Failed',
-        message: `Failed to initialize the marketplace: ${error instanceof Error ? error.message : 'Please check your wallet connection and try again.'}`,
-        duration: 7000,
+        message: 'Failed to initialize the marketplace. Please try again.',
+        duration: 5000,
       });
     }
   }
