@@ -11,12 +11,13 @@ import { generateFunnyName } from '@/lib/utils/funny-name-generator';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { accountService } from '@/lib/firebase/firebase-service';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
   const { isConnected, walletData, disconnect, connect, isFreighterAvailable } = useGlobalWallet();
   const { isAuthenticated, user, getUserStats, updateUser } = useAuth();
-  const { account } = useFirebase();
+  const { account, refreshAccountData } = useFirebase();
   const { addToast } = useToast();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -58,23 +59,27 @@ export const UserDropdown = () => {
   };
 
   const displayName =
-    isAuthenticated && user
-      ? user.customName || user.username
-      : (() => {
-          // Check localStorage for profile data if wallet is connected
-          if (walletData?.publicKey) {
-            try {
-              const profileData = localStorage.getItem(`profile_${walletData.publicKey}`);
-              if (profileData) {
-                const parsed = JSON.parse(profileData);
-                if (parsed.customName) return parsed.customName;
-              }
-            } catch (error) {
-      console.error('Error loading profile:', error);
-    }
+    // Priority 1: Firebase account displayName (most authoritative)
+    account?.displayName ||
+    // Priority 2: Auth context user data
+    (isAuthenticated && user ? user.customName || user.username : null) ||
+    // Priority 3: localStorage for non-authenticated users
+    (() => {
+      if (walletData?.publicKey) {
+        try {
+          const profileData = localStorage.getItem(`profile_${walletData.publicKey}`);
+          if (profileData) {
+            const parsed = JSON.parse(profileData);
+            if (parsed.customName) return parsed.customName;
           }
-          return generateDisplayName(walletData?.publicKey || '');
-        })();
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
+      }
+      return null;
+    })() ||
+    // Priority 4: Generated name as fallback
+    generateDisplayName(walletData?.publicKey || '');
   const stats = getUserStats();
 
   const handleDisconnect = () => {
@@ -90,6 +95,8 @@ export const UserDropdown = () => {
   };
 
   const handleAutoGenerate = async () => {
+    console.log('handleAutoGenerate called');
+    
     if (!walletData?.publicKey) {
       addToast({
         type: 'error',
@@ -124,6 +131,18 @@ export const UserDropdown = () => {
         localStorage.setItem(`profile_${walletData.publicKey}`, JSON.stringify(profileData));
       }
 
+      // Always save to Firebase regardless of authentication status
+      if (walletData?.publicKey) {
+        await accountService.createOrUpdateAccount({
+          id: walletData.publicKey,
+          displayName: newName,
+          walletAddress: walletData.publicKey,
+        });
+        
+        // Refresh Firebase account data to reflect changes immediately
+        await refreshAccountData();
+      }
+
       addToast({
         type: 'success',
         title: '🎉 Profile Updated!',
@@ -150,6 +169,8 @@ export const UserDropdown = () => {
   };
 
   const handleSaveName = async () => {
+    console.log('handleSaveName called with tempName:', tempName);
+    
     if (!tempName.trim()) {
       addToast({
         type: 'error',
@@ -172,30 +193,51 @@ export const UserDropdown = () => {
 
     setIsSaving(true);
     try {
+      const displayName = tempName.trim();
+      
       if (user) {
-        // Update existing user
+        // Update existing user in Auth context
         await updateUser({
-          customName: tempName.trim(),
+          customName: displayName,
         });
       } else {
         // Store in localStorage for non-authenticated users
         const profileData = {
-          customName: tempName.trim(),
+          customName: displayName,
           walletAddress: walletData.publicKey,
         };
         localStorage.setItem(`profile_${walletData.publicKey}`, JSON.stringify(profileData));
       }
 
+      // Always save to Firebase regardless of authentication status
+      if (walletData?.publicKey) {
+        console.log('Saving to Firebase:', { id: walletData.publicKey, displayName });
+        
+        await accountService.createOrUpdateAccount({
+          id: walletData.publicKey,
+          displayName: displayName,
+          walletAddress: walletData.publicKey,
+        });
+        
+        console.log('Firebase save completed, refreshing account data...');
+        
+        // Refresh Firebase account data to reflect changes immediately
+        await refreshAccountData();
+        
+        console.log('Account data refreshed');
+      }
+
       addToast({
         type: 'success',
         title: '✅ Name Saved!',
-        message: `Your display name is now: ${tempName.trim()}`,
+        message: `Your display name is now: ${displayName}`,
         duration: 3000,
       });
 
       setIsEditingName(false);
       setTempName('');
     } catch (error) {
+      console.error('Error saving display name:', error);
       addToast({
         type: 'error',
         title: '❌ Save Failed',

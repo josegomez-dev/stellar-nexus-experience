@@ -82,7 +82,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           // Create new account
           await firebaseUtils.createAccount(
             walletData.publicKey,
-            user?.username || 'Anonymous User',
+            user?.customName || user?.username || 'Anonymous User',
             walletData.network || 'testnet'
           );
           

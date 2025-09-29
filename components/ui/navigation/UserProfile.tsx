@@ -90,11 +90,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
               {/* User info */}
               <div className='flex-1'>
                 <h2 className='text-xl font-bold text-white'>
-                  {user
-                    ? user.username
-                    : account
-                      ? `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}`
-                      : 'Guest User'}
+                  {account?.displayName ||
+                    (user ? user.customName || user.username : null) ||
+                    (account ? `${account.walletAddress.slice(0, 6)}...${account.walletAddress.slice(-4)}` : 'Guest User')}
                 </h2>
                 <p className='text-white/70 text-sm'>
                   Level {level} • {account ? account.experience : stats.experience} XP
