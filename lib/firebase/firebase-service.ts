@@ -39,6 +39,15 @@ export const accountService = {
     const accountRef = doc(db, COLLECTIONS.ACCOUNTS, accountData.id!);
     const accountDoc = {
       ...accountData,
+      // Initialize new fields if they don't exist
+      completedQuests: accountData.completedQuests || [],
+      questProgress: accountData.questProgress || {},
+      referrals: accountData.referrals || {
+        totalReferrals: 0,
+        successfulReferrals: 0,
+        referralCode: '',
+        referralHistory: [],
+      },
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
     };
@@ -51,7 +60,26 @@ export const accountService = {
     const accountSnap = await getDoc(accountRef);
 
     if (accountSnap.exists()) {
-      return convertTimestamps(accountSnap.data()) as Account;
+      const accountData = convertTimestamps(accountSnap.data());
+      const account = { id: accountSnap.id, ...accountData } as Account;
+
+      // Ensure new fields are initialized for existing accounts
+      if (!account.completedQuests) {
+        account.completedQuests = [];
+      }
+      if (!account.questProgress) {
+        account.questProgress = {};
+      }
+      if (!account.referrals) {
+        account.referrals = {
+          totalReferrals: 0,
+          successfulReferrals: 0,
+          referralCode: '',
+          referralHistory: [],
+        };
+      }
+
+      return account;
     }
     return null;
   },

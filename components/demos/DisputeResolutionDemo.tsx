@@ -63,6 +63,9 @@ export const DisputeResolutionDemo = () => {
 
   // Individual loading states for each milestone
   const [milestoneLoadingStates, setMilestoneLoadingStates] = useState<Record<string, boolean>>({});
+  
+  // Individual loading states for each dispute resolution
+  const [disputeLoadingStates, setDisputeLoadingStates] = useState<Record<string, boolean>>({});
 
   // Confetti animation state
   const [showConfetti, setShowConfetti] = useState(false);
@@ -605,6 +608,8 @@ export const DisputeResolutionDemo = () => {
     if (!contractId) return;
 
     try {
+      // Set loading state for this specific dispute
+      setDisputeLoadingStates(prev => ({ ...prev, [disputeId]: true }));
       const dispute = disputes.find(d => d.id === disputeId);
       if (!dispute) return;
 
@@ -729,6 +734,9 @@ export const DisputeResolutionDemo = () => {
         message: 'Failed to resolve the dispute.',
         duration: 5000,
       });
+    } finally {
+      // Clear loading state for this specific dispute
+      setDisputeLoadingStates(prev => ({ ...prev, [disputeId]: false }));
     }
   }
 
@@ -847,6 +855,7 @@ export const DisputeResolutionDemo = () => {
     // Clear individual dispute input states
     setDisputeReasons({});
     setResolutionReasons({});
+    setDisputeLoadingStates({});
 
     addToast({
       type: 'info',
@@ -1182,24 +1191,24 @@ export const DisputeResolutionDemo = () => {
                             <div className='grid grid-cols-3 gap-2'>
                               <button
                                 onClick={() => handleResolveDispute(dispute.id, 'approve')}
-                                disabled={hooks.resolveDispute.isLoading}
+                                disabled={disputeLoadingStates[dispute.id]}
                                 className='px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 rounded-lg text-green-300 hover:text-green-200 transition-colors text-sm'
                               >
-                                {hooks.resolveDispute.isLoading ? '...' : 'Approve'}
+                                {disputeLoadingStates[dispute.id] ? '...' : 'Approve'}
                               </button>
                               <button
                                 onClick={() => handleResolveDispute(dispute.id, 'reject')}
-                                disabled={hooks.resolveDispute.isLoading}
+                                disabled={disputeLoadingStates[dispute.id]}
                                 className='px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors text-sm'
                               >
-                                {hooks.resolveDispute.isLoading ? '...' : 'Reject'}
+                                {disputeLoadingStates[dispute.id] ? '...' : 'Reject'}
                               </button>
                               <button
                                 onClick={() => handleResolveDispute(dispute.id, 'modify')}
-                                disabled={hooks.resolveDispute.isLoading}
+                                disabled={disputeLoadingStates[dispute.id]}
                                 className='px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-400/30 rounded-lg text-yellow-300 hover:text-yellow-200 transition-colors text-sm'
                               >
-                                {hooks.resolveDispute.isLoading ? '...' : 'Modify'}
+                                {disputeLoadingStates[dispute.id] ? '...' : 'Modify'}
                               </button>
                             </div>
                           </div>

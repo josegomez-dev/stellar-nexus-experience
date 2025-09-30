@@ -19,6 +19,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const { transactions, isLoading, refreshTransactions } = useTransactionHistory();
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'transactions'>('overview');
   const [isMainAchievementsCollapsed, setIsMainAchievementsCollapsed] = useState(false);
+  const [isNexusBadgesCollapsed, setIsNexusBadgesCollapsed] = useState(false);
+  const [isExtraBadgesCollapsed, setIsExtraBadgesCollapsed] = useState(false);
+  const [selectedCharacterPhase, setSelectedCharacterPhase] = useState(0); // 0: baby, 1: teen, 2: adult
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -87,19 +90,21 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
   // Helper functions for level and progress calculations
   const getLevel = () => {
-    return safeAccount.level || 1;
+    const currentExp = safeAccount.experience || 0;
+    // Calculate level based on total XP: Level 1 = 0-999 XP, Level 2 = 1000-1999 XP, etc.
+    return Math.floor(currentExp / 1000) + 1;
   };
 
   const getExperienceProgress = () => {
     const currentLevel = getLevel();
     const currentExp = safeAccount.experience || 0;
-    const expForCurrentLevel = (currentLevel - 1) * 1000;
-    const expForNextLevel = currentLevel * 1000;
-    const expInCurrentLevel = currentExp - expForCurrentLevel;
-
+    
+    // Calculate XP within current level (0-1000 for each level)
+    const expInCurrentLevel = currentExp % 1000;
+    
     return {
       current: expInCurrentLevel,
-      next: expForNextLevel - expForCurrentLevel,
+      next: 1000, // Each level requires 1000 XP
     };
   };
 
@@ -129,6 +134,31 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const expPercentage = (expProgress.current / expProgress.next) * 100;
   const mainDemoProgress = getMainDemoProgress();
 
+  // Character phase logic
+  const getAvailableCharacterPhases = () => {
+    const phases = [
+      { id: 0, name: 'Baby', video: '/videos/phases/baby.mp4', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Teen', video: '/videos/phases/teen.mp4', image: '/images/character/teen.png', minLevel: 2 },
+      { id: 2, name: 'Adult', video: '/videos/phases/adullt.mp4', image: '/images/character/character.png', minLevel: 3 }
+    ];
+    return phases.filter(phase => level >= phase.minLevel);
+  };
+
+  const availablePhases = getAvailableCharacterPhases();
+  const currentPhase = availablePhases[selectedCharacterPhase] || availablePhases[0];
+
+  const handlePreviousPhase = () => {
+    setSelectedCharacterPhase(prev => 
+      prev > 0 ? prev - 1 : availablePhases.length - 1
+    );
+  };
+
+  const handleNextPhase = () => {
+    setSelectedCharacterPhase(prev => 
+      prev < availablePhases.length - 1 ? prev + 1 : 0
+    );
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'badges', label: 'Badges', icon: '🏆' },
@@ -145,11 +175,37 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400/10 to-transparent rounded-full blur-xl'></div>
 
         <div className='relative z-10 flex items-center gap-6'>
-          {/* Character Avatar - Bigger and Enhanced */}
+          {/* Character Avatar with Navigation */}
           <div className='flex-shrink-0'>
             <div className='relative'>
-              {level === 1 ? (
+              {/* Navigation Arrows */}
+              {availablePhases.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePreviousPhase}
+                    className='absolute -left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 border border-white/30 transition-all duration-200 hover:scale-110'
+                    title={`Previous phase (${availablePhases[selectedCharacterPhase > 0 ? selectedCharacterPhase - 1 : availablePhases.length - 1]?.name})`}
+                  >
+                    <svg className='w-4 h-4 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleNextPhase}
+                    className='absolute -right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 border border-white/30 transition-all duration-200 hover:scale-110'
+                    title={`Next phase (${availablePhases[selectedCharacterPhase < availablePhases.length - 1 ? selectedCharacterPhase + 1 : 0]?.name})`}
+                  >
+                    <svg className='w-4 h-4 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
+                    </svg>
+                  </button>
+                </>
+              )}
+
+              {/* Character Display with Reverse Playback */}
+              {currentPhase && (
                 <video
+                  key={currentPhase.id} // Force re-render when phase changes
                   autoPlay
                   muted
                   playsInline
@@ -157,41 +213,49 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                   style={{
                     animation: '4s ease-in-out infinite alternate',
                   }}
-                  onEnded={e => {
+                  onEnded={(e) => {
                     const video = e.target as HTMLVideoElement;
-                    video.currentTime = video.duration;
+                    // Start reverse playback
                     const reverseInterval = setInterval(() => {
                       if (video.currentTime <= 0) {
                         clearInterval(reverseInterval);
                         video.currentTime = 0;
-                        video.play();
+                        video.play(); // Start forward playback again
                       } else {
-                        video.currentTime -= 0.1;
+                        video.currentTime -= 0.1; // Reverse playback
                       }
                     }, 100);
                   }}
                 >
-                  <source src='/videos/phases/baby.mp4' type='video/mp4' />
+                  <source src={currentPhase.video} type='video/mp4' />
                   <img
-                    src='/images/character/baby.png'
-                    alt='Level 1 Character'
+                    src={currentPhase.image}
+                    alt={`${currentPhase.name} Character`}
                     className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
                   />
                 </video>
-              ) : (
-                <img
-                  src={
-                    level === 2 ? '/images/character/teen.png' : '/images/character/character.png'
-                  }
-                  alt={`Level ${level} Character`}
-                  className='w-32 h-32 object-contain drop-shadow-2xl rounded-full border-2 border-purple-400/30'
-                />
               )}
 
               {/* Level Badge */}
               <div className='absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20'>
                 Lv.{level}
               </div>
+
+              {/* Phase Indicator */}
+              {availablePhases.length > 1 && (
+                <div className='absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 border border-white/20'>
+                  <div className='flex items-center gap-1'>
+                    {availablePhases.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                          index === selectedCharacterPhase ? 'bg-white' : 'bg-white/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Glow Effect */}
               <div className='absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full blur-lg scale-110'></div>
@@ -245,7 +309,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         </div>
         <div className='bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-3 border border-purple-400/30'>
           <div className='text-xl font-bold text-purple-400'>
-            {safeAccount.badgesEarned?.length || 0} / 5
+            {safeAccount.badgesEarned?.length || 0} / 13
           </div>
           <div className='text-xs text-gray-300'>Badges Earned</div>
         </div>
@@ -308,15 +372,32 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
       const totalCount = mainDemoBadges.length; // Should be 3
       const isAllMainBadgesEarned = earnedCount === 3; // All 3 main demo badges
 
+      // Separate badges into categories
+      const topBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+      const extraBadges = ['social_butterfly', 'hashtag_hero', 'discord_warrior', 'quest_master', 'first_referral', 'referral_champion', 'referral_legend', 'community_builder'];
+      
+      const earnedTopBadges = earnedBadgeIds.filter(id => topBadges.includes(id));
+      const earnedExtraBadges = earnedBadgeIds.filter(id => extraBadges.includes(id));
+      const allEarnedBadges = earnedBadgeIds.length;
+      const allTotalBadges = AVAILABLE_BADGES.length;
+
       return (
         <div className='space-y-4'>
+          {/* Top Badges Progress */}
           <div className='text-center mb-4'>
-            <div className='text-2xl font-bold text-white'>{earnedBadgeIds.length} / 5</div>
+            <div className='flex items-center justify-center space-x-2 mb-2'>
+              <div className='text-2xl font-bold text-white'>
+                {earnedTopBadges.length} / {topBadges.length}
+              </div>
+              {earnedTopBadges.length === topBadges.length && (
+                <div className='text-green-400 text-xl'>✅</div>
+              )}
+            </div>
             <div className='text-sm text-gray-400'>Top Badges</div>
             <div className='w-full bg-gray-700 rounded-full h-2 mt-2'>
               <div
                 className='bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500'
-                style={{ width: `${(earnedBadgeIds.length / 5) * 100}%` }}
+                style={{ width: `${(earnedTopBadges.length / topBadges.length) * 100}%` }}
               />
             </div>
           </div>
@@ -339,7 +420,13 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
           {/* Nexus Badges Section */}
           <div className='space-y-3'>
-            <div className='flex items-center space-x-2 mb-3'>
+            <div
+              className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
+              onClick={e => {
+                e.stopPropagation();
+                setIsNexusBadgesCollapsed(!isNexusBadgesCollapsed);
+              }}
+            >
               <div className='w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full'></div>
               <h3 className='text-lg font-semibold text-white'>Nexus Badges</h3>
               <div className='bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-2 py-1 rounded-full text-xs text-purple-300 border border-purple-400/30'>
@@ -350,32 +437,41 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                 }{' '}
                 / 2
               </div>
+              <div className='ml-auto'>
+                {isNexusBadgesCollapsed ? (
+                  <span className='text-gray-400 text-lg'>▶</span>
+                ) : (
+                  <span className='text-gray-400 text-lg'>▼</span>
+                )}
+              </div>
             </div>
 
-            <div className='space-y-2'>
-              {badgesWithStatus
-                .filter(badge => ['welcome_explorer', 'nexus_master'].includes(badge.id))
-                .map(badge => (
-                  <div key={badge.id} className='relative'>
-                    <Tooltip
-                      content={
-                        <div className='text-center'>
-                          <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
-                          <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
-                          <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
+            {!isNexusBadgesCollapsed && (
+              <div className='space-y-2'>
+                {badgesWithStatus
+                  .filter(badge => ['welcome_explorer', 'nexus_master'].includes(badge.id))
+                  .map(badge => (
+                    <div key={badge.id} className='relative'>
+                      <Tooltip
+                        content={
+                          <div className='text-center'>
+                            <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
+                            <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
+                            <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
+                          </div>
+                        }
+                        position='top'
+                      >
+                        <div>
+                          <Badge3D badge={badge} size='sm' compact={true} />
+                          {/* Nexus Badge Indicator */}
+                          <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full border border-white/20'></div>
                         </div>
-                      }
-                      position='top'
-                    >
-                      <div>
-                        <Badge3D badge={badge} size='sm' compact={true} />
-                        {/* Nexus Badge Indicator */}
-                        <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full border border-white/20'></div>
-                      </div>
-                    </Tooltip>
-                  </div>
-                ))}
-            </div>
+                      </Tooltip>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Demo Badges Section */}
@@ -423,6 +519,73 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                           <Badge3D badge={badge} size='sm' compact={true} />
                           {/* Demo Badge Indicator */}
                           <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border border-white/20'></div>
+                        </div>
+                      </Tooltip>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          <hr className='my-4' />
+
+          {/* All Badges Progress */}
+          <div className='text-center mb-4'>
+            <div className='text-lg font-bold text-white'>
+              {allEarnedBadges} / {allTotalBadges}
+            </div>
+            <div className='text-sm text-gray-400'>Total Badges</div>
+            <div className='w-full bg-gray-700 rounded-full h-1.5 mt-2'>
+              <div
+                className='bg-gradient-to-r from-blue-400 to-purple-500 h-1.5 rounded-full transition-all duration-500'
+                style={{ width: `${(allEarnedBadges / allTotalBadges) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Extra Badges Section */}
+          <div className='space-y-3'>
+            <div
+              className='flex items-center space-x-2 mb-3 cursor-pointer hover:bg-gray-800/30 rounded-lg p-2 transition-colors'
+              onClick={e => {
+                e.stopPropagation();
+                setIsExtraBadgesCollapsed(!isExtraBadgesCollapsed);
+              }}
+            >
+              <div className='w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full'></div>
+              <h3 className='text-lg font-semibold text-white'>Extra Badges</h3>
+              <div className='bg-gradient-to-r from-green-500/20 to-emerald-500/20 px-2 py-1 rounded-full text-xs text-green-300 border border-green-400/30'>
+                {earnedExtraBadges.length} / {extraBadges.length}
+              </div>
+              <div className='ml-auto'>
+                {isExtraBadgesCollapsed ? (
+                  <span className='text-gray-400 text-lg'>▶</span>
+                ) : (
+                  <span className='text-gray-400 text-lg'>▼</span>
+                )}
+              </div>
+            </div>
+
+            {!isExtraBadgesCollapsed && (
+              <div className='space-y-2'>
+                {badgesWithStatus
+                  .filter(badge => extraBadges.includes(badge.id))
+                  .map(badge => (
+                    <div key={badge.id} className='relative'>
+                      <Tooltip
+                        content={
+                          <div className='text-center'>
+                            <div className='text-lg font-bold text-white mb-1'>{badge.name}</div>
+                            <div className='text-sm text-gray-300 mb-2'>{badge.description}</div>
+                            <div className='text-xs text-cyan-300'>{badge.earningPoints} pts</div>
+                          </div>
+                        }
+                        position='top'
+                      >
+                        <div>
+                          <Badge3D badge={badge} size='sm' compact={true} />
+                          {/* Extra Badge Indicator */}
+                          <div className='absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border border-white/20'></div>
                         </div>
                       </Tooltip>
                     </div>

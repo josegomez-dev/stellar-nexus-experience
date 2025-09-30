@@ -132,7 +132,18 @@ export const HelloMilestoneDemo = ({
   };
 
   // Check if demo was already completed
-  const isCompleted = account?.demosCompleted?.includes('hello-milestone') || false;
+  const isCompleted = (() => {
+    if (!account?.demosCompleted) return false;
+    
+    // Handle both array and object formats for demosCompleted
+    if (Array.isArray(account.demosCompleted)) {
+      return account.demosCompleted.includes('hello-milestone');
+    } else if (typeof account.demosCompleted === 'object') {
+      return Object.values(account.demosCompleted).includes('hello-milestone');
+    }
+    
+    return false;
+  })();
 
   // Demo completion tracking is now handled by FirebaseContext
 

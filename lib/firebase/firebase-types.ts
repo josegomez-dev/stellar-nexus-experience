@@ -44,6 +44,19 @@ export interface Account {
   badgesEarned: string[]; // Array of badge IDs earned
   clappedDemos: string[]; // Array of demo IDs that the user has clapped for
 
+  // Quest system
+  completedQuests: string[]; // Array of quest IDs completed
+  questProgress: Record<string, number>; // Progress tracking for multi-step quests
+
+  // Referral system
+  referrals: {
+    totalReferrals: number;
+    successfulReferrals: number; // Referrals that completed account creation
+    referralCode: string; // Unique referral code for this user
+    referredBy?: string; // Referral code of the user who referred this user
+    referralHistory: ReferralRecord[];
+  };
+
   // Transaction history - now stored in separate collection
 }
 
@@ -66,6 +79,8 @@ export const COLLECTIONS = {
   ACCOUNTS: 'accounts',
   TRANSACTIONS: 'transactions',
   DEMO_STATS: 'demo_stats',
+  QUESTS: 'quests',
+  REFERRAL_INVITATIONS: 'referral_invitations',
 } as const;
 
 // Predefined demos configuration (static data)
@@ -106,8 +121,53 @@ export interface DemoFeedback {
   completionTime?: number; // Time taken in minutes
 }
 
+// Quest system interfaces
+export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  category: 'social' | 'referral' | 'engagement' | 'community';
+  type: 'follow' | 'post' | 'join' | 'refer' | 'complete';
+  requirements: {
+    action: string; // What the user needs to do
+    target?: string; // Target (e.g., account to follow, hashtag to use)
+    count?: number; // How many times (for multi-step quests)
+    verification?: 'manual' | 'automatic'; // How completion is verified
+  };
+  rewards: {
+    experience: number;
+    points: number;
+    badgeId?: string; // Badge earned for completion
+  };
+  isActive: boolean;
+  isRepeatable: boolean;
+  unlockRequirements?: string[]; // Badge IDs required to unlock this quest
+}
+
+// Referral system interfaces
+export interface ReferralRecord {
+  id: string;
+  referredUserWallet: string;
+  referredUserName: string;
+  referralDate: Date;
+  status: 'pending' | 'completed' | 'failed';
+  bonusEarned: number; // XP bonus earned
+}
+
+export interface ReferralInvitation {
+  id: string;
+  referrerWallet: string;
+  referrerName: string;
+  email: string;
+  referralCode: string;
+  invitationDate: Date;
+  status: 'sent' | 'opened' | 'completed' | 'expired';
+  expiresAt: Date;
+}
+
 // Predefined badges configuration (static data)
 export const PREDEFINED_BADGES = [
+  // Demo Badges (Main Badges)
   {
     id: 'welcome_explorer',
     name: 'Welcome Explorer',
@@ -158,6 +218,90 @@ export const PREDEFINED_BADGES = [
     category: 'special',
     rarity: 'legendary',
   },
+  
+  // Quest Badges (Extra Badges)
+  {
+    id: 'social_butterfly',
+    name: 'Social Butterfly',
+    description: 'Followed Trustless Work and Stellar on X',
+    earningPoints: 25,
+    baseColor: '#1DA1F2',
+    icon: 'social',
+    category: 'quest',
+    rarity: 'common',
+  },
+  {
+    id: 'hashtag_hero',
+    name: 'Hashtag Hero',
+    description: 'Posted about Trustless Work with hashtags',
+    earningPoints: 30,
+    baseColor: '#E1306C',
+    icon: 'hashtag',
+    category: 'quest',
+    rarity: 'common',
+  },
+  {
+    id: 'discord_warrior',
+    name: 'Discord Warrior',
+    description: 'Joined the Trustless Work Discord server',
+    earningPoints: 35,
+    baseColor: '#5865F2',
+    icon: 'discord',
+    category: 'quest',
+    rarity: 'common',
+  },
+  {
+    id: 'quest_master',
+    name: 'Quest Master',
+    description: 'Completed all available quests',
+    earningPoints: 100,
+    baseColor: '#FF6B35',
+    icon: 'quest',
+    category: 'quest',
+    rarity: 'epic',
+  },
+  
+  // Referral Badges (Extra Badges)
+  {
+    id: 'first_referral',
+    name: 'First Referral',
+    description: 'Successfully referred your first friend',
+    earningPoints: 50,
+    baseColor: '#10B981',
+    icon: 'referral',
+    category: 'referral',
+    rarity: 'rare',
+  },
+  {
+    id: 'referral_champion',
+    name: 'Referral Champion',
+    description: 'Successfully referred 5 friends',
+    earningPoints: 150,
+    baseColor: '#8B5CF6',
+    icon: 'champion',
+    category: 'referral',
+    rarity: 'epic',
+  },
+  {
+    id: 'referral_legend',
+    name: 'Referral Legend',
+    description: 'Successfully referred 10+ friends',
+    earningPoints: 300,
+    baseColor: '#F59E0B',
+    icon: 'legend',
+    category: 'referral',
+    rarity: 'legendary',
+  },
+  {
+    id: 'community_builder',
+    name: 'Community Builder',
+    description: 'Built a thriving community through referrals',
+    earningPoints: 500,
+    baseColor: '#EF4444',
+    icon: 'community',
+    category: 'referral',
+    rarity: 'legendary',
+  },
 ];
 
 // Helper functions
@@ -175,4 +319,149 @@ export const getAllDemos = () => {
 
 export const getAllBadges = () => {
   return PREDEFINED_BADGES;
+};
+
+// Predefined quests configuration
+export const PREDEFINED_QUESTS: Quest[] = [
+  {
+    id: 'follow_both_accounts',
+    title: 'Social Butterfly',
+    description: 'Follow both @TrustlessWork and @StellarOrg on X to stay updated with the latest news and learn about the Stellar ecosystem',
+    category: 'social',
+    type: 'follow',
+    requirements: {
+      action: 'Follow both @TrustlessWork and @StellarOrg on X',
+      target: 'https://x.com/TrustlessWork and https://x.com/StellarOrg',
+      verification: 'manual',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'social_butterfly',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
+  },
+  {
+    id: 'post_hashtags',
+    title: 'Share the Love',
+    description: 'Post about Trustless Work using hashtags #escrow-master #nexus-master',
+    category: 'social',
+    type: 'post',
+    requirements: {
+      action: 'Post about Trustless Work with hashtags',
+      target: '#escrow-master #nexus-master #trustless-work #stellar',
+      verification: 'manual',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'hashtag_hero',
+    },
+    isActive: true,
+    isRepeatable: true,
+    unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
+  },
+  {
+    id: 'join_discord',
+    title: 'Join the Community',
+    description: 'Join the Trustless Work Discord server to see weekly leaderboard updates',
+    category: 'community',
+    type: 'join',
+    requirements: {
+      action: 'Join the Trustless Work Discord server',
+      target: 'https://discord.gg/trustlesswork',
+      verification: 'manual',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'discord_warrior',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
+  },
+  {
+    id: 'refer_1_friend',
+    title: 'First Referral',
+    description: 'Invite 1 friend to join Trustless Work',
+    category: 'referral',
+    type: 'refer',
+    requirements: {
+      action: 'Invite 1 friend',
+      count: 1,
+      verification: 'automatic',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'first_referral',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
+  },
+  {
+    id: 'refer_5_friends',
+    title: 'Referral Champion',
+    description: 'Invite 5 friends to join Trustless Work',
+    category: 'referral',
+    type: 'refer',
+    requirements: {
+      action: 'Invite 5 friends',
+      count: 5,
+      verification: 'automatic',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'referral_champion',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['first_referral'],
+  },
+  {
+    id: 'refer_10_friends',
+    title: 'Referral Legend',
+    description: 'Invite 10 friends to join Trustless Work',
+    category: 'referral',
+    type: 'refer',
+    requirements: {
+      action: 'Invite 10 friends',
+      count: 10,
+      verification: 'automatic',
+    },
+    rewards: {
+      experience: 250,
+      points: 25,
+      badgeId: 'referral_legend',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['referral_champion'],
+  },
+];
+
+// Helper functions for quests
+export const getQuestById = (id: string) => {
+  return PREDEFINED_QUESTS.find(quest => quest.id === id);
+};
+
+export const getAllQuests = () => {
+  return PREDEFINED_QUESTS;
+};
+
+export const getQuestsByCategory = (category: string) => {
+  return PREDEFINED_QUESTS.filter(quest => quest.category === category);
+};
+
+export const getAvailableQuests = (completedBadges: string[]) => {
+  return PREDEFINED_QUESTS.filter(quest => {
+    if (!quest.isActive) return false;
+    if (!quest.unlockRequirements) return true;
+    return quest.unlockRequirements.every(badgeId => completedBadges.includes(badgeId));
+  });
 };

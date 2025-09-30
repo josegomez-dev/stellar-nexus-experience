@@ -31,6 +31,7 @@ import Image from 'next/image';
 // Remove unused nexusCodex import
 import { getBadgeById, Account, DemoStats, PREDEFINED_DEMOS } from '@/lib/firebase/firebase-types';
 import { getBadgeIcon, BADGE_SIZES } from '@/utils/constants/badges/assets';
+import { QuestAndReferralSection } from '@/components/ui/quest/QuestAndReferralSection';
 
 // Demo Selection Component
 interface DemoCard {
@@ -1021,7 +1022,7 @@ export default function HomePageContent() {
     }
 
     // Check if user has earned all required badges
-    const requiredBadges = ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const requiredBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
     const hasAllBadges = requiredBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
 
     return hasAllBadges;
@@ -1512,6 +1513,30 @@ export default function HomePageContent() {
                   />
                 )}
               </div>
+            </section>
+
+            {/* Quest and Referral System Section */}
+            <section className="container mx-auto px-4 py-16">
+              <QuestAndReferralSection
+                account={account}
+                onQuestComplete={(questId, rewards) => {
+                  addToastHook({
+                    type: 'success',
+                    title: '🎯 Quest Completed!',
+                    message: `Earned ${rewards.experience} XP and ${rewards.points} points!`,
+                    duration: 5000,
+                  });
+                }}
+                onReferralComplete={(referralData) => {
+                  addToastHook({
+                    type: 'success',
+                    title: '👥 Referral Sent!',
+                    message: `Invitation sent to ${referralData.email}`,
+                    duration: 5000,
+                  });
+                }}
+                refreshAccountData={refreshAccountData}
+              />
             </section>
 
             {/* Interactive Tutorial Section - Full Width with Irregular Shape */}

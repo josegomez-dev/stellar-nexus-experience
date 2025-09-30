@@ -22,9 +22,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
 
   // Use Firebase account data
   const stats = getUserStats();
-  const level = account?.level || stats.level;
+  const level = account 
+    ? Math.floor((account.experience || 0) / 1000) + 1
+    : stats.level;
   const expProgress = account
-    ? { current: account.experience, next: (account.level + 1) * 1000 }
+    ? { 
+        current: (account.experience || 0) % 1000, 
+        next: 1000 
+      }
     : null;
   const mainDemoProgress = account
     ? { completed: account.demosCompleted.length, total: 3 }
@@ -43,10 +48,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
     if (account && expProgress) {
       return (expProgress.current / expProgress.next) * 100;
     }
-    const currentLevelXP = (stats.level - 1) * 1000;
-    const nextLevelXP = stats.level * 1000;
-    const progress = ((stats.experience - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-    return Math.min(progress, 100);
+    // For stats-based calculation, use modulo to get XP within current level
+    const expInCurrentLevel = stats.experience % 1000;
+    return (expInCurrentLevel / 1000) * 100;
   };
 
   const expPercentage =
@@ -318,7 +322,18 @@ export const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => 
                     <div className='space-y-3'>
                       {mainDemos
                         .map(demoId => {
-                          const isCompleted = account.demosCompleted.includes(demoId);
+                          const isCompleted = (() => {
+                            if (!account.demosCompleted) return false;
+                            
+                            // Handle both array and object formats for demosCompleted
+                            if (Array.isArray(account.demosCompleted)) {
+                              return account.demosCompleted.includes(demoId);
+                            } else if (typeof account.demosCompleted === 'object') {
+                              return Object.values(account.demosCompleted).includes(demoId);
+                            }
+                            
+                            return false;
+                          })();
                           const pointsEarned = 0; // Not available in current structure
 
                           return (

@@ -151,7 +151,7 @@ export const Header = () => {
                       </span>
                       <span className='text-xs text-white/70'>Level:</span>
                       <span className='text-sm font-semibold text-blue-400'>
-                        {account?.level || 1}
+                        {account ? Math.floor((account.experience || 0) / 1000) + 1 : 1}
                       </span>
                     </div>
 
