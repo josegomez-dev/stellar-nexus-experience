@@ -1,17 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Account, ReferralRecord } from '@/lib/firebase/firebase-types';
+import { Account, ReferralRecord, ReferralInvitation } from '@/lib/firebase/firebase-types';
 import { ReferralService } from '@/lib/services/referral-service';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { getBadgeIcon, BADGE_SIZES } from '@/utils/constants/badges/assets';
+import { useToast } from '@/contexts/ui/ToastContext';
 
 interface ReferralSystemProps {
   account: Account | null;
   onReferralComplete?: (referralData: any) => void;
+  onAccountRefresh?: () => Promise<void>;
 }
 
-export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onReferralComplete }) => {
+export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onReferralComplete, onAccountRefresh }) => {
+  const { addToast } = useToast();
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
     successfulReferrals: 0,
@@ -25,6 +28,10 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
   const [inviteMessage, setInviteMessage] = useState('');
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
+  const [pendingInvitations, setPendingInvitations] = useState<ReferralInvitation[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   useEffect(() => {
     if (account) {
@@ -32,7 +39,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
     }
   }, [account]);
 
-  const loadReferralData = () => {
+  const loadReferralData = async () => {
     if (!account) {
       setIsLoading(false);
       return;
@@ -40,7 +47,38 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
 
     try {
       const stats = ReferralService.getReferralStats(account);
-      setReferralStats(stats);
+      
+      // If no referral code exists, try to initialize the referral system
+      if (!stats.referralCode) {
+        try {
+          const result = await ReferralService.initializeReferralSystem(account);
+          if (result.success && result.referralCode) {
+            // Refresh account data to get the updated referral code
+            if (onAccountRefresh) {
+              await onAccountRefresh();
+              // After refresh, the account prop will be updated by the parent component
+              // We'll get the updated stats in the next render cycle
+              return; // Exit early, let the useEffect re-run with updated account
+            }
+            // Fallback: use the result directly if no refresh function
+            setReferralStats({
+              ...stats,
+              referralCode: result.referralCode,
+            });
+          } else {
+            setReferralStats(stats);
+          }
+        } catch (initError) {
+          console.error('Error initializing referral system:', initError);
+          setReferralStats(stats);
+        }
+      } else {
+        setReferralStats(stats);
+      }
+      
+      // Load pending invitations
+      const pending = await ReferralService.getPendingInvitations(account);
+      setPendingInvitations(pending);
     } catch (error) {
       console.error('Error loading referral data:', error);
       // Set default stats if there's an error
@@ -93,6 +131,110 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
       }
     } catch (error) {
       console.error('Error copying referral link:', error);
+    }
+  };
+
+  const handleCopyReferralCode = async () => {
+    if (!account) return;
+
+    try {
+      const result = await ReferralService.copyReferralCode(account);
+      if (result.success) {
+        setCopyCodeSuccess(true);
+        setTimeout(() => setCopyCodeSuccess(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error copying referral code:', error);
+    }
+  };
+
+  const handleRefreshReferrals = async () => {
+    if (!account) return;
+
+    setIsRefreshing(true);
+    try {
+      const result = await ReferralService.checkForNewReferrals(account);
+      
+      if (result.success) {
+        if (result.newReferrals > 0) {
+          addToast({
+            title: 'New Referrals Found!',
+            message: result.message,
+            type: 'success',
+          });
+          
+          // Reload data to show updated stats
+          await loadReferralData();
+          
+          if (onReferralComplete) {
+            onReferralComplete({ type: 'new_referrals', count: result.newReferrals });
+          }
+        } else {
+          addToast({
+            title: 'No New Referrals',
+            message: result.message,
+            type: 'info',
+          });
+        }
+      } else {
+        addToast({
+          title: 'Refresh Failed',
+          message: result.message,
+          type: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing referrals:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to refresh referrals',
+        type: 'error',
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleGenerateCode = async () => {
+    if (!account) return;
+
+    setIsGeneratingCode(true);
+    try {
+      const result = await ReferralService.initializeReferralSystem(account);
+      
+      if (result.success && result.referralCode) {
+        addToast({
+          title: 'Referral Code Generated!',
+          message: `Your new referral code is: ${result.referralCode}`,
+          type: 'success',
+        });
+        
+        // Refresh account data to get the updated referral code
+        if (onAccountRefresh) {
+          await onAccountRefresh();
+        }
+        
+        // Update stats with the new referral code
+        setReferralStats(prev => ({
+          ...prev,
+          referralCode: result.referralCode!,
+        }));
+      } else {
+        addToast({
+          title: 'Generation Failed',
+          message: result.message,
+          type: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error generating referral code:', error);
+      addToast({
+        title: 'Error',
+        message: 'Failed to generate referral code',
+        type: 'error',
+      });
+    } finally {
+      setIsGeneratingCode(false);
     }
   };
 
@@ -152,6 +294,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
         </div>
       </div>
 
+
       {/* Current Badge */}
       {currentBadge && (
         <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl p-4 border border-green-400/30">
@@ -196,32 +339,79 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
 
       {/* Referral Code */}
       <div className="bg-white/10 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Your Referral Code</h3>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 bg-black/20 rounded-lg p-3 border border-white/20">
-            <div className="text-sm text-white/70 mb-1">Referral Code</div>
-            <div className="text-lg font-mono font-bold text-blue-400">
-              {referralStats.referralCode || 'Generating...'}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Your Referral Code</h3>
+          {!referralStats.referralCode && (
+            <button
+              onClick={handleGenerateCode}
+              disabled={isGeneratingCode}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+            >
+              {isGeneratingCode ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <span>⚡</span>
+                  <span>Generate Code</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-black/20 rounded-lg p-3 border border-white/20">
+              <div className="text-sm text-white/70 mb-1">Referral Code</div>
+              <div className="text-lg font-mono font-bold text-blue-400">
+                {referralStats.referralCode || 'Generating...'}
+              </div>
             </div>
+            <button
+              onClick={handleCopyReferralCode}
+              disabled={!referralStats.referralCode}
+              className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                copyCodeSuccess
+                  ? 'bg-green-500 text-white'
+                  : referralStats.referralCode
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:scale-105'
+                  : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              {copyCodeSuccess ? '✓ Copied!' : '📋 Copy Code'}
+            </button>
           </div>
-          <button
-            onClick={handleCopyReferralLink}
-            className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-              copySuccess
-                ? 'bg-green-500 text-white'
-                : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white hover:scale-105'
-            }`}
-          >
-            {copySuccess ? '✓ Copied!' : '📋 Copy Link'}
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-black/20 rounded-lg p-3 border border-white/20">
+              <div className="text-sm text-white/70 mb-1">Referral Link</div>
+              <div className="text-sm font-mono text-blue-300 truncate">
+                {referralStats.referralCode ? `${window.location.origin}?ref=${referralStats.referralCode}` : 'Generating...'}
+              </div>
+            </div>
+            <button
+              onClick={handleCopyReferralLink}
+              disabled={!referralStats.referralCode}
+              className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                copySuccess
+                  ? 'bg-green-500 text-white'
+                  : referralStats.referralCode
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white hover:scale-105'
+                  : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              {copySuccess ? '✓ Copied!' : '🔗 Copy Link'}
+            </button>
+          </div>
         </div>
         <div className="mt-3 text-sm text-white/60">
-          Share this link with friends to earn 50 XP for each successful referral!
+          Share your code or link with friends to earn 50 XP for each successful referral!
         </div>
       </div>
 
       {/* Invite Actions */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         <button
           onClick={() => setShowInviteModal(true)}
           className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
@@ -230,44 +420,133 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
           <span>Send Email Invite</span>
         </button>
         <button
+          onClick={handleCopyReferralCode}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
+        >
+          <span>📋</span>
+          <span>Copy Code</span>
+        </button>
+        <button
           onClick={handleCopyReferralLink}
           className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
         >
           <span>🔗</span>
-          <span>Copy Referral Link</span>
+          <span>Copy Link</span>
         </button>
       </div>
 
-      {/* Recent Referrals */}
-      {referralStats.recentReferrals.length > 0 && (
-        <div className="bg-white/10 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Recent Referrals</h3>
-          <div className="space-y-3">
-            {referralStats.recentReferrals.map((referral, index) => (
-              <div
-                key={referral.id}
-                className="flex items-center justify-between bg-black/20 rounded-lg p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {index + 1}
-                  </div>
-                  <div>
+      {/* Referrals Table */}
+      <div className="bg-white/10 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Referral History</h3>
+          <button
+            onClick={handleRefreshReferrals}
+            disabled={isRefreshing}
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+          >
+            {isRefreshing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Checking...</span>
+              </>
+            ) : (
+              <>
+                <span>🔄</span>
+                <span>Check for New</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/20">
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Status</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Email/Name</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Date</th>
+                <th className="text-left py-3 px-4 text-white/70 font-medium">Reward</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Pending Invitations */}
+              {pendingInvitations.map((invitation, index) => (
+                <tr key={`pending-${invitation.id}`} className="border-b border-white/10 hover:bg-white/5 transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span className="text-yellow-400 font-medium text-sm">Pending</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="text-white font-medium">{invitation.email}</div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="text-white/60 text-sm">
+                      {new Date(invitation.invitationDate).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-yellow-400 font-medium text-sm">+50 XP</span>
+                      <span className="text-yellow-300">⏳</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {/* Successful Referrals */}
+              {referralStats.recentReferrals.map((referral, index) => (
+                <tr key={`success-${referral.id}`} className="border-b border-white/10 hover:bg-white/5 transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-green-400 font-medium text-sm">Completed</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
                     <div className="text-white font-medium">{referral.referredUserName}</div>
-                    <div className="text-sm text-white/60">
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="text-white/60 text-sm">
                       {new Date(referral.referralDate).toLocaleDateString()}
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-green-400 font-medium">+{referral.bonusEarned} XP</span>
-                  <span className="text-green-300">✓</span>
-                </div>
-              </div>
-            ))}
-          </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-400 font-medium text-sm">+{referral.bonusEarned} XP</span>
+                      <span className="text-green-300">✓</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {/* Empty State */}
+              {pendingInvitations.length === 0 && referralStats.recentReferrals.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-8 px-4 text-center">
+                    <div className="text-white/50 text-sm">
+                      No referrals yet. Start inviting friends to earn bonus XP!
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {/* Summary */}
+        {(pendingInvitations.length > 0 || referralStats.recentReferrals.length > 0) && (
+          <div className="mt-4 pt-4 border-t border-white/20">
+            <div className="flex justify-between text-sm text-white/70">
+              <span>Total Pending: {pendingInvitations.length}</span>
+              <span>Total Completed: {referralStats.recentReferrals.length}</span>
+              <span>Total XP Earned: +{referralStats.totalBonusEarned}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Invite Modal */}
       {showInviteModal && (

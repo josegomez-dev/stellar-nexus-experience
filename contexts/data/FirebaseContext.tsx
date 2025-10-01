@@ -29,6 +29,7 @@ interface DemoCard {
 import { useBadgeAnimation } from '../ui/BadgeAnimationContext';
 import { useToast } from '../ui/ToastContext';
 import { useTransactionHistory } from './TransactionContext';
+import { ReferralService } from '../../lib/services/referral-service';
 
 interface FirebaseContextType {
   // Account data
@@ -44,7 +45,7 @@ interface FirebaseContextType {
   isInitialized: boolean;
   
   // Actions
-  initializeAccount: (displayName: string) => Promise<void>;
+  initializeAccount: (displayName: string, referralCode?: string, userEmail?: string) => Promise<void>;
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
   hasBadge: (badgeId: string) => Promise<boolean>;
   hasCompletedDemo: (demoId: string) => Promise<boolean>;
@@ -114,6 +115,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           // Add experience and points for account creation
           await accountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
           
+          // Initialize referral system for new account
+          try {
+            await ReferralService.initializeReferralSystem(
+              { id: walletData.publicKey, displayName: user?.customName || user?.username || 'Anonymous User', walletAddress: walletData.publicKey } as Account
+            );
+          } catch (referralError) {
+            console.error('Error initializing referral system:', referralError);
+          }
+          
           // Show Welcome badge animation
           const welcomeBadge = getBadgeById('welcome_explorer');
           if (welcomeBadge) {
@@ -130,6 +140,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
             id: walletData.publicKey,
             lastLoginAt: new Date(),
           });
+          
+          // Check if existing account needs referral system initialization
+          if (!existingAccount.referrals?.referralCode) {
+            try {
+              await ReferralService.initializeReferralSystem(
+                { id: walletData.publicKey, displayName: existingAccount.displayName, walletAddress: walletData.publicKey } as Account
+              );
+            } catch (referralError) {
+              console.error('Error initializing referral system for existing account:', referralError);
+            }
+          }
         }
         
         // Load account data (demo stats already loaded above)
@@ -202,7 +223,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   };
 
   // Initialize account (called from AuthModal)
-  const initializeAccount = async (displayName: string) => {
+  const initializeAccount = async (displayName: string, referralCode?: string, userEmail?: string) => {
     if (!walletData?.publicKey) throw new Error('Wallet not connected');
     
     setIsLoading(true);
@@ -223,6 +244,43 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         
         // Add experience and points for account creation
         await accountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
+        
+        // Initialize referral system if referral code provided
+        if (referralCode) {
+          try {
+            const referralResult = await ReferralService.initializeReferralSystem(
+              { id: walletData.publicKey, displayName, walletAddress: walletData.publicKey } as Account,
+              referralCode,
+              userEmail
+            );
+            
+            if (referralResult.success && referralResult.bonusEarned && referralResult.bonusEarned > 0) {
+              addToast({
+                title: 'Referral Bonus!',
+                message: `You earned ${referralResult.bonusEarned} XP for using a referral code!`,
+                type: 'success',
+              });
+            }
+          } catch (referralError) {
+            console.error('Error initializing referral system:', referralError);
+            addToast({
+              title: 'Referral Error',
+              message: 'Invalid referral code, but account was created successfully.',
+              type: 'warning',
+            });
+          }
+        } else {
+          // Initialize referral system without referral code
+          try {
+            await ReferralService.initializeReferralSystem(
+              { id: walletData.publicKey, displayName, walletAddress: walletData.publicKey } as Account,
+              undefined,
+              userEmail
+            );
+          } catch (referralError) {
+            console.error('Error initializing referral system:', referralError);
+          }
+        }
         
         // Show Welcome badge animation
         const welcomeBadge = getBadgeById('welcome_explorer');

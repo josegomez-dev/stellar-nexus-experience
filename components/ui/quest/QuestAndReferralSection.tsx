@@ -152,6 +152,7 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
         <ReferralSystem
           account={account}
           onReferralComplete={onReferralComplete}
+          onAccountRefresh={refreshAccountData}
         />
       )}
     </div>

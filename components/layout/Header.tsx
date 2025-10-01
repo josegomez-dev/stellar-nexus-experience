@@ -98,7 +98,7 @@ export const Header = () => {
               <span>Demos</span>
             </a> */}
             {/* Only show Nexus Web3 Playground when wallet is connected */}
-            {isConnected && (
+            {/* {isConnected && (
               <Tooltip
                 position='bottom'
                 content={
@@ -133,7 +133,7 @@ export const Header = () => {
                   </span>
                 </a>
               </Tooltip>
-            )}
+            )} */}
           </nav>
 
           {/* Header Controls */}

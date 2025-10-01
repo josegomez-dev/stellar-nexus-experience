@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { ReferralCodeModal } from '@/components/ui/modals/ReferralCodeModal';
 import Image from 'next/image';
 
 interface AuthModalProps {
@@ -14,6 +16,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) => {
   const { signUp, signIn, initializeUserWithFirebase, isLoading, error } = useAuth();
   const { walletData, isConnected } = useGlobalWallet();
+  const { initializeAccount } = useFirebase();
   const [currentMode, setCurrentMode] = useState<'signup' | 'signin'>(mode);
   const [formData, setFormData] = useState({
     username: '',
@@ -21,6 +24,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBenefitsExpanded, setIsBenefitsExpanded] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [pendingReferralCode, setPendingReferralCode] = useState<string | null>(null);
 
   // Random username suggestions
   const usernameSuggestions = [
@@ -251,6 +256,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
     setFormData({ username: '', email: '' });
   }, [mode]);
 
+  // Check for referral code in URL
+  useEffect(() => {
+    if (isOpen && currentMode === 'signup') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+      if (refCode) {
+        setPendingReferralCode(refCode);
+      }
+    }
+  }, [isOpen, currentMode]);
+
   // Handle escape key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -274,16 +290,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
     setIsSubmitting(true);
     try {
       if (currentMode === 'signup') {
-        // Use Firebase initialization for new users
-        await initializeUserWithFirebase(formData.username);
+        // Check if we have a pending referral code or need to show referral modal
+        if (pendingReferralCode || formData.email) {
+          setShowReferralModal(true);
+        } else {
+          // Use Firebase initialization for new users
+          await initializeAccount(formData.username);
+          onClose();
+        }
       } else {
         await signIn(walletData.publicKey);
+        onClose();
       }
-      onClose();
     } catch (err) {
       console.error('Error in signIn:', err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleReferralCodeSubmit = async (referralCode: string) => {
+    try {
+      await initializeAccount(formData.username, referralCode, formData.email);
+      setShowReferralModal(false);
+      onClose();
+    } catch (err) {
+      console.error('Error creating account with referral code:', err);
+      throw err;
+    }
+  };
+
+  const handleReferralModalClose = async () => {
+    try {
+      await initializeAccount(formData.username, undefined, formData.email);
+      setShowReferralModal(false);
+      onClose();
+    } catch (err) {
+      console.error('Error creating account:', err);
     }
   };
 
@@ -532,6 +575,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
           </svg>
         </button>
       </div>
+
+      {/* Referral Code Modal */}
+      <ReferralCodeModal
+        isOpen={showReferralModal}
+        onClose={handleReferralModalClose}
+        onReferralCodeSubmit={handleReferralCodeSubmit}
+        userEmail={formData.email}
+      />
     </div>
   );
 };
