@@ -1,7 +1,7 @@
 import { 
   Account, 
-  ReferralRecord, 
-  ReferralInvitation,
+  ReferralRecord,
+  InvitationRecord,
   getQuestById 
 } from '@/lib/firebase/firebase-types';
 import { db } from '@/lib/firebase/firebase';
@@ -11,7 +11,6 @@ import {
   arrayUnion, 
   increment, 
   collection, 
-  addDoc, 
   query, 
   where, 
   getDocs,
@@ -48,6 +47,7 @@ export class ReferralService {
         'referrals.totalReferrals': 0,
         'referrals.successfulReferrals': 0,
         'referrals.referralHistory': [],
+        'referrals.invitees': [], // Track all invitations sent
         updatedAt: new Date(),
       };
 
@@ -254,20 +254,22 @@ export class ReferralService {
       const referralLink = `${window.location.origin}?ref=${referralCode}`;
       
       // Create invitation record
-      const invitation: ReferralInvitation = {
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-        referrerWallet: referrer.walletAddress,
-        referrerName: referrer.displayName,
+      const invitationId = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      const invitation: InvitationRecord = {
+        id: invitationId,
         email,
-        referralCode,
         invitationDate: new Date(),
         status: 'sent',
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       };
 
-      // Save invitation to Firebase
-      const invitationsRef = collection(db, 'referral_invitations');
-      const docRef = await addDoc(invitationsRef, invitation);
+      // Save invitation to account's referrals.invitees
+      const referrerRef = doc(db, 'accounts', referrer.id);
+      await updateDoc(referrerRef, {
+        'referrals.invitees': arrayUnion(invitation),
+        'referrals.totalReferrals': increment(1), // Count sent invitations
+        updatedAt: new Date(),
+      });
 
       // Send email using EmailJS
       try {
@@ -297,19 +299,24 @@ export class ReferralService {
         // Send email
         await emailjs.send(serviceId, templateId, templateParams, publicKey);
 
-        // Update invitation status to sent
-        await updateDoc(docRef, { status: 'sent' });
-
         return {
           success: true,
           message: 'Referral invitation sent successfully',
-          invitationId: docRef.id,
+          invitationId,
         };
       } catch (emailError) {
         console.error('EmailJS error:', emailError);
         
-        // Update invitation status to failed
-        await updateDoc(docRef, { status: 'failed' });
+        // Update invitation status to failed in account's invitees
+        const invitees = referrer.referrals?.invitees || [];
+        const updatedInvitees = invitees.map(inv => 
+          inv.id === invitationId ? { ...inv, status: 'failed' as const } : inv
+        );
+        
+        await updateDoc(referrerRef, {
+          'referrals.invitees': updatedInvitees,
+          updatedAt: new Date(),
+        });
 
         // Fallback: log the invitation details for manual sending
         console.log('Referral invitation details (EmailJS failed):', {
@@ -329,7 +336,7 @@ export class ReferralService {
         return {
           success: false,
           message: 'Failed to send email, but invitation was recorded. Please check EmailJS configuration.',
-          invitationId: docRef.id,
+          invitationId,
         };
       }
     } catch (error) {
@@ -424,38 +431,49 @@ export class ReferralService {
   /**
    * Track email invitation when user creates account
    */
-  static async trackEmailInvitation(email: string, referralCode: string): Promise<{
+  static async trackEmailInvitation(email: string, referralCode: string, newUserWallet?: string): Promise<{
     success: boolean;
     message: string;
     invitationId?: string;
   }> {
     try {
-      const invitationsRef = collection(db, 'referral_invitations');
-      const q = query(
-        invitationsRef,
-        where('email', '==', email),
-        where('referralCode', '==', referralCode),
-        where('status', '==', 'sent')
-      );
-      const querySnapshot = await getDocs(q);
+      // Find referrer account by referral code
+      const referrerResult = await this.findReferrerByCode(referralCode);
+      if (!referrerResult.success || !referrerResult.referrer) {
+        return { success: false, message: 'Referrer not found' };
+      }
 
-      if (querySnapshot.empty) {
+      const referrer = referrerResult.referrer;
+      const invitees = referrer.referrals?.invitees || [];
+      
+      // Find matching invitation
+      const invitation = invitees.find(inv => inv.email === email && inv.status === 'sent');
+      if (!invitation) {
         return { success: false, message: 'No matching invitation found' };
       }
 
-      const invitationDoc = querySnapshot.docs[0];
-      const invitationId = invitationDoc.id;
-
       // Update invitation status to completed
-      await updateDoc(doc(db, 'referral_invitations', invitationId), {
-        status: 'completed',
-        completedAt: new Date(),
+      const updatedInvitees = invitees.map(inv => 
+        inv.id === invitation.id 
+          ? { 
+              ...inv, 
+              status: 'completed' as const, 
+              completedAt: new Date(),
+              referredUserWallet: newUserWallet 
+            } 
+          : inv
+      );
+
+      const referrerRef = doc(db, 'accounts', referrer.id);
+      await updateDoc(referrerRef, {
+        'referrals.invitees': updatedInvitees,
+        updatedAt: new Date(),
       });
 
       return {
         success: true,
         message: 'Email invitation tracked successfully',
-        invitationId,
+        invitationId: invitation.id,
       };
     } catch (error) {
       console.error('Error tracking email invitation:', error);
@@ -473,31 +491,32 @@ export class ReferralService {
     referrerName?: string;
   }> {
     try {
-      const invitationsRef = collection(db, 'referral_invitations');
-      const q = query(
-        invitationsRef,
-        where('email', '==', email),
-        where('status', '==', 'sent')
-      );
-      const querySnapshot = await getDocs(q);
+      // Search all accounts for an invitation with this email
+      const accountsRef = collection(db, 'accounts');
+      const querySnapshot = await getDocs(accountsRef);
 
-      if (querySnapshot.empty) {
-        return { success: true, hasInvitation: false };
+      for (const docSnap of querySnapshot.docs) {
+        const account = docSnap.data() as Account;
+        const invitees = account.referrals?.invitees || [];
+        
+        // Find matching invitation
+        const invitation = invitees.find(inv => 
+          inv.email === email && 
+          inv.status === 'sent' &&
+          new Date() <= inv.expiresAt
+        );
+
+        if (invitation) {
+          return {
+            success: true,
+            hasInvitation: true,
+            referralCode: account.referrals?.referralCode,
+            referrerName: account.displayName,
+          };
+        }
       }
 
-      const invitation = querySnapshot.docs[0].data() as ReferralInvitation;
-      
-      // Check if invitation is still valid (not expired)
-      if (new Date() > invitation.expiresAt) {
-        return { success: true, hasInvitation: false };
-      }
-
-      return {
-        success: true,
-        hasInvitation: true,
-        referralCode: invitation.referralCode,
-        referrerName: invitation.referrerName,
-      };
+      return { success: true, hasInvitation: false };
     } catch (error) {
       console.error('Error checking pending invitation:', error);
       return { success: false, hasInvitation: false };
@@ -525,24 +544,15 @@ export class ReferralService {
   /**
    * Get pending invitations for a user
    */
-  static async getPendingInvitations(account: Account): Promise<ReferralInvitation[]> {
+  static async getPendingInvitations(account: Account): Promise<InvitationRecord[]> {
     try {
-      const invitationsRef = collection(db, 'referral_invitations');
-      const q = query(
-        invitationsRef,
-        where('referrerWallet', '==', account.walletAddress),
-        where('status', '==', 'sent')
+      const invitees = account.referrals?.invitees || [];
+      
+      // Filter for pending invitations that haven't expired
+      const pendingInvitations = invitees.filter(inv => 
+        inv.status === 'sent' && 
+        new Date() <= inv.expiresAt
       );
-      const querySnapshot = await getDocs(q);
-
-      const pendingInvitations: ReferralInvitation[] = [];
-      querySnapshot.forEach((doc) => {
-        const invitation = doc.data() as ReferralInvitation;
-        // Check if invitation is still valid (not expired)
-        if (new Date() <= invitation.expiresAt) {
-          pendingInvitations.push(invitation);
-        }
-      });
 
       return pendingInvitations;
     } catch (error) {
@@ -553,6 +563,7 @@ export class ReferralService {
 
   /**
    * Check for new successful referrals and update stats
+   * This method syncs completed invitees to referralHistory
    */
   static async checkForNewReferrals(account: Account): Promise<{
     success: boolean;
@@ -560,22 +571,15 @@ export class ReferralService {
     message: string;
   }> {
     try {
-      const invitationsRef = collection(db, 'referral_invitations');
-      const q = query(
-        invitationsRef,
-        where('referrerWallet', '==', account.walletAddress),
-        where('status', '==', 'completed')
-      );
-      const querySnapshot = await getDocs(q);
-
-      const completedInvitations = querySnapshot.docs.map(doc => doc.data() as ReferralInvitation);
+      const invitees = account.referrals?.invitees || [];
+      const completedInvitees = invitees.filter(inv => inv.status === 'completed');
       
       // Check which completed invitations are not yet in the referral history
       const referralHistory = account.referrals?.referralHistory || [];
       const existingReferralWallets = referralHistory.map(record => record.referredUserWallet);
       
-      const newCompletedInvitations = completedInvitations.filter(invitation => 
-        !existingReferralWallets.includes(invitation.email) // Using email as identifier for now
+      const newCompletedInvitations = completedInvitees.filter(invitation => 
+        invitation.referredUserWallet && !existingReferralWallets.includes(invitation.referredUserWallet)
       );
 
       if (newCompletedInvitations.length > 0) {
@@ -583,8 +587,8 @@ export class ReferralService {
         const accountRef = doc(db, 'accounts', account.id);
         
         const newReferralRecords = newCompletedInvitations.map(invitation => ({
-          id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-          referredUserWallet: invitation.email, // Using email as identifier
+          id: invitation.id,
+          referredUserWallet: invitation.referredUserWallet || invitation.email,
           referredUserName: invitation.email.split('@')[0], // Extract name from email
           referralDate: invitation.invitationDate,
           status: 'completed' as const,
@@ -592,7 +596,6 @@ export class ReferralService {
         }));
 
         await updateDoc(accountRef, {
-          'referrals.successfulReferrals': increment(newCompletedInvitations.length),
           'referrals.referralHistory': arrayUnion(...newReferralRecords),
           experience: increment(50 * newCompletedInvitations.length),
           totalPoints: increment(50 * newCompletedInvitations.length),
@@ -600,7 +603,13 @@ export class ReferralService {
         });
 
         // Check for new badges
-        const updatedAccount = { ...account, referrals: { ...account.referrals, successfulReferrals: (account.referrals?.successfulReferrals || 0) + newCompletedInvitations.length } };
+        const updatedAccount = { 
+          ...account, 
+          referrals: { 
+            ...account.referrals, 
+            successfulReferrals: (account.referrals?.successfulReferrals || 0) + newCompletedInvitations.length 
+          } 
+        };
         await this.checkReferralQuests(updatedAccount);
 
         return {

@@ -54,7 +54,8 @@ export interface Account {
     successfulReferrals: number; // Referrals that completed account creation
     referralCode: string; // Unique referral code for this user
     referredBy?: string; // Referral code of the user who referred this user
-    referralHistory: ReferralRecord[];
+    referralHistory: ReferralRecord[]; // Successful referrals
+    invitees: InvitationRecord[]; // All invitations sent (pending and completed)
   };
 
   // Transaction history - now stored in separate collection
@@ -80,7 +81,6 @@ export const COLLECTIONS = {
   TRANSACTIONS: 'transactions',
   DEMO_STATS: 'demo_stats',
   QUESTS: 'quests',
-  REFERRAL_INVITATIONS: 'referral_invitations',
 } as const;
 
 // Predefined demos configuration (static data)
@@ -154,16 +154,17 @@ export interface ReferralRecord {
   bonusEarned: number; // XP bonus earned
 }
 
-export interface ReferralInvitation {
+// Invitation tracking (stores in account's referrals field)
+export interface InvitationRecord {
   id: string;
-  referrerWallet: string;
-  referrerName: string;
   email: string;
-  referralCode: string;
   invitationDate: Date;
-  status: 'sent' | 'opened' | 'completed' | 'expired';
+  status: 'sent' | 'opened' | 'completed' | 'expired' | 'failed';
   expiresAt: Date;
+  completedAt?: Date;
+  referredUserWallet?: string; // Set when completed
 }
+
 
 // Predefined badges configuration (static data)
 export const PREDEFINED_BADGES = [
