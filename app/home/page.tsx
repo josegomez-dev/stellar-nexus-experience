@@ -1239,17 +1239,6 @@ export default function HomePageContent() {
         {/* Preloader Screen */}
         <PreloaderScreen 
           isLoading={isLoading} 
-          loadingProgress={loadingProgress}
-          loadingSteps={[
-            'Initializing STELLAR NEXUS...',
-            'Connecting to Stellar Network...',
-            'Loading Demo Suite...',
-            'Fetching Demo Statistics...',
-            'Preparing Smart Contracts...',
-            'Finalizing Experience...',
-            'Ready to Launch!',
-          ]}
-          currentStep={loadingStep}
         />
 
         {/* Main Content - Only show when not loading */}
