@@ -1240,9 +1240,9 @@ export default function HomePageContent() {
         <VideoPreloaderScreen 
           isLoading={isLoading}
           title="STELLAR NEXUS"
-          subtitle="Welcome to the future of trustless work"
+          subtitle="Welcome to the future of Web3"
           showText={true}
-          minDuration={2000}
+          minDuration={5000}
         />
 
         {/* Main Content - Only show when not loading */}
