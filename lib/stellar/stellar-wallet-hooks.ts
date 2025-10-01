@@ -652,9 +652,41 @@ export const useWallet = (): UseWalletReturn => {
 
   // Open wallet modal function
   const openWalletModal = useCallback(async () => {
-    const currentKit = walletKit || globalWalletKit;
+    let currentKit = walletKit || globalWalletKit;
+    
+    // If kit is not initialized, try to initialize it now
+    if (!currentKit && !isInitializing) {
+      try {
+        isInitializing = true;
+        
+        // Create wallet modules
+        const modules = [
+          new FreighterModule(),
+          new AlbedoModule(),
+          new RabetModule(),
+          new LobstrModule(),
+        ];
+
+        // Initialize the kit
+        currentKit = new StellarWalletsKit({
+          network: WalletNetwork.TESTNET,
+          modules,
+        });
+
+        // Store globally to prevent re-initialization
+        globalWalletKit = currentKit;
+        setWalletKit(currentKit);
+        
+        isInitializing = false;
+      } catch (initError) {
+        isInitializing = false;
+        console.error('Failed to initialize wallet kit:', initError);
+        throw new Error('Wallet kit not initialized. Please refresh the page and try again.');
+      }
+    }
+    
     if (!currentKit) {
-      throw new Error('Wallet kit not initialized');
+      throw new Error('Wallet kit not initialized. Please refresh the page and try again.');
     }
 
     try {
@@ -664,13 +696,14 @@ export const useWallet = (): UseWalletReturn => {
         },
         onClosed: (err: Error) => {
           if (err) {
-          } else {
+            console.warn('Modal closed with error:', err);
           }
         },
         modalTitle: 'Connect Wallet',
         notAvailableText: 'Wallet not available',
       });
     } catch (err) {
+      console.error('Error opening wallet modal:', err);
       throw err;
     }
   }, [walletKit, connect]);

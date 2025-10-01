@@ -394,13 +394,32 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         setIsConnecting(true);
                         try {
                           await openWalletModal(); // Use Stellar Wallets Kit modal
+                          // If modal opened successfully, auto-close sidebar after connection
+                          setTimeout(() => {
+                            if (isConnected) {
+                              onToggle();
+                            }
+                          }, 1500);
                         } catch (error) {
-                          addToast({
-                            type: 'error',
-                            title: 'Wallet Connection Error',
-                            message: 'Failed to open wallet selection modal',
-                            duration: 5000,
-                          });
+                          console.error('Wallet modal error:', error);
+                          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                          
+                          // Provide more specific error messages
+                          if (errorMessage.includes('not initialized')) {
+                            addToast({
+                              type: 'warning',
+                              title: 'Wallet Kit Initializing',
+                              message: 'Please wait a moment and try again',
+                              duration: 4000,
+                            });
+                          } else {
+                            addToast({
+                              type: 'error',
+                              title: 'Wallet Connection Error',
+                              message: 'Failed to open wallet selection modal. Try using Freighter or manual address.',
+                              duration: 6000,
+                            });
+                          }
                         } finally {
                           setIsConnecting(false);
                         }
@@ -842,13 +861,32 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
                         setIsConnecting(true);
                         try {
                           await openWalletModal(); // Use Stellar Wallets Kit modal
+                          // If modal opened successfully, auto-close banner after connection
+                          setTimeout(() => {
+                            if (isConnected) {
+                              onToggle();
+                            }
+                          }, 1500);
                         } catch (error) {
-                          addToast({
-                            type: 'error',
-                            title: 'Wallet Connection Error',
-                            message: 'Failed to open wallet selection modal',
-                            duration: 5000,
-                          });
+                          console.error('Wallet modal error:', error);
+                          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                          
+                          // Provide more specific error messages
+                          if (errorMessage.includes('not initialized')) {
+                            addToast({
+                              type: 'warning',
+                              title: 'Wallet Kit Initializing',
+                              message: 'Please wait a moment and try again, or use Freighter/manual address',
+                              duration: 5000,
+                            });
+                          } else {
+                            addToast({
+                              type: 'error',
+                              title: 'Wallet Connection Error',
+                              message: 'Failed to open wallet selection modal. Try using Freighter or manual address.',
+                              duration: 6000,
+                            });
+                          }
                         } finally {
                           setIsConnecting(false);
                         }
