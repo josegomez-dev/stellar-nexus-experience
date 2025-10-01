@@ -317,7 +317,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
       {/* Achievement Guide */}
       <div className='bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-3 border border-blue-400/20 mt-4'>
-        <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Achievement Guide</h4>
+        <h4 className='text-sm font-semibold text-blue-300 mb-2'>🎯 Top Achievements Guide</h4>
         <div className='text-xs text-gray-300 space-y-1'>
           <div>
             • <span>Account Creation</span> → Welcome Explorer

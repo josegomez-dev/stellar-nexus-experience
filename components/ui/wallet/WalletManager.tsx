@@ -107,8 +107,11 @@ export const WalletManager = () => {
 
   if (isLoading) {
     return (
-      <div className='flex items-center justify-center p-4'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+      <div className='flex items-center justify-center p-6'>
+        <div className='flex flex-col items-center space-y-3'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+          <p className='text-white/80 text-sm'>Initializing wallet connection...</p>
+        </div>
       </div>
     );
   }
@@ -333,9 +336,12 @@ export const WalletManager = () => {
           <button
             onClick={handleConnect}
             disabled={!selectedWallet || isValidating}
-            className='w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg'
+            className='w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg flex items-center justify-center space-x-2'
           >
-            {isValidating ? '🔍 Validating...' : '🚀 Connect Wallet'}
+            {isValidating && (
+              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+            )}
+            <span>{isValidating ? 'Validating address...' : '🚀 Connect Wallet'}</span>
           </button>
 
           <div className='text-xs text-white/70 text-center'>
