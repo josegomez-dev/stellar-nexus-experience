@@ -64,26 +64,6 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
     >
       {/* Full-screen Video Background */}
       <div className='absolute inset-0 overflow-hidden'>
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          onLoadedData={() => setVideoLoaded(true)}
-          className={`
-            absolute top-1/2 left-1/2 
-            min-w-full min-h-full 
-            w-auto h-auto 
-            -translate-x-1/2 -translate-y-1/2
-            object-cover
-            transition-opacity duration-1000
-            ${videoLoaded ? 'opacity-100' : 'opacity-0'}
-          `}
-        >
-          <source src={videoPath} type='video/mp4' />
-          Your browser does not support the video tag.
-        </video>
-
         {/* Gradient Overlay for better text readability */}
         {showText && (
           <div className='absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60'></div>

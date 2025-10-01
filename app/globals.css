@@ -32,7 +32,7 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
-  --radius-full: 9999px;
+  --radius-full: 9990px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -56,7 +56,7 @@
   --z-modal: 1040;
   --z-popover: 1050;
   --z-tooltip: 1060;
-  --z-epic: 9999;
+  --z-epic: 9990;
 }
 
 /* ==========================================================================

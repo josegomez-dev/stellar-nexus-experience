@@ -1245,9 +1245,31 @@ export default function HomePageContent() {
           minDuration={5000}
         />
 
+
         {/* Main Content - Only show when not loading */}
         {!isLoading && (
           <>
+            {/* Full-Screen Video Overlay */}
+            <video
+              autoPlay
+              muted
+              playsInline
+              onEnded={() => {
+                // Hide video after it ends
+                const videoElement = document.querySelector('.fullscreen-video') as HTMLVideoElement;
+                if (videoElement) {
+                  videoElement.style.opacity = '0';
+                  setTimeout(() => {
+                    videoElement.style.display = 'none';
+                  }, 1000);
+                }
+              }}
+              className="fullscreen-video fixed inset-0 w-full h-full object-cover z-[99999] transition-opacity duration-1000"
+            >
+              <source src={'/videos/preloader.mp4'} type='video/mp4' />
+              Your browser does not support the video tag.
+            </video>
+              
             {/* Hero Section */}
             <section className='container mx-auto px-4 py-16'>
               <div className='text-center'>
