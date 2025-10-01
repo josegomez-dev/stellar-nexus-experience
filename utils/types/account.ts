@@ -45,6 +45,11 @@ export interface UserAccount {
   updatedAt: Timestamp;
   lastLoginAt: Timestamp;
 
+  // Root-level fields for backward compatibility with old Account type
+  level?: number;
+  experience?: number;
+  totalPoints?: number;
+
   // Profile information
   profile: {
     username?: string;

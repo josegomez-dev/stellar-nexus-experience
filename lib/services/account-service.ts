@@ -49,6 +49,9 @@ export class AccountService {
       createdAt: now,
       updatedAt: now,
       lastLoginAt: now,
+      level: 1, // Root level for backward compatibility
+      experience: 150, // Experience points
+      totalPoints: 150, // Account creation bonus (100) + Welcome Explorer (10) + margin
 
       profile: {
         level: 1,
@@ -621,7 +624,8 @@ export class AccountService {
     await updateDoc(accountRef, {
       experience: newExperience,
       totalPoints: currentPoints + points,
-      level: newLevel,
+      level: newLevel, // Root level for backward compatibility
+      'profile.level': newLevel, // Also update profile.level for consistency
       updatedAt: serverTimestamp(),
     });
   }
