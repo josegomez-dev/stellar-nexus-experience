@@ -26,7 +26,7 @@ import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
-import { PreloaderScreen } from '@/components/ui/PreloaderScreen';
+import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
 import Image from 'next/image';
 // Remove unused nexusCodex import
 import { getBadgeById, Account, DemoStats, PREDEFINED_DEMOS } from '@/lib/firebase/firebase-types';
@@ -1236,9 +1236,13 @@ export default function HomePageContent() {
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
-        {/* Preloader Screen */}
-        <PreloaderScreen 
-          isLoading={isLoading} 
+        {/* Video Preloader Screen */}
+        <VideoPreloaderScreen 
+          isLoading={isLoading}
+          title="STELLAR NEXUS"
+          subtitle="Welcome to the future of trustless work"
+          showText={true}
+          minDuration={2000}
         />
 
         {/* Main Content - Only show when not loading */}

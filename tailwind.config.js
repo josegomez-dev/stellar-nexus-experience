@@ -98,6 +98,7 @@ module.exports = {
         epicTextReveal: 'epicTextReveal 2s ease-out',
         epicFloatingParticles: 'epicFloatingParticles 3s ease-in-out infinite',
         rotatingNexus: 'rotatingNexus 2s linear infinite',
+        twinkle: 'twinkle 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -144,6 +145,10 @@ module.exports = {
         rotatingNexus: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        twinkle: {
+          '0%, 100%': { opacity: '0.2', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.5)' },
         },
       },
       spacing: {
