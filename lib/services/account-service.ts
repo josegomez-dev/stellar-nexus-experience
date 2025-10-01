@@ -221,6 +221,12 @@ export class AccountService {
     const isFirstCompletion = currentDemo?.status !== 'completed';
 
     const pointsEarned = this.calculateDemoPoints(demoId, score, isFirstCompletion);
+    
+    // Calculate new experience and level
+    const currentExperience = account.profile?.experience || account.experience || 0;
+    const experienceGained = pointsEarned * 2; // Experience is 2x points
+    const newExperience = currentExperience + experienceGained;
+    const newLevel = Math.floor(newExperience / 1000) + 1;
 
     const updateData: any = {
       [`demos.${demoId}.status`]: 'completed',
@@ -228,7 +234,11 @@ export class AccountService {
       [`demos.${demoId}.score`]: score,
       [`demos.${demoId}.pointsEarned`]: isFirstCompletion ? pointsEarned : currentDemo.pointsEarned, // Keep original points on replay
       'profile.totalPoints': increment(pointsEarned),
-      'profile.experience': increment(pointsEarned * 2), // Experience is 2x points
+      'profile.experience': increment(experienceGained),
+      'profile.level': newLevel, // Update level in profile
+      level: newLevel, // Update level at root for backward compatibility
+      experience: newExperience, // Update experience at root for backward compatibility
+      totalPoints: increment(pointsEarned), // Update totalPoints at root for backward compatibility
       'stats.totalPointsEarned': increment(pointsEarned),
       updatedAt: serverTimestamp(),
     };
@@ -307,10 +317,27 @@ export class AccountService {
   // Award badge
   async awardBadge(accountId: string, badgeId: string): Promise<void> {
     const badge = getBadgeById(badgeId);
+    const badgePoints = badge?.earningPoints || 0;
+    
+    // Get current account to calculate new level
+    const accountDoc = await getDoc(doc(db, 'accounts', accountId));
+    const account = accountDoc.data() as UserAccount;
+    
+    // Calculate new experience and level (badges give points but experience is 2x points)
+    const currentExperience = account.profile?.experience || account.experience || 0;
+    const experienceGained = badgePoints * 2; // Experience is 2x points
+    const newExperience = currentExperience + experienceGained;
+    const newLevel = Math.floor(newExperience / 1000) + 1;
+    
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, {
       badgesEarned: arrayUnion(badgeId), // Add to badges array
-      'profile.totalPoints': increment(badge?.earningPoints || 0),
+      'profile.totalPoints': increment(badgePoints),
+      'profile.experience': increment(experienceGained),
+      'profile.level': newLevel, // Update level in profile
+      level: newLevel, // Update level at root for backward compatibility
+      experience: newExperience, // Update experience at root for backward compatibility
+      totalPoints: increment(badgePoints), // Update totalPoints at root for backward compatibility
       updatedAt: serverTimestamp(),
     });
 
@@ -318,7 +345,7 @@ export class AccountService {
     await this.logPointsTransaction(
       accountId,
       'earn',
-      badge?.earningPoints || 0,
+      badgePoints,
       `Badge: ${badge?.name || badgeId}`
     );
   }
