@@ -586,7 +586,7 @@ export class ReferralService {
           id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
           referredUserWallet: invitation.email, // Using email as identifier
           referredUserName: invitation.email.split('@')[0], // Extract name from email
-          referralDate: invitation.completedAt || new Date(),
+          referralDate: invitation.invitationDate,
           status: 'completed' as const,
           bonusEarned: 50,
         }));
