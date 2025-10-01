@@ -1684,7 +1684,7 @@ export default function HomePageContent() {
                     🎓 Tutorial
                   </h3>
                   <p className='text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
-                    New to Trustless Work? <br /> Start with our tutorial to learn how everything
+                    New to Trustless Work or Stellar? <br /> Start with our tutorial to learn how everything
                     works!
                   </p>
                 </div>
