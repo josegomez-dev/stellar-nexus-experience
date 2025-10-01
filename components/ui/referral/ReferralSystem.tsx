@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Account, ReferralRecord, ReferralInvitation } from '@/lib/firebase/firebase-types';
+import { Account, ReferralRecord, InvitationRecord } from '@/lib/firebase/firebase-types';
 import { ReferralService } from '@/lib/services/referral-service';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { getBadgeIcon, BADGE_SIZES } from '@/utils/constants/badges/assets';
@@ -29,7 +29,7 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
-  const [pendingInvitations, setPendingInvitations] = useState<ReferralInvitation[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<InvitationRecord[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 

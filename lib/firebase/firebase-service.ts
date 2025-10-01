@@ -47,6 +47,7 @@ export const accountService = {
         successfulReferrals: 0,
         referralCode: '',
         referralHistory: [],
+        invitees: [],
       },
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
@@ -76,6 +77,7 @@ export const accountService = {
           successfulReferrals: 0,
           referralCode: '',
           referralHistory: [],
+          invitees: [],
         };
       }
 
