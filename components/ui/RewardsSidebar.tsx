@@ -292,6 +292,31 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse'></div>
             </div>
           </div>
+          
+          {/* Motivational Message */}
+          <div className='mt-3 text-center'>
+            <p className='text-xs text-gray-400 flex items-center justify-center gap-2'>
+              {level < 2 ? (
+                <>
+                  <span className='text-purple-400 animate-pulse'>✨</span>
+                  <span>Help <span className='text-purple-300 font-semibold'>Nexus Prime</span> evolve to Teen form!</span>
+                  <span className='text-purple-400 animate-pulse'>✨</span>
+                </>
+              ) : level < 3 ? (
+                <>
+                  <span className='text-blue-400 animate-pulse'>🌟</span>
+                  <span>Keep going! Help <span className='text-blue-300 font-semibold'>Nexus Prime</span> reach Final form!</span>
+                  <span className='text-blue-400 animate-pulse'>🌟</span>
+                </>
+              ) : (
+                <>
+                  <span className='text-cyan-400 animate-pulse'>👑</span>
+                  <span><span className='text-cyan-300 font-semibold'>Nexus Prime</span> has reached full power! Keep earning XP to master the universe!</span>
+                  <span className='text-cyan-400 animate-pulse'>👑</span>
+                </>
+              )}
+            </p>
+          </div>
         </div>
       </div>
 

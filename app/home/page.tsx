@@ -1051,6 +1051,8 @@ export default function HomePageContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   // Initialize Firebase data on app load
   useEffect(() => {
@@ -1114,6 +1116,13 @@ export default function HomePageContent() {
       }, 15000); // 15 second timeout
 
       return () => clearTimeout(timeout);
+    }
+  }, [isLoading]);
+
+  // Set video playing state when loading completes
+  useEffect(() => {
+    if (!isLoading) {
+      setIsVideoPlaying(true);
     }
   }, [isLoading]);
 
@@ -1221,11 +1230,19 @@ export default function HomePageContent() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
-      {/* Header */}
-      <Header />
+      {/* Header - Hidden when preloader or video is playing */}
+      {!isLoading && !isVideoPlaying && (
+        <div className='animate-fadeIn'>
+          <Header />
+        </div>
+      )}
 
-      {/* Authentication Banner */}
-      <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
+      {/* Authentication Banner - Hidden when preloader or video is playing */}
+      {!isLoading && !isVideoPlaying && (
+        <div className='animate-fadeIn'>
+          <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
+        </div>
+      )}
 
       {/* Animated background elements */}
       <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
@@ -1249,13 +1266,19 @@ export default function HomePageContent() {
         {/* Main Content - Only show when not loading */}
         {!isLoading && (
           <>
-            {/* Full-Screen Video Overlay */}
+            {/* Full-Screen Video Overlay with fade-in animation */}
             <video
               autoPlay
               muted
               playsInline
+              onLoadedData={() => {
+                // Trigger fade-in when video is loaded and ready
+                setVideoLoaded(true);
+              }}
               onEnded={() => {
                 // Hide video after it ends
+                setIsVideoPlaying(false);
+                setVideoLoaded(false);
                 const videoElement = document.querySelector('.fullscreen-video') as HTMLVideoElement;
                 if (videoElement) {
                   videoElement.style.opacity = '0';
@@ -1264,14 +1287,16 @@ export default function HomePageContent() {
                   }, 1000);
                 }
               }}
-              className="fullscreen-video fixed inset-0 w-full h-full object-cover z-[99999] transition-opacity duration-1000"
+              className={`fullscreen-video fixed inset-0 w-full h-full object-cover z-[99999] transition-opacity duration-1000 ${
+                videoLoaded ? 'opacity-100 animate-fadeIn' : 'opacity-0'
+              }`}
             >
               <source src={'/videos/preloader.mp4'} type='video/mp4' />
               Your browser does not support the video tag.
             </video>
               
-            {/* Hero Section */}
-            <section className='container mx-auto px-4 py-16'>
+            {/* Hero Section - with fade-in animation */}
+            <section className={`container mx-auto px-4 py-16 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
               <div className='text-center'>
                 {/* Page Header */}
                 <div className='text-center mb-16'>
@@ -1469,7 +1494,8 @@ export default function HomePageContent() {
               </div>
             </section>
 
-            <section className=' mx-auto px-4'>
+            {/* Demo Cards Section - with fade-in animation */}
+            <section className={`mx-auto px-4 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
               <div className=' mx-auto'>
                 {isConnected && firebaseLoading && !isInitialized && (
                   <div className='text-center py-16'>
@@ -1530,8 +1556,8 @@ export default function HomePageContent() {
               </div>
             </section>
 
-            {/* Quest and Referral System Section */}
-            <section className="container mx-auto px-4 py-16">
+            {/* Quest and Referral System Section - with fade-in animation */}
+            <section className={`container mx-auto px-4 py-16 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
               <QuestAndReferralSection
                 account={account}
                 onQuestComplete={(questId, rewards) => {
@@ -1554,10 +1580,10 @@ export default function HomePageContent() {
               />
             </section>
 
-            {/* Interactive Tutorial Section - Full Width with Irregular Shape */}
+            {/* Interactive Tutorial Section - Full Width with Irregular Shape - with fade-in animation */}
             <section
               id='interactive-tutorial'
-              className='relative w-full py-16 overflow-hidden -mb-20 mt-20'
+              className={`relative w-full py-16 overflow-hidden -mb-20 mt-20 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}
             >
               {/* Irregular Background Shape - Full Width */}
               <div className='absolute inset-0'>
@@ -1658,7 +1684,7 @@ export default function HomePageContent() {
                     🎓 Tutorial
                   </h3>
                   <p className='text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed'>
-                    New to trustless work? <br /> Start with our tutorial to learn how everything
+                    New to Trustless Work? <br /> Start with our tutorial to learn how everything
                     works!
                   </p>
                 </div>
@@ -1735,8 +1761,12 @@ export default function HomePageContent() {
         )}
       </main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer - Hidden when preloader or video is playing */}
+      {!isLoading && !isVideoPlaying && (
+        <div className='animate-fadeIn'>
+          <Footer />
+        </div>
+      )}
 
       {/* Wallet Sidebar */}
       <WalletSidebar
@@ -1749,7 +1779,8 @@ export default function HomePageContent() {
             setWalletExpanded(true);
           }
         }}
-        showBanner={true}
+        showBanner={!isLoading && !isVideoPlaying}
+        hideFloatingButton={isLoading || isVideoPlaying}
       />
 
       {/* NEXUS PRIME Character */}

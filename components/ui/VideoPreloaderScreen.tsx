@@ -90,7 +90,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
       {showText && (
         <div className='relative z-10 h-full flex flex-col items-center justify-center text-center px-4'>
           {/* Main Title */}
-          <h1
+          {/* <h1
             className={`
               text-5xl md:text-7xl lg:text-8xl font-bold 
               text-transparent bg-clip-text 
@@ -102,7 +102,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
             style={{ animationDelay: '0.2s' }}
           >
             {title}
-          </h1>
+          </h1> */}
 
           {/* Subtitle */}
           <p

@@ -17,9 +17,10 @@ interface WalletSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   showBanner?: boolean;
+  hideFloatingButton?: boolean;
 }
 
-export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSidebarProps) => {
+export const WalletSidebar = ({ isOpen, onToggle, showBanner = false, hideFloatingButton = false }: WalletSidebarProps) => {
   const {
     walletData,
     isConnected,
@@ -740,7 +741,7 @@ export const WalletSidebar = ({ isOpen, onToggle, showBanner = false }: WalletSi
       {/* Floating Wallet Control Buttons - Always show, different styling based on connection */}
       <div className='fixed top-36 right-4 z-30 flex flex-col space-y-3'>
         {/* Open Wallet Button */}
-        {!isOpen && (
+        {!isOpen && !hideFloatingButton && (
           <>
             {/* Mobile toggle button */}
             <button
