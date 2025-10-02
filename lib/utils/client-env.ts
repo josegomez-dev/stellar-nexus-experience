@@ -37,6 +37,11 @@ const clientEnvSchema = z.object({
     .optional()
     .transform(val => val === 'true'),
   NEXT_PUBLIC_PLATFORM_PUBLIC_KEY: z.string().default(''),
+
+  // EmailJS Configuration
+  NEXT_PUBLIC_EMAILJS_SERVICE_ID: z.string().optional(),
+  NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: z.string().optional(),
+  NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: z.string().optional(),
 });
 
 // Parse and validate client-side environment variables

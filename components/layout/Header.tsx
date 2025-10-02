@@ -8,12 +8,14 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
 import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
+import { PokemonReferralCard, ReferralInvitationModal } from '@/components/ui/referral';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 import Image from 'next/image';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRewardsOpen, setIsRewardsOpen] = useState(false);
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
   const { isConnected } = useGlobalWallet();
   const { account, isLoading } = useFirebase();
 
@@ -89,6 +91,13 @@ export const Header = () => {
             >
               <span className='text-lg'>📊</span>
               <span>Analytics</span>
+            </a>
+            <a
+              href='/docs'
+              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
+            >
+              <span className='text-lg'>📑</span>
+              <span>Docs</span>
             </a>
             {/* <a
               href='/'
@@ -184,6 +193,16 @@ export const Header = () => {
                         onClose={() => setIsRewardsOpen(false)}
                       />
                     </div>
+
+                    {/* Referral Button */}
+                    <Tooltip position='bottom' content='Invite Friends & Share Referral Card'>
+                      <button
+                        onClick={() => setIsReferralModalOpen(true)}
+                        className='relative p-2 text-white/80 hover:text-white transition-colors'
+                      >
+                        <span className='text-xl'>🎴</span>
+                      </button>
+                    </Tooltip>
                   </>
                 ) : isLoading ? (
                   <div className='flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-1'>
@@ -308,6 +327,13 @@ export const Header = () => {
           </div>
         </div>
       )}
+
+      {/* Referral Invitation Modal */}
+      <ReferralInvitationModal
+        isOpen={isReferralModalOpen}
+        onClose={() => setIsReferralModalOpen(false)}
+        account={account}
+      />
     </header>
   );
 };
