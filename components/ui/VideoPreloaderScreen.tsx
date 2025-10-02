@@ -14,8 +14,8 @@ interface VideoPreloaderScreenProps {
 export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
   isLoading,
   videoPath = '/videos/preloader.mp4',
-  title = 'STELLAR NEXUS',
-  subtitle = 'Welcome to the future of trustless work',
+  title = 'STELLAR NEXUS EXPERIENCE',
+  subtitle = 'Welcome to the future of Web3',
   showText = true,
   minDuration = 2000, // Show for at least 2 seconds
 }) => {

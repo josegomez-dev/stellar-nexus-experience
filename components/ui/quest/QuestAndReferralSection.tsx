@@ -23,7 +23,9 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
       <div className="text-center py-16">
         <div className="text-4xl mb-4">🔒</div>
         <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
-        <p className="text-white/70">Connect your Stellar wallet to access quests and referrals</p>
+        <p className="text-white/70">Connect your Stellar wallet to access quests and earn rewards</p>
+        <br/>
+        <div className="text-8xl mb-6">🎁</div>
       </div>
     );
   }

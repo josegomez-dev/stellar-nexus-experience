@@ -1256,8 +1256,8 @@ export default function HomePageContent() {
         {/* Video Preloader Screen */}
         <VideoPreloaderScreen 
           isLoading={isLoading}
-          title="STELLAR NEXUS"
-          subtitle="Welcome to the future of Web3"
+          title="STELLAR NEXUS EXPERIENCE"
+          subtitle="Loading Nexus Experience..."
           showText={true}
           minDuration={5000}
         />
@@ -1294,6 +1294,58 @@ export default function HomePageContent() {
               <source src={'/videos/preloader.mp4'} type='video/mp4' />
               Your browser does not support the video tag.
             </video>
+
+            {/* Text Overlay for Video */}
+            {videoLoaded && (
+              <div className="fixed inset-0 z-[100000] flex items-center justify-center pointer-events-none">
+                <div className="text-center px-4">
+                  {/* Main Title */}
+                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-6 animate-fadeInUp drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                    STELLAR NEXUS EXPERIENCE
+                  </h1>
+                  
+                  {/* Subtitle */}
+                  <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-8 animate-fadeInUp drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" style={{ animationDelay: '0.4s' }}>
+                    Welcome to the future of Web3 Early Adopters Program
+                  </p>
+                  
+                  {/* Loading Indicator */}
+                  <div className="animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
+                    <div className="flex justify-center space-x-2">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"
+                          style={{
+                            animationDelay: `${i * 0.2}s`,
+                            animationDuration: '1s',
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Gradient Overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
+                
+                {/* Animated Particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 3}s`,
+                        animationDuration: `${2 + Math.random() * 3}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
               
             {/* Hero Section - with fade-in animation */}
             <section className={`container mx-auto px-4 py-16 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
