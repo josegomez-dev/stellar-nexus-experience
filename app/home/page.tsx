@@ -27,7 +27,6 @@ import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
-import { ReferralBonusModal } from '@/components/ui/modals/ReferralBonusModal';
 import Image from 'next/image';
 // Remove unused nexusCodex import
 import { getBadgeById, Account, DemoStats, PREDEFINED_DEMOS } from '@/lib/firebase/firebase-types';
@@ -1004,8 +1003,6 @@ export default function HomePageContent() {
     refreshAccountData,
     isLoading: firebaseLoading,
     isInitialized,
-    referralBonusInfo,
-    setReferralBonusInfo,
   } = useFirebase();
   const { addToast: addToastHook } = useToast();
   const [activeDemo, setActiveDemo] = useState('hello-milestone');
@@ -1571,14 +1568,6 @@ export default function HomePageContent() {
                     duration: 5000,
                   });
                 }}
-                onReferralComplete={(referralData) => {
-                  addToastHook({
-                    type: 'success',
-                    title: '👥 Referral Sent!',
-                    message: `Invitation sent to ${referralData.email}`,
-                    duration: 5000,
-                  });
-                }}
                 refreshAccountData={refreshAccountData}
               />
             </section>
@@ -1857,16 +1846,6 @@ export default function HomePageContent() {
         onClose={() => setLeaderboardSidebarOpen(false)}
       />
 
-      {/* Referral Bonus Modal */}
-      {referralBonusInfo && (
-        <ReferralBonusModal
-          isOpen={referralBonusInfo.showModal}
-          onClose={() => setReferralBonusInfo(null)}
-          bonusEarned={referralBonusInfo.bonusEarned}
-          referrerName={referralBonusInfo.referrerName}
-          referralCode={referralBonusInfo.referralCode}
-        />
-      )}
 
       {/* Toast Container */}
       <ToastContainer />

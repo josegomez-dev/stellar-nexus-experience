@@ -3,25 +3,20 @@
 import React, { useState } from 'react';
 import { Account } from '@/lib/firebase/firebase-types';
 import { QuestService } from '@/lib/services/quest-service';
-import { ReferralService } from '@/lib/services/referral-service';
 import { QuestSystem } from './QuestSystem';
-import { ReferralSystem } from '../referral/ReferralSystem';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 
 interface QuestAndReferralSectionProps {
   account: Account | null;
   onQuestComplete?: (questId: string, rewards: any) => void;
-  onReferralComplete?: (referralData: any) => void;
   refreshAccountData?: () => Promise<void>;
 }
 
 export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = ({
   account,
   onQuestComplete,
-  onReferralComplete,
   refreshAccountData,
 }) => {
-  const [activeTab, setActiveTab] = useState<'quest' | 'referral'>('quest');
 
   if (!account) {
     return (
@@ -34,15 +29,14 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
   }
 
   const isQuestSystemUnlocked = QuestService.isQuestSystemUnlocked(account);
-  const isReferralSystemUnlocked = ReferralService.isReferralSystemUnlocked(account);
 
-  if (!isQuestSystemUnlocked && !isReferralSystemUnlocked) {
+  if (!isQuestSystemUnlocked) {
     return (
       <div className="text-center py-16">
         <div className="text-6xl mb-6">🔒</div>
-        <h3 className="text-2xl font-bold text-white mb-4">Quest & Referral System Locked</h3>
+        <h3 className="text-2xl font-bold text-white mb-4">Quest System Locked</h3>
         <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-          Complete the main demos and earn the top 5 badges to unlock the quest and referral systems!
+          Complete the main demos and earn the top 5 badges to unlock the quest system!
         </p>
         
         {/* Progress Indicator */}
@@ -115,46 +109,11 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
 
   return (
     <div className="space-y-6">
-      {/* Tab Navigation */}
-      <div className="flex justify-center">
-        <div className="bg-white/10 rounded-lg p-1 flex">
-          <button
-            onClick={() => setActiveTab('quest')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'quest'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            🎯 Quests
-          </button>
-          <button
-            onClick={() => setActiveTab('referral')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'referral'
-                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            👥 Referrals
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'quest' ? (
-        <QuestSystem
-          account={account}
-          onQuestComplete={onQuestComplete}
-          refreshAccountData={refreshAccountData}
-        />
-      ) : (
-        <ReferralSystem
-          account={account}
-          onReferralComplete={onReferralComplete}
-          onAccountRefresh={refreshAccountData}
-        />
-      )}
+      <QuestSystem
+        account={account}
+        onQuestComplete={onQuestComplete}
+        refreshAccountData={refreshAccountData}
+      />
     </div>
   );
 };
