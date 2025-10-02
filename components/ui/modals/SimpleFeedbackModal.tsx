@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { DemoFeedback } from '@/lib/firebase/firebase-types';
 import { StarRating } from '@/components/ui/common';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
 
 interface SimpleFeedbackModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
   demoName,
   completionTime,
 }) => {
+  const { submitMandatoryFeedback } = useFirebase();
   const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +50,18 @@ export const SimpleFeedbackModal: React.FC<SimpleFeedbackModalProps> = ({
 
     setIsSubmitting(true);
     try {
+      // Submit mandatory feedback to separate collection
+      await submitMandatoryFeedback({
+        demoId,
+        demoName,
+        rating,
+        feedback: feedback.trim() || 'No specific feedback provided',
+        difficulty: 'medium', // Default
+        wouldRecommend: rating >= 4, // Auto-determine based on rating
+        completionTime,
+      });
+
+      // Also call the original onSubmit for backward compatibility
       await onSubmit({
         demoId,
         demoName,

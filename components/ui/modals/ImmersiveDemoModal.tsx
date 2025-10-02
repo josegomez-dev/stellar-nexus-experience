@@ -70,6 +70,7 @@ export const ImmersiveDemoModal = ({
   const { isConnected, walletData } = useGlobalWallet();
   const { addToast } = useToast();
   const { getTransactionsByDemo } = useTransactionHistory();
+  const { submitMandatoryFeedback } = useFirebase();
 
   const [currentStep, setCurrentStep] = useState<'warning' | 'demo' | 'feedback'>('warning');
   const [progress, setProgress] = useState(0);
@@ -317,9 +318,18 @@ export const ImmersiveDemoModal = ({
     setIsSubmittingFeedback(true);
 
     try {
-      // Feedback submission tracking is now handled by FirebaseContext
+      // Submit mandatory feedback to separate collection
       if (isConnected && walletData?.publicKey) {
-        console.log('Feedback submission with wallet connected');
+        await submitMandatoryFeedback({
+          demoId,
+          demoName: demoTitle,
+          rating: feedback.rating,
+          feedback: feedback.comment.trim() || 'No specific feedback provided',
+          difficulty: feedback.difficulty,
+          wouldRecommend: feedback.wouldRecommend,
+          completionTime: Math.round(elapsedTime / 60), // Convert seconds to minutes
+        });
+        console.log('Mandatory feedback submitted to Firebase');
       }
 
       // Save feedback to localStorage as backup

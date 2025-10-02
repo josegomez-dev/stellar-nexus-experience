@@ -72,6 +72,7 @@ export const COLLECTIONS = {
   TRANSACTIONS: 'transactions',
   DEMO_STATS: 'demo_stats',
   QUESTS: 'quests',
+  MANDATORY_FEEDBACK: 'mandatory_feedback',
 } as const;
 
 // Predefined demos configuration (static data)
@@ -110,6 +111,23 @@ export interface DemoFeedback {
   demoId: string; // Associated demo ID
   demoName: string; // Demo name for context
   completionTime?: number; // Time taken in minutes
+}
+
+// Mandatory feedback tracking interface for separate collection
+export interface MandatoryFeedback {
+  id: string; // Auto-generated document ID
+  userId: string; // Wallet address of the user
+  demoId: string; // Associated demo ID
+  demoName: string; // Demo name for context
+  rating: number; // 1-5 stars (mandatory)
+  feedback: string; // Text feedback (mandatory)
+  difficulty: 'easy' | 'medium' | 'hard'; // Difficulty level
+  wouldRecommend: boolean; // Would recommend to others
+  completionTime: number; // Time taken in minutes
+  timestamp: Date; // When feedback was submitted
+  sessionId?: string; // Optional session tracking
+  userAgent?: string; // Browser/client info
+  ipAddress?: string; // For analytics (if needed)
 }
 
 // Quest system interfaces

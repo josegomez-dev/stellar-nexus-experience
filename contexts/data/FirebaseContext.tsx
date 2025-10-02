@@ -5,11 +5,13 @@ import { useGlobalWallet } from '../wallet/WalletContext';
 import { 
   accountService,
   demoStatsService,
+  mandatoryFeedbackService,
   firebaseUtils
 } from '../../lib/firebase/firebase-service';
 import { 
   Account,
   DemoStats,
+  MandatoryFeedback,
   PREDEFINED_DEMOS,
   PREDEFINED_BADGES,
   getBadgeById
@@ -53,6 +55,18 @@ interface FirebaseContextType {
   hasClappedDemo: (demoId: string) => Promise<boolean>;
   refreshAccountData: () => Promise<void>;
   clapDemo: (demoId: string) => Promise<void>;
+  
+  // Mandatory feedback actions
+  submitMandatoryFeedback: (feedbackData: Omit<MandatoryFeedback, 'id' | 'userId' | 'timestamp'>) => Promise<string>;
+  hasUserSubmittedFeedback: (demoId: string) => Promise<boolean>;
+  getUserFeedback: () => Promise<MandatoryFeedback[]>;
+  getDemoFeedbackStats: (demoId: string) => Promise<{
+    totalFeedback: number;
+    averageRating: number;
+    averageCompletionTime: number;
+    difficultyDistribution: Record<string, number>;
+    recommendationRate: number;
+  }>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -481,6 +495,78 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     }
   };
 
+  // Submit mandatory feedback
+  const submitMandatoryFeedback = async (feedbackData: Omit<MandatoryFeedback, 'id' | 'userId' | 'timestamp'>): Promise<string> => {
+    if (!walletData?.publicKey) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      const feedbackId = await mandatoryFeedbackService.submitFeedback({
+        ...feedbackData,
+        userId: walletData.publicKey,
+      });
+
+      addToast({
+        title: '✅ Feedback Submitted!',
+        message: 'Thank you for your valuable feedback!',
+        type: 'success',
+        duration: 3000,
+      });
+
+      return feedbackId;
+    } catch (error) {
+      console.error('Failed to submit mandatory feedback:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit feedback. Please try again.';
+      addToast({
+        title: 'Error',
+        message: errorMessage,
+        type: 'error',
+      });
+      throw error;
+    }
+  };
+
+  // Check if user has submitted feedback for a demo
+  const hasUserSubmittedFeedback = async (demoId: string): Promise<boolean> => {
+    if (!walletData?.publicKey) return false;
+    
+    try {
+      return await mandatoryFeedbackService.hasUserSubmittedFeedback(walletData.publicKey, demoId);
+    } catch (error) {
+      console.error('Failed to check feedback submission:', error);
+      return false;
+    }
+  };
+
+  // Get user's feedback history
+  const getUserFeedback = async (): Promise<MandatoryFeedback[]> => {
+    if (!walletData?.publicKey) return [];
+    
+    try {
+      return await mandatoryFeedbackService.getUserFeedback(walletData.publicKey);
+    } catch (error) {
+      console.error('Failed to get user feedback:', error);
+      return [];
+    }
+  };
+
+  // Get demo feedback statistics
+  const getDemoFeedbackStats = async (demoId: string) => {
+    try {
+      return await mandatoryFeedbackService.getDemoFeedbackStats(demoId);
+    } catch (error) {
+      console.error('Failed to get demo feedback stats:', error);
+      return {
+        totalFeedback: 0,
+        averageRating: 0,
+        averageCompletionTime: 0,
+        difficultyDistribution: {},
+        recommendationRate: 0,
+      };
+    }
+  };
+
   // Convert PREDEFINED_DEMOS to DemoCard format
   const demos: DemoCard[] = [
     {
@@ -539,6 +625,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     hasClappedDemo,
     refreshAccountData,
     clapDemo,
+    submitMandatoryFeedback,
+    hasUserSubmittedFeedback,
+    getUserFeedback,
+    getDemoFeedbackStats,
   };
 
   return (

@@ -15,7 +15,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { Account, TransactionRecord, DemoStats, COLLECTIONS } from './firebase-types';
+import { Account, TransactionRecord, DemoStats, MandatoryFeedback, COLLECTIONS } from './firebase-types';
 
 // Helper function to convert Firestore timestamps to Date objects
 const convertTimestamps = (data: any): any => {
@@ -337,6 +337,23 @@ export const accountService = {
 
     return transactions;
   },
+
+  // Get all accounts (for analytics)
+  async getAllAccounts(): Promise<Account[]> {
+    const accountsRef = collection(db, COLLECTIONS.ACCOUNTS);
+    const querySnapshot = await getDocs(accountsRef);
+    const accounts: Account[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      accounts.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as Account);
+    });
+
+    return accounts;
+  },
 };
 
 // Demo Stats Service - for tracking demo completion and engagement statistics
@@ -482,6 +499,155 @@ export const demoStatsService = {
       'nexus-master': 'Nexus Master Achievement',
     };
     return demoNames[demoId] || demoId;
+  },
+};
+
+// Mandatory Feedback Service - for tracking mandatory feedback submissions
+export const mandatoryFeedbackService = {
+  // Submit mandatory feedback
+  async submitFeedback(feedbackData: Omit<MandatoryFeedback, 'id' | 'timestamp'>): Promise<string> {
+    const feedbackRef = collection(db, COLLECTIONS.MANDATORY_FEEDBACK);
+    const docRef = await addDoc(feedbackRef, {
+      ...feedbackData,
+      timestamp: serverTimestamp(),
+    });
+    return docRef.id;
+  },
+
+  // Get feedback by user and demo
+  async getFeedbackByUserAndDemo(userId: string, demoId: string): Promise<MandatoryFeedback | null> {
+    const feedbackRef = collection(db, COLLECTIONS.MANDATORY_FEEDBACK);
+    const q = query(
+      feedbackRef,
+      where('userId', '==', userId),
+      where('demoId', '==', demoId),
+      orderBy('timestamp', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as MandatoryFeedback;
+    }
+    return null;
+  },
+
+  // Get all feedback for a user
+  async getUserFeedback(userId: string): Promise<MandatoryFeedback[]> {
+    const feedbackRef = collection(db, COLLECTIONS.MANDATORY_FEEDBACK);
+    const q = query(
+      feedbackRef,
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const feedback: MandatoryFeedback[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      feedback.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as MandatoryFeedback);
+    });
+
+    return feedback;
+  },
+
+  // Get all feedback for a demo
+  async getDemoFeedback(demoId: string): Promise<MandatoryFeedback[]> {
+    const feedbackRef = collection(db, COLLECTIONS.MANDATORY_FEEDBACK);
+    const q = query(
+      feedbackRef,
+      where('demoId', '==', demoId),
+      orderBy('timestamp', 'desc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const feedback: MandatoryFeedback[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      feedback.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as MandatoryFeedback);
+    });
+
+    return feedback;
+  },
+
+  // Get feedback statistics for a demo
+  async getDemoFeedbackStats(demoId: string): Promise<{
+    totalFeedback: number;
+    averageRating: number;
+    averageCompletionTime: number;
+    difficultyDistribution: Record<string, number>;
+    recommendationRate: number;
+  }> {
+    const feedback = await this.getDemoFeedback(demoId);
+    
+    if (feedback.length === 0) {
+      return {
+        totalFeedback: 0,
+        averageRating: 0,
+        averageCompletionTime: 0,
+        difficultyDistribution: {},
+        recommendationRate: 0,
+      };
+    }
+
+    const totalRating = feedback.reduce((sum, f) => sum + f.rating, 0);
+    const totalCompletionTime = feedback.reduce((sum, f) => sum + f.completionTime, 0);
+    const recommendations = feedback.filter(f => f.wouldRecommend).length;
+    
+    const difficultyDistribution = feedback.reduce((acc, f) => {
+      acc[f.difficulty] = (acc[f.difficulty] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalFeedback: feedback.length,
+      averageRating: totalRating / feedback.length,
+      averageCompletionTime: totalCompletionTime / feedback.length,
+      difficultyDistribution,
+      recommendationRate: (recommendations / feedback.length) * 100,
+    };
+  },
+
+  // Check if user has submitted feedback for a demo
+  async hasUserSubmittedFeedback(userId: string, demoId: string): Promise<boolean> {
+    const feedback = await this.getFeedbackByUserAndDemo(userId, demoId);
+    return feedback !== null;
+  },
+
+  // Get recent feedback (for admin/analytics)
+  async getRecentFeedback(limitCount: number = 50): Promise<MandatoryFeedback[]> {
+    const feedbackRef = collection(db, COLLECTIONS.MANDATORY_FEEDBACK);
+    const q = query(
+      feedbackRef,
+      orderBy('timestamp', 'desc'),
+      limit(limitCount)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const feedback: MandatoryFeedback[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      feedback.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as MandatoryFeedback);
+    });
+
+    return feedback;
   },
 };
 
