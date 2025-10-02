@@ -136,7 +136,7 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ className = 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header and Filters */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <h2 className="text-xl font-semibold text-white">Account Analytics</h2>
           <div className="flex items-center gap-4">
@@ -167,27 +167,27 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ className = 
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="p-3 bg-white/5 rounded border border-white/10">
+          <div className="p-3 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
             <p className="text-2xl font-bold text-white">{accounts.length}</p>
-            <p className="text-sm text-gray-400">Total Users</p>
+            <p className="text-sm text-gray-300">Total Users</p>
           </div>
-          <div className="p-3 bg-white/5 rounded border border-white/10">
+          <div className="p-3 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
             <p className="text-2xl font-bold text-green-400">
               {accounts.filter(a => a.isActive).length}
             </p>
-            <p className="text-sm text-gray-400">Active Users</p>
+            <p className="text-sm text-gray-300">Active Users</p>
           </div>
-          <div className="p-3 bg-white/5 rounded border border-white/10">
+          <div className="p-3 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
             <p className="text-2xl font-bold text-blue-400">
               {accounts.reduce((sum, a) => sum + a.totalPoints, 0).toLocaleString()}
             </p>
-            <p className="text-sm text-gray-400">Total Points</p>
+            <p className="text-sm text-gray-300">Total Points</p>
           </div>
-          <div className="p-3 bg-white/5 rounded border border-white/10">
+          <div className="p-3 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
             <p className="text-2xl font-bold text-purple-400">
               {accounts.reduce((sum, a) => sum + a.demosCompleted.length, 0)}
             </p>
-            <p className="text-sm text-gray-400">Demos Completed</p>
+            <p className="text-sm text-gray-300">Demos Completed</p>
           </div>
         </div>
 
@@ -254,7 +254,7 @@ export const AccountAnalytics: React.FC<AccountAnalyticsProps> = ({ className = 
             </thead>
             <tbody>
               {filteredAndSortedAccounts.map((account) => (
-                <tr key={account.userId} className="border-b border-white/10 hover:bg-white/5">
+                <tr key={account.userId} className="border-b border-white/20 hover:bg-gray-800/40">
                   <td className="py-3 px-4">
                     <div>
                       <p className="text-white font-medium">{account.displayName}</p>

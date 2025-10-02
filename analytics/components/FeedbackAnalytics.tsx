@@ -75,7 +75,7 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Overview Stats */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <h2 className="text-xl font-semibold text-white mb-6">Feedback Overview</h2>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -107,7 +107,7 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
       </div>
 
       {/* Rating Distribution */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <h2 className="text-xl font-semibold text-white mb-6">Rating Distribution</h2>
         
         <div className="space-y-3">
@@ -141,7 +141,7 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
       </div>
 
       {/* Difficulty Distribution */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <h2 className="text-xl font-semibold text-white mb-6">Difficulty Distribution</h2>
         
         <div className="grid grid-cols-3 gap-4">
@@ -157,7 +157,7 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
             };
             
             return (
-              <div key={difficulty} className="p-4 bg-white/5 rounded border border-white/10">
+              <div key={difficulty} className="p-4 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-white">{count}</p>
                   <p className="text-sm text-gray-400 capitalize">{difficulty}</p>
@@ -176,12 +176,12 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
       </div>
 
       {/* Feedback by Demo */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <h2 className="text-xl font-semibold text-white mb-6">Feedback by Demo</h2>
         
         <div className="space-y-4">
           {Object.entries(feedbackData.feedbackByDemo).map(([demoId, demoData]) => (
-            <div key={demoId} className="p-4 bg-white/5 rounded border border-white/10">
+            <div key={demoId} className="p-4 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium text-white">{demoData.demoName}</h3>
                 <span className="text-sm text-gray-400">{demoData.totalFeedback} feedback</span>
@@ -211,12 +211,12 @@ export const FeedbackAnalytics: React.FC<FeedbackAnalyticsProps> = ({ className 
       </div>
 
       {/* Recent Feedback */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className="p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30">
         <h2 className="text-xl font-semibold text-white mb-6">Recent Feedback</h2>
         
         <div className="space-y-3">
           {feedbackData.recentFeedback.slice(0, 10).map((feedback) => (
-            <div key={feedback.id} className="p-4 bg-white/5 rounded border border-white/10">
+            <div key={feedback.id} className="p-4 bg-gray-800/60 backdrop-blur-sm rounded border border-white/20">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="text-white font-medium">{feedback.demoName}</p>
@@ -277,13 +277,13 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
   };
 
   return (
-    <div className="p-4 bg-white/5 rounded-lg border border-white/20 hover:bg-white/10 transition-colors">
+    <div className="p-4 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30 hover:bg-gray-800/80 transition-colors">
       <div className="flex items-center justify-between mb-2">
         <span className="text-2xl">{icon}</span>
         <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${colorClasses[color]}`}></div>
       </div>
       <p className="text-2xl font-bold text-white mb-1">{value}</p>
-      <p className="text-sm text-gray-400">{title}</p>
+      <p className="text-sm text-gray-300">{title}</p>
     </div>
   );
 };

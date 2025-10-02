@@ -5,12 +5,15 @@ import { PlatformAnalytics } from './PlatformAnalytics';
 import { AccountAnalytics } from './AccountAnalytics';
 import { FeedbackAnalytics } from './FeedbackAnalytics';
 import { AnalyticsView } from '../types';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useTheme } from '@/contexts/ui/ThemeContext';
 
 interface AnalyticsDashboardProps {
   className?: string;
 }
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ className = '' }) => {
+  const { theme } = useTheme();
   const [activeView, setActiveView] = useState<AnalyticsView>('overview');
   const [loading, setLoading] = useState(false);
 
@@ -22,6 +25,26 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     { id: 'engagement', label: 'Engagement', icon: '⚡' },
   ] as const;
 
+  const getThemeClasses = () => {
+    if (theme === 'light') {
+      return {
+        container: 'p-6 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg',
+        text: 'text-gray-800',
+        textSecondary: 'text-gray-600',
+        textMuted: 'text-gray-500'
+      };
+    } else {
+      return {
+        container: 'p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-white/30',
+        text: 'text-white',
+        textSecondary: 'text-gray-300',
+        textMuted: 'text-gray-400'
+      };
+    }
+  };
+
+  const themeClasses = getThemeClasses();
+
   const renderActiveView = () => {
     switch (activeView) {
       case 'overview':
@@ -32,16 +55,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
         return <FeedbackAnalytics />;
       case 'demos':
         return (
-          <div className="p-6 bg-white/5 rounded-lg border border-white/20">
-            <h2 className="text-xl font-semibold text-white mb-4">Demo Analytics</h2>
-            <p className="text-gray-400">Demo analytics coming soon...</p>
+          <div className={themeClasses.container}>
+            <h2 className={`text-xl font-semibold ${themeClasses.text} mb-4`}>Demo Analytics</h2>
+            <p className={themeClasses.textSecondary}>Demo analytics coming soon...</p>
           </div>
         );
       case 'engagement':
         return (
-          <div className="p-6 bg-white/5 rounded-lg border border-white/20">
-            <h2 className="text-xl font-semibold text-white mb-4">Engagement Analytics</h2>
-            <p className="text-gray-400">Engagement analytics coming soon...</p>
+          <div className={themeClasses.container}>
+            <h2 className={`text-xl font-semibold ${themeClasses.text} mb-4`}>Engagement Analytics</h2>
+            <p className={themeClasses.textSecondary}>Engagement analytics coming soon...</p>
           </div>
         );
       default:
@@ -52,25 +75,26 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className={themeClasses.container}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
-            <p className="text-gray-400 mt-1">Platform insights and user analytics</p>
+            <h1 className={`text-2xl font-bold ${themeClasses.text}`}>Analytics Dashboard</h1>
+            <p className={`${themeClasses.textMuted} mt-1`}>Platform insights and user analytics</p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <button
               onClick={() => setLoading(true)}
               className="px-4 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors"
             >
               🔄 Refresh
             </button>
+            <ThemeToggle />
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+      <div className={themeClasses.container}>
         <div className="flex flex-wrap gap-2">
           {views.map((view) => (
             <button
@@ -78,8 +102,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
               onClick={() => setActiveView(view.id)}
               className={`px-4 py-2 rounded-lg transition-colors ${
                 activeView === view.id
-                  ? 'bg-blue-500/20 border border-blue-400/50 text-blue-300'
-                  : 'bg-white/5 border border-white/20 text-gray-300 hover:bg-white/10'
+                  ? theme === 'light' 
+                    ? 'bg-blue-500/20 border border-blue-400/50 text-blue-600'
+                    : 'bg-blue-500/20 border border-blue-400/50 text-blue-300'
+                  : theme === 'light'
+                    ? 'bg-gray-100/50 border border-gray-200/50 text-gray-600 hover:bg-gray-200/50'
+                    : 'bg-white/5 border border-white/20 text-gray-300 hover:bg-white/10'
               }`}
             >
               <span className="mr-2">{view.icon}</span>
@@ -92,12 +120,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
       {/* Content */}
       <div className="min-h-[600px]">
         {loading ? (
-          <div className="p-6 bg-white/5 rounded-lg border border-white/20">
+          <div className={themeClasses.container}>
             <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-white/10 rounded w-1/3"></div>
+              <div className={`h-6 ${theme === 'light' ? 'bg-gray-200' : 'bg-white/10'} rounded w-1/3`}></div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="h-20 bg-white/10 rounded"></div>
+                  <div key={i} className={`h-20 ${theme === 'light' ? 'bg-gray-200' : 'bg-white/10'} rounded`}></div>
                 ))}
               </div>
             </div>
