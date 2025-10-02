@@ -33,8 +33,8 @@ export const Footer = () => {
               </div>
             </div>
             <p className='text-white/80 text-sm mb-4'>
-              A proof-of-concept application demonstrating Trustless Work escrow management on the
-              Stellar blockchain. Experience the future of decentralized work.
+              Master the art of <span className='text-brand-200 font-semibold'>Trustless Work</span> escrow management on the&nbsp;
+              <span className='text-brand-200 font-semibold'>Stellar</span> blockchain. <br /> Experience the future of decentralized work with <span className='text-brand-200 font-semibold'>Stellar Nexus Experience</span>.
             </p>
           </div>
         </div>

@@ -195,7 +195,7 @@ export const Header = () => {
                     </div>
 
                     {/* Referral Button */}
-                    <Tooltip position='bottom' content='Invite Friends & Share Referral Card'>
+                    <Tooltip position='bottom' content='Invite Friends & Share Nexus Card'>
                       <button
                         onClick={() => setIsReferralModalOpen(true)}
                         className='relative p-2 text-white/80 hover:text-white transition-colors'

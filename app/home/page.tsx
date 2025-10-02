@@ -1230,6 +1230,49 @@ export default function HomePageContent() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Stellar Nexus Experience",
+            "alternateName": "Stellar Nexus Experience Web3 Early Adopters Program",
+            "description": "Join the Stellar Nexus Experience Web3 Early Adopters Program. Master trustless work on Stellar blockchain with interactive demos, earn badges, and compete on the global leaderboard.",
+            "url": "https://stellar-nexus-experience.vercel.app",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "Stellar Nexus Team",
+              "url": "https://stellar-nexus-experience.vercel.app"
+            },
+            "featureList": [
+              "Interactive Blockchain Demos",
+              "Trustless Work Education",
+              "Badge System",
+              "Global Leaderboard",
+              "Stellar Network Integration",
+              "Web3 Wallet Connection"
+            ],
+            "screenshot": "https://stellar-nexus-experience.vercel.app/images/logo/logo.png",
+            "softwareVersion": "0.1.0",
+            "datePublished": "2024-01-01",
+            "dateModified": new Date().toISOString().split('T')[0],
+            "inLanguage": "en-US",
+            "isAccessibleForFree": true,
+            "browserRequirements": "Requires JavaScript. Requires HTML5.",
+            "softwareRequirements": "Web Browser",
+            "permissions": "Web3 Wallet Access"
+          })
+        }}
+      />
       {/* Header - Hidden when preloader or video is playing */}
       {!isLoading && !isVideoPlaying && (
         <div className='animate-fadeIn'>
@@ -1306,7 +1349,7 @@ export default function HomePageContent() {
                   
                   {/* Subtitle */}
                   <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-8 animate-fadeInUp drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" style={{ animationDelay: '0.4s' }}>
-                    Welcome to the future of Web3 Early Adopters Program
+                    Web3 Early Adopters Program
                   </p>
                   
                   {/* Loading Indicator */}
@@ -1432,10 +1475,16 @@ export default function HomePageContent() {
 
                   <br />
                   <br />
-
-                  <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
-                    Master the art of trustless work with our demo suite on Stellar blockchain
-                  </p>
+                  <br />
+                  <div className='text-center mb-4'>
+                    <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
+                      Early adopters. Real builders. Stellar impact.
+                    </p>
+                    <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
+                      Master the art of <span className='text-brand-200 font-semibold'>Trustless Work</span> with our demo suite on <span className='text-brand-200 font-semibold'>Stellar</span> blockchain
+                    </p>
+                  </div>
+                  <br />
 
                   {/* Tutorial Buttons */}
                   <div className='flex justify-center gap-6 mb-8'>
@@ -1454,17 +1503,6 @@ export default function HomePageContent() {
                       >
                         <span className='text-xl'>👨‍🏫&nbsp;</span>
                         <span>Tutorial</span>
-                        <span className='text-xl'>&nbsp;→</span>
-                      </button>
-                    </Tooltip>
-
-                    <Tooltip content='Join the Challenge!'>
-                      <button
-                        onClick={() => setLeaderboardSidebarOpen(true)}
-                        className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
-                      >
-                        <span className='text-xl'>🏆&nbsp;</span>
-                        <span>Leaderboard</span>
                         <span className='text-xl'>&nbsp;→</span>
                       </button>
                     </Tooltip>
@@ -1547,6 +1585,13 @@ export default function HomePageContent() {
             </section>
 
             {/* Demo Cards Section - with fade-in animation */}
+            <div className='text-center'>
+              <p className=' text-white/80 max-w-3xl mx-auto mb-6'>
+              The <span className='text-brand-200 font-semibold'>Stellar Nexus Experience</span> turns early adoption into an adventure—earn XP, unlock badges, and co-create the future of Web3 alongside the first wave of <span className='text-brand-200 font-semibold'>Founders, Builders, and Developers</span>.
+              </p>
+            </div>
+
+
             <section className={`mx-auto px-4 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
               <div className=' mx-auto'>
                 {isConnected && firebaseLoading && !isInitialized && (
@@ -1697,11 +1742,11 @@ export default function HomePageContent() {
 
                 {/* Floating Character Images - Left and Right - Repositioned for bottom alignment */}
 
-                <div className='absolute bottom-8 -right-8 opacity-80 pointer-events-none'>
+                <div className='absolute bottom-12 -left-20 opacity-80 pointer-events-none'>
                   <div className='relative w-full h-full'>
                     <Image
-                      src='/images/character/character.png'
-                      alt='Guide Character Right'
+                      src='/images/character/baby-full.png'
+                      alt='Guide Character Left'
                       width={200}
                       height={200}
                       className='w-full h-full object-contain drop-shadow-2xl animate-float mr-40 -mb-40'
@@ -1738,15 +1783,7 @@ export default function HomePageContent() {
                     onClick={() => setShowOnboarding(true)}
                     className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
                   >
-                    <div className='flex items-center space-x-2'>
-                      <Image
-                        src='/images/logo/logoicon.png'
-                        alt='Tutorial'
-                        width={20}
-                        height={20}
-                        className='w-5 h-5'
-                        style={{ width: 'auto', height: 'auto' }}
-                      />
+                    <div className='flex items-center space-x-2'>                  
                       <span>Start Tutorial</span>
                     </div>
                   </button>
@@ -1766,10 +1803,16 @@ export default function HomePageContent() {
 
                     <div className='relative z-10'>
                       <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
-                        ⚡
+                        <Image
+                          src='/images/icons/demos.png'
+                          alt='Hands-on'
+                          width={50}
+                          height={50}
+                          style={{ width: 'auto', height: 'auto', margin: '0 auto' }}
+                        />
                       </div>
                       <div className='font-semibold text-white/90 mb-2 text-base'>Quick Start</div>
-                      <div className='text-white/70'>Learn the basics in just a few minutes</div>
+                      <div className='text-white/70'>Learn the basics in just a few minutes by going through the <span className='text-brand-300 font-bold'>Trustless Work</span> demos</div>
                     </div>
                   </div>
 
@@ -1779,10 +1822,16 @@ export default function HomePageContent() {
 
                     <div className='relative z-10'>
                       <div className='text-4xl mb-4 group-hover:scale-105 transition-transform duration-300'>
-                        🎯
+                        <Image
+                          src='/images/icons/console.png'
+                          alt='Hands-on'
+                          width={50}
+                          height={50}
+                          style={{ width: 'auto', height: 'auto', margin: '0 auto' }}
+                        />
                       </div>
                       <div className='font-semibold text-white/90 mb-2 text-base'>Hands-on</div>
-                      <div className='text-white/70'>Interactive examples and real scenarios</div>
+                      <div className='text-white/70'>Interactive games and real scenarios to test your skills in the <span className='text-brand-300 font-bold'>Nexus Web3 Playground</span></div>
                     </div>
                   </div>
 
@@ -1792,7 +1841,14 @@ export default function HomePageContent() {
 
                     <div className='relative z-10'>
                       <div className='text-4xl mb-4 group-hover:scale-110 transition-transform duration-300'>
-                        💡
+                        <Image
+                          src='/images/character/nexus-prime-chat.png'
+                          alt='Smart Tips'
+                          width={50}
+                          height={50}
+                          className='rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'
+                          style={{ width: 'auto', height: 'auto', margin: '0 auto' }}
+                        />
                       </div>
                       <div className='font-semibold text-white/90 mb-2 text-base'>Smart Tips</div>
                       <div className='text-white/70'>Pro tips and best practices included</div>
@@ -1801,9 +1857,45 @@ export default function HomePageContent() {
                 </div>
               </div>
             </section>
+            
           </>
         )}
       </main>
+      
+      {/* Leaderboard Button - Centered between Tutorial and Footer */}
+      <div className='text-center mb-12'>
+        {/* Powered by Trustless Work */}
+        <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
+          🏆 Nexus Global Leaderboard
+        </h3>
+      </div>
+
+      <div className='flex justify-center items-center px-4'>
+        <div className='relative animate-pulse hover:animate-none cursor-pointer'>
+          {/* Pulsing Ring Animation */}
+          <div className='absolute -inset-4 rounded-2xl bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-lg animate-ping opacity-75'></div>
+          <div className='absolute -inset-2 rounded-xl bg-gradient-to-r from-purple-400/40 to-pink-400/40 blur-md animate-pulse opacity-60'></div>
+          <div className='absolute -inset-1 rounded-lg bg-gradient-to-r from-purple-300/50 to-pink-300/50 blur-sm animate-pulse opacity-40'></div>
+
+          <Tooltip content='Join the Challenge!'>
+            <button
+              onClick={() => setLeaderboardSidebarOpen(true)}
+              className='relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3 hover:animate-none'
+            >
+              <span className='text-xl'>👥&nbsp;</span>
+              <span>See the top performers</span>
+              <span className='text-xl'>&nbsp;→</span>
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+      <br />
+      <div className='text-center mb-4'>
+        <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
+          Powered by <span className='text-brand-200 font-semibold'>Trustless Work</span>
+        </p>
+      </div>
+
 
       {/* Footer - Hidden when preloader or video is playing */}
       {!isLoading && !isVideoPlaying && (

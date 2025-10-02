@@ -89,7 +89,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
           `}
           style={{ animationDelay: '0.6s' }}
         >
-          Welcome to the future of Web3
+          Web3 Early Adopters Program
         </p>
 
         {/* Start Button */}

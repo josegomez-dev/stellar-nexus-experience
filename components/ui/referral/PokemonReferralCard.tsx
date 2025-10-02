@@ -27,6 +27,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const [gifProgress, setGifProgress] = useState(0);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+  const [isGeneratingMp4, setIsGeneratingMp4] = useState(false);
+  const [mp4Progress, setMp4Progress] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(0); // 0: baby, 1: teen, 2: adult
   const cardRef = useRef<HTMLDivElement>(null);
@@ -160,7 +162,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       addToast({
         type: 'success',
         title: '🎉 Card Downloaded!',
-        message: 'Your Pokemon-style referral card has been saved!',
+        message: 'Your Nexus card has been saved!',
         duration: 3000,
       });
     } catch (error) {
@@ -168,7 +170,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       addToast({
         type: 'error',
         title: '❌ Download Failed',
-        message: 'Failed to generate referral card. Please try again.',
+        message: 'Failed to generate Nexus card. Please try again.',
         duration: 3000,
       });
     } finally {
@@ -181,39 +183,174 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
     setIsGeneratingGif(true);
     setGifProgress(0);
+    
     try {
-      // Create GIF instance with optimized settings
+      // Create canvas for high-quality rendering
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      
+      // Set final render size (optimized for social sharing)
+      const width = 640;
+      const height = 1040;
+      canvas.width = width;
+      canvas.height = height;
+
+      // GIF settings optimized for quality and size
       const gif = new GIF({
-        workers: 2,
-        quality: 20, // Better quality
-        width: 320,
-        height: 520,
+        workers: 4,
+        quality: 2, // Lower = better quality (1-20)
+        width,
+        height,
         workerScript: '/gif.worker.js',
+        dither: true, // Better gradient handling
+        repeat: 0, // Loop forever
       });
 
-      // Create a simple static animation with 4 frames (no movement, just timing)
-      const frames = 4;
+      // Animation settings
+      const durationSec = 4; // Keep it short for social sharing
+      const fps = 15; // Sweet spot for quality/size
+      const totalFrames = durationSec * fps;
 
-      for (let i = 0; i < frames; i++) {
-        // Capture the frame without any modifications
-        const canvas = await html2canvas(cardRef.current, {
-          useCORS: true,
-          allowTaint: true,
+      // Draw each frame directly on canvas
+      for (let i = 0; i < totalFrames; i++) {
+        const progress = i / (totalFrames - 1);
+        const time = progress * Math.PI * 2;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        // Draw card background with gradient
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.5, '#16213e');
+        gradient.addColorStop(1, '#0f3460');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add animated border glow
+        const glowIntensity = 0.3 + Math.sin(time * 2) * 0.2;
+        const glowSize = 20 + Math.sin(time * 3) * 10;
+        ctx.shadowColor = currentTheme.border;
+        ctx.shadowBlur = glowSize;
+        ctx.strokeStyle = currentTheme.border;
+        ctx.lineWidth = 8;
+        ctx.strokeRect(20, 20, width - 40, height - 40);
+        ctx.shadowBlur = 0;
+        
+        // Draw character with phase transition
+        const characterSize = 120;
+        const characterX = width / 2 - characterSize / 2;
+        const characterY = 200;
+        
+        // Phase selection based on animation progress
+        let characterSrc = '/images/character/character.png';
+        if (progress < 0.33) {
+          characterSrc = '/images/character/baby.png';
+        } else if (progress < 0.66) {
+          characterSrc = '/images/character/teen.png';
+        }
+        
+        // Load and draw character
+        const characterImg = document.createElement('img');
+        characterImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve) => {
+          characterImg.onload = () => resolve();
+          characterImg.src = characterSrc;
         });
-
-        // Add frame with appropriate delay
-        gif.addFrame(canvas, { delay: 250 }); // Slightly longer delay for better visibility
+        
+        // Add character glow effect
+        const charGlow = 0.5 + Math.sin(time * 4) * 0.3;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 15 + charGlow * 10;
+        ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
+        ctx.shadowBlur = 0;
+        
+        // Draw user info
+        ctx.fillStyle = currentTheme.text;
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(account.displayName || 'Nexus Explorer', width / 2, 380);
+        
+        // Draw level
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText(`Level ${userLevel}`, width / 2, 410);
+        
+        // Draw stats with animation
+        const statsY = 450;
+        const stats = [
+          { label: 'Points', value: account.totalPoints || 0 },
+          { label: 'XP', value: account.experience || 0 },
+          { label: 'Badges', value: earnedBadges.length }
+        ];
+        
+        stats.forEach((stat, index) => {
+          const statX = (width / 4) * (index + 1);
+          const pulse = 1 + Math.sin(time * 6 + index) * 0.1;
+          
+          ctx.font = `bold ${16 * pulse}px Arial`;
+          ctx.fillText(stat.value.toString(), statX, statsY);
+          ctx.font = '12px Arial';
+          ctx.fillText(stat.label, statX, statsY + 20);
+        });
+        
+        // Draw badges with animation
+        if (earnedBadges.length > 0) {
+          const badgeSize = 40;
+          const badgeY = 520;
+          const badgeSpacing = 60;
+          const startX = (width - (earnedBadges.length * badgeSpacing)) / 2;
+          
+          earnedBadges.slice(0, 6).forEach((badgeId, index) => {
+            const badgeX = startX + index * badgeSpacing;
+            const rotation = Math.sin(time * 3 + index * 0.5) * 0.1;
+            const scale = 1 + Math.sin(time * 4 + index * 0.3) * 0.1;
+            
+            ctx.save();
+            ctx.translate(badgeX + badgeSize / 2, badgeY + badgeSize / 2);
+            ctx.rotate(rotation);
+            ctx.scale(scale, scale);
+            
+            // Draw badge placeholder (you can replace with actual badge rendering)
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(0, 0, badgeSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆', 0, 5);
+            
+            ctx.restore();
+          });
+        }
+        
+        // Draw referral code
+        ctx.fillStyle = currentTheme.text;
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`Referral: ${referralCode}`, width / 2, height - 100);
+        
+        // Draw footer text
+        ctx.font = '14px Arial';
+        ctx.fillText('Join the Nexus Experience!', width / 2, height - 60);
+        ctx.font = '12px Arial';
+        ctx.fillText('Master Trustless Work on Stellar', width / 2, height - 40);
+        
+        // Add frame to GIF
+        gif.addFrame(ctx, { copy: true, delay: 1000 / fps });
         
         // Update progress
-        setGifProgress(Math.round(((i + 1) / frames) * 50)); // 50% for frame capture
+        const frameProgress = Math.round(((i + 1) / totalFrames) * 80);
+        setGifProgress(frameProgress);
+        
+        // Small delay to prevent UI blocking
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
-
-      // Update progress to show rendering phase
-      setGifProgress(75);
       
       // Render the GIF
       gif.on('finished', function (blob) {
         setGifProgress(100);
+        
         // Create download link
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -226,16 +363,22 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
         addToast({
           type: 'success',
-          title: '🎉 GIF Downloaded!',
-          message: 'Your referral card GIF has been saved!',
-          duration: 3000,
+          title: '🎉 Premium GIF Downloaded!',
+          message: 'Your high-quality referral card GIF is ready for social sharing!',
+          duration: 4000,
         });
 
         setIsGeneratingGif(false);
         setGifProgress(0);
       });
 
+      gif.on('progress', function (p) {
+        const renderProgress = 80 + Math.round(p * 20);
+        setGifProgress(renderProgress);
+      });
+
       gif.render();
+      
     } catch (error) {
       console.error('Error generating GIF:', error);
       addToast({
@@ -246,6 +389,216 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       });
       setIsGeneratingGif(false);
       setGifProgress(0);
+    }
+  };
+
+  const handleDownloadMp4 = async () => {
+    if (!cardRef.current) return;
+
+    setIsGeneratingMp4(true);
+    setMp4Progress(0);
+    
+    try {
+      // Create canvas for high-quality rendering
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      
+      // Set final render size (optimized for social sharing)
+      const width = 640;
+      const height = 1040;
+      canvas.width = width;
+      canvas.height = height;
+
+      // Animation settings
+      const durationSec = 4;
+      const fps = 30; // Higher FPS for MP4
+      const totalFrames = durationSec * fps;
+
+      // Create MediaRecorder for MP4/WebM
+      const stream = canvas.captureStream(fps);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 2500000, // 2.5 Mbps for good quality
+      });
+
+      const chunks: BlobPart[] = [];
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `nexus-referral-card-${referralCode}.webm`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        addToast({
+          type: 'success',
+          title: '🎉 Premium Video Downloaded!',
+          message: 'Your high-quality referral card video is ready for social sharing!',
+          duration: 4000,
+        });
+
+        setIsGeneratingMp4(false);
+        setMp4Progress(0);
+      };
+
+      // Start recording
+      mediaRecorder.start();
+
+      // Draw each frame directly on canvas
+      for (let i = 0; i < totalFrames; i++) {
+        const progress = i / (totalFrames - 1);
+        const time = progress * Math.PI * 2;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        // Draw card background with gradient
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.5, '#16213e');
+        gradient.addColorStop(1, '#0f3460');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add animated border glow
+        const glowIntensity = 0.3 + Math.sin(time * 2) * 0.2;
+        const glowSize = 20 + Math.sin(time * 3) * 10;
+        ctx.shadowColor = currentTheme.border;
+        ctx.shadowBlur = glowSize;
+        ctx.strokeStyle = currentTheme.border;
+        ctx.lineWidth = 8;
+        ctx.strokeRect(20, 20, width - 40, height - 40);
+        ctx.shadowBlur = 0;
+        
+        // Draw character with phase transition
+        const characterSize = 120;
+        const characterX = width / 2 - characterSize / 2;
+        const characterY = 200;
+        
+        // Phase selection based on animation progress
+        let characterSrc = '/images/character/character.png';
+        if (progress < 0.33) {
+          characterSrc = '/images/character/baby.png';
+        } else if (progress < 0.66) {
+          characterSrc = '/images/character/teen.png';
+        }
+        
+        // Load and draw character
+        const characterImg = document.createElement('img');
+        characterImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve) => {
+          characterImg.onload = () => resolve();
+          characterImg.src = characterSrc;
+        });
+        
+        // Add character glow effect
+        const charGlow = 0.5 + Math.sin(time * 4) * 0.3;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 15 + charGlow * 10;
+        ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
+        ctx.shadowBlur = 0;
+        
+        // Draw user info
+        ctx.fillStyle = currentTheme.text;
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(account.displayName || 'Nexus Explorer', width / 2, 380);
+        
+        // Draw level
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText(`Level ${userLevel}`, width / 2, 410);
+        
+        // Draw stats with animation
+        const statsY = 450;
+        const stats = [
+          { label: 'Points', value: account.totalPoints || 0 },
+          { label: 'XP', value: account.experience || 0 },
+          { label: 'Badges', value: earnedBadges.length }
+        ];
+        
+        stats.forEach((stat, index) => {
+          const statX = (width / 4) * (index + 1);
+          const pulse = 1 + Math.sin(time * 6 + index) * 0.1;
+          
+          ctx.font = `bold ${16 * pulse}px Arial`;
+          ctx.fillText(stat.value.toString(), statX, statsY);
+          ctx.font = '12px Arial';
+          ctx.fillText(stat.label, statX, statsY + 20);
+        });
+        
+        // Draw badges with animation
+        if (earnedBadges.length > 0) {
+          const badgeSize = 40;
+          const badgeY = 520;
+          const badgeSpacing = 60;
+          const startX = (width - (earnedBadges.length * badgeSpacing)) / 2;
+          
+          earnedBadges.slice(0, 6).forEach((badgeId, index) => {
+            const badgeX = startX + index * badgeSpacing;
+            const rotation = Math.sin(time * 3 + index * 0.5) * 0.1;
+            const scale = 1 + Math.sin(time * 4 + index * 0.3) * 0.1;
+            
+            ctx.save();
+            ctx.translate(badgeX + badgeSize / 2, badgeY + badgeSize / 2);
+            ctx.rotate(rotation);
+            ctx.scale(scale, scale);
+            
+            // Draw badge placeholder
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(0, 0, badgeSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆', 0, 5);
+            
+            ctx.restore();
+          });
+        }
+        
+        // Draw referral code
+        ctx.fillStyle = currentTheme.text;
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`Referral: ${referralCode}`, width / 2, height - 100);
+        
+        // Draw footer text
+        ctx.font = '14px Arial';
+        ctx.fillText('Join the Nexus Experience!', width / 2, height - 60);
+        ctx.font = '12px Arial';
+        ctx.fillText('Master Trustless Work on Stellar', width / 2, height - 40);
+        
+        // Update progress
+        const frameProgress = Math.round(((i + 1) / totalFrames) * 90);
+        setMp4Progress(frameProgress);
+        
+        // Wait for next frame
+        await new Promise(resolve => setTimeout(resolve, 1000 / fps));
+      }
+
+      // Stop recording
+      mediaRecorder.stop();
+      
+    } catch (error) {
+      console.error('Error generating MP4:', error);
+      addToast({
+        type: 'error',
+        title: '❌ Video Generation Failed',
+        message: 'Failed to generate animated video. Please try again.',
+        duration: 3000,
+      });
+      setIsGeneratingMp4(false);
+      setMp4Progress(0);
     }
   };
 
@@ -376,7 +729,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               }}
             >
               {/* Video Background */}
-              <div className='absolute inset-0 opacity-30'>
+              <div className='absolute inset-0 '>
                 <video
                   key={currentPhase.id}
                   autoPlay
@@ -403,7 +756,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   <div className='flex flex-col items-center'>
                     <div className='text-center mb-3'>
                       <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
-                        NEXUS PRIME
+                        NEXUS CARD
                       </div>
                     </div>
 
@@ -469,16 +822,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                       <div
                         className={`absolute inset-0 rounded-full bg-gradient-to-r ${currentTheme.glow} blur-lg scale-110`}
                       ></div>
-                    </div>
-
-                    {/* Phase Info */}
-                    <div className='text-center mt-2'>
-                      <div className='text-xs font-semibold' style={{ color: currentTheme.text }}>
-                        {currentPhase.name} Phase
-                      </div>
-                      {/* <div className='text-xs opacity-70' style={{ color: currentTheme.text }}>
-                        Level {currentPhase.level}
-                      </div> */}
                     </div>
                   </div>
 
@@ -644,6 +987,43 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 <>
                   <span className='text-lg'>🎬</span>
                   <span>Download GIF</span>
+                </>
+              )}
+            </div>
+          </button>
+
+          {/* Download MP4/WebM Button */}
+          <button
+            onClick={handleDownloadMp4}
+            disabled={isGeneratingMp4}
+            className='w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 relative overflow-hidden'
+          >
+            {/* Animated background effect */}
+            {isGeneratingMp4 && (
+              <div className='absolute inset-0 bg-gradient-to-r from-green-400/20 to-teal-400/20 animate-pulse'></div>
+            )}
+            
+            <div className='relative z-10 flex items-center space-x-2'>
+              {isGeneratingMp4 ? (
+                <>
+                  <div className='relative'>
+                    <div className='animate-spin rounded-full h-5 w-5 border-2 border-white/30'></div>
+                    <div className='animate-spin rounded-full h-5 w-5 border-t-2 border-white absolute top-0 left-0' style={{ animationDirection: 'reverse' }}></div>
+                  </div>
+                  <div className='flex flex-col items-start'>
+                    <span className='text-sm'>Creating Video...</span>
+                    <div className='w-20 h-1 bg-white/20 rounded-full overflow-hidden mt-1'>
+                      <div 
+                        className='h-full bg-white rounded-full transition-all duration-300 ease-out'
+                        style={{ width: `${mp4Progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className='text-lg'>🎥</span>
+                  <span>Download Video</span>
                 </>
               )}
             </div>

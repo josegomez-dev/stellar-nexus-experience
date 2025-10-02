@@ -141,7 +141,7 @@ export const ReferralInvitationModal: React.FC<ReferralInvitationModalProps> = (
           <div className='flex items-center justify-between mb-6'>
             <div>
               <h2 className='text-2xl font-bold text-white mb-1'>Referral Center</h2>
-              <p className='text-white/70 text-sm'>Invite friends and share your referral card!</p>
+              <p className='text-white/70 text-sm'>Invite friends and share your Nexus card!</p>
             </div>
             <button
               onClick={handleClose}
@@ -265,25 +265,6 @@ export const ReferralInvitationModal: React.FC<ReferralInvitationModalProps> = (
               <PokemonReferralCard account={account} />
             </div>
           )}
-
-          {/* EmailJS Configuration Status */}
-          <div className='mt-4 pt-4 border-t border-white/10'>
-            <div className='text-xs text-white/60 text-center'>
-              {emailJSService.isConfigured() ? (
-                <span className='text-green-400'>✅ Email service ready</span>
-              ) : (
-                <div className='space-y-2'>
-                  <span className='text-yellow-400 block'>⚠️ Email service not configured</span>
-                  <p className='text-xs text-white/50'>
-                    To enable email invitations, configure EmailJS environment variables:
-                    <br />
-                    NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
-                    NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>
