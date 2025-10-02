@@ -8,6 +8,7 @@ import { AnalyticsView } from '../types';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useTheme } from '@/contexts/ui/ThemeContext';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface ViewConfig {
   id: AnalyticsView;
@@ -24,6 +25,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
   const { theme } = useTheme();
   const [activeView, setActiveView] = useState<AnalyticsView>('overview');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const views: ViewConfig[] = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -94,7 +96,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
       <div className={themeClasses.headerContainer}>
         <div className='flex items-center justify-between'>
           <div>
-            <div className='flex items-center space-x-2'>
+            <div className='flex items-center space-x-2 cursor-pointer' onClick={() => router.push('/')}>
               <Image src='/images/logo/logoicon.png' alt='Nexus Logo' width={100} height={100} />
               <Image src='/images/logo/iconletter.png' alt='Nexus Logo' width={100} height={100} />
             </div>

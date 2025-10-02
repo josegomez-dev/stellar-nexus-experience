@@ -89,15 +89,34 @@ export const Header = () => {
               href='/analytics'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
-              <span className='text-lg'>📊</span>
+              <span className='text-lg'>
+                <Image
+                  src='/images/icons/docs.png'
+                  alt='Analytics'
+                  width={20}
+                  height={20}
+                  className='w-5 h-5'
+                  style={{ width: 'auto', height: 'auto' }}
+                />
+              </span>
               <span>Analytics</span>
             </a>
             <a
               href='/docs'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
-              <span className='text-lg'>📑</span>
-              <span>Docs</span>
+              <span className='text-lg'>
+                <Image
+                  src='/images/icons/docs.png'
+                  alt='Analytics'
+                  width={20}
+                  height={20}
+                  className='w-5 h-5'
+                  style={{ width: 'auto', height: 'auto' }}
+                />
+              </span>
+              <span>Starter Kits</span>
+              <span className='text-xs text-white/40 ml-2 rounded-full bg-white/10 px-2 py-1'>WIP</span>
             </a>
             {/* <a
               href='/'

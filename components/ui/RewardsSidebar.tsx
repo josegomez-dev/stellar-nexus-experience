@@ -238,7 +238,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
               {/* Level Badge */}
               <div className='absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20'>
-                Lv.{level}
+                {level === 1 ? 'Explorer' : level === 2 ? 'Mid-Level' : level === 3 ? 'Expert' : `Lv.${level}`}
               </div>
 
               {/* Phase Indicator */}

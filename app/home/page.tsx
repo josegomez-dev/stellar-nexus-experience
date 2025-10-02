@@ -1478,7 +1478,7 @@ export default function HomePageContent() {
                   <br />
                   <div className='text-center mb-4'>
                     <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
-                      Early adopters. Real builders. Stellar impact.
+                      Web3 Early adopters. Real builders. Stellar impact.
                     </p>
                     <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
                       Master the art of <span className='text-brand-200 font-semibold'>Trustless Work</span> with our demo suite on <span className='text-brand-200 font-semibold'>Stellar</span> blockchain
