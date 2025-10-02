@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Account, ReferralRecord, InvitationRecord } from '@/lib/firebase/firebase-types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Account } from '@/lib/firebase/firebase-types';
 import { ReferralService } from '@/lib/services/referral-service';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { getBadgeIcon, BADGE_SIZES } from '@/utils/constants/badges/assets';
 import { useToast } from '@/contexts/ui/ToastContext';
+import { PokemonReferralCard, PokemonReferralCardRef } from './PokemonReferralCard';
 
 interface ReferralSystemProps {
   account: Account | null;
@@ -15,12 +16,13 @@ interface ReferralSystemProps {
 
 export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onReferralComplete, onAccountRefresh }) => {
   const { addToast } = useToast();
+  const pokemonCardRef = useRef<PokemonReferralCardRef>(null);
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
     successfulReferrals: 0,
     referralCode: '',
     totalBonusEarned: 0,
-    recentReferrals: [] as ReferralRecord[],
+    recentReferrals: [] as any[],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -29,9 +31,11 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
-  const [pendingInvitations, setPendingInvitations] = useState<InvitationRecord[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [showPokemonCard, setShowPokemonCard] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   useEffect(() => {
     if (account) {
@@ -76,9 +80,9 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
         setReferralStats(stats);
       }
       
-      // Load pending invitations
-      const pending = await ReferralService.getPendingInvitations(account);
-      setPendingInvitations(pending);
+      // Load referral history (pending + completed)
+      const history = ReferralService.getReferralHistory(account);
+      setPendingInvitations(history.pendingInvitations);
     } catch (error) {
       console.error('Error loading referral data:', error);
       // Set default stats if there's an error
@@ -162,6 +166,11 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
             message: result.message,
             type: 'success',
           });
+          
+          // Refresh account data to show updated stats
+          if (onAccountRefresh) {
+            await onAccountRefresh();
+          }
           
           // Reload data to show updated stats
           await loadReferralData();
@@ -252,6 +261,78 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
     return { target: 15, reward: 'Community Builder Badge' };
   };
 
+  // Calculate user level based on experience
+  const getUserLevel = () => {
+    if (!account?.experience) return 1;
+    return Math.floor(account.experience / 100) + 1;
+  };
+
+  // Handle Pokemon card sharing
+  const handleShareCard = async (platform: 'twitter' | 'linkedin' | 'facebook') => {
+    if (pokemonCardRef.current) {
+      try {
+        await pokemonCardRef.current.shareCardImage(platform);
+        addToast({
+          title: 'Card Shared!',
+          message: `Your referral card has been shared on ${platform}`,
+          type: 'success',
+        });
+      } catch (error) {
+        console.error('Error sharing card:', error);
+        addToast({
+          title: 'Share Failed',
+          message: 'Failed to share your referral card',
+          type: 'error',
+        });
+      }
+    }
+  };
+
+  // Handle Pokemon card download
+  const handleDownloadCard = async () => {
+    if (pokemonCardRef.current) {
+      try {
+        await pokemonCardRef.current.downloadCardImage();
+        addToast({
+          title: 'Card Downloaded!',
+          message: 'Your referral card has been saved to your device',
+          type: 'success',
+        });
+      } catch (error) {
+        console.error('Error downloading card:', error);
+        addToast({
+          title: 'Download Failed',
+          message: 'Failed to download your referral card',
+          type: 'error',
+        });
+      }
+    }
+  };
+
+  // Handle Pokemon card GIF download
+  const handleDownloadCardGif = async () => {
+    if (pokemonCardRef.current) {
+      setIsGeneratingImage(true);
+      try {
+        await pokemonCardRef.current.downloadCardGif();
+        addToast({
+          title: 'Card GIF Downloaded!',
+          message: 'Your animated referral card has been saved to your device',
+          type: 'success',
+        });
+      } catch (error) {
+        console.error('Error downloading card GIF:', error);
+        addToast({
+          title: 'Download Failed',
+          message: 'Failed to download your animated referral card',
+          type: 'error',
+        });
+      } finally {
+        setIsGeneratingImage(false);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -337,216 +418,190 @@ export const ReferralSystem: React.FC<ReferralSystemProps> = ({ account, onRefer
         </div>
       </div>
 
-      {/* Referral Code */}
-      <div className="bg-white/10 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Your Referral Code</h3>
-          {!referralStats.referralCode && (
-            <button
-              onClick={handleGenerateCode}
-              disabled={isGeneratingCode}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-            >
-              {isGeneratingCode ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <span>⚡</span>
-                  <span>Generate Code</span>
-                </>
-              )}
-            </button>
-          )}
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 bg-black/20 rounded-lg p-3 border border-white/20">
-              <div className="text-sm text-white/70 mb-1">Referral Code</div>
-              <div className="text-lg font-mono font-bold text-blue-400">
-                {referralStats.referralCode || 'Generating...'}
-              </div>
-            </div>
-            <button
-              onClick={handleCopyReferralCode}
-              disabled={!referralStats.referralCode}
-              className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                copyCodeSuccess
-                  ? 'bg-green-500 text-white'
-                  : referralStats.referralCode
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:scale-105'
-                  : 'bg-gray-500 text-gray-300 cursor-not-allowed'
-              }`}
-            >
-              {copyCodeSuccess ? '✓ Copied!' : '📋 Copy Code'}
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 bg-black/20 rounded-lg p-3 border border-white/20">
-              <div className="text-sm text-white/70 mb-1">Referral Link</div>
-              <div className="text-sm font-mono text-blue-300 truncate">
-                {referralStats.referralCode ? `${window.location.origin}?ref=${referralStats.referralCode}` : 'Generating...'}
-              </div>
-            </div>
-            <button
-              onClick={handleCopyReferralLink}
-              disabled={!referralStats.referralCode}
-              className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                copySuccess
-                  ? 'bg-green-500 text-white'
-                  : referralStats.referralCode
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white hover:scale-105'
-                  : 'bg-gray-500 text-gray-300 cursor-not-allowed'
-              }`}
-            >
-              {copySuccess ? '✓ Copied!' : '🔗 Copy Link'}
-            </button>
-          </div>
-        </div>
-        <div className="mt-3 text-sm text-white/60">
-          Share your code or link with friends to earn 50 XP for each successful referral!
-        </div>
-      </div>
-
-      {/* Invite Actions */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <button
-          onClick={() => setShowInviteModal(true)}
-          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
-        >
-          <span>📧</span>
-          <span>Send Email Invite</span>
-        </button>
-        <button
-          onClick={handleCopyReferralCode}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
-        >
-          <span>📋</span>
-          <span>Copy Code</span>
-        </button>
-        <button
-          onClick={handleCopyReferralLink}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
-        >
-          <span>🔗</span>
-          <span>Copy Link</span>
-        </button>
-      </div>
-
-      {/* Referrals Table */}
-      <div className="bg-white/10 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Referral History</h3>
-          <button
-            onClick={handleRefreshReferrals}
-            disabled={isRefreshing}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+      {/* Two-Column Grid Layout */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Left Column: Pokemon Referral Card */}
+        {referralStats.referralCode && (
+          <div 
+            className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-400/30 relative overflow-hidden"
+            style={{
+              backgroundImage: 'url(/images/bg/space.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
           >
-            {isRefreshing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Checking...</span>
-              </>
-            ) : (
-              <>
-                <span>🔄</span>
-                <span>Check for New</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/20">
-                <th className="text-left py-3 px-4 text-white/70 font-medium">Status</th>
-                <th className="text-left py-3 px-4 text-white/70 font-medium">Email/Name</th>
-                <th className="text-left py-3 px-4 text-white/70 font-medium">Date</th>
-                <th className="text-left py-3 px-4 text-white/70 font-medium">Reward</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Pending Invitations */}
-              {pendingInvitations.map((invitation, index) => (
-                <tr key={`pending-${invitation.id}`} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <span className="text-yellow-400 font-medium text-sm">Pending</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="text-white font-medium">{invitation.email}</div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="text-white/60 text-sm">
-                      {new Date(invitation.invitationDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-yellow-400 font-medium text-sm">+50 XP</span>
-                      <span className="text-yellow-300">⏳</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {/* Successful Referrals */}
-              {referralStats.recentReferrals.map((referral, index) => (
-                <tr key={`success-${referral.id}`} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      <span className="text-green-400 font-medium text-sm">Completed</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="text-white font-medium">{referral.referredUserName}</div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="text-white/60 text-sm">
-                      {new Date(referral.referralDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-400 font-medium text-sm">+{referral.bonusEarned} XP</span>
-                      <span className="text-green-300">✓</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {/* Empty State */}
-              {pendingInvitations.length === 0 && referralStats.recentReferrals.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-8 px-4 text-center">
-                    <div className="text-white/50 text-sm">
-                      No referrals yet. Start inviting friends to earn bonus XP!
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Summary */}
-        {(pendingInvitations.length > 0 || referralStats.recentReferrals.length > 0) && (
-          <div className="mt-4 pt-4 border-t border-white/20">
-            <div className="flex justify-between text-sm text-white/70">
-              <span>Total Pending: {pendingInvitations.length}</span>
-              <span>Total Completed: {referralStats.recentReferrals.length}</span>
-              <span>Total XP Earned: +{referralStats.totalBonusEarned}</span>
+            {/* Pokemon Card */}
+            <div className="flex justify-center mb-4">
+              <PokemonReferralCard
+                ref={pokemonCardRef}
+                account={account}
+                referralCode={referralStats.referralCode}
+                level={getUserLevel()}
+                className="transform hover:scale-105 transition-transform duration-300"
+              />
             </div>
+
+            {/* Download Buttons */}
+            <div className="space-y-3">
+              <div className="text-sm text-white/70 text-center mb-3">
+                Download your card to share your progress:
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={handleDownloadCard}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 text-sm"
+                >
+                  <span>💾</span>
+                  <span>PNG</span>
+                </button>
+                <button
+                  onClick={handleDownloadCardGif}
+                  disabled={isGeneratingImage}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-purple-400 disabled:to-pink-400 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🎬</span>
+                      <span>GIF</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
           </div>
         )}
+
+        {/* Right Column: Referral Code & Actions */}
+        <div className="bg-white/10 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Your Referral Code</h3>
+            <p className="text-sm text-white/70">
+              Share your code or link with friends to earn 50 XP for each successful referral!
+            </p>
+            {!referralStats.referralCode && (
+              <button
+                onClick={handleGenerateCode}
+                disabled={isGeneratingCode}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+              >
+                {isGeneratingCode ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>⚡</span>
+                    <span>Generate Code</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Referral Code Display */}
+          <div className="space-y-4 mb-4">
+            <div className="bg-black/20 rounded-lg p-4 border border-white/20">
+              <div className="text-sm text-white/70 mb-2">Referral Code</div>
+              <div className="text-lg font-mono font-bold text-blue-400 mb-3">
+                {referralStats.referralCode || 'Generating...'}
+              </div>
+              <button
+                onClick={handleCopyReferralCode}
+                disabled={!referralStats.referralCode}
+                className={`w-full px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  copyCodeSuccess
+                    ? 'bg-green-500 text-white'
+                    : referralStats.referralCode
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:scale-105'
+                    : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                {copyCodeSuccess ? '✓ Copied!' : '📋 Copy Code'}
+              </button>
+            </div>
+
+            <div className="bg-black/20 rounded-lg p-4 border border-white/20">
+              <div className="text-sm text-white/70 mb-2">Referral Link</div>
+              <div className="text-sm font-mono text-blue-300 truncate mb-3">
+                {referralStats.referralCode ? `${window.location.origin}?ref=${referralStats.referralCode}` : 'Generating...'}
+              </div>
+              <button
+                onClick={handleCopyReferralLink}
+                disabled={!referralStats.referralCode}
+                className={`w-full px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  copySuccess
+                    ? 'bg-green-500 text-white'
+                    : referralStats.referralCode
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white hover:scale-105'
+                    : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                {copySuccess ? '✓ Copied!' : '🔗 Copy Link'}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <p className="text-sm text-white/70 mb-3 text-center">
+            Send an email invitation to a friend to join the referral program
+          </p>
+          <div className="grid grid-cols-1 gap-3 mb-4">
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 text-sm"
+            >
+              <span>📧</span>
+              <span>Send Email Invitation</span>
+            </button>
+          </div>
+
+          {/* Social Sharing */}
+          {referralStats.referralCode && (
+            <div className="mb-4">
+              <div className="text-sm text-white/70 mb-3 text-center">
+                Share your card directly on social media:
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleShareCard('twitter')}
+                  className="bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-medium py-2 px-2 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-1 text-xs"
+                >
+                  <span>🐦</span>
+                  <span>Twitter</span>
+                </button>
+                <button
+                  onClick={() => handleShareCard('linkedin')}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-2 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-1 text-xs"
+                >
+                  <span>💼</span>
+                  <span>LinkedIn</span>
+                </button>
+                <button
+                  onClick={() => handleShareCard('facebook')}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2 px-2 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-1 text-xs"
+                >
+                  <span>📘</span>
+                  <span>Facebook</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="text-sm text-white/60 text-center">
+            Share your code or link with friends to earn 50 XP for each successful referral!
+          </div>
+        </div>
       </div>
+
 
       {/* Invite Modal */}
       {showInviteModal && (

@@ -38,6 +38,7 @@ export const UserDropdown = () => {
     return hasNexusMasterBadge;
   }, [account]);
 
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -478,7 +479,7 @@ export const UserDropdown = () => {
                 </Tooltip>
 
                 <hr />
-
+              
                 <button
                   onClick={handleDisconnect}
                   disabled={isDisconnecting || walletLoading}
@@ -501,6 +502,7 @@ export const UserDropdown = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

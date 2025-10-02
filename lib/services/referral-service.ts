@@ -48,6 +48,7 @@ export class ReferralService {
         'referrals.successfulReferrals': 0,
         'referrals.referralHistory': [],
         'referrals.invitees': [], // Track all invitations sent
+        'referrals.dismissedReferralPanel': false, // Default to false so new users see the panel
         updatedAt: new Date(),
       };
 
@@ -60,6 +61,17 @@ export class ReferralService {
         // Find and update the referrer's stats
         const referrerResult = await this.findReferrerByCode(referredByCode);
         if (referrerResult.success && referrerResult.referrer) {
+          // Track email invitation if user email is provided
+          if (userEmail) {
+            try {
+              await this.trackEmailInvitation(userEmail, referredByCode, account.walletAddress);
+            } catch (emailError) {
+              console.error('Error tracking email invitation:', emailError);
+              // Don't fail the whole process if email tracking fails
+            }
+          }
+
+          // Update referrer's stats and give bonus to new user
           await this.updateReferrerStats(referrerResult.referrer, account);
           bonusEarned = 25; // 25 XP bonus for being referred
           
@@ -68,16 +80,6 @@ export class ReferralService {
             experience: increment(25),
             totalPoints: increment(25),
           });
-
-          // Track email invitation if user email is provided
-          if (userEmail) {
-            try {
-              await this.trackEmailInvitation(userEmail, referredByCode);
-            } catch (emailError) {
-              console.error('Error tracking email invitation:', emailError);
-              // Don't fail the whole process if email tracking fails
-            }
-          }
         }
       }
 
@@ -541,25 +543,6 @@ export class ReferralService {
     }
   }
 
-  /**
-   * Get pending invitations for a user
-   */
-  static async getPendingInvitations(account: Account): Promise<InvitationRecord[]> {
-    try {
-      const invitees = account.referrals?.invitees || [];
-      
-      // Filter for pending invitations that haven't expired
-      const pendingInvitations = invitees.filter(inv => 
-        inv.status === 'sent' && 
-        new Date() <= inv.expiresAt
-      );
-
-      return pendingInvitations;
-    } catch (error) {
-      console.error('Error getting pending invitations:', error);
-      return [];
-    }
-  }
 
   /**
    * Check for new successful referrals and update stats
@@ -597,6 +580,7 @@ export class ReferralService {
 
         await updateDoc(accountRef, {
           'referrals.referralHistory': arrayUnion(...newReferralRecords),
+          'referrals.successfulReferrals': increment(newCompletedInvitations.length),
           experience: increment(50 * newCompletedInvitations.length),
           totalPoints: increment(50 * newCompletedInvitations.length),
           updatedAt: new Date(),
@@ -630,6 +614,61 @@ export class ReferralService {
         success: false,
         newReferrals: 0,
         message: 'Failed to check for new referrals.',
+      };
+    }
+  }
+
+  /**
+   * Get pending invitations for display in referral history
+   */
+  static getPendingInvitations(account: Account): InvitationRecord[] {
+    try {
+      const invitees = account.referrals?.invitees || [];
+      
+      // Filter for pending invitations that haven't expired
+      const pendingInvitations = invitees.filter(inv => 
+        inv.status === 'sent' && 
+        new Date() <= inv.expiresAt
+      );
+
+      return pendingInvitations;
+    } catch (error) {
+      console.error('Error getting pending invitations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get all referral history (pending + completed) for display
+   */
+  static getReferralHistory(account: Account): {
+    pendingInvitations: InvitationRecord[];
+    completedReferrals: ReferralRecord[];
+  } {
+    try {
+      const invitees = account.referrals?.invitees || [];
+      const referralHistory = account.referrals?.referralHistory || [];
+      
+      // Get pending invitations
+      const pendingInvitations = invitees.filter(inv => 
+        inv.status === 'sent' && 
+        new Date() <= inv.expiresAt
+      );
+
+      // Get completed referrals
+      const completedReferrals = referralHistory.filter(record => 
+        record.status === 'completed'
+      );
+
+      return {
+        pendingInvitations,
+        completedReferrals,
+      };
+    } catch (error) {
+      console.error('Error getting referral history:', error);
+      return {
+        pendingInvitations: [],
+        completedReferrals: [],
       };
     }
   }

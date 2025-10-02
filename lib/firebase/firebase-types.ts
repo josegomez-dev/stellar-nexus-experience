@@ -48,15 +48,6 @@ export interface Account {
   completedQuests: string[]; // Array of quest IDs completed
   questProgress: Record<string, number>; // Progress tracking for multi-step quests
 
-  // Referral system
-  referrals: {
-    totalReferrals: number;
-    successfulReferrals: number; // Referrals that completed account creation
-    referralCode: string; // Unique referral code for this user
-    referredBy?: string; // Referral code of the user who referred this user
-    referralHistory: ReferralRecord[]; // Successful referrals
-    invitees: InvitationRecord[]; // All invitations sent (pending and completed)
-  };
 
   // Transaction history - now stored in separate collection
 }
@@ -144,26 +135,6 @@ export interface Quest {
   unlockRequirements?: string[]; // Badge IDs required to unlock this quest
 }
 
-// Referral system interfaces
-export interface ReferralRecord {
-  id: string;
-  referredUserWallet: string;
-  referredUserName: string;
-  referralDate: Date;
-  status: 'pending' | 'completed' | 'failed';
-  bonusEarned: number; // XP bonus earned
-}
-
-// Invitation tracking (stores in account's referrals field)
-export interface InvitationRecord {
-  id: string;
-  email: string;
-  invitationDate: Date;
-  status: 'sent' | 'opened' | 'completed' | 'expired' | 'failed';
-  expiresAt: Date;
-  completedAt?: Date;
-  referredUserWallet?: string; // Set when completed
-}
 
 
 // Predefined badges configuration (static data)
@@ -261,48 +232,6 @@ export const PREDEFINED_BADGES = [
     category: 'quest',
     rarity: 'epic',
   },
-  
-  // Referral Badges (Extra Badges)
-  {
-    id: 'first_referral',
-    name: 'First Referral',
-    description: 'Successfully referred your first friend',
-    earningPoints: 50,
-    baseColor: '#10B981',
-    icon: 'referral',
-    category: 'referral',
-    rarity: 'rare',
-  },
-  {
-    id: 'referral_champion',
-    name: 'Referral Champion',
-    description: 'Successfully referred 5 friends',
-    earningPoints: 150,
-    baseColor: '#8B5CF6',
-    icon: 'champion',
-    category: 'referral',
-    rarity: 'epic',
-  },
-  {
-    id: 'referral_legend',
-    name: 'Referral Legend',
-    description: 'Successfully referred 10+ friends',
-    earningPoints: 300,
-    baseColor: '#F59E0B',
-    icon: 'legend',
-    category: 'referral',
-    rarity: 'legendary',
-  },
-  {
-    id: 'community_builder',
-    name: 'Community Builder',
-    description: 'Built a thriving community through referrals',
-    earningPoints: 500,
-    baseColor: '#EF4444',
-    icon: 'community',
-    category: 'referral',
-    rarity: 'legendary',
-  },
 ];
 
 // Helper functions
@@ -347,7 +276,7 @@ export const PREDEFINED_QUESTS: Quest[] = [
   {
     id: 'post_hashtags',
     title: 'Share the Love',
-    description: 'Post about Trustless Work using hashtags #escrow-master #nexus-master',
+    description: '🚀 trust is cool. trustless is cooler. ship escrow flows, earn XP, mint your rep. welcome to Stellar Nexus Experience—where work clears on-chain, fast. join the run → build / test / win. #escrow-master #nexus-master #trustless-work #stellar-nexus #stellar-nexus-experience',
     category: 'social',
     type: 'post',
     requirements: {
@@ -383,66 +312,6 @@ export const PREDEFINED_QUESTS: Quest[] = [
     isActive: true,
     isRepeatable: false,
     unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
-  },
-  {
-    id: 'refer_1_friend',
-    title: 'First Referral',
-    description: 'Invite 1 friend to join Trustless Work',
-    category: 'referral',
-    type: 'refer',
-    requirements: {
-      action: 'Invite 1 friend',
-      count: 1,
-      verification: 'automatic',
-    },
-    rewards: {
-      experience: 250,
-      points: 25,
-      badgeId: 'first_referral',
-    },
-    isActive: true,
-    isRepeatable: false,
-    unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
-  },
-  {
-    id: 'refer_5_friends',
-    title: 'Referral Champion',
-    description: 'Invite 5 friends to join Trustless Work',
-    category: 'referral',
-    type: 'refer',
-    requirements: {
-      action: 'Invite 5 friends',
-      count: 5,
-      verification: 'automatic',
-    },
-    rewards: {
-      experience: 250,
-      points: 25,
-      badgeId: 'referral_champion',
-    },
-    isActive: true,
-    isRepeatable: false,
-    unlockRequirements: ['first_referral'],
-  },
-  {
-    id: 'refer_10_friends',
-    title: 'Referral Legend',
-    description: 'Invite 10 friends to join Trustless Work',
-    category: 'referral',
-    type: 'refer',
-    requirements: {
-      action: 'Invite 10 friends',
-      count: 10,
-      verification: 'automatic',
-    },
-    rewards: {
-      experience: 250,
-      points: 25,
-      badgeId: 'referral_legend',
-    },
-    isActive: true,
-    isRepeatable: false,
-    unlockRequirements: ['referral_champion'],
   },
 ];
 

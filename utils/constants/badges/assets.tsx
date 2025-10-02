@@ -141,7 +141,7 @@ export const BADGE_SVG_ICONS = {
 } as const;
 
 // Badge sound effect
-export const BADGE_SOUND = '/sounds/earnBadge.mp3';
+export const BADGE_SOUND = '/sounds/intro.mp3';
 
 // Centralized badge definitions with assets
 export const BADGE_ASSETS: Record<string, BadgeAsset> = {

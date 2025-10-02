@@ -42,13 +42,6 @@ export const accountService = {
       // Initialize new fields if they don't exist
       completedQuests: accountData.completedQuests || [],
       questProgress: accountData.questProgress || {},
-      referrals: accountData.referrals || {
-        totalReferrals: 0,
-        successfulReferrals: 0,
-        referralCode: '',
-        referralHistory: [],
-        invitees: [],
-      },
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
     };
@@ -70,15 +63,6 @@ export const accountService = {
       }
       if (!account.questProgress) {
         account.questProgress = {};
-      }
-      if (!account.referrals) {
-        account.referrals = {
-          totalReferrals: 0,
-          successfulReferrals: 0,
-          referralCode: '',
-          referralHistory: [],
-          invitees: [],
-        };
       }
 
       return account;
@@ -221,6 +205,7 @@ export const accountService = {
 
     return false;
   },
+
 
   // Add transaction to user's history
   async addTransaction(

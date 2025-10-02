@@ -9,6 +9,12 @@ import {
 } from '@/lib/services/leaderboard-service';
 import { Tooltip } from './Tooltip';
 
+// Utility function to format wallet address
+const formatWalletAddress = (address: string): string => {
+  if (!address || address.length < 8) return address;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 interface LeaderboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -122,7 +128,7 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
             >
               <div className='cursor-help'>
                 <h4 className='font-bold text-white text-sm truncate'>{entry.displayName}</h4>
-                <p className='text-xs text-gray-400 truncate'>{entry.walletAddress}</p>
+                <p className='text-xs text-gray-400 truncate'>{formatWalletAddress(entry.walletAddress)}</p>
               </div>
             </Tooltip>
           </div>
@@ -263,7 +269,7 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
 
   const tabs = [
     { id: 'global', label: 'Global', icon: '🌍' },
-    { id: 'around', label: 'Around Me', icon: '🎯' },
+    // { id: 'around', label: 'Around Me', icon: '🎯' },
   ];
 
   if (!isOpen) {

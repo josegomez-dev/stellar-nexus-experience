@@ -31,6 +31,13 @@ import { useToast } from '../ui/ToastContext';
 import { useTransactionHistory } from './TransactionContext';
 import { ReferralService } from '../../lib/services/referral-service';
 
+interface ReferralBonusInfo {
+  bonusEarned: number;
+  referrerName: string;
+  referralCode: string;
+  showModal: boolean;
+}
+
 interface FirebaseContextType {
   // Account data
   account: Account | null;
@@ -44,6 +51,9 @@ interface FirebaseContextType {
   isLoading: boolean;
   isInitialized: boolean;
   
+  // Referral bonus info
+  referralBonusInfo: ReferralBonusInfo | null;
+  
   // Actions
   initializeAccount: (displayName: string, referralCode?: string, userEmail?: string) => Promise<void>;
   completeDemo: (demoId: string, score?: number, completionTimeMinutes?: number) => Promise<void>;
@@ -52,6 +62,7 @@ interface FirebaseContextType {
   hasClappedDemo: (demoId: string) => Promise<boolean>;
   refreshAccountData: () => Promise<void>;
   clapDemo: (demoId: string) => Promise<void>;
+  setReferralBonusInfo: (info: ReferralBonusInfo | null) => void;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -80,6 +91,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
   const [demoStats, setDemoStats] = useState<DemoStats[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [referralBonusInfo, setReferralBonusInfo] = useState<ReferralBonusInfo | null>(null);
 
   // Initialize account data when wallet connects
   useEffect(() => {
@@ -98,6 +110,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       
       setIsLoading(true);
       try {
+        // Check for referral code in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get('ref');
+        
         // Check if account exists
         const existingAccount = await accountService.getAccountByWalletAddress(walletData.publicKey);
         
@@ -115,11 +131,27 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           // Add experience and points for account creation
           await accountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
           
-          // Initialize referral system for new account
+          // Initialize referral system for new account with referral code if present
           try {
-            await ReferralService.initializeReferralSystem(
-              { id: walletData.publicKey, displayName: user?.customName || user?.username || 'Anonymous User', walletAddress: walletData.publicKey } as Account
+            const referralResult = await ReferralService.initializeReferralSystem(
+              { id: walletData.publicKey, displayName: user?.customName || user?.username || 'Anonymous User', walletAddress: walletData.publicKey } as Account,
+              referralCode || undefined
             );
+            
+            // Show referral bonus modal if bonus was earned
+            if (referralResult.success && referralResult.bonusEarned && referralResult.bonusEarned > 0) {
+              // Find referrer info for the modal
+              const referrerResult = await ReferralService.findReferrerByCode(referralCode!);
+              if (referrerResult.success && referrerResult.referrer) {
+                // Store referral bonus info for modal display
+                setReferralBonusInfo({
+                  bonusEarned: referralResult.bonusEarned,
+                  referrerName: referrerResult.referrer.displayName,
+                  referralCode: referralCode!,
+                  showModal: true
+                });
+              }
+            }
           } catch (referralError) {
             console.error('Error initializing referral system:', referralError);
           }
@@ -584,6 +616,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     demoStats,
     isLoading,
     isInitialized,
+    referralBonusInfo,
     initializeAccount,
     completeDemo,
     hasBadge,
@@ -591,6 +624,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     hasClappedDemo,
     refreshAccountData,
     clapDemo,
+    setReferralBonusInfo,
   };
 
   return (
