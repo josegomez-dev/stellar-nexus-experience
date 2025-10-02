@@ -25,6 +25,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const { walletData } = useGlobalWallet();
   const { user } = useAuth();
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
+  const [gifProgress, setGifProgress] = useState(0);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(0); // 0: baby, 1: teen, 2: adult
@@ -179,33 +180,40 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     if (!cardRef.current) return;
 
     setIsGeneratingGif(true);
+    setGifProgress(0);
     try {
-      // Create GIF instance
+      // Create GIF instance with optimized settings
       const gif = new GIF({
         workers: 2,
-        quality: 10,
+        quality: 20, // Better quality
         width: 320,
         height: 520,
         workerScript: '/gif.worker.js',
       });
 
-      // Capture multiple frames for animation
-      const frames = 20;
-      for (let i = 0; i < frames; i++) {
-        // Wait a bit between frames for smooth animation
-        await new Promise(resolve => setTimeout(resolve, 100));
+      // Create a simple static animation with 4 frames (no movement, just timing)
+      const frames = 4;
 
-        // Capture current frame
+      for (let i = 0; i < frames; i++) {
+        // Capture the frame without any modifications
         const canvas = await html2canvas(cardRef.current, {
           useCORS: true,
           allowTaint: true,
         });
 
-        gif.addFrame(canvas, { delay: 200 });
+        // Add frame with appropriate delay
+        gif.addFrame(canvas, { delay: 250 }); // Slightly longer delay for better visibility
+        
+        // Update progress
+        setGifProgress(Math.round(((i + 1) / frames) * 50)); // 50% for frame capture
       }
 
+      // Update progress to show rendering phase
+      setGifProgress(75);
+      
       // Render the GIF
       gif.on('finished', function (blob) {
+        setGifProgress(100);
         // Create download link
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -219,11 +227,12 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
         addToast({
           type: 'success',
           title: '🎉 GIF Downloaded!',
-          message: 'Your animated referral card GIF has been saved!',
+          message: 'Your referral card GIF has been saved!',
           duration: 3000,
         });
 
         setIsGeneratingGif(false);
+        setGifProgress(0);
       });
 
       gif.render();
@@ -236,6 +245,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
         duration: 3000,
       });
       setIsGeneratingGif(false);
+      setGifProgress(0);
     }
   };
 
@@ -301,7 +311,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     <div className={`relative ${className}`}>
       {/* Main Container - 2 Column Grid */}
       <div className='grid grid-cols-2 gap-6 items-start'>
-        {/* Left Column - Pokemon Card */}
+        {/* Left Column - Pokemon Style Nexus Card */}
         <div className='flex justify-center'>
           <div className='relative'>
             {/* Ranking Medal */}
@@ -356,7 +366,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               </div>
             )}
 
-            {/* Pokemon Card */}
+            {/* Pokemon Style Nexus Card Card */}
             <div
               ref={cardRef}
               className={`relative w-80 h-[520px] rounded-2xl border-4 shadow-2xl overflow-hidden ${currentTheme.shadow}`}
@@ -394,9 +404,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                     <div className='text-center mb-3'>
                       <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
                         NEXUS PRIME
-                      </div>
-                      <div className='text-xs opacity-80' style={{ color: currentTheme.text }}>
-                        Character Phases
                       </div>
                     </div>
 
@@ -469,9 +476,9 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                       <div className='text-xs font-semibold' style={{ color: currentTheme.text }}>
                         {currentPhase.name} Phase
                       </div>
-                      <div className='text-xs opacity-70' style={{ color: currentTheme.text }}>
+                      {/* <div className='text-xs opacity-70' style={{ color: currentTheme.text }}>
                         Level {currentPhase.level}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -504,6 +511,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   </div>
                 </div>
 
+                <br/>
                 <br/>
                 <br/>
 
@@ -545,12 +553,16 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   {/* Stats */}
                   <div className='bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/30'>
                     <div
-                      className='grid grid-cols-2 gap-3 text-sm'
+                      className='grid grid-cols-3 gap-2 text-sm'
                       style={{ color: currentTheme.text }}
                     >
                       <div className='text-center'>
                         <div className='font-bold text-lg'>{account.totalPoints || 0}</div>
                         <div className='text-xs opacity-80'>Points</div>
+                      </div>
+                      <div className='text-center'>
+                        <div className='font-bold text-lg'>{account.experience || 0}</div>
+                        <div className='text-xs opacity-80'>Experience</div>
                       </div>
                       <div className='text-center'>
                         <div className='font-bold text-lg'>{earnedBadges.length}</div>
@@ -604,19 +616,37 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
           <button
             onClick={handleDownloadGif}
             disabled={isGeneratingGif}
-            className='w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2'
+            className='w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 relative overflow-hidden'
           >
-            {isGeneratingGif ? (
-              <>
-                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                <span>Creating GIF...</span>
-              </>
-            ) : (
-              <>
-                <span>🎬</span>
-                <span>Download GIF</span>
-              </>
+            {/* Animated background effect */}
+            {isGeneratingGif && (
+              <div className='absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse'></div>
             )}
+            
+            <div className='relative z-10 flex items-center space-x-2'>
+              {isGeneratingGif ? (
+                <>
+                  <div className='relative'>
+                    <div className='animate-spin rounded-full h-5 w-5 border-2 border-white/30'></div>
+                    <div className='animate-spin rounded-full h-5 w-5 border-t-2 border-white absolute top-0 left-0' style={{ animationDirection: 'reverse' }}></div>
+                  </div>
+                  <div className='flex flex-col items-start'>
+                    <span className='text-sm'>Creating GIF...</span>
+                    <div className='w-20 h-1 bg-white/20 rounded-full overflow-hidden mt-1'>
+                      <div 
+                        className='h-full bg-white rounded-full transition-all duration-300 ease-out'
+                        style={{ width: `${gifProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className='text-lg'>🎬</span>
+                  <span>Download GIF</span>
+                </>
+              )}
+            </div>
           </button>
 
             <p className='text-white/60 text-xs'>
@@ -636,7 +666,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
             </div>
           </button>
 
-            <br/>
+            <hr/>
             <p className='text-white/60 text-xs'>
                 Share your Nexus Experience on social media
             </p>

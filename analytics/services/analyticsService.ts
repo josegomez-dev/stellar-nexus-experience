@@ -120,10 +120,10 @@ export class AnalyticsService {
         // Calculate engagement score (0-100)
         const demosCompleted = Array.isArray(account.demosCompleted) 
           ? account.demosCompleted 
-          : Object.values(account.demosCompleted || {});
+          : Object.values(account.demosCompleted || {}) as string[];
         const badgesEarned = Array.isArray(account.badgesEarned) 
           ? account.badgesEarned 
-          : Object.values(account.badgesEarned || {});
+          : Object.values(account.badgesEarned || {}) as string[];
         
         const engagementScore = Math.min(100, 
           (demosCompleted.length * 20) + 
@@ -153,7 +153,7 @@ export class AnalyticsService {
           badgesEarned: badgesEarned,
           clappedDemos: Array.isArray(account.clappedDemos) 
             ? account.clappedDemos 
-            : Object.values(account.clappedDemos || {}),
+            : Object.values(account.clappedDemos || {}) as string[],
           createdAt: account.createdAt,
           lastLoginAt: account.lastLoginAt,
           totalFeedback,
