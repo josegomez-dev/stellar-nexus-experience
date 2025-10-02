@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Account } from '@/lib/firebase/firebase-types';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { useToast } from '@/contexts/ui/ToastContext';
@@ -26,6 +26,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const { user } = useAuth();
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
+  const [gifProgress, setGifProgress] = useState(0);
   const [selectedPhase, setSelectedPhase] = useState(0); // 0: baby, 1: teen, 2: adult
   const [selectedBackground, setSelectedBackground] = useState(0); // 0: explorer, 1: mid-level, 2: expert
   const [selectedForm, setSelectedForm] = useState(0); // 0: initial, 1: mid, 2: final
@@ -252,6 +254,111 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       });
     } finally {
       setIsGeneratingPng(false);
+    }
+  };
+
+  const handleDownloadGif = async () => {
+    if (!cardRef.current) return;
+
+    setIsGeneratingGif(true);
+    setGifProgress(0);
+
+    try {
+      const frames = [];
+      const totalFrames = 12; // Number of frames for the GIF
+      const delay = 100; // Delay between frames in ms
+
+      // Generate frames with slight variations for animation
+
+      for (let i = 0; i < totalFrames; i++) {
+        // Create a temporary clone of the card with slight modifications
+        const clonedCard = cardRef.current.cloneNode(true) as HTMLElement;
+        
+        // Add slight rotation and glow effect for animation
+        clonedCard.style.transform = `rotate(${Math.sin(i * 0.5) * 2}deg)`;
+        clonedCard.style.boxShadow = `0 0 ${20 + Math.sin(i * 0.8) * 10}px rgba(255, 215, 0, 0.5)`;
+        
+        // Temporarily add to DOM for capture
+        clonedCard.style.cssText += `
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+          visibility: hidden;
+          pointer-events: none;
+        `;
+        document.body.appendChild(clonedCard);
+
+        try {
+          const canvas = await html2canvas(clonedCard, {
+            width: 400,
+            height: 520,
+            background: 'transparent',
+            useCORS: true,
+            allowTaint: true,
+          });
+          
+          frames.push(canvas);
+          const progress = ((i + 1) / totalFrames) * 100;
+          setGifProgress(progress);
+          
+          // Small delay to show progress
+          await new Promise(resolve => setTimeout(resolve, 50));
+        } finally {
+          document.body.removeChild(clonedCard);
+        }
+      }
+
+      // Create GIF
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: 400,
+        height: 520,
+        workerScript: '/gif.worker.js',
+      });
+
+      // Add frames to GIF
+      frames.forEach(frame => {
+        gif.addFrame(frame, { delay: delay });
+      });
+
+      // Render GIF
+      gif.on('finished', (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `nexus-card-${account.displayName || 'anonymous'}-${Date.now()}.gif`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        setIsGeneratingGif(false);
+        setGifProgress(0);
+        addToast({
+          type: 'success',
+          title: '🎭 GIF Downloaded!',
+          message: 'Your animated Nexus card is ready!',
+          duration: 3000,
+        });
+      });
+
+      gif.on('progress', (progress: number) => {
+        setGifProgress(progress * 100);
+      });
+
+      gif.render();
+      
+    } catch (error) {
+      console.error('Error generating GIF:', error);
+      setIsGeneratingGif(false);
+      setGifProgress(0);
+      addToast({
+        type: 'error',
+        title: 'GIF Generation Failed',
+        message: 'Unable to create animated GIF. Please try again.',
+        duration: 3000,
+      });
     }
   };
 
@@ -570,7 +677,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
         </div>
 
         {/* Left Column - Layout, Background & Form Selection Rows */}
-        <div className='mt-8 space-y-6'>
+        <div className='space-y-6'>
           {/* Layout Selection Row */}
           <div>
             <p className='text-white/80 text-sm font-bold mb-3 text-center'>
@@ -773,9 +880,12 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       </div>
       
       <br/>
+      <hr/>
+      <br/>
 
-          {/* Right Column - Download PNG Button */}
-          <div className='flex justify-center'>
+          {/* Right Column - Download Buttons */}
+          <div className='space-y-4'>
+            {/* Download PNG Button */}
             <button
               onClick={handleDownloadPng}
               disabled={isGeneratingPng}
@@ -793,6 +903,38 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 </>
               )}
             </button>
+
+            {/* Download GIF Button */}
+            <button
+              onClick={handleDownloadGif}
+              disabled={isGeneratingGif}
+              className='bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 w-full'
+            >
+              {isGeneratingGif ? (
+                <>
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                  <span>Creating GIF...</span>
+                  <div className='animate-pulse text-xs ml-2'>
+                    ({Math.round(gifProgress)}%)
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span>🎭</span>
+                  <span>Download GIF</span>
+                </>
+              )}
+            </button>
+
+            {/* GIF Progress Bar */}
+            {isGeneratingGif && (
+              <div className='w-full bg-gray-700 rounded-full h-2 overflow-hidden'>
+                <div
+                  className='bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300 ease-out'
+                  style={{ width: `${gifProgress}%` }}
+                />
+              </div>
+            )}
           </div>
     </div>
   );
