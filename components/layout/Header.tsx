@@ -90,6 +90,7 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
             <a
+              target='_blank'
               href='/docs'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >
