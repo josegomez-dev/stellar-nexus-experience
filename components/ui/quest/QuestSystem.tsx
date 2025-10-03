@@ -168,9 +168,17 @@ export const QuestSystem: React.FC<QuestSystemProps> = ({ account, onQuestComple
         </div>
         <div className="bg-white/10 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-purple-400">
-            {availableQuests.filter(q => getQuestStatus(q) === 'in-progress').length}
+            <p>
+              Nexus Quest Master
+            </p>
           </div>
-          <div className="text-sm text-white/70">In Progress</div>
+          <div className="text-sm text-white/70">
+            {completedQuests.length === 4 ? (
+              <p>Thank you for your participation!</p>
+            ) : (
+              <p>Complete the full quest line will be highly apprecited!</p>
+            )}    
+          </div>
         </div>
       </div>
 

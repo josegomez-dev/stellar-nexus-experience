@@ -17,7 +17,7 @@ export const Header = () => {
   const { isConnected } = useGlobalWallet();
   const { account, isLoading } = useFirebase();
 
-  // Check if user has unlocked mini-games access (earned all badges including Nexus Master)
+  // Check if user has unlocked mini-games access (earned all 5 top badges)
   const miniGamesUnlocked = useMemo(() => {
     if (!account || !account.badgesEarned) return false;
 
@@ -29,11 +29,11 @@ export const Header = () => {
       badgesEarnedArray = Object.values(account.badgesEarned);
     }
 
-    // Check if user has earned all required badges
-    const requiredBadges = ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
-    const hasAllBadges = requiredBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
+    // Check if user has earned all 5 top badges
+    const topBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const hasAllTopBadges = topBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
 
-    return hasAllBadges;
+    return hasAllTopBadges;
   }, [account]);
 
   // Listen for custom event to toggle rewards dropdown
@@ -48,15 +48,21 @@ export const Header = () => {
     };
   }, []);
 
-  // Auto-open rewards sidebar when wallet connects
+  // Auto-open rewards sidebar only on first wallet connect (not on reconnects)
   useEffect(() => {
     if (isConnected && account) {
-      // Small delay to ensure wallet sidebar closes first
-      const timer = setTimeout(() => {
-        setIsRewardsOpen(true);
-      }, 500);
+      // Check if this is the first time connecting (no previous session)
+      const hasConnectedBefore = localStorage.getItem('wallet-connected-before');
+      
+      if (!hasConnectedBefore) {
+        // First time connecting - auto-open rewards panel
+        const timer = setTimeout(() => {
+          setIsRewardsOpen(true);
+          localStorage.setItem('wallet-connected-before', 'true');
+        }, 500);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
   }, [isConnected, account]);
 

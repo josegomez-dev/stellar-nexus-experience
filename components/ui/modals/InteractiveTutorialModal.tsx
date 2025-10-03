@@ -165,6 +165,10 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
   const currentSectionData = tutorialSections[currentSection];
   const currentStepData = currentSectionData?.steps[currentStep];
 
+  // Calculate overall progress across all sections
+  const totalSteps = tutorialSections.reduce((total, section) => total + section.steps.length, 0);
+  const completedSteps = tutorialSections.slice(0, currentSection).reduce((total, section) => total + section.steps.length, 0) + currentStep;
+  const overallProgress = Math.round((completedSteps / totalSteps) * 100);
 
   const handleSectionChange = (sectionIndex: number) => {
     setCurrentSection(sectionIndex);
@@ -332,13 +336,13 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
                   Step {currentStep + 1} of {currentSectionData?.steps.length} • Section {currentSection + 1} of {tutorialSections.length}
                 </span>
                 <span>
-                  {Math.round(((currentStep + 1) / (currentSectionData?.steps.length || 1)) * 100)}% Complete
+                  {overallProgress}% Complete
                 </span>
               </div>
               <div className="w-full bg-white/10 rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-brand-500 to-accent-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${((currentStep + 1) / (currentSectionData?.steps.length || 1)) * 100}%` }}
+                  style={{ width: `${overallProgress}%` }}
                 ></div>
               </div>
             </div>

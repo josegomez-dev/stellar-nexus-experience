@@ -1010,7 +1010,7 @@ export default function HomePageContent() {
   // Note: submitFeedback removed from simplified Firebase context
   // Removed old AccountService usage
 
-  // Check if user has unlocked mini-games access (earned all badges including Nexus Master)
+  // Check if user has unlocked mini-games access (earned all 5 top badges)
   const miniGamesUnlocked = useMemo(() => {
     if (!account || !account.badgesEarned) return false;
 
@@ -1022,11 +1022,11 @@ export default function HomePageContent() {
       badgesEarnedArray = Object.values(account.badgesEarned);
     }
 
-    // Check if user has earned all required badges
-    const requiredBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
-    const hasAllBadges = requiredBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
+    // Check if user has earned all 5 top badges
+    const topBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const hasAllTopBadges = topBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
 
-    return hasAllBadges;
+    return hasAllTopBadges;
   }, [account]);
 
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
@@ -1480,7 +1480,7 @@ export default function HomePageContent() {
                   <br />
                   <div className='text-center mb-4'>
                     <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
-                      Web3 Early adopters. Real builders. Stellar impact.
+                      Early adopters. Real builders. Stellar impact.
                     </p>
                     <p className='text-xl text-white/80 max-w-3xl mx-auto mb-6'>
                       Master the art of <span className='text-brand-200 font-semibold'>Trustless Work</span> with our demo suite on <span className='text-brand-200 font-semibold'>Stellar</span> blockchain
@@ -1533,47 +1533,59 @@ export default function HomePageContent() {
                       </button>
                     </Tooltip>
 
-                    <Tooltip
-                      position='bottom'
-                      content={
-                        miniGamesUnlocked
-                          ? 'Explore the Nexus Web3 Playground'
-                          : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
-                      }
-                    >
-                      <a
-                        href={miniGamesUnlocked ? '/mini-games' : '#'}
-                        onClick={e => {
-                          if (!miniGamesUnlocked) {
-                            e.preventDefault();
-                          }
-                        }}
-                        className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 transform shadow-lg border-2 ${
-                          miniGamesUnlocked
-                            ? 'bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white hover:scale-105 hover:shadow-xl border-white/20 hover:border-white/40 cursor-pointer'
-                            : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
-                        }`}
-                        title={
+                    <div className={`relative ${miniGamesUnlocked ? 'animate-pulse hover:animate-none cursor-pointer' : ''}`}>
+                      {/* Wave Effect - Only show when unlocked */}
+                      {miniGamesUnlocked && (
+                        <>
+                          {/* Pulsing Ring Animation */}
+                          <div className='absolute -inset-4 rounded-2xl bg-gradient-to-r from-brand-500/30 to-accent-500/30 blur-lg animate-ping opacity-75'></div>
+                          <div className='absolute -inset-2 rounded-xl bg-gradient-to-r from-brand-400/40 to-accent-400/40 blur-md animate-pulse opacity-60'></div>
+                          <div className='absolute -inset-1 rounded-lg bg-gradient-to-r from-brand-300/50 to-accent-300/50 blur-sm animate-pulse opacity-40'></div>
+                        </>
+                      )}
+
+                      <Tooltip
+                        position='bottom'
+                        content={
                           miniGamesUnlocked
                             ? 'Explore the Nexus Web3 Playground'
                             : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
                         }
                       >
-                        <span>
-                          {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
-                        </span>
-                        <span className='text-xl'>
-                          <Image
-                            src={'/images/icons/console.png'}
-                            alt='Nexus Web3 Playground'
-                            width={50}
-                            height={20}
-                            className={miniGamesUnlocked ? '' : 'grayscale'}
-                            style={{ width: 'auto', height: 'auto' }}
-                          />
-                        </span>
-                      </a>
-                    </Tooltip>
+                        <a
+                          href={miniGamesUnlocked ? '/mini-games' : '#'}
+                          onClick={e => {
+                            if (!miniGamesUnlocked) {
+                              e.preventDefault();
+                            }
+                          }}
+                          className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 transform shadow-lg border-2 ${
+                            miniGamesUnlocked
+                              ? 'bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white hover:scale-105 hover:shadow-xl border-white/20 hover:border-white/40 cursor-pointer hover:animate-none'
+                              : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                          }`}
+                          title={
+                            miniGamesUnlocked
+                              ? 'Explore the Nexus Web3 Playground'
+                              : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
+                          }
+                        >
+                          <span>
+                            {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                          </span>
+                          <span className='text-xl'>
+                            <Image
+                              src={'/images/icons/console.png'}
+                              alt='Nexus Web3 Playground'
+                              width={50}
+                              height={20}
+                              className={miniGamesUnlocked ? '' : 'grayscale'}
+                              style={{ width: 'auto', height: 'auto' }}
+                            />
+                          </span>
+                        </a>
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
 
@@ -1866,7 +1878,6 @@ export default function HomePageContent() {
       
       {/* Leaderboard Button - Centered between Tutorial and Footer */}
       <div className='text-center mb-12'>
-        {/* Powered by Trustless Work */}
         <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
           🏆 Nexus Global Leaderboard
         </h3>
@@ -1890,12 +1901,6 @@ export default function HomePageContent() {
             </button>
           </Tooltip>
         </div>
-      </div>
-      <br />
-      <div className='text-center mb-4'>
-        <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
-          Powered by <span className='text-brand-200 font-semibold'>Trustless Work</span>
-        </p>
       </div>
 
 

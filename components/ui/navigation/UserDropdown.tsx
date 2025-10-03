@@ -32,14 +32,23 @@ export const UserDropdown = () => {
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Check if user has unlocked mini-games access (earned Nexus Master badge)
+  // Check if user has unlocked mini-games access (earned all 5 top badges)
   const miniGamesUnlocked = useMemo(() => {
-    if (!account || !account.badgesEarned || !Array.isArray(account.badgesEarned)) return false;
+    if (!account || !account.badgesEarned) return false;
 
-    // Check if user has earned the Nexus Master badge
-    const hasNexusMasterBadge = account.badgesEarned.includes('nexus_master');
+    // Handle both array and object formats for badgesEarned (Firebase sometimes stores arrays as objects)
+    let badgesEarnedArray: string[] = [];
+    if (Array.isArray(account.badgesEarned)) {
+      badgesEarnedArray = account.badgesEarned;
+    } else if (typeof account.badgesEarned === 'object') {
+      badgesEarnedArray = Object.values(account.badgesEarned);
+    }
 
-    return hasNexusMasterBadge;
+    // Check if user has earned all 5 top badges
+    const topBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
+    const hasAllTopBadges = topBadges.every(badgeId => badgesEarnedArray.includes(badgeId));
+
+    return hasAllTopBadges;
   }, [account]);
 
 
@@ -422,7 +431,7 @@ export const UserDropdown = () => {
                   content={
                     miniGamesUnlocked
                       ? 'Explore the Nexus Web3 Playground'
-                      : 'Earn the Nexus Master badge to unlock the Nexus Web3 Playground'
+                      : 'Earn all 5 top badges to unlock the Nexus Web3 Playground'
                   }
                 >
                   <a
