@@ -332,7 +332,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
 
             {/* Speech Bubble */}
             {isExpanded && (
-              <div className='absolute bottom-20 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
+              <div className='absolute bottom-32 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
                 {/* Arrow */}
                 <div className='absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
 

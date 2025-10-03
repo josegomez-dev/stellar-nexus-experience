@@ -1055,6 +1055,7 @@ export default function HomePageContent() {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   // Initialize Firebase data on app load
   useEffect(() => {
@@ -1066,14 +1067,15 @@ export default function HomePageContent() {
     if (typeof window !== 'undefined') {
       const hasLoadedBefore = localStorage.getItem('homePageLoaded');
       if (hasLoadedBefore) {
-        setIsLoading(false);
+        // Don't auto-start anything - wait for user to click start button
+        // Keep isLoading as true and hasStarted as false until user clicks
       }
     }
   }, []);
 
   // Preloader effect - track actual loading progress
   useEffect(() => {
-    if (!isLoading) return; // Skip if already loaded
+    if (!isLoading || !hasStarted) return; // Skip if already loaded or not started
 
     const loadingSteps = [
       { progress: 10, message: 'Initializing STELLAR NEXUS...' },
@@ -1107,7 +1109,7 @@ export default function HomePageContent() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isLoading, isInitialized, demoStats]);
+  }, [isLoading, hasStarted, isInitialized, demoStats]);
 
   // Fallback timeout to ensure preloader doesn't get stuck
   useEffect(() => {
@@ -1121,10 +1123,19 @@ export default function HomePageContent() {
     }
   }, [isLoading]);
 
-  // Set video playing state when loading completes
+  // Set video playing state when loading completes and play intro sound
   useEffect(() => {
     if (!isLoading) {
       setIsVideoPlaying(true);
+      
+      // Play intro sound when video starts
+      try {
+        const audio = new Audio('/sounds/intro.mp3');
+        audio.volume = 0.6;
+        audio.play().catch(() => {}); // Silent fallback if audio fails
+      } catch (error) {
+        // Silent fallback if audio fails
+      }
     }
   }, [isLoading]);
 
@@ -1230,6 +1241,13 @@ export default function HomePageContent() {
     setFeedbackDemoData(null);
   };
 
+  // Handle start button click
+  const handleStartClick = () => {
+    // Start the experience
+    setHasStarted(true);
+    setIsLoading(true);
+  };
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
       {/* Structured Data for SEO */}
@@ -1276,14 +1294,14 @@ export default function HomePageContent() {
         }}
       />
       {/* Header - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && (
+      {!isLoading && !isVideoPlaying && hasStarted && (
         <div className='animate-fadeIn'>
           <Header />
         </div>
       )}
 
       {/* Authentication Banner - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && (
+      {!isLoading && !isVideoPlaying && hasStarted && (
         <div className='animate-fadeIn'>
           <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
         </div>
@@ -1298,18 +1316,96 @@ export default function HomePageContent() {
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
-        {/* Video Preloader Screen */}
-        <VideoPreloaderScreen 
-          isLoading={isLoading}
-          title="STELLAR NEXUS EXPERIENCE"
-          subtitle="Initializing Stellar Nexus Experience..."
-          showText={true}
-          minDuration={5000}
-        />
+        {/* Start Button Screen - Show before everything else */}
+        {!hasStarted && (
+          <div className="fixed inset-0 bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center z-[100000]">
+            {/* Animated background elements */}
+            <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
+            
+            {/* Floating particles */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${2 + Math.random() * 3}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="text-center px-4 relative z-10">
+              {/* Logo */}
+              <div className='flex justify-center mb-8'>
+                <Image
+                  src='/images/logo/logoicon.png'
+                  alt='STELLAR NEXUS'
+                  width={200}
+                  height={200}
+                  priority
+                  className="animate-pulse"
+                  style={{ width: 'auto', height: 'auto', marginBottom: '-50px' }}
+                />
+              </div>
+
+              <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                Web3 Early Adopters Program
+              </p>
+              
+              {/* Start Button */}
+              <div className="relative group">
+                {/* Main Button */}
+                <button
+                  onClick={handleStartClick}
+                  className='relative px-12 py-6 font-bold rounded-2xl transition-all duration-500 transform shadow-2xl border-2 text-2xl hover:scale-110 hover:rotate-1 hover:from-brand-600 hover:via-accent-600 hover:to-brand-700 text-white border-white/30 hover:border-white/60'
+                >
+                  {/* Button Content */}
+                  <div className='flex items-center justify-center space-x-4'>
+                    <span>START EXPERIENCE</span>
+                  </div>
+
+                  {/* Hover Effects */}
+                  <div className='absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                </button>
+              </div>
+
+              {/* Loading Indicator */}
+              <div className="mt-8 animate-fadeInUp">
+                <p className="text-white/60 text-sm mt-4">
+                  Click to begin your journey into the <span className="text-brand-400">Stellar Nexus Experience</span>
+                </p>
+              </div>
+
+              {/* Powered by Trustless Work */}
+              <div className='text-center mt-4'>
+                <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
+                  Powered by{' '}
+                  <span className='text-brand-200 font-semibold'>Trustless Work</span>
+                </p>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* Video Preloader Screen - Only show after Start button is clicked */}
+        {hasStarted && (
+          <VideoPreloaderScreen 
+            isLoading={isLoading}
+            title="STELLAR NEXUS EXPERIENCE"
+            subtitle="Initializing Stellar Nexus Experience..."
+            showText={true}
+            minDuration={5000}
+          />
+        )}
 
 
-        {/* Main Content - Only show when not loading */}
-        {!isLoading && (
+        {/* Main Content - Only show when not loading and started */}
+        {!isLoading && hasStarted && (
           <>
             {/* Full-Screen Video Overlay with fade-in animation */}
             <video
@@ -1907,7 +2003,7 @@ export default function HomePageContent() {
 
 
       {/* Footer - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && (
+      {!isLoading && !isVideoPlaying && hasStarted && (
         <div className='animate-fadeIn'>
           <Footer />
         </div>
@@ -1924,17 +2020,19 @@ export default function HomePageContent() {
             setWalletExpanded(true);
           }
         }}
-        showBanner={!isLoading && !isVideoPlaying}
-        hideFloatingButton={isLoading || isVideoPlaying}
+        showBanner={!isLoading && !isVideoPlaying && hasStarted}
+        hideFloatingButton={isLoading || isVideoPlaying || !hasStarted}
       />
 
-      {/* NEXUS PRIME Character */}
-      <NexusPrime 
-        currentPage='home' 
-        currentDemo={activeDemo} 
-        walletConnected={isConnected}
-        autoOpen={isVideoPlaying}
-      />
+      {/* NEXUS PRIME Character - Only show after started */}
+      {hasStarted && (
+        <NexusPrime 
+          currentPage='home' 
+          currentDemo={activeDemo} 
+          walletConnected={isConnected}
+          autoOpen={isVideoPlaying}
+        />
+      )}
 
       {/* Onboarding Overlay */}
       <OnboardingOverlay
@@ -1992,8 +2090,8 @@ export default function HomePageContent() {
       {/* User Profile Modal */}
       <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
-      {/* Account Status Indicator */}
-      <AccountStatusIndicator />
+      {/* Account Status Indicator - Only show after started */}
+      {hasStarted && <AccountStatusIndicator />}
 
       {/* Demo Feedback Modal */}
       {showFeedbackModal && feedbackDemoData && (
@@ -2014,8 +2112,8 @@ export default function HomePageContent() {
       />
 
 
-      {/* Toast Container */}
-      <ToastContainer />
+      {/* Toast Container - Only show after started */}
+      {hasStarted && <ToastContainer />}
     </div>
   );
 }
