@@ -90,22 +90,6 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
             <a
-              href='/analytics'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
-            >
-              <span className='text-lg'>
-                <Image
-                  src='/images/icons/docs.png'
-                  alt='Analytics'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5'
-                  style={{ width: 'auto', height: 'auto' }}
-                />
-              </span>
-              <span>Analytics</span>
-            </a>
-            <a
               href='/docs'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
             >

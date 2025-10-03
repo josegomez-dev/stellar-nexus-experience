@@ -1974,7 +1974,7 @@ export default function HomePageContent() {
       {/* Leaderboard Button - Centered between Tutorial and Footer */}
       <div className='text-center mb-12'>
         <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
-        Global Leaderboard
+        🏆 Global Leaderboard
         </h3>
         <p className='text-white/70'>
           See the top performers and compete for the Nexus Global Leaderboard!

@@ -14,7 +14,7 @@ import Image from 'next/image';
 
 function DocsPageContent() {
   const { isConnected } = useGlobalWallet();
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('starters');
   const [isLoading, setIsLoading] = useState(() => {
     // Check if this is the first time loading the page
     if (typeof window !== 'undefined') {
@@ -58,10 +58,9 @@ function DocsPageContent() {
   }, [isLoading]);
 
   const sections = [
-    { id: 'overview', title: 'Technology Overview', icon: '🚀' },
-    { id: 'stellar', title: 'Stellar Implementation', icon: '⭐' },
-    { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
     { id: 'starters', title: 'Nexus Starters', icon: '👨🏻‍💻' },
+    { id: 'vibecoding', title: 'Vibecoding Guide', icon: '✨' },
+    { id: 'architecture', title: 'System Architecture', icon: '🏗️' },
   ];
 
   return (
@@ -255,7 +254,7 @@ function DocsPageContent() {
                               className='relative z-10 text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 mb-6 drop-shadow-2xl'
                               style={{ zIndex: 1000, marginTop: '-200px' }}
                             >
-                              DOCS
+                              Developer Starter Kits
                             </h1>
                           </div>
 
@@ -295,299 +294,258 @@ function DocsPageContent() {
                         </div>
 
                         {/* Content Sections */}
-                        <div className='bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8'>
-                          {/* Technology Overview */}
-                          {activeSection === 'overview' && (
+                        <div className='border border-white/20 rounded-2xl p-8'>
+                          {/* Vibecoding Guide */}
+                          {activeSection === 'vibecoding' && (
                             <div className='space-y-8'>
                               <div className='text-center mb-8'>
                                 <h2 className='text-3xl font-bold text-white mb-4'>
-                                  Technology Overview
+                                  ✨ Vibecoding Guide
                                 </h2>
-                                <p className='text-lg text-white/80'>
-                                  Trustless Work is a revolutionary technology stack that enables
-                                  decentralized work management through smart contract-powered
-                                  escrow systems on the Stellar blockchain.
-                                </p>
-                              </div>
-
-                              <div className='grid md:grid-cols-3 gap-6'>
-                                <div className='text-center p-6 bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-xl border border-brand-400/30'>
-                                  <div className='text-4xl mb-4'>🔐</div>
-                                  <h3 className='text-xl font-semibold text-white mb-3'>
-                                    Smart Contract Escrow
-                                  </h3>
-                                  <p className='text-white/80'>
-                                    Automated fund management with programmable logic and no
-                                    third-party intermediaries
-                                  </p>
-                                </div>
-                                <div className='text-center p-6 bg-gradient-to-br from-success-500/20 to-success-400/20 rounded-xl border border-success-400/30'>
-                                  <div className='text-4xl mb-4'>⚡</div>
-                                  <h3 className='text-xl font-semibold text-white mb-3'>
-                                    Stellar Blockchain
-                                  </h3>
-                                  <p className='text-white/80'>
-                                    Built on Stellar's fast, low-cost, and environmentally friendly
-                                    distributed ledger
-                                  </p>
-                                </div>
-                                <div className='text-center p-6 bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-xl border border-accent-400/30'>
-                                  <div className='text-4xl mb-4'>🌐</div>
-                                  <h3 className='text-xl font-semibold text-white mb-3'>
-                                    Developer SDK
-                                  </h3>
-                                  <p className='text-white/80'>
-                                    Comprehensive React hooks and TypeScript interfaces for rapid
-                                    development
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className='bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/20'>
-                                <h3 className='text-2xl font-bold text-white mb-4'>
-                                  Core Technology Stack
-                                </h3>
-                                <div className='grid md:grid-cols-2 gap-6'>
-                                  <div>
-                                    <h4 className='font-semibold text-brand-300 mb-3'>
-                                      Blockchain Layer
-                                    </h4>
-                                    <ul className='text-white/80 text-sm space-y-2'>
-                                      <li>
-                                        • <strong>Stellar Network:</strong> Consensus Protocol (SCP)
-                                        with 3-5 second finality
-                                      </li>
-                                      <li>
-                                        • <strong>Smart Contracts:</strong> Stellar's native smart
-                                        contract capabilities
-                                      </li>
-                                      <li>
-                                        • <strong>Multi-Asset Support:</strong> Native and custom
-                                        token support
-                                      </li>
-                                      <li>
-                                        • <strong>Transaction Types:</strong> Payment, Path Payment,
-                                        Manage Offer operations
-                                      </li>
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className='font-semibold text-accent-300 mb-3'>
-                                      Application Layer
-                                    </h4>
-                                    <ul className='text-white/80 text-sm space-y-2'>
-                                      <li>
-                                        • <strong>React Hooks:</strong> useEscrow, useWallet,
-                                        useTransaction hooks
-                                      </li>
-                                      <li>
-                                        • <strong>TypeScript:</strong> Full type safety with
-                                        comprehensive interfaces
-                                      </li>
-                                      <li>
-                                        • <strong>Wallet Integration:</strong> Freighter, Albedo,
-                                        and custom wallet support
-                                      </li>
-                                      <li>
-                                        • <strong>State Management:</strong> React Context for
-                                        global state synchronization
-                                      </li>
-                                    </ul>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-xl p-6 border border-brand-400/30'>
-                                <h3 className='text-2xl font-bold text-white mb-4'>
-                                  Technical Advantages
-                                </h3>
-                                <ul className='text-white/80 space-y-2'>
-                                  <li>
-                                    • <strong>Scalability:</strong> Stellar's 1000+ TPS capacity for
-                                    high-volume applications
-                                  </li>
-                                  <li>
-                                    • <strong>Cost Efficiency:</strong> 0.00001 XLM per operation
-                                    (~$0.000001)
-                                  </li>
-                                  <li>
-                                    • <strong>Global Access:</strong> Borderless transactions with
-                                    instant settlement
-                                  </li>
-                                  <li>
-                                    • <strong>Security:</strong> Cryptographic security with
-                                    Byzantine Fault Tolerance
-                                  </li>
-                                  <li>
-                                    • <strong>Interoperability:</strong> Built-in bridges to
-                                    traditional financial systems
-                                  </li>
-                                  <li>
-                                    • <strong>Environmental:</strong> Carbon-neutral consensus
-                                    mechanism
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Stellar Implementation */}
-                          {activeSection === 'stellar' && (
-                            <div className='space-y-8'>
-                              <div className='text-center mb-8'>
-                                <h2 className='text-3xl font-bold text-white mb-4'>
-                                  Stellar Implementation
-                                </h2>
-                                <p className='text-lg text-white/80'>
-                                  Deep dive into Stellar blockchain integration and smart contract
-                                  implementation
+                                <p className='text-lg text-white/80 max-w-3xl mx-auto'>
+                                  The modern approach to building with rhythm, creativity, and flow. 
+                                  Learn how to code with vibes, not just syntax.
                                 </p>
                               </div>
 
                               <div className='grid md:grid-cols-2 gap-8'>
-                                <div className='space-y-6'>
-                                  <h3 className='text-2xl font-bold text-brand-300'>
-                                    Stellar Network Features
-                                  </h3>
-                                  <div className='space-y-4'>
-                                    <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-lg p-4 border border-brand-400/30'>
-                                      <h4 className='font-semibold text-white mb-2'>
-                                        Consensus Protocol (SCP)
-                                      </h4>
-                                      <p className='text-white/80 text-sm'>
-                                        Stellar Consensus Protocol ensures network agreement in 3-5
-                                        seconds with Byzantine Fault Tolerance
-                                      </p>
-                                    </div>
-                                    <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-lg p-4 border border-brand-400/30'>
-                                      <h4 className='font-semibold text-white mb-2'>
-                                        Asset Management
-                                      </h4>
-                                      <p className='text-white/80 text-sm'>
-                                        Native support for XLM, USDC, and custom assets with
-                                        built-in trustlines
-                                      </p>
-                                    </div>
-                                    <div className='bg-gradient-to-br from-brand-500/20 to-brand-400/20 rounded-lg p-4 border border-brand-400/30'>
-                                      <h4 className='font-semibold text-white mb-2'>
-                                        Transaction Operations
-                                      </h4>
-                                      <p className='text-white/80 text-sm'>
-                                        Payment, Path Payment, Manage Offer, and Set Options for
-                                        complex escrow logic
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-
+                                {/* Vibecoding Principles */}
                                 <div className='space-y-6'>
                                   <h3 className='text-2xl font-bold text-accent-300'>
-                                    Smart Contract Implementation
+                                    🎵 Vibecoding Principles
                                   </h3>
                                   <div className='space-y-4'>
-                                    <div className='bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-lg p-4 border border-accent-400/30'>
+                                    <div className='bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-400/30'>
                                       <h4 className='font-semibold text-white mb-2'>
-                                        Escrow Logic
+                                        🎶 Flow State Development
                                       </h4>
                                       <p className='text-white/80 text-sm'>
-                                        Multi-signature accounts with time-locked releases and
-                                        milestone-based payments
+                                        Enter the zone where code flows naturally, problems solve themselves, 
+                                        and creativity meets technical precision.
                                       </p>
                                     </div>
-                                    <div className='bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-lg p-4 border border-accent-400/30'>
+                                    <div className='bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg p-4 border border-cyan-400/30'>
                                       <h4 className='font-semibold text-white mb-2'>
-                                        Dispute Resolution
+                                        🌊 Rhythm-Based Architecture
                                       </h4>
                                       <p className='text-white/80 text-sm'>
-                                        Built-in arbitration system with multi-party consensus
-                                        mechanisms
+                                        Build systems that have natural rhythm - clean patterns, 
+                                        predictable flows, and harmonious data structures.
                                       </p>
                                     </div>
-                                    <div className='bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-lg p-4 border border-accent-400/30'>
+                                    <div className='bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg p-4 border border-green-400/30'>
                                       <h4 className='font-semibold text-white mb-2'>
-                                        Multi-Party Support
+                                        ✨ Creative Problem Solving
                                       </h4>
                                       <p className='text-white/80 text-sm'>
-                                        Support for complex work relationships with multiple
-                                        stakeholders
+                                        Think outside the box, embrace unconventional solutions, 
+                                        and let creativity guide your technical decisions.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Modern Development Practices */}
+                                <div className='space-y-6'>
+                                  <h3 className='text-2xl font-bold text-brand-300'>
+                                    🚀 Modern Development Practices
+                                  </h3>
+                                  <div className='space-y-4'>
+                                    <div className='bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-400/30'>
+                                      <h4 className='font-semibold text-white mb-2'>
+                                        🎯 Intent-Driven Code
+                                      </h4>
+                                      <p className='text-white/80 text-sm'>
+                                        Write code that expresses intent clearly, making it self-documenting 
+                                        and maintainable.
+                                      </p>
+                                    </div>
+                                    <div className='bg-gradient-to-br from-yellow-500/20 to-amber-500/20 rounded-lg p-4 border border-yellow-400/30'>
+                                      <h4 className='font-semibold text-white mb-2'>
+                                        🔥 Hot Reloading Mindset
+                                      </h4>
+                                      <p className='text-white/80 text-sm'>
+                                        Build with instant feedback loops, rapid iteration, 
+                                        and continuous improvement cycles.
+                                      </p>
+                                    </div>
+                                    <div className='bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg p-4 border border-indigo-400/30'>
+                                      <h4 className='font-semibold text-white mb-2'>
+                                        🌐 Web3-First Thinking
+                                      </h4>
+                                      <p className='text-white/80 text-sm'>
+                                        Design for decentralization from the ground up, 
+                                        embracing trustless and permissionless architectures.
                                       </p>
                                     </div>
                                   </div>
                                 </div>
                               </div>
 
+                              {/* Vibecoding Workflow */}
                               <div className='bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/20'>
+                                <h3 className='text-2xl font-bold text-white mb-6'>
+                                  🎼 Vibecoding Workflow
+                                </h3>
+                                <div className='grid md:grid-cols-4 gap-4'>
+                                  <div className='text-center p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-400/30'>
+                                    <div className='text-3xl mb-3'>🎧</div>
+                                    <h4 className='font-semibold text-white mb-2'>Set the Vibe</h4>
+                                    <p className='text-white/80 text-sm'>
+                                      Create your perfect coding environment - music, lighting, 
+                                      and tools that inspire creativity.
+                                    </p>
+                                  </div>
+                                  <div className='text-center p-4 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg border border-cyan-400/30'>
+                                    <div className='text-3xl mb-3'>🧠</div>
+                                    <h4 className='font-semibold text-white mb-2'>Mind Mapping</h4>
+                                    <p className='text-white/80 text-sm'>
+                                      Visualize your solution before coding. 
+                                      Map out the problem space and solution architecture.
+                                    </p>
+                                  </div>
+                                  <div className='text-center p-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg border border-green-400/30'>
+                                    <div className='text-3xl mb-3'>⚡</div>
+                                    <h4 className='font-semibold text-white mb-2'>Rapid Prototyping</h4>
+                                    <p className='text-white/80 text-sm'>
+                                      Build quickly, test often, iterate fast. 
+                                      Embrace the "build, break, rebuild" cycle.
+                                    </p>
+                                  </div>
+                                  <div className='text-center p-4 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg border border-orange-400/30'>
+                                    <div className='text-3xl mb-3'>🎨</div>
+                                    <h4 className='font-semibold text-white mb-2'>Polish & Ship</h4>
+                                    <p className='text-white/80 text-sm'>
+                                      Refine your creation, add the finishing touches, 
+                                      and ship with confidence.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Vibecoding Tools */}
+                              <div className='bg-gradient-to-br from-accent-500/20 to-accent-400/20 rounded-xl p-6 border border-accent-400/30'>
                                 <h3 className='text-2xl font-bold text-white mb-4'>
-                                  Implementation Architecture
+                                  🛠️ Vibecoding Tools & Stack
                                 </h3>
                                 <div className='grid md:grid-cols-3 gap-6'>
-                                  <div className='text-center'>
-                                    <div className='text-3xl mb-3'>🔑</div>
-                                    <h4 className='font-semibold text-white mb-2'>
-                                      Key Management
+                                  <div>
+                                    <h4 className='font-semibold text-accent-300 mb-3'>
+                                      Development Environment
                                     </h4>
-                                    <p className='text-white/80 text-sm'>
-                                      Hierarchical deterministic wallets with multi-signature
-                                      support
-                                    </p>
+                                    <ul className='text-white/80 text-sm space-y-2'>
+                                      <li>• <strong>VS Code:</strong> With vibecoding extensions</li>
+                                      <li>• <strong>Neovim:</strong> For the terminal flow state</li>
+                                      <li>• <strong>WebStorm:</strong> Full-featured IDE experience</li>
+                                      <li>• <strong>Cursor:</strong> AI-powered coding assistant</li>
+                                    </ul>
                                   </div>
-                                  <div className='text-center'>
-                                    <div className='text-3xl mb-3'>📊</div>
-                                    <h4 className='font-semibold text-white mb-2'>
-                                      State Management
+                                  <div>
+                                    <h4 className='font-semibold text-accent-300 mb-3'>
+                                      Frameworks & Libraries
                                     </h4>
-                                    <p className='text-white/80 text-sm'>
-                                      React Context with real-time blockchain state synchronization
-                                    </p>
+                                    <ul className='text-white/80 text-sm space-y-2'>
+                                      <li>• <strong>React:</strong> Component-based vibes</li>
+                                      <li>• <strong>Next.js:</strong> Full-stack flow</li>
+                                      <li>• <strong>TypeScript:</strong> Type-safe creativity</li>
+                                      <li>• <strong>Tailwind:</strong> Utility-first styling</li>
+                                    </ul>
                                   </div>
-                                  <div className='text-center'>
-                                    <div className='text-3xl mb-3'>🔗</div>
-                                    <h4 className='font-semibold text-white mb-2'>
-                                      Network Integration
+                                  <div>
+                                    <h4 className='font-semibold text-accent-300 mb-3'>
+                                      Web3 & Blockchain
                                     </h4>
-                                    <p className='text-white/80 text-sm'>
-                                      Horizon API integration with WebSocket for live updates
-                                    </p>
+                                    <ul className='text-white/80 text-sm space-y-2'>
+                                      <li>• <strong>Stellar SDK:</strong> Blockchain vibes</li>
+                                      <li>• <strong>Web3.js:</strong> Ethereum integration</li>
+                                      <li>• <strong>Wallet Connect:</strong> Seamless connections</li>
+                                      <li>• <strong>IPFS:</strong> Decentralized storage</li>
+                                    </ul>
                                   </div>
                                 </div>
                               </div>
 
+                              {/* Vibecoding Code Example */}
                               <div className='bg-gradient-to-br from-success-500/20 to-success-400/20 rounded-xl p-6 border border-success-400/30'>
                                 <h3 className='text-2xl font-bold text-white mb-4'>
-                                  Stellar SDK Integration
+                                  💻 Vibecoding in Action
                                 </h3>
                                 <div className='bg-white/5 rounded-lg p-4 border border-white/20'>
                                   <pre className='text-white/80 text-sm overflow-x-auto'>
-                                    {`// Example: Creating a Trustless Work escrow
-import { useEscrow } from '@trustless-work/react';
+                                    {`// Vibecoding: Building with rhythm and flow
+import { useVibe } from '@vibecoding/react';
+import { createFlow } from '@vibecoding/core';
 
-const EscrowComponent = () => {
-  const { createEscrow, escrowState } = useEscrow();
+const VibecodingComponent = () => {
+  const { vibe, setVibe, enterFlowState } = useVibe();
   
-  const handleCreateEscrow = async () => {
-    const escrow = await createEscrow({
-      amount: '1000',
-      asset: 'USDC',
-      milestones: [
-        { amount: '300', description: 'Project Setup' },
-        { amount: '400', description: 'Core Development' },
-        { amount: '300', description: 'Testing & Deployment' }
-      ],
-      clientWallet: clientAddress,
-      workerWallet: workerAddress
+  // Set the coding vibe
+  useEffect(() => {
+    setVibe({
+      music: 'lofi-hip-hop',
+      lighting: 'warm-glow',
+      energy: 'focused-creative'
+    });
+  }, []);
+
+  // Create a flow state for complex operations
+  const handleComplexOperation = async () => {
+    await enterFlowState(async () => {
+      // This code runs with enhanced focus and creativity
+      const result = await createFlow()
+        .step('analyze-problem', analyzeProblem)
+        .step('design-solution', designSolution)
+        .step('implement-code', implementCode)
+        .step('test-refine', testAndRefine)
+        .execute();
+      
+      return result;
     });
   };
-  
+
   return (
-    <div>
-      <button onClick={handleCreateEscrow}>
-        Create Escrow
+    <div className="vibecoding-container">
+      <h2>Current Vibe: {vibe.energy}</h2>
+      <button onClick={handleComplexOperation}>
+        Enter Flow State 🎵
       </button>
-      <div>Status: {escrowState.status}</div>
     </div>
   );
-};`}
+};
+
+export default VibecodingComponent;`}
                                   </pre>
+                                </div>
+                              </div>
+
+                              {/* Vibecoding Resources */}
+                              <div className='bg-gradient-to-br from-warning-500/20 to-warning-400/20 rounded-xl p-6 border border-warning-400/30'>
+                                <h3 className='text-2xl font-bold text-white mb-4'>
+                                  📚 Vibecoding Resources
+                                </h3>
+                                <div className='grid md:grid-cols-2 gap-6'>
+                                  <div>
+                                    <h4 className='font-semibold text-warning-300 mb-3'>
+                                      Learning Resources
+                                    </h4>
+                                    <ul className='text-white/80 text-sm space-y-2'>
+                                      <li>• <strong>Vibecoding Academy:</strong> Master the art of flow coding</li>
+                                      <li>• <strong>Flow State Podcast:</strong> Interviews with vibecoding masters</li>
+                                      <li>• <strong>Coding Playlists:</strong> Curated music for different coding moods</li>
+                                      <li>• <strong>Vibe Templates:</strong> Pre-configured development environments</li>
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h4 className='font-semibold text-warning-300 mb-3'>
+                                      Community & Tools
+                                    </h4>
+                                    <ul className='text-white/80 text-sm space-y-2'>
+                                      <li>• <strong>Vibecoding Discord:</strong> Connect with fellow vibe coders</li>
+                                      <li>• <strong>Flow Metrics:</strong> Track your coding flow states</li>
+                                      <li>• <strong>Vibe Checker:</strong> Analyze your code's vibes</li>
+                                      <li>• <strong>Collaborative Sessions:</strong> Pair programming with vibes</li>
+                                    </ul>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -606,198 +564,192 @@ const EscrowComponent = () => {
                                 </p>
                               </div>
 
-                              {/* Architecture Diagram */}
-                              <div className='bg-gradient-to-br from-brand-500/10 to-accent-500/10 rounded-xl p-6 border border-brand-400/30'>
-                                <h3 className='text-2xl font-bold text-white mb-6 text-center'>
-                                  📊 System Architecture Overview
-                                </h3>
-                                <div className='bg-white/5 rounded-lg p-4 border border-white/20 overflow-x-auto'>
-                                  <div className='mermaid-diagram min-w-[800px] text-sm'>
-                                    <div className='text-center text-white/60 mb-4'>
-                                      <p>Trustless Work System Architecture & Data Flow</p>
-                                      <p className='text-xs'>
-                                        Component relationships and integration points
-                                      </p>
+                              <div className='bg-white/5 rounded-lg p-4 border border-white/20 overflow-x-auto'>
+                                <div className='mermaid-diagram min-w-[800px] text-sm'>
+                                  <div className='text-center text-white/60 mb-4'>
+                                    <p>Trustless Work System Architecture & Data Flow</p>
+                                    <p className='text-xs'>
+                                      Component relationships and integration points
+                                    </p>
+                                  </div>
+
+                                  {/* Architecture Diagram using Mermaid-like structure */}
+                                  <div className='architecture-diagram space-y-6'>
+                                    {/* User Layer */}
+                                    <div className='text-center'>
+                                      <div className='inline-block bg-gradient-to-r from-brand-500/30 to-accent-500/30 px-6 py-3 rounded-lg border border-brand-400/50'>
+                                        <div className='text-2xl mb-2'>👤</div>
+                                        <div className='font-semibold text-white'>
+                                          User Interface Layer
+                                        </div>
+                                        <div className='text-xs text-white/70'>
+                                          React Components & Hooks
+                                        </div>
+                                      </div>
                                     </div>
 
-                                    {/* Architecture Diagram using Mermaid-like structure */}
-                                    <div className='architecture-diagram space-y-6'>
-                                      {/* User Layer */}
-                                      <div className='text-center'>
-                                        <div className='inline-block bg-gradient-to-r from-brand-500/30 to-accent-500/30 px-6 py-3 rounded-lg border border-brand-400/50'>
-                                          <div className='text-2xl mb-2'>👤</div>
-                                          <div className='font-semibold text-white'>
-                                            User Interface Layer
+                                    {/* State Management Layer */}
+                                    <div className='text-center'>
+                                      <div className='inline-block bg-gradient-to-r from-success-500/30 to-success-400/30 px-6 py-3 rounded-lg border border-success-400/50'>
+                                        <div className='text-2xl mb-2'>⚙️</div>
+                                        <div className='font-semibold text-white'>
+                                          State Management Layer
+                                        </div>
+                                        <div className='text-xs text-white/70'>
+                                          React Context & Hooks
+                                        </div>
+                                      </div>
+                                      <div className='grid grid-cols-3 gap-3 mt-4 max-w-2xl mx-auto'>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Wallet Context
                                           </div>
-                                          <div className='text-xs text-white/70'>
-                                            React Components & Hooks
+                                          <div className='text-xs text-white/60'>
+                                            Stellar Integration
+                                          </div>
+                                        </div>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Escrow Context
+                                          </div>
+                                          <div className='text-xs text-white/60'>
+                                            Smart Contract State
+                                          </div>
+                                        </div>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Transaction Context
+                                          </div>
+                                          <div className='text-xs text-white/60'>
+                                            Network Operations
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Business Logic Layer */}
+                                    <div className='text-center'>
+                                      <div className='inline-block bg-gradient-to-r from-accent-500/30 to-accent-400/30 px-6 py-3 rounded-lg border border-accent-400/50'>
+                                        <div className='text-2xl mb-2'>🔧</div>
+                                        <div className='font-semibold text-white'>
+                                          Business Logic Layer
+                                        </div>
+                                        <div className='text-xs text-white/70'>
+                                          Trustless Work SDK
+                                        </div>
+                                      </div>
+                                      <div className='grid grid-cols-3 gap-3 mt-4 max-w-xl mx-auto'>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Escrow Management
+                                          </div>
+                                          <div className='text-xs text-white/60'>
+                                            Contract Logic
+                                          </div>
+                                        </div>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Wallet Operations
+                                          </div>
+                                          <div className='text-xs text-white/60'>
+                                            Key Management
+                                          </div>
+                                        </div>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>
+                                            Transaction Handling
+                                          </div>
+                                          <div className='text-xs text-white/60'>
+                                            Network Operations
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Blockchain Layer */}
+                                    <div className='text-center'>
+                                      <div className='inline-block bg-warning-500/30 to-warning-400/30 px-6 py-3 rounded-lg border border-warning-400/50'>
+                                        <div className='text-2xl mb-2'>🚀</div>
+                                        <div className='font-semibold text-white'>
+                                          Blockchain Layer
+                                        </div>
+                                        <div className='text-xs text-white/70'>
+                                          Stellar Network
+                                        </div>
+                                      </div>
+
+                                      {/* Stellar Components */}
+                                      <div className='grid grid-cols-2 gap-4 mt-4 max-w-lg mx-auto'>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>Horizon API</div>
+                                          <div className='text-xs text-white/60'>
+                                            Network Interface
+                                          </div>
+                                        </div>
+                                        <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                          <div className='text-xs text-white/80'>Stellar SDK</div>
+                                          <div className='text-xs text-white/60'>
+                                            Core Operations
                                           </div>
                                         </div>
                                       </div>
 
-                                      {/* State Management Layer */}
-                                      <div className='text-center'>
-                                        <div className='inline-block bg-gradient-to-r from-success-500/30 to-success-400/30 px-6 py-3 rounded-lg border border-success-400/50'>
-                                          <div className='text-2xl mb-2'>⚙️</div>
-                                          <div className='font-semibold text-white'>
-                                            State Management Layer
-                                          </div>
-                                          <div className='text-xs text-white/70'>
-                                            React Context & Hooks
-                                          </div>
+                                      {/* Smart Contract Components */}
+                                      <div className='mt-4'>
+                                        <div className='text-sm text-white/70 mb-3'>
+                                          Smart Contract Components
                                         </div>
-                                        <div className='grid grid-cols-3 gap-3 mt-4 max-w-2xl mx-auto'>
+                                        <div className='grid grid-cols-2 gap-4 max-w-2xl mx-auto'>
                                           <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
                                             <div className='text-xs text-white/80'>
-                                              Wallet Context
+                                              Multi-Signature
                                             </div>
                                             <div className='text-xs text-white/60'>
-                                              Stellar Integration
+                                              Escrow Accounts
                                             </div>
                                           </div>
                                           <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
                                             <div className='text-xs text-white/80'>
-                                              Escrow Context
+                                              Time Locks
                                             </div>
                                             <div className='text-xs text-white/60'>
-                                              Smart Contract State
+                                              Release Conditions
                                             </div>
                                           </div>
                                           <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
                                             <div className='text-xs text-white/80'>
-                                              Transaction Context
+                                              Asset Management
                                             </div>
                                             <div className='text-xs text-white/60'>
-                                              Network Operations
+                                              Token Operations
+                                            </div>
+                                          </div>
+                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
+                                            <div className='text-xs text-white/80'>
+                                              Dispute Resolution
+                                            </div>
+                                            <div className='text-xs text-white/60'>
+                                              Arbitration Logic
                                             </div>
                                           </div>
                                         </div>
                                       </div>
+                                    </div>
 
-                                      {/* Business Logic Layer */}
-                                      <div className='text-center'>
-                                        <div className='inline-block bg-gradient-to-r from-accent-500/30 to-accent-400/30 px-6 py-3 rounded-lg border border-accent-400/50'>
-                                          <div className='text-2xl mb-2'>🔧</div>
-                                          <div className='font-semibold text-white'>
-                                            Business Logic Layer
-                                          </div>
-                                          <div className='text-xs text-white/70'>
-                                            Trustless Work SDK
-                                          </div>
+                                    {/* Data Flow Indicators */}
+                                    <div className='text-center text-white/60 text-xs'>
+                                      <div className='flex items-center justify-center space-x-8'>
+                                        <div className='flex items-center space-x-2'>
+                                          <div className='w-3 h-3 bg-brand-400 rounded-full'></div>
+                                          <span>Uses</span>
                                         </div>
-                                        <div className='grid grid-cols-3 gap-3 mt-4 max-w-xl mx-auto'>
-                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                            <div className='text-xs text-white/80'>
-                                              Escrow Management
-                                            </div>
-                                            <div className='text-xs text-white/60'>
-                                              Contract Logic
-                                            </div>
-                                          </div>
-                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                            <div className='text-xs text-white/80'>
-                                              Wallet Operations
-                                            </div>
-                                            <div className='text-xs text-white/60'>
-                                              Key Management
-                                            </div>
-                                          </div>
-                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                            <div className='text-xs text-white/80'>
-                                              Transaction Handling
-                                            </div>
-                                            <div className='text-xs text-white/60'>
-                                              Network Operations
-                                            </div>
-                                          </div>
+                                        <div className='flex items-center space-x-2'>
+                                          <div className='w-3 h-3 bg-success-400 rounded-full'></div>
+                                          <span>Manages State</span>
                                         </div>
-                                      </div>
-
-                                      {/* Blockchain Layer */}
-                                      <div className='text-center'>
-                                        <div className='inline-block bg-warning-500/30 to-warning-400/30 px-6 py-3 rounded-lg border border-warning-400/50'>
-                                          <div className='text-2xl mb-2'>🚀</div>
-                                          <div className='font-semibold text-white'>
-                                            Blockchain Layer
-                                          </div>
-                                          <div className='text-xs text-white/70'>
-                                            Stellar Network
-                                          </div>
-                                        </div>
-
-                                        {/* Stellar Components */}
-                                        <div className='grid grid-cols-2 gap-4 mt-4 max-w-lg mx-auto'>
-                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                            <div className='text-xs text-white/80'>Horizon API</div>
-                                            <div className='text-xs text-white/60'>
-                                              Network Interface
-                                            </div>
-                                          </div>
-                                          <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                            <div className='text-xs text-white/80'>Stellar SDK</div>
-                                            <div className='text-xs text-white/60'>
-                                              Core Operations
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Smart Contract Components */}
-                                        <div className='mt-4'>
-                                          <div className='text-sm text-white/70 mb-3'>
-                                            Smart Contract Components
-                                          </div>
-                                          <div className='grid grid-cols-2 gap-4 max-w-2xl mx-auto'>
-                                            <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                              <div className='text-xs text-white/80'>
-                                                Multi-Signature
-                                              </div>
-                                              <div className='text-xs text-white/60'>
-                                                Escrow Accounts
-                                              </div>
-                                            </div>
-                                            <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                              <div className='text-xs text-white/80'>
-                                                Time Locks
-                                              </div>
-                                              <div className='text-xs text-white/60'>
-                                                Release Conditions
-                                              </div>
-                                            </div>
-                                            <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                              <div className='text-xs text-white/80'>
-                                                Asset Management
-                                              </div>
-                                              <div className='text-xs text-white/60'>
-                                                Token Operations
-                                              </div>
-                                            </div>
-                                            <div className='bg-white/10 px-3 py-2 rounded border border-white/20'>
-                                              <div className='text-xs text-white/80'>
-                                                Dispute Resolution
-                                              </div>
-                                              <div className='text-xs text-white/60'>
-                                                Arbitration Logic
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      {/* Data Flow Indicators */}
-                                      <div className='text-center text-white/60 text-xs'>
-                                        <div className='flex items-center justify-center space-x-8'>
-                                          <div className='flex items-center space-x-2'>
-                                            <div className='w-3 h-3 bg-brand-400 rounded-full'></div>
-                                            <span>Uses</span>
-                                          </div>
-                                          <div className='flex items-center space-x-2'>
-                                            <div className='w-3 h-3 bg-success-400 rounded-full'></div>
-                                            <span>Manages State</span>
-                                          </div>
-                                          <div className='flex items-center space-x-2'>
-                                            <div className='w-3 h-3 bg-accent-400 rounded-full'></div>
-                                            <span>Executes Logic</span>
-                                          </div>
+                                        <div className='flex items-center space-x-2'>
+                                          <div className='w-3 h-3 bg-accent-400 rounded-full'></div>
+                                          <span>Executes Logic</span>
                                         </div>
                                       </div>
                                     </div>
@@ -1061,19 +1013,5 @@ const EscrowComponent = () => {
 }
 
 export default function DocsPage() {
-  return (
-    <WalletProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <TransactionProvider>
-            <AccountProvider>
-              <EscrowProvider>
-                <DocsPageContent />
-              </EscrowProvider>
-            </AccountProvider>
-          </TransactionProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </WalletProvider>
-  );
+  return <DocsPageContent />;
 }
