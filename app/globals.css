@@ -374,28 +374,24 @@ body {
 /* Demo Card Styles */
 .demo-card.earned-badge {
   animation:
-    float 3s ease-in-out infinite,
     glow-pulse 2s ease-in-out infinite !important;
 }
 
 .demo-card.earned-badge:hover {
   animation:
-    float 1.5s ease-in-out infinite,
     glow-pulse 1s ease-in-out infinite !important;
-  transform: scale(1.05) translateY(-5px) !important;
+  transform: scale(1.05) !important;
 }
 
 .demo-card.completed.earned-badge {
   animation:
-    float 3s ease-in-out infinite,
     glow-pulse 2s ease-in-out infinite !important;
 }
 
 .demo-card.completed.earned-badge:hover {
   animation:
-    float 1.5s ease-in-out infinite,
     glow-pulse 1s ease-in-out infinite !important;
-  transform: scale(1.05) translateY(-5px) !important;
+  transform: scale(1.05) !important;
 }
 
 .badge-shine {
@@ -425,7 +421,7 @@ body {
 }
 
 .demo-card.completed:hover {
-  transform: scale(1.05) translateY(-8px);
+  transform: scale(1.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

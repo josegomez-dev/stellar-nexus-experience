@@ -568,16 +568,16 @@ const DemoSelector = ({
                         {/* <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
                           <BadgeEmblem id={badgeId} size='sm' className='text-orange-400' />
                         </div> */}
-                        <div
-                          className='absolute bottom-8 left-8 floating-particle opacity-60'
+                        {/* <div
+                          className='absolute bottom-8 left-8 opacity-60'
                           style={{ animationDelay: '1s' }}
                         >
                           {getBadgeIcon(badgeId, BADGE_SIZES.sm) || (
                             <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
                           )}
-                        </div>
+                        </div> */}
                         <div
-                          className='absolute bottom-4 right-4 floating-particle opacity-90'
+                          className='absolute bottom-4 right-4 opacity-90'
                           style={{ animationDelay: '1.5s' }}
                         >
                           {getBadgeIcon(badgeId, BADGE_SIZES.sm) || (
@@ -1598,6 +1598,12 @@ export default function HomePageContent() {
               </div>
             </section>
 
+
+            <div className='text-center mb-12'>
+              <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
+              🧩 ESCROW ARSENAL
+              </h3>
+            </div>
             {/* Demo Cards Section - with fade-in animation */}
             <div className='text-center'>
               <p className=' text-white/80 max-w-3xl mx-auto mb-6'>
