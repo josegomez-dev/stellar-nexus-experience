@@ -334,7 +334,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         </div>
         <div className='bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-3 border border-purple-400/30'>
           <div className='text-xl font-bold text-purple-400'>
-            {safeAccount.badgesEarned?.length || 0} / 13
+            {safeAccount.badgesEarned?.length || 0} / 9
           </div>
           <div className='text-xs text-gray-300'>Badges Earned</div>
         </div>

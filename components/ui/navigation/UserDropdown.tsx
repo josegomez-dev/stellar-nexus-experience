@@ -12,6 +12,8 @@ import { useToast } from '@/contexts/ui/ToastContext';
 import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { accountService } from '@/lib/firebase/firebase-service';
+import { ReferralInvitationModal } from '@/components/ui/referral';
+import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
@@ -26,6 +28,8 @@ export const UserDropdown = () => {
   const [tempName, setTempName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user has unlocked mini-games access (earned Nexus Master badge)
@@ -387,17 +391,7 @@ export const UserDropdown = () => {
                 </div> */}
               </div>
             </div>
-            <button
-              onClick={() => {
-                // Dispatch custom event to open rewards dropdown
-                window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
-                setIsOpen(false);
-              }}
-              className='w-full flex items-center space-x-3 mt-2 text-brand-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm'
-            >
-              <span className='text-lg'>🎮</span>
-              <span>Check your Progress</span>
-            </button>
+            
           </div>
 
           {/* Network Status */}
@@ -479,6 +473,44 @@ export const UserDropdown = () => {
                 </Tooltip>
 
                 <hr />
+                {/* Quick Action Buttons */}
+                <div className='space-y-2 mt-2'>
+                  <button
+                    onClick={() => {
+                      // Dispatch custom event to open rewards dropdown
+                      window.dispatchEvent(new CustomEvent('toggleRewardsSidebar'));
+                      setIsOpen(false);
+                    }}
+                    className='w-full flex items-center space-x-3 text-brand-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
+                  >
+                    <span className='text-lg'>🎮</span>
+                    <span>Rewards & Progress</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsLeaderboardOpen(true);
+                      setIsOpen(false);
+                    }}
+                    className='w-full flex items-center space-x-3 text-yellow-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
+                  >
+                    <span className='text-lg'>🏆</span>
+                    <span>Global Leaderboard</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsReferralModalOpen(true);
+                      setIsOpen(false);
+                    }}
+                    className='w-full flex items-center space-x-3 text-purple-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
+                  >
+                    <span className='text-lg'>🎴</span>
+                    <span>Referral Center</span>
+                  </button>
+                </div>
+
+                <hr />
               
                 <button
                   onClick={handleDisconnect}
@@ -502,6 +534,19 @@ export const UserDropdown = () => {
           </div>
         </div>
       )}
+
+      {/* Referral Invitation Modal */}
+      <ReferralInvitationModal
+        isOpen={isReferralModalOpen}
+        onClose={() => setIsReferralModalOpen(false)}
+        account={account}
+      />
+
+      {/* Leaderboard Sidebar */}
+      <LeaderboardSidebar
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+      />
 
     </div>
   );

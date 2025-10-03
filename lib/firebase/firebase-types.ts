@@ -331,6 +331,25 @@ export const PREDEFINED_QUESTS: Quest[] = [
     isRepeatable: false,
     unlockRequirements: ['escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'],
   },
+  {
+    id: 'claim_quest_master_badge',
+    title: 'Quest Master Badge',
+    description: 'Claim your Quest Master Badge after completing all social quests',
+    category: 'community',
+    type: 'complete',
+    requirements: {
+      action: 'Claim the Quest Master Badge',
+      verification: 'manual',
+    },
+    rewards: {
+      experience: 500,
+      points: 100,
+      badgeId: 'quest_master',
+    },
+    isActive: true,
+    isRepeatable: false,
+    unlockRequirements: ['social_butterfly', 'hashtag_hero', 'discord_warrior'],
+  },
 ];
 
 // Helper functions for quests

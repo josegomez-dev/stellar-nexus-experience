@@ -99,7 +99,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       id: 2,
       name: 'Expert',
       level: 3,
-      backgroundImage: '/images/character/character.png',
+      backgroundImage: '/images/games/web3-basics-adventure.png',
       avatarImage: '/images/character/character.png',
       available: userLevel >= 3,
     },
