@@ -1927,7 +1927,12 @@ export default function HomePageContent() {
       />
 
       {/* NEXUS PRIME Character */}
-      <NexusPrime currentPage='home' currentDemo={activeDemo} walletConnected={isConnected} />
+      <NexusPrime 
+        currentPage='home' 
+        currentDemo={activeDemo} 
+        walletConnected={isConnected}
+        autoOpen={isVideoPlaying}
+      />
 
       {/* Onboarding Overlay */}
       <OnboardingOverlay
