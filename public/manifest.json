@@ -17,13 +17,13 @@
       "type": "image/x-icon"
     },
     {
-      "src": "/images/logo/logo.png",
+      "src": "/images/logo/logoicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/logo/logo.png",
+      "src": "/images/logo/logoicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -31,7 +31,7 @@
   ],
   "screenshots": [
     {
-      "src": "/images/logo/logo.png",
+      "src": "/images/logo/logoicon.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
@@ -46,7 +46,7 @@
       "url": "/?section=leaderboard",
       "icons": [
         {
-          "src": "/images/logo/logo.png",
+          "src": "/images/logo/logoicon.png",
           "sizes": "96x96"
         }
       ]
@@ -58,7 +58,7 @@
       "url": "/?section=demos",
       "icons": [
         {
-          "src": "/images/logo/logo.png",
+          "src": "/images/logo/logoicon.png",
           "sizes": "96x96"
         }
       ]

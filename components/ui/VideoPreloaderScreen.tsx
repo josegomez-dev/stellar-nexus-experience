@@ -22,6 +22,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
   const [isVisible, setIsVisible] = useState(isLoading);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [starPositions, setStarPositions] = useState<Array<{left: string, top: string, delay: string, duration: string}>>([]);
 
   useEffect(() => {
     if (!isLoading && isVisible) {
@@ -39,6 +40,17 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
       setIsVisible(true);
     }
   }, [isLoading, isVisible]);
+
+  // Generate star positions on client side only to avoid hydration mismatch
+  useEffect(() => {
+    const positions = [...Array(20)].map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 3}s`,
+      duration: `${2 + Math.random() * 3}s`,
+    }));
+    setStarPositions(positions);
+  }, []);
 
   // Ensure minimum display duration
   useEffect(() => {
@@ -71,15 +83,15 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
 
         {/* Animated Particles Overlay */}
         <div className='absolute inset-0 overflow-hidden pointer-events-none'>
-          {[...Array(20)].map((_, i) => (
+          {starPositions.map((position, i) => (
             <div
               key={i}
               className='absolute w-1 h-1 bg-white rounded-full animate-twinkle'
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
+                left: position.left,
+                top: position.top,
+                animationDelay: position.delay,
+                animationDuration: position.duration,
               }}
             />
           ))}

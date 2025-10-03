@@ -152,8 +152,7 @@ export const QuestSystem: React.FC<QuestSystemProps> = ({ account, onQuestComple
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">🎯 Explore Nexus Quests</h2>
-        <p className="text-white/70">Complete quests to earn XP, points, and special badges!</p>
+        <p className="text-white/70">Complete <span className='text-brand-200 font-semibold'>Nexus Quests</span> to earn XP, points, and special badges!</p>
       </div>
 
       {/* Quest Stats */}

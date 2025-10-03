@@ -797,7 +797,7 @@ const DemoSelector = ({
                     isNexusMasterCompleted ? (
                       /* Nexus Master Completed */
                       <div className='flex flex-col items-center justify-center h-full'>
-                        <div className='text-4xl mb-4 animate-pulse'>👑</div>
+                        <div className='text-4xl mt-4 mb-4 animate-pulse'>🧑‍🚀 </div>
                         <div className='text-xl font-bold text-green-400 mb-2'>NEXUS MASTER</div>
                         <div className='text-sm text-green-300/80'>Achievement Unlocked!</div>
                       </div>
@@ -1263,7 +1263,7 @@ export default function HomePageContent() {
               "Stellar Network Integration",
               "Web3 Wallet Connection"
             ],
-            "screenshot": "https://stellar-nexus-experience.vercel.app/images/logo/logo.png",
+            "screenshot": "https://stellar-nexus-experience.vercel.app/images/logo/logoicon.png",
             "softwareVersion": "0.1.0",
             "datePublished": "2024-01-01",
             "dateModified": new Date().toISOString().split('T')[0],
@@ -1598,17 +1598,12 @@ export default function HomePageContent() {
               </div>
             </section>
 
-
-            <div className='text-center mb-12'>
-              <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
-              🧩 ESCROW ARSENAL
-              </h3>
-            </div>
             {/* Demo Cards Section - with fade-in animation */}
             <div className='text-center'>
               <p className=' text-white/80 max-w-3xl mx-auto mb-6'>
-              The <span className='text-brand-200 font-semibold'>Stellar Nexus Experience</span> turns early adoption into an adventure—earn XP, unlock badges, and co-create the future of Web3 alongside the first wave of <span className='text-brand-200 font-semibold'>Founders, Builders, and Developers</span>.
+              The <span className='text-brand-200 font-semibold'>Escrow Arsenal</span> turns early adoption into an adventure—earn XP, unlock badges, and co-create the future of Web3 alongside the first wave of <span className='text-brand-200 font-semibold'>Founders, Builders, and Developers</span>.
               </p>
+              <br />
             </div>
 
 
@@ -1796,6 +1791,11 @@ export default function HomePageContent() {
                     New to Trustless Work or Stellar? <br /> Start with our tutorial to learn how everything
                     works!
                   </p>
+                  <div className='mt-4 text-center'>
+                    <p className='text-brand-300 text-sm animate-pulse'>
+                      💡 New here? Start with the tutorial to learn how everything works!
+                    </p>
+                  </div>
                 </div>
 
                 <div className='mb-8 flex justify-center'>
@@ -1803,19 +1803,12 @@ export default function HomePageContent() {
                     onClick={() => setShowInteractiveTutorial(true)}
                     className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
                   >
-                    <div className='flex items-center space-x-2'>                  
+                    <div className='flex items-center space-x-2'>
                       <span>📚</span>
                       <span>Interactive Tutorial</span>
                     </div>
                   </button>
                 </div>
-                  {!hasSeenOnboarding && (
-                    <div className='mt-4 text-center'>
-                      <p className='text-brand-300 text-sm animate-pulse'>
-                        💡 New here? Start with the tutorial to learn how everything works!
-                      </p>
-                    </div>
-                  )}
 
                 <div className='grid md:grid-cols-3 gap-8 text-sm'>
                   <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
@@ -1885,8 +1878,11 @@ export default function HomePageContent() {
       {/* Leaderboard Button - Centered between Tutorial and Footer */}
       <div className='text-center mb-12'>
         <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
-          🏆 Nexus Global Leaderboard
+        Global Leaderboard
         </h3>
+        <p className='text-white/70'>
+          See the top performers and compete for the Nexus Global Leaderboard!
+        </p>
       </div>
 
       <div className='flex justify-center items-center px-4'>
@@ -1901,7 +1897,7 @@ export default function HomePageContent() {
               onClick={() => setLeaderboardSidebarOpen(true)}
               className='relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3 hover:animate-none'
             >
-              <span className='text-xl'>👥&nbsp;</span>
+              <span className='text-xl'>🏆 &nbsp;</span>
               <span>See the top performers</span>
               <span className='text-xl'>&nbsp;→</span>
             </button>

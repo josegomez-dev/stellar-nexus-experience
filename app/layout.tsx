@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     siteName: 'Stellar Nexus Experience',
     images: [
       {
-        url: '/images/logo/logo.png',
+        url: '/images/logo/logoicon.png',
         width: 1200,
         height: 630,
         alt: 'Stellar Nexus Experience - Web3 Early Adopters Program',
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Stellar Nexus Experience | Web3 Early Adopters Program',
     description: 'Join the Stellar Nexus Experience Web3 Early Adopters Program. Master trustless work on Stellar blockchain with interactive demos, earn badges, and compete on the global leaderboard.',
-    images: ['/images/logo/logo.png'],
+    images: ['/images/logo/logoicon.png'],
     creator: '@StellarNexus',
   },
   robots: {

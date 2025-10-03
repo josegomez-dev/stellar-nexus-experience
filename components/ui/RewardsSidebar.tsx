@@ -41,6 +41,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
     };
   }, [isOpen, onClose]);
 
+
   // Helper functions for badge styling using centralized assets
   const getRarityColor = (rarity: string) => {
     const colors = BADGE_COLORS[rarity as keyof typeof BADGE_COLORS] || BADGE_COLORS.common;
@@ -55,9 +56,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const AVAILABLE_BADGES = badges.length > 0 ? badges : getAllBadges();
 
   // Only show when account exists - consistent with UserProfile
-  if (!account || !isOpen) {
-    return null;
-  }
+  // Note: Early return moved to after all hooks to avoid React hooks order violation
 
   // Ensure we have safe defaults for all data
   const safeAccount = {
@@ -147,6 +146,28 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const availablePhases = getAvailableCharacterPhases();
   const currentPhase = availablePhases[selectedCharacterPhase] || availablePhases[0];
 
+  // Auto-select character phase based on level
+  useEffect(() => {
+    // Find the highest available phase based on current level
+    const phases = [
+      { id: 0, name: 'Baby', video: '/videos/phases/baby.mp4', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Teen', video: '/videos/phases/teen.mp4', image: '/images/character/teen.png', minLevel: 2 },
+      { id: 2, name: 'Adult', video: '/videos/phases/adullt.mp4', image: '/images/character/character.png', minLevel: 3 }
+    ];
+    
+    // Find the highest phase the user has unlocked
+    const unlockedPhases = phases.filter(phase => level >= phase.minLevel);
+    const highestUnlockedPhase = unlockedPhases[unlockedPhases.length - 1];
+    
+    if (highestUnlockedPhase) {
+      // Set the selected phase to the highest unlocked phase
+      const phaseIndex = phases.findIndex(phase => phase.id === highestUnlockedPhase.id);
+      if (phaseIndex !== -1) {
+        setSelectedCharacterPhase(phaseIndex);
+      }
+    }
+  }, [level]);
+
   const handlePreviousPhase = () => {
     setSelectedCharacterPhase(prev => 
       prev > 0 ? prev - 1 : availablePhases.length - 1
@@ -214,17 +235,24 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                     animation: '4s ease-in-out infinite alternate',
                   }}
                   onEnded={(e) => {
-                    const video = e.target as HTMLVideoElement;
-                    // Start reverse playback
-                    const reverseInterval = setInterval(() => {
-                      if (video.currentTime <= 0) {
-                        clearInterval(reverseInterval);
-                        video.currentTime = 0;
-                        video.play(); // Start forward playback again
-                      } else {
-                        video.currentTime -= 0.1; // Reverse playback
-                      }
-                    }, 100);
+                    try {
+                      const video = e.target as HTMLVideoElement;
+                      // Start reverse playback
+                      const reverseInterval = setInterval(() => {
+                        if (video.currentTime <= 0) {
+                          clearInterval(reverseInterval);
+                          video.currentTime = 0;
+                          video.play(); // Start forward playback again
+                        } else {
+                          video.currentTime -= 0.1; // Reverse playback
+                        }
+                      }, 100);
+                    } catch (error) {
+                      console.warn('Error in video playback:', error);
+                    }
+                  }}
+                  onError={(e) => {
+                    console.warn('Video failed to load:', currentPhase.video);
                   }}
                 >
                   <source src={currentPhase.video} type='video/mp4' />
@@ -323,7 +351,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
       {/* Points Summary */}
       <div className='grid grid-cols-3 gap-3'>
         <div className='bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg p-3 border border-green-400/30'>
-          <div className='text-xl font-bold text-green-400'>{account.totalPoints || 0}</div>
+          <div className='text-xl font-bold text-green-400'>{account?.totalPoints || 0}</div>
           <div className='text-xs text-gray-300'>Total Points</div>
         </div>
         <div className='bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg p-3 border border-yellow-400/30'>
@@ -690,6 +718,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         return renderOverview();
     }
   };
+
+  // Early return if not open or no account to prevent unnecessary rendering
+  if (!isOpen || !account) return null;
 
   return (
     <>
