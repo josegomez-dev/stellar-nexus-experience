@@ -104,12 +104,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
             <p className={`${themeClasses.textMuted} mt-1`}>Platform insights and user analytics</p>
           </div>
           <div className='flex items-center space-x-4'>
-            <button
-              onClick={() => setLoading(true)}
-              className='px-4 py-2 bg-blue-500/20 border border-blue-400/50 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors'
-            >
-              🔄 Refresh
-            </button>
             <ThemeToggle />
           </div>
         </div>
