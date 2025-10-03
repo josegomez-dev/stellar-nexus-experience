@@ -6,6 +6,7 @@ import { QuestService } from '@/lib/services/quest-service';
 import { QuestSystem } from './QuestSystem';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { Tooltip } from '../Tooltip';
+import { AnimatedGiftBox } from './AnimatedGiftBox';
 
 interface QuestAndReferralSectionProps {
   account: Account | null;
@@ -27,7 +28,9 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
         <p className="text-white/70">Connect your Stellar wallet to access quests and earn rewards</p>
         <br/>
         <Tooltip content="Complete The Top 5 Badges to Unlock Nexus Quests" position="bottom">
-          <div className="text-8xl mb-6">🎁</div>
+          <div className="flex justify-center mb-6">
+            <AnimatedGiftBox size="lg" />
+          </div>
         </Tooltip>
       </div>
     );
