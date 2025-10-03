@@ -10,7 +10,6 @@ import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import html2canvas from 'html2canvas';
 import Image from 'next/image';
-import GIF from 'gif.js';
 
 interface PokemonReferralCardProps {
   account: Account | null;
@@ -26,8 +25,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const { user } = useAuth();
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
-  const [gifProgress, setGifProgress] = useState(0);
   const [selectedPhase, setSelectedPhase] = useState(0); // 0: baby, 1: teen, 2: adult
   const [selectedBackground, setSelectedBackground] = useState(0); // 0: explorer, 1: mid-level, 2: expert
   const [selectedForm, setSelectedForm] = useState(0); // 0: initial, 1: mid, 2: final
@@ -54,7 +51,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const rankingThemes = {
     1: {
       // Gold
-      //   background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+        background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
       border: '#FFD700',
       text: '#000000',
       shadow: 'shadow-yellow-500/50',
@@ -62,7 +59,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     },
     2: {
       // Silver
-      //   background: 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 50%, #808080 100%)',
+      background: 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 50%, #808080 100%)',
       border: '#C0C0C0',
       text: '#000000',
       shadow: 'shadow-gray-400/50',
@@ -70,7 +67,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     },
     3: {
       // Bronze
-      //   background: 'linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%)',
+        background: 'linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%)',
       border: '#CD7F32',
       text: '#FFFFFF',
       shadow: 'shadow-orange-600/50',
@@ -257,110 +254,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     }
   };
 
-  const handleDownloadGif = async () => {
-    if (!cardRef.current) return;
-
-    setIsGeneratingGif(true);
-    setGifProgress(0);
-
-    try {
-      const frames = [];
-      const totalFrames = 12; // Number of frames for the GIF
-      const delay = 100; // Delay between frames in ms
-
-      // Generate frames with slight variations for animation
-
-      for (let i = 0; i < totalFrames; i++) {
-        // Create a temporary clone of the card with slight modifications
-        const clonedCard = cardRef.current.cloneNode(true) as HTMLElement;
-        
-        // Add slight rotation and glow effect for animation
-        clonedCard.style.transform = `rotate(${Math.sin(i * 0.5) * 2}deg)`;
-        clonedCard.style.boxShadow = `0 0 ${20 + Math.sin(i * 0.8) * 10}px rgba(255, 215, 0, 0.5)`;
-        
-        // Temporarily add to DOM for capture
-        clonedCard.style.cssText += `
-          position: absolute;
-          top: -9999px;
-          left: -9999px;
-          visibility: hidden;
-          pointer-events: none;
-        `;
-        document.body.appendChild(clonedCard);
-
-        try {
-          const canvas = await html2canvas(clonedCard, {
-            width: 400,
-            height: 520,
-            background: 'transparent',
-            useCORS: true,
-            allowTaint: true,
-          });
-          
-          frames.push(canvas);
-          const progress = ((i + 1) / totalFrames) * 100;
-          setGifProgress(progress);
-          
-          // Small delay to show progress
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } finally {
-          document.body.removeChild(clonedCard);
-        }
-      }
-
-      // Create GIF
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: 400,
-        height: 520,
-        workerScript: '/gif.worker.js',
-      });
-
-      // Add frames to GIF
-      frames.forEach(frame => {
-        gif.addFrame(frame, { delay: delay });
-      });
-
-      // Render GIF
-      gif.on('finished', (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `nexus-card-${account.displayName || 'anonymous'}-${Date.now()}.gif`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        setIsGeneratingGif(false);
-        setGifProgress(0);
-        addToast({
-          type: 'success',
-          title: '🎭 GIF Downloaded!',
-          message: 'Your animated Nexus card is ready!',
-          duration: 3000,
-        });
-      });
-
-      gif.on('progress', (progress: number) => {
-        setGifProgress(progress * 100);
-      });
-
-      gif.render();
-      
-    } catch (error) {
-      console.error('Error generating GIF:', error);
-      setIsGeneratingGif(false);
-      setGifProgress(0);
-      addToast({
-        type: 'error',
-        title: 'GIF Generation Failed',
-        message: 'Unable to create animated GIF. Please try again.',
-        duration: 3000,
-      });
-    }
-  };
 
 
 
@@ -497,6 +390,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   alt={`${currentBackground.name} Background`}
                   className='w-full h-full object-cover'
                 />
+                {/* Background Overlay for Better Text Readability */}
+                <div className='absolute inset-0 bg-black/40'></div>
               </div>
 
               <br/>
@@ -546,30 +441,84 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 )}
 
                 {currentLayout.id === 1 && (
-                  /* Modern Layout - Centered Single Column */
-                  <div className='flex flex-col items-center text-center space-y-4'>
-                    <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
-                      NEXUS CARD
-                    </div>
-                    
-                    {/* Avatar */}
-                    <div className='relative'>
-                      <div className='scale-125'>
-                        <UserAvatar size='lg' showStatus={false} />
+                  /* Modern Layout - Profile Card Style */
+                  <div className='flex flex-col h-full'>
+                    {/* Top Section - Card Type and Icon */}
+                    <div className='flex justify-between items-start mb-4'>
+                      <div className='text-sm font-bold text-white/90'>
+                        COMMON
                       </div>
-                      <div className='absolute -bottom-1 -right-1 bg-white rounded-full px-1.5 py-0.5'>
-                        <div className='text-xs font-bold' style={{ color: 'black' }}>
-                          Lv.{userLevel}
+                      <div className='w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center'>
+                        <div className='w-3 h-3 bg-white rounded-full'></div>
+                      </div>
+                    </div>
+
+                    {/* Center Section - Avatar and Name */}
+                    <div className='flex flex-col items-center mb-6'>
+                      {/* Avatar */}
+                      <div className='relative mb-3'>
+                        <div className='scale-125'>
+                          <UserAvatar size='lg' showStatus={false} />
+                        </div>
+                        <div className='absolute -bottom-1 -right-1 bg-orange-500 rounded-full w-8 h-8 flex items-center justify-center'>
+                          <div className='text-sm font-bold text-white'>
+                            {userLevel}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Name and Title */}
+                      <div className='text-center'>
+                        <div className='text-lg font-bold text-white mb-1'>
+                          {account.displayName || 'Nexus Explorer'}
+                        </div>
+                        <div className='text-sm text-yellow-400 font-semibold'>
+                          TRUSTLESS WORKER
                         </div>
                       </div>
                     </div>
 
-                    <div className='text-lg font-bold' style={{ color: currentTheme.text }}>
-                      {account.displayName || 'Nexus Explorer'}
+                    {/* Stats Section */}
+                    <div className='flex-1 mb-4'>
+                      <div className='grid grid-cols-2 gap-2 text-sm'>
+                        <div className='flex justify-between items-center'>
+                          <span className='text-yellow-400 font-semibold'>XP</span>
+                          <span className='text-white font-bold'>{account.experience || 0}</span>
+                        </div>
+                        <div className='flex justify-between items-center'>
+                          <span className='text-yellow-400 font-semibold'>POINTS</span>
+                          <span className='text-white font-bold'>{account.totalPoints || 0}</span>
+                        </div>
+                        <div className='flex justify-between items-center'>
+                          <span className='text-yellow-400 font-semibold'>REFERRALS</span>
+                          <span className='text-white font-bold'>0</span>
+                        </div>
+                        <div className='flex justify-between items-center'>
+                          <span className='text-yellow-400 font-semibold'>BADGES</span>
+                          <span className='text-white font-bold'>{earnedBadges.length} / 13</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className='text-xs opacity-80' style={{ color: currentTheme.text }}>
-                      {account.totalPoints || 0} points
-                    </div>
+
+                    {/* Badges Section */}
+                    {earnedBadges.length > 0 && (
+                      <div className='flex flex-wrap justify-center gap-2'>
+                        {earnedBadges.slice(0, 6).map((badgeId, index) => (
+                          <div key={index} className='w-6 h-6'>
+                            <BadgeEmblem
+                              id={badgeId as string}
+                              size='sm'
+                              className='w-full h-full'
+                            />
+                          </div>
+                        ))}
+                        {earnedBadges.length > 6 && (
+                          <div className='w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center'>
+                            <span className='text-xs font-bold text-white'>+{earnedBadges.length - 6}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -605,8 +554,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 <br/>
                 <br/>
 
-                {/* Earned Badges */}
-                {earnedBadges.length > 0 && (
+                {/* Earned Badges - Only for Classic and Minimal layouts */}
+                {currentLayout.id !== 1 && earnedBadges.length > 0 && (
                   <div className='relative z-10 px-6 mb-4'>
                     <div className='bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/30'>
                       {/* <div
@@ -638,29 +587,31 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   </div>
                 )}
 
-                {/* Stats and Referral Code */}
-                <div className='relative z-10 px-6 mb-4 space-y-3'>
-                  {/* Stats */}
-                  <div className='bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/30'>
-                    <div
-                      className='grid grid-cols-3 gap-2 text-sm'
-                      style={{ color: currentTheme.text }}
-                    >
-                      <div className='text-center'>
-                        <div className='font-bold text-lg'>{account.totalPoints || 0}</div>
-                        <div className='text-xs opacity-80'>Points</div>
-                      </div>
-                      <div className='text-center'>
-                        <div className='font-bold text-lg'>{account.experience || 0}</div>
-                        <div className='text-xs opacity-80'>Experience</div>
-                      </div>
-                      <div className='text-center'>
-                        <div className='font-bold text-lg'>{earnedBadges.length}</div>
-                        <div className='text-xs opacity-80'>Badges</div>
+                {/* Stats and Referral Code - Only for Classic and Minimal layouts */}
+                {currentLayout.id !== 1 && (
+                  <div className='relative z-10 px-6 mb-4 space-y-3'>
+                    {/* Stats */}
+                    <div className='bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/30'>
+                      <div
+                        className='grid grid-cols-3 gap-2 text-sm'
+                        style={{ color: currentTheme.text }}
+                      >
+                        <div className='text-center'>
+                          <div className='font-bold text-lg'>{account.totalPoints || 0}</div>
+                          <div className='text-xs opacity-80'>Points</div>
+                        </div>
+                        <div className='text-center'>
+                          <div className='font-bold text-lg'>{account.experience || 0}</div>
+                          <div className='text-xs opacity-80'>Experience</div>
+                        </div>
+                        <div className='text-center'>
+                          <div className='font-bold text-lg'>{earnedBadges.length}</div>
+                          <div className='text-xs opacity-80'>Badges</div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <br/>
 
@@ -904,37 +855,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               )}
             </button>
 
-            {/* Download GIF Button */}
-            <button
-              onClick={handleDownloadGif}
-              disabled={isGeneratingGif}
-              className='bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 w-full'
-            >
-              {isGeneratingGif ? (
-                <>
-                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                  <span>Creating GIF...</span>
-                  <div className='animate-pulse text-xs ml-2'>
-                    ({Math.round(gifProgress)}%)
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span>🎭</span>
-                  <span>Download GIF</span>
-                </>
-              )}
-            </button>
-
-            {/* GIF Progress Bar */}
-            {isGeneratingGif && (
-              <div className='w-full bg-gray-700 rounded-full h-2 overflow-hidden'>
-                <div
-                  className='bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300 ease-out'
-                  style={{ width: `${gifProgress}%` }}
-                />
-              </div>
-            )}
           </div>
     </div>
   );
