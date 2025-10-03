@@ -18,6 +18,7 @@ import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ImmersiveDemoModal } from '@/components/ui/modals/ImmersiveDemoModal';
+import { InteractiveTutorialModal } from '@/components/ui/modals/InteractiveTutorialModal';
 import { TechTreeModal } from '@/components/ui/modals/TechTreeModal';
 import { ToastContainer } from '@/components/ui/Toast';
 import { AuthBanner } from '@/components/ui/auth/AuthBanner';
@@ -1032,6 +1033,7 @@ export default function HomePageContent() {
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [leaderboardSidebarOpen, setLeaderboardSidebarOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
   // Feedback modal state
@@ -1300,7 +1302,7 @@ export default function HomePageContent() {
         <VideoPreloaderScreen 
           isLoading={isLoading}
           title="STELLAR NEXUS EXPERIENCE"
-          subtitle="Loading Nexus Experience..."
+          subtitle="Initializing Stellar Nexus Experience..."
           showText={true}
           minDuration={5000}
         />
@@ -1778,15 +1780,17 @@ export default function HomePageContent() {
                   </p>
                 </div>
 
-                <div className='mb-8'>
+                <div className='mb-8 flex justify-center'>
                   <button
-                    onClick={() => setShowOnboarding(true)}
+                    onClick={() => setShowInteractiveTutorial(true)}
                     className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
                   >
                     <div className='flex items-center space-x-2'>                  
-                      <span>Start Tutorial</span>
+                      <span>📚</span>
+                      <span>Interactive Tutorial</span>
                     </div>
                   </button>
+                </div>
                   {!hasSeenOnboarding && (
                     <div className='mt-4 text-center'>
                       <p className='text-brand-300 text-sm animate-pulse'>
@@ -1794,7 +1798,6 @@ export default function HomePageContent() {
                       </p>
                     </div>
                   )}
-                </div>
 
                 <div className='grid md:grid-cols-3 gap-8 text-sm'>
                   <div className='group p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden'>
@@ -1857,7 +1860,6 @@ export default function HomePageContent() {
                 </div>
               </div>
             </section>
-            
           </>
         )}
       </main>
@@ -1927,6 +1929,15 @@ export default function HomePageContent() {
         isActive={showOnboarding}
         onComplete={() => {
           setShowOnboarding(false);
+          setHasSeenOnboarding(true);
+        }}
+      />
+
+      {/* Interactive Tutorial Modal */}
+      <InteractiveTutorialModal
+        isOpen={showInteractiveTutorial}
+        onClose={() => {
+          setShowInteractiveTutorial(false);
           setHasSeenOnboarding(true);
         }}
       />

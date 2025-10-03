@@ -5,14 +5,15 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import { EscrowProvider } from '@/contexts/data/EscrowContext';
-import { WalletProvider } from '@/contexts/wallet/WalletContext';
+import { WalletProvider, useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { AuthProvider } from '@/contexts/auth/AuthContext';
 import { ToastProvider } from '@/contexts/ui/ToastContext';
 import { TransactionProvider } from '@/contexts/data/TransactionContext';
 import { AccountProvider } from '@/contexts/auth/AccountContext';
 import Image from 'next/image';
 
-export default function DocsPage() {
+function DocsPageContent() {
+  const { isConnected } = useGlobalWallet();
   const [activeSection, setActiveSection] = useState('overview');
   const [isLoading, setIsLoading] = useState(() => {
     // Check if this is the first time loading the page
@@ -1046,10 +1047,28 @@ const EscrowComponent = () => {
                   </main>
 
                   {/* Nexus Prime */}
-                  <NexusPrime currentPage='docs' />
+                  <NexusPrime currentPage='docs' walletConnected={isConnected} />
 
                   <Footer />
                 </div>
+              </EscrowProvider>
+            </AccountProvider>
+          </TransactionProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </WalletProvider>
+  );
+}
+
+export default function DocsPage() {
+  return (
+    <WalletProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <TransactionProvider>
+            <AccountProvider>
+              <EscrowProvider>
+                <DocsPageContent />
               </EscrowProvider>
             </AccountProvider>
           </TransactionProvider>

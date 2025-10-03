@@ -11,6 +11,8 @@ interface OnboardingStep {
   position: 'top' | 'bottom' | 'left' | 'right';
   characterPosition: 'left' | 'right';
   highlightElement?: boolean;
+  image?: string;
+  imageAlt?: string;
 }
 
 interface OnboardingOverlayProps {
@@ -25,9 +27,11 @@ export const OnboardingOverlay = ({
 }: OnboardingOverlayProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   // Removed unused highlightedElement state
-  const [activeTab, setActiveTab] = useState('hello-milestone');
+  const [activeTab, setActiveTab] = useState('wallet-setup');
   const [ttsEnabled, setIsTtsEnabled] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [autoPlayTimeout, setAutoPlayTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Text-to-Speech functionality
   const speakMessage = (text: string) => {
@@ -76,6 +80,78 @@ export const OnboardingOverlay = ({
     setIsTtsEnabled(!ttsEnabled);
   };
 
+  // Auto-play functionality
+  const startAutoPlay = () => {
+    if (isAutoPlaying) {
+      // Stop auto-play
+      setIsAutoPlaying(false);
+      if (autoPlayTimeout) {
+        clearTimeout(autoPlayTimeout);
+        setAutoPlayTimeout(null);
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      return;
+    }
+
+    // Start auto-play
+    setIsAutoPlaying(true);
+    setIsTtsEnabled(true); // Enable TTS for auto-play
+    
+    const autoPlayNext = () => {
+      const currentSteps = getOnboardingSteps(activeTab);
+      
+      if (currentStep < currentSteps.length - 1) {
+        // Move to next step in current tab
+        const nextStepIndex = currentStep + 1;
+        setCurrentStep(nextStepIndex);
+        const step = currentSteps[nextStepIndex];
+        
+        // Speak the step
+        speakMessage(`${step.title}. ${step.description}`);
+        
+        // Schedule next auto-play
+        const timeout = setTimeout(autoPlayNext, 8000); // 8 seconds per step
+        setAutoPlayTimeout(timeout);
+      } else {
+        // Move to next tab
+        const currentTabIndex = demoTabs.findIndex(tab => tab.id === activeTab);
+        if (currentTabIndex < demoTabs.length - 1) {
+          const nextTab = demoTabs[currentTabIndex + 1];
+          setActiveTab(nextTab.id);
+          setCurrentStep(0);
+          
+          // Get first step of new tab
+          const newSteps = getOnboardingSteps(nextTab.id);
+          if (newSteps.length > 0) {
+            const firstStep = newSteps[0];
+            speakMessage(`${firstStep.title}. ${firstStep.description}`);
+            
+            // Schedule next auto-play
+            const timeout = setTimeout(autoPlayNext, 8000);
+            setAutoPlayTimeout(timeout);
+          }
+        } else {
+          // Auto-play completed
+          setIsAutoPlaying(false);
+          setAutoPlayTimeout(null);
+        }
+      }
+    };
+
+    // Start with current step
+    const currentSteps = getOnboardingSteps(activeTab);
+    if (currentSteps.length > 0) {
+      const step = currentSteps[currentStep];
+      speakMessage(`${step.title}. ${step.description}`);
+      
+      // Schedule next auto-play
+      const timeout = setTimeout(autoPlayNext, 8000);
+      setAutoPlayTimeout(timeout);
+    }
+  };
+
   // Demo-specific onboarding steps
   const getOnboardingSteps = (demoId: string): OnboardingStep[] => {
     const baseSteps: OnboardingStep[] = [
@@ -91,6 +167,263 @@ export const OnboardingOverlay = ({
     ];
 
     switch (demoId) {
+      case 'wallet-setup':
+        return [
+          ...baseSteps,
+          {
+            id: 'install-freighter',
+            title: 'Step 1: Install Freighter Wallet 🦎',
+            description:
+              'First, install the Freighter browser extension. Go to freighter.app and click "Install Extension" for your browser (Chrome, Firefox, or Safari).',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Freighter wallet installation page',
+          },
+          {
+            id: 'create-wallet',
+            title: 'Step 2: Create New Wallet 🔑',
+            description:
+              'Open Freighter and click "Create New Wallet". Choose a strong password and write down your 24-word recovery phrase in a safe place. Never share this phrase!',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Freighter wallet creation screen',
+          },
+          {
+            id: 'verify-phrase',
+            title: 'Step 3: Verify Recovery Phrase ✅',
+            description:
+              'Freighter will ask you to verify your recovery phrase. Click the words in the correct order to confirm you have them written down correctly.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Recovery phrase verification screen',
+          },
+          {
+            id: 'switch-testnet',
+            title: 'Step 4: Switch to Testnet 🧪',
+            description:
+              'In Freighter settings, switch to "Testnet" network. This allows you to use free test tokens without spending real money.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Freighter testnet settings',
+          },
+          {
+            id: 'fund-wallet',
+            title: 'Step 5: Fund with XLM Testnet 💰',
+            description:
+              'Go to the Stellar Testnet Friendbot at https://friendbot.stellar.org/ and enter your wallet address to receive 10,000 free XLM testnet tokens.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Stellar Friendbot funding page',
+          },
+          {
+            id: 'verify-balance',
+            title: 'Step 6: Verify Your Balance 💳',
+            description:
+              'Check your Freighter wallet to confirm you received the testnet XLM. You should see around 10,000 XLM in your balance.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Freighter wallet balance display',
+          },
+          {
+            id: 'connect-to-app',
+            title: 'Step 7: Connect to Our App 🔗',
+            description:
+              'Now you can connect your Freighter wallet to our application. Click the "Connect Wallet" button and approve the connection in Freighter.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Wallet connection interface',
+          },
+          {
+            id: 'wallet-ready',
+            title: '🎉 Wallet Setup Complete!',
+            description:
+              'Congratulations! Your Stellar wallet is now ready for trustless work. You can now explore our demos and experience the power of blockchain escrow systems.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Wallet setup completion celebration',
+          },
+        ];
+
+      case 'mainnet-migration':
+        return [
+          ...baseSteps,
+          {
+            id: 'understand-mainnet',
+            title: 'Step 1: Understanding Mainnet vs Testnet 🌐',
+            description:
+              'Testnet uses fake money for learning. Mainnet uses real XLM and real value. Only migrate when you\'re confident and ready to use real funds.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Testnet vs Mainnet comparison',
+          },
+          {
+            id: 'backup-wallet',
+            title: 'Step 2: Backup Your Wallet 📋',
+            description:
+              'Before migrating, ensure you have your 24-word recovery phrase safely stored. This is your only way to recover your wallet if something goes wrong.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Wallet backup security reminder',
+          },
+          {
+            id: 'get-real-xlm',
+            title: 'Step 3: Get Real XLM 💎',
+            description:
+              'Purchase XLM from exchanges like Coinbase, Binance, or Kraken. Transfer them to your Freighter wallet address. Start with small amounts for testing.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'XLM purchase on cryptocurrency exchange',
+          },
+          {
+            id: 'switch-mainnet',
+            title: 'Step 4: Switch to Mainnet 🚀',
+            description:
+              'In Freighter settings, switch from "Testnet" to "Mainnet". This connects you to the real Stellar network where transactions have real value.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Freighter mainnet settings',
+          },
+          {
+            id: 'verify-mainnet-balance',
+            title: 'Step 5: Verify Mainnet Balance 💰',
+            description:
+              'Check that your real XLM appears in your Freighter wallet. You should see your purchased XLM in the mainnet balance.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Mainnet wallet balance verification',
+          },
+          {
+            id: 'test-small-transaction',
+            title: 'Step 6: Test Small Transaction 🧪',
+            description:
+              'Make a small test transaction to ensure everything works correctly. Send a small amount of XLM to another address to verify the setup.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Small test transaction example',
+          },
+          {
+            id: 'connect-mainnet-app',
+            title: 'Step 7: Connect Mainnet to App 🔗',
+            description:
+              'Connect your mainnet wallet to our application. Be aware that all transactions will now use real XLM with real value.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Mainnet wallet connection to app',
+          },
+          {
+            id: 'mainnet-ready',
+            title: '🚀 Mainnet Migration Complete!',
+            description:
+              'You\'re now on the real Stellar network! Use real XLM for trustless work transactions. Remember to always double-check amounts before confirming transactions.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Mainnet migration completion',
+          },
+        ];
+
+      case 'tech-tree':
+        return [
+          ...baseSteps,
+          {
+            id: 'tech-tree-overview',
+            title: 'Step 1: Trustless Work Tech Tree 🌳',
+            description:
+              'Explore the comprehensive tech tree that shows all available trustless work technologies, from basic escrow to advanced smart contracts and DeFi integrations.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Trustless Work Tech Tree overview',
+          },
+          {
+            id: 'tech-tree-navigation',
+            title: 'Step 2: Navigate the Tech Tree 🗺️',
+            description:
+              'Click on different branches to explore technologies. Each node represents a specific feature or capability you can learn and implement.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Tech Tree navigation interface',
+          },
+          {
+            id: 'tech-tree-levels',
+            title: 'Step 3: Technology Levels 📊',
+            description:
+              'Technologies are organized by complexity levels: Basic, Intermediate, Advanced, and Expert. Start with basic concepts and progress to advanced implementations.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Technology complexity levels',
+          },
+          {
+            id: 'tech-tree-progress',
+            title: 'Step 4: Track Your Progress 🎯',
+            description:
+              'See which technologies you\'ve mastered and which ones are still locked. Complete demos and quests to unlock new branches of the tech tree.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Tech Tree progress tracking',
+          },
+          {
+            id: 'tech-tree-resources',
+            title: 'Step 5: Access Resources 📚',
+            description:
+              'Each technology node provides documentation, code examples, and tutorials. Use the tech tree as your learning roadmap for trustless work mastery.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Tech Tree learning resources',
+          },
+          {
+            id: 'tech-tree-ready',
+            title: '🌳 Tech Tree Explorer Ready!',
+            description:
+              'You\'re now ready to explore the Trustless Work Tech Tree! Use it as your guide to learn new technologies and track your progress in the ecosystem.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Tech Tree exploration ready',
+          },
+        ];
+
       case 'hello-milestone':
         return [
           ...baseSteps,
@@ -103,6 +436,8 @@ export const OnboardingOverlay = ({
             position: 'top',
             characterPosition: 'left',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Connect wallet button in demo',
           },
           {
             id: 'select-demo',
@@ -113,6 +448,8 @@ export const OnboardingOverlay = ({
             position: 'bottom',
             characterPosition: 'right',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Baby Steps to Riches demo interface',
           },
           {
             id: 'initialize-escrow',
@@ -123,6 +460,8 @@ export const OnboardingOverlay = ({
             position: 'top',
             characterPosition: 'left',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Initialize escrow button and form',
           },
           {
             id: 'fund-escrow',
@@ -133,6 +472,8 @@ export const OnboardingOverlay = ({
             position: 'bottom',
             characterPosition: 'right',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Fund escrow transaction interface',
           },
           {
             id: 'complete-milestone',
@@ -143,6 +484,8 @@ export const OnboardingOverlay = ({
             position: 'top',
             characterPosition: 'left',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Complete milestone button and confirmation',
           },
           {
             id: 'approve-work',
@@ -153,6 +496,8 @@ export const OnboardingOverlay = ({
             position: 'bottom',
             characterPosition: 'right',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Approve milestone interface',
           },
           {
             id: 'release-funds',
@@ -163,6 +508,8 @@ export const OnboardingOverlay = ({
             position: 'top',
             characterPosition: 'left',
             highlightElement: true,
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Funds released success screen',
           },
           {
             id: 'completion-requirements',
@@ -347,6 +694,394 @@ export const OnboardingOverlay = ({
           },
         ];
 
+      case 'quest-system':
+        return [
+          ...baseSteps,
+          {
+            id: 'quest-overview',
+            title: 'Step 1: Quest System Overview 🎯',
+            description:
+              'Complete quests to earn XP, unlock badges, and level up your Nexus Prime. Each quest teaches you different aspects of trustless work systems.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Quest system overview interface',
+          },
+          {
+            id: 'daily-quests',
+            title: 'Step 2: Daily Quests 📅',
+            description:
+              'Complete daily quests like connecting your wallet, exploring demos, or completing milestones. These give you consistent XP and keep you engaged.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Daily quest interface',
+          },
+          {
+            id: 'achievement-badges',
+            title: 'Step 3: Achievement Badges 🏆',
+            description:
+              'Earn special badges for completing milestones, mastering demos, or helping others. Badges showcase your expertise and unlock special rewards.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Achievement badges collection',
+          },
+          {
+            id: 'xp-system',
+            title: 'Step 4: XP and Leveling ⭐',
+            description:
+              'Gain XP from completing quests and activities. Level up to unlock new features, get priority support, and access exclusive content.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'XP and leveling system',
+          },
+          {
+            id: 'quest-rewards',
+            title: 'Step 5: Quest Rewards 🎁',
+            description:
+              'Claim rewards for completed quests including XLM tokens, exclusive NFTs, early access to features, and special recognition in the community.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Quest rewards interface',
+          },
+          {
+            id: 'quest-completion',
+            title: '🎉 Quest Master!',
+            description:
+              'You\'re now ready to embark on your quest journey! Complete quests regularly to maximize your XP gains and unlock all available badges.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Quest completion celebration',
+          },
+        ];
+
+      case 'nexus-account':
+        return [
+          ...baseSteps,
+          {
+            id: 'nexus-prime-intro',
+            title: 'Step 1: Meet Nexus Prime 🤖',
+            description:
+              'Nexus Prime is your AI companion that evolves as you progress. Help it reach its final form by completing activities and earning XP.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime introduction',
+          },
+          {
+            id: 'nexus-evolution',
+            title: 'Step 2: Evolution Stages 🦋',
+            description:
+              'Nexus Prime evolves through stages: Basic → Advanced → Expert → Master → Final Form. Each stage unlocks new abilities and features.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime evolution stages',
+          },
+          {
+            id: 'nexus-features',
+            title: 'Step 3: Nexus Features ⚡',
+            description:
+              'Unlock features like advanced analytics, personalized recommendations, priority support, and exclusive access to new demos and features.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime features showcase',
+          },
+          {
+            id: 'nexus-customization',
+            title: 'Step 4: Customize Nexus 🎨',
+            description:
+              'Personalize your Nexus Prime with different avatars, themes, and behaviors. Make it truly yours as it grows with your expertise.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime customization options',
+          },
+          {
+            id: 'nexus-final-form',
+            title: 'Step 5: Final Form Unlock 🚀',
+            description:
+              'Reach the ultimate Nexus Prime form by mastering all demos, completing quests, and contributing to the community. The final form is legendary!',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime final form',
+          },
+          {
+            id: 'nexus-complete',
+            title: '🌟 Nexus Prime Ready!',
+            description:
+              'Your Nexus Prime is ready to evolve! Start completing activities to help it grow and unlock its full potential as your trustless work companion.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Prime ready to evolve',
+          },
+        ];
+
+      case 'referral-center':
+        return [
+          ...baseSteps,
+          {
+            id: 'referral-overview',
+            title: 'Step 1: Referral System Overview 👥',
+            description:
+              'Invite friends to join the trustless work revolution! Earn XP, badges, and rewards for each successful referral. Help build the community.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Referral system overview',
+          },
+          {
+            id: 'nexus-card',
+            title: 'Step 2: Nexus Pokemon Card 🃏',
+            description:
+              'Get your unique Nexus Pokemon-style card! Share it with friends to show off your achievements and level. Each card is unique and collectible.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Nexus Pokemon-style card',
+          },
+          {
+            id: 'email-invites',
+            title: 'Step 3: Email Invitations 📧',
+            description:
+              'Send personalized email invitations to friends. Customize your message and track who opens and clicks your invites. Make it personal!',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Email invitation interface',
+          },
+          {
+            id: 'referral-tracking',
+            title: 'Step 4: Track Referrals 📊',
+            description:
+              'Monitor your referral success with detailed analytics. See who joined, their progress, and your earnings. Optimize your referral strategy.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Referral tracking dashboard',
+          },
+          {
+            id: 'referral-rewards',
+            title: 'Step 5: Referral Rewards 🎁',
+            description:
+              'Earn rewards for successful referrals including XLM tokens, exclusive badges, early access to features, and special recognition.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Referral rewards system',
+          },
+          {
+            id: 'referral-success',
+            title: '🎉 Referral Master!',
+            description:
+              'You\'re ready to start referring friends! Share your Nexus card, send invitations, and help grow the trustless work community.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Referral system ready',
+          },
+        ];
+
+      case 'leaderboard':
+        return [
+          ...baseSteps,
+          {
+            id: 'leaderboard-overview',
+            title: 'Step 1: Global Leaderboard 🌍',
+            description:
+              'Compete with users worldwide on the global leaderboard! Rankings are based on XP, completed quests, referrals, and community contributions.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Global leaderboard interface',
+          },
+          {
+            id: 'ranking-system',
+            title: 'Step 2: Ranking System 🏅',
+            description:
+              'Climb the ranks from Rookie to Legend! Your rank is determined by total XP, quest completion rate, referral success, and community engagement.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Ranking system explanation',
+          },
+          {
+            id: 'leaderboard-features',
+            title: 'Step 3: Leaderboard Features ⭐',
+            description:
+              'View top performers, filter by region, see your progress, and compare with friends. Get inspired by the community\'s achievements.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Leaderboard features showcase',
+          },
+          {
+            id: 'leaderboard-rewards',
+            title: 'Step 4: Leaderboard Rewards 🏆',
+            description:
+              'Top performers get exclusive rewards including special badges, XLM tokens, early access to features, and recognition in the community.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Leaderboard rewards system',
+          },
+          {
+            id: 'community-competition',
+            title: 'Step 5: Community Competition 🤝',
+            description:
+              'Participate in community challenges, team competitions, and special events. Work together to achieve common goals and earn group rewards.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Community competition interface',
+          },
+          {
+            id: 'leaderboard-ready',
+            title: '🚀 Ready to Compete!',
+            description:
+              'You\'re ready to climb the leaderboard! Complete quests, refer friends, and engage with the community to maximize your ranking.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Leaderboard competition ready',
+          },
+        ];
+
+      case 'starters':
+        return [
+          ...baseSteps,
+          {
+            id: 'choose-starter',
+            title: 'Step 1: Choose Your Starter Kit 🛠️',
+            description:
+              'Select from our pre-built starter templates: Basic Escrow, Multi-Milestone Project, or Marketplace Integration. Each comes with documentation and examples.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Available starter kit templates',
+          },
+          {
+            id: 'basic-escrow',
+            title: 'Step 2: Basic Escrow Starter 📦',
+            description:
+              'Start with our Basic Escrow template. It includes a simple escrow contract, milestone management, and automatic fund release. Perfect for learning the fundamentals.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Basic escrow starter template',
+          },
+          {
+            id: 'multi-milestone',
+            title: 'Step 3: Multi-Milestone Starter 🎯',
+            description:
+              'For complex projects, use our Multi-Milestone starter. It supports multiple deliverables, progressive payments, and milestone dependencies.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Multi-milestone project starter',
+          },
+          {
+            id: 'marketplace-integration',
+            title: 'Step 4: Marketplace Integration 🏪',
+            description:
+              'Build a complete marketplace with our integration starter. Includes task posting, worker matching, escrow automation, and dispute resolution.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Marketplace integration starter',
+          },
+          {
+            id: 'development-setup',
+            title: 'Step 5: Development Environment ⚙️',
+            description:
+              'Set up your development environment with Stellar SDK, smart contract tools, and testing frameworks. We provide Docker containers for easy setup.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Development environment setup',
+          },
+          {
+            id: 'testing-guide',
+            title: 'Step 6: Testing Your Contracts 🧪',
+            description:
+              'Learn how to test your escrow contracts using our testing suite. Includes unit tests, integration tests, and simulation tools for different scenarios.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Smart contract testing interface',
+          },
+          {
+            id: 'deployment-guide',
+            title: 'Step 7: Deploy to Stellar 🚀',
+            description:
+              'Deploy your contracts to Stellar testnet first, then mainnet. We provide step-by-step deployment guides and monitoring tools.',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Stellar deployment process',
+          },
+          {
+            id: 'community-support',
+            title: 'Step 8: Join Our Community 👥',
+            description:
+              'Connect with other developers in our Discord community. Get help, share projects, and contribute to the trustless work ecosystem.',
+            target: 'body',
+            position: 'bottom',
+            characterPosition: 'right',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Discord community interface',
+          },
+          {
+            id: 'starters-complete',
+            title: '🎉 Ready to Build!',
+            description:
+              'You\'re now equipped with all the tools and knowledge to build your own trustless work applications. Start with our starter kits and customize them for your needs!',
+            target: 'body',
+            position: 'top',
+            characterPosition: 'left',
+            image: '/images/tutorial/placeholder.svg',
+            imageAlt: 'Ready to build celebration',
+          },
+        ];
+
       default:
         return baseSteps;
     }
@@ -357,22 +1092,70 @@ export const OnboardingOverlay = ({
   // Demo tabs configuration
   const demoTabs = [
     {
+      id: 'wallet-setup',
+      title: '1. Wallet Setup',
+      icon: '🦎',
+      color: 'from-green-500 to-emerald-400',
+    },
+    {
+      id: 'tech-tree',
+      title: '2. Tech Tree',
+      icon: '🌳',
+      color: 'from-emerald-500 to-green-400',
+    },
+    {
       id: 'hello-milestone',
-      title: '1. Baby Steps',
+      title: '3. Baby Steps',
       icon: '🎮',
       color: 'from-brand-500 to-brand-400',
     },
     {
       id: 'dispute-resolution',
-      title: '2. Drama Queen',
-      icon: '🎮',
+      title: '4. Drama Queen',
+      icon: '👑',
       color: 'from-warning-500 to-warning-400',
     },
     {
       id: 'micro-marketplace',
-      title: '3. Gig Economy',
-      icon: '🎮',
+      title: '5. Gig Economy',
+      icon: '🛒',
       color: 'from-accent-500 to-accent-400',
+    },
+    {
+      id: 'quest-system',
+      title: '6. Quest System',
+      icon: '🎯',
+      color: 'from-yellow-500 to-orange-400',
+    },
+    {
+      id: 'nexus-account',
+      title: '7. Nexus Account',
+      icon: '🤖',
+      color: 'from-indigo-500 to-purple-400',
+    },
+    {
+      id: 'referral-center',
+      title: '8. Referral Center',
+      icon: '👥',
+      color: 'from-pink-500 to-rose-400',
+    },
+    {
+      id: 'leaderboard',
+      title: '9. Leaderboard',
+      icon: '🏆',
+      color: 'from-amber-500 to-yellow-400',
+    },
+    {
+      id: 'starters',
+      title: '10. Starters',
+      icon: '🛠️',
+      color: 'from-purple-500 to-pink-400',
+    },
+    {
+      id: 'mainnet-migration',
+      title: '11. Mainnet Migration',
+      icon: '🚀',
+      color: 'from-blue-500 to-cyan-400',
     },
   ];
 
@@ -420,14 +1203,17 @@ export const OnboardingOverlay = ({
     }
   }, [currentStep, activeTab, isActive, ttsEnabled, speakMessage, steps]);
 
-  // Cleanup TTS on unmount
+  // Cleanup TTS and auto-play on unmount
   useEffect(() => {
     return () => {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      if (autoPlayTimeout) {
+        clearTimeout(autoPlayTimeout);
+      }
     };
-  }, []);
+  }, [autoPlayTimeout]);
 
   if (!isActive) return null;
 
@@ -485,6 +1271,17 @@ export const OnboardingOverlay = ({
               >
                 {isSpeaking ? '⏸️' : '▶️'}
               </button>
+              <button
+                onClick={startAutoPlay}
+                className={`px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 text-sm ${
+                  isAutoPlaying
+                    ? 'bg-gradient-to-r from-orange-500/20 to-red-600/20 border border-orange-400/50 text-orange-300'
+                    : 'bg-gradient-to-r from-purple-500/20 to-indigo-600/20 border border-purple-400/50 text-purple-300'
+                }`}
+                title={isAutoPlaying ? 'Stop Auto-Play' : 'Start Auto-Play All Tabs'}
+              >
+                {isAutoPlaying ? '⏹️ STOP' : '▶️ AUTO'}
+              </button>
             </div>
           </div>
         </div>
@@ -522,15 +1319,40 @@ export const OnboardingOverlay = ({
             })}
           </div>
           <div className='mt-2 text-center'>
-            <p className='text-xs text-gray-400'>💡 All main demos are available in the tutorial</p>
+            <p className='text-xs text-gray-400'>💡 Start with wallet setup, explore the tech tree, then demos and community features, migrate to mainnet when ready</p>
           </div>
         </div>
 
         {/* Content */}
         <div className='p-6 overflow-y-auto max-h-[60vh]'>
-          <div className='text-center mb-6'>
-            <h3 className='text-xl font-bold text-white mb-2'>{currentStepData.title}</h3>
-            <p className='text-white/80 leading-relaxed'>{currentStepData.description}</p>
+          <div className='flex flex-col lg:flex-row gap-6 mb-6'>
+            {/* Text Content */}
+            <div className='flex-1 text-center lg:text-left'>
+              <h3 className='text-xl font-bold text-white mb-2'>{currentStepData.title}</h3>
+              <p className='text-white/80 leading-relaxed'>{currentStepData.description}</p>
+            </div>
+            
+            {/* Image Content */}
+            {currentStepData.image && (
+              <div className='flex-shrink-0 w-full lg:w-80'>
+                <div className='relative bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <Image
+                    src={currentStepData.image}
+                    alt={currentStepData.imageAlt || 'Tutorial step illustration'}
+                    width={320}
+                    height={240}
+                    className='w-full h-auto rounded-lg shadow-lg'
+                    onError={(e) => {
+                      // Fallback to placeholder if image doesn't exist
+                      e.currentTarget.src = '/images/tutorial/placeholder.svg';
+                    }}
+                  />
+                  <div className='absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded'>
+                    Step {currentStep + 1}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Step Progress */}

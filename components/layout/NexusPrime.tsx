@@ -19,10 +19,10 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const lastProcessedMessageRef = useRef('');
   const typewriterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Tutorial steps for interactive guidance
   const tutorialSteps = [
@@ -57,52 +57,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     },
   ];
 
-  // Text-to-Speech functionality
-  const speakMessage = (text: string) => {
-    if (!ttsEnabled || !('speechSynthesis' in window)) return;
-
-    // Stop any current speech
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.2; // Increased from 0.9 to 1.4 for faster speech
-    utterance.pitch = 1.4; // Slightly higher pitch for more energy
-    utterance.volume = 0.9; // Increased volume for better clarity
-
-    // Try to use a male voice
-    const voices = window.speechSynthesis.getVoices();
-    const maleVoice = voices.find(
-      voice =>
-        voice.name.includes('Alex') ||
-        voice.name.includes('Daniel') ||
-        voice.name.includes('Google') ||
-        voice.name.includes('Male') ||
-        voice.name.includes('David') ||
-        voice.name.includes('Tom') ||
-        voice.name.includes('Mark') ||
-        voice.name.includes('James') ||
-        voice.name.includes('John') ||
-        voice.name.includes('Michael')
-    );
-    if (maleVoice) {
-      utterance.voice = maleVoice;
-    }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Toggle TTS on/off
-  const toggleTts = () => {
-    if (ttsEnabled) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-    setTtsEnabled(!ttsEnabled);
-  };
 
   // Character messages based on context
   const characterMessages = useMemo(() => ({
@@ -111,6 +65,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         'Greetings, mortal! I am NEXUS PRIME, guardian of the STELLAR NEXUS. Ready to explore the ESCROW ARSENAL?',
       wallet: 'Connect your Stellar wallet to unlock the full power of trustless work systems!',
       demos: 'The ESCROW ARSENAL awaits your command. Choose your weapon wisely!',
+      walletConnected: 'Excellent! Your Stellar wallet is now connected. The power of trustless systems is yours! Welcome to the ESCROW ARSENAL! 🚀',
     },
     demos: {
       welcome:
@@ -136,7 +91,10 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     let message = '';
 
     if (currentPage === 'home') {
-      if (walletConnected) {
+      if (walletConnected && hasShownWelcome) {
+        // Show special welcome message for first-time wallet connection
+        message = characterMessages.home.walletConnected;
+      } else if (walletConnected) {
         message = characterMessages.home.demos;
       } else {
         message = characterMessages.home.wallet;
@@ -161,7 +119,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     return String(message)
       .replace(/undefined/g, '')
       .trim();
-  }, [currentPage, currentDemo, walletConnected, characterMessages]);
+  }, [currentPage, currentDemo, walletConnected, hasShownWelcome, characterMessages]);
 
   // Simple typewriter effect for messages
   const startTypewriter = useCallback((message: string) => {
@@ -192,6 +150,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     typewriterTimeoutRef.current = setTimeout(typeNextChar, 100);
   }, []);
 
+
   // Effect to trigger typewriter when context changes
   useEffect(() => {
     const message = getContextMessage();
@@ -200,6 +159,44 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       startTypewriter(message);
     }
   }, [getContextMessage, startTypewriter]);
+
+  // Effect to show welcome message when wallet first connects
+  useEffect(() => {
+    if (walletConnected && !hasShownWelcome) {
+      setHasShownWelcome(true);
+      // Auto-expand the chat panel when wallet connects for the first time
+      setTimeout(() => {
+        setIsExpanded(true);
+      }, 1500); // Wait for the slide-in animation to complete
+    } else if (!walletConnected) {
+      setHasShownWelcome(false);
+    }
+  }, [walletConnected, hasShownWelcome]);
+
+  // Effect to handle clicks outside the chat container
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        chatContainerRef.current &&
+        !chatContainerRef.current.contains(event.target as Node) &&
+        isExpanded
+      ) {
+        // Add a small delay to prevent accidental closes
+        setTimeout(() => {
+          setIsExpanded(false);
+        }, 100);
+      }
+    };
+
+    // Only add event listener when the chat is expanded
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -216,28 +213,15 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   const startTutorial = () => {
     setShowTutorial(true);
     setTutorialStep(0);
-    if (tutorialSteps && tutorialSteps.length > 0) {
-      const firstStep = tutorialSteps[0];
-      if (ttsEnabled) {
-        speakMessage(`${firstStep.title}. ${firstStep.message}`);
-      }
-    }
   };
 
   const nextTutorialStep = () => {
     if (tutorialSteps && tutorialStep < tutorialSteps.length - 1) {
       const nextStep = tutorialStep + 1;
       setTutorialStep(nextStep);
-      const step = tutorialSteps[nextStep];
-      if (ttsEnabled && step) {
-        speakMessage(`${step.title}. ${step.message}`);
-      }
     } else {
       setShowTutorial(false);
       setTutorialStep(0);
-      if (ttsEnabled) {
-        speakMessage("Tutorial completed! You're now ready to master the ESCROW ARSENAL!");
-      }
     }
   };
 
@@ -245,82 +229,31 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     if (tutorialSteps && tutorialStep > 0) {
       const prevStep = tutorialStep - 1;
       setTutorialStep(prevStep);
-      const step = tutorialSteps[prevStep];
-      if (ttsEnabled && step) {
-        speakMessage(`${step.title}. ${step.message}`);
-      }
     }
   };
 
   const skipTutorial = () => {
     setShowTutorial(false);
     setTutorialStep(0);
-    if (ttsEnabled) {
-      speakMessage('Tutorial skipped. Feel free to ask me anything about the ESCROW ARSENAL!');
-    }
   };
 
   return (
     <>
-      {/* Speaking Character - Appears from left side when speaking */}
-      {walletConnected && isSpeaking && (
-        <div
-          className='fixed bottom-6 left-6 z-100 animate-slideInLeft'
-          style={{ zIndex: 1000, marginLeft: '80px', marginBottom: '-50px' }}
-        >
-          <div className='relative'>
-            {/* Character Image */}
-            <Image
-              src='/images/character/character.png'
-              alt='NEXUS PRIME Speaking'
-              width={200}
-              height={200}
-              className='object-contain drop-shadow-2xl'
-            />
-            {/* Speech bubble effect */}
-            <div className='absolute -top-8 left-1/2 transform -translate-x-1/2'>
-              <div className='bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 border border-white/30'>
-                <div className='flex space-x-1'>
-                  <div className='w-1 h-1 bg-purple-400 rounded-full animate-ping'></div>
-                  <div
-                    className='w-1 h-1 bg-purple-400 rounded-full animate-ping'
-                    style={{ animationDelay: '0.2s' }}
-                  ></div>
-                  <div
-                    className='w-1 h-1 bg-purple-400 rounded-full animate-ping'
-                    style={{ animationDelay: '0.4s' }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className='fixed bottom-6 left-6 z-50'>
         {/* Character Avatar - Only show when wallet is connected */}
         {walletConnected && (
-          <div className='relative group'>
+          <div ref={chatContainerRef} className='relative group animate-fadeIn'>
             {/* Character Image/Icon */}
             <div
               className='w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative'
               onClick={() => setIsExpanded(!isExpanded)}
+              style={{ 
+                animation: 'fadeIn 0.8s ease-out, pulse 2s infinite 1s',
+                transform: 'translateX(-20px)',
+                animationFillMode: 'forwards'
+              }}
             >
-              {/* Voice Toggle Button */}
-              <button
-                onClick={e => {
-                  e.stopPropagation();
-                  toggleTts();
-                }}
-                className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-2 border-white shadow-lg hover:scale-105 transition-all duration-200 z-20 ${
-                  ttsEnabled
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-                    : 'bg-gradient-to-r from-red-500 to-pink-600'
-                }`}
-                title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-              >
-                <span className='text-sm text-white'>{ttsEnabled ? '🔊' : '🔇'}</span>
-              </button>
               <div className='w-full h-full rounded-full bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden'>
                 {/* Stellar Network Pattern */}
                 <div className='absolute inset-0 opacity-30'>
@@ -336,6 +269,13 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 />
                 {/* Glowing Effect */}
                 <div className='absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'></div>
+                
+                {/* New Message Indicator */}
+                {hasShownWelcome && (
+                  <div className='absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full border-2 border-white shadow-lg animate-pulse'>
+                    <div className='w-full h-full bg-green-400 rounded-full animate-ping opacity-75'></div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -363,47 +303,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                     </div>
                   </div>
 
-                  {/* TTS Controls in Chat Header */}
-                  <div className='flex items-center space-x-2'>
-                    {/* Play Current Message Button */}
-                    <button
-                      onClick={() => {
-                        if (ttsEnabled && currentMessage) {
-                          speakMessage(currentMessage);
-                        }
-                      }}
-                      disabled={!ttsEnabled || !currentMessage || isSpeaking}
-                      className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                        !ttsEnabled || !currentMessage || isSpeaking
-                          ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                      }`}
-                      title={
-                        !ttsEnabled
-                          ? 'Voice is disabled'
-                          : !currentMessage
-                            ? 'No message to play'
-                            : isSpeaking
-                              ? 'Already speaking'
-                              : 'Play current message with voice'
-                      }
-                    >
-                      <span className='text-sm'>{isSpeaking ? '⏸️' : '▶️'}</span>
-                    </button>
-
-                    {/* TTS Toggle */}
-                    <button
-                      onClick={toggleTts}
-                      className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                        ttsEnabled
-                          ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                          : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                      }`}
-                      title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-                    >
-                      <span className='text-sm'>{ttsEnabled ? '🔊' : '🔇'}</span>
-                    </button>
-                  </div>
                 </div>
 
                 {/* Message */}
@@ -441,17 +340,8 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                     <span className='text-white/60'>Online</span>
                   </div>
                   <div className='flex items-center space-x-2'>
-                    {isSpeaking ? (
-                      <>
-                        <div className='w-2 h-2 bg-purple-400 rounded-full'></div>
-                        <span className='text-purple-300'>Speaking...</span>
-                      </>
-                    ) : (
-                      <>
-                        <div className='w-2 h-2 bg-cyan-400 rounded-full'></div>
-                        <span className='text-white/60'>Stellar Network</span>
-                      </>
-                    )}
+                    <div className='w-2 h-2 bg-cyan-400 rounded-full'></div>
+                    <span className='text-white/60'>Stellar Network</span>
                   </div>
                 </div>
 
@@ -465,11 +355,14 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                       >
                         Dismiss
                       </button>
+                      <p className='text-center text-white/40 text-xs'>
+                        Click outside to close
+                      </p>
                     </div>
                   ) : (
                     <div className='space-y-2'>
-                      {/* Tutorial Progress and TTS Toggle */}
-                      <div className='flex items-center justify-between mb-2'>
+                      {/* Tutorial Progress */}
+                      <div className='flex items-center justify-center mb-2'>
                         <div className='flex-1 text-center'>
                           <div className='w-full bg-white/10 rounded-full h-1 mb-2'>
                             <div
@@ -482,47 +375,6 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                           <span className='text-xs text-white/60'>
                             Step {tutorialStep + 1} of {tutorialSteps.length}
                           </span>
-                        </div>
-
-                        {/* TTS Controls for Tutorial */}
-                        <div className='flex items-center space-x-2'>
-                          {/* Play Tutorial Step Button */}
-                          <button
-                            onClick={() => {
-                              if (ttsEnabled) {
-                                const step = tutorialSteps[tutorialStep];
-                                speakMessage(`${step.title}. ${step.message}`);
-                              }
-                            }}
-                            disabled={!ttsEnabled || isSpeaking}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                              !ttsEnabled || isSpeaking
-                                ? 'bg-gray-500/20 text-gray-400 border border-gray-400/30 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-500/20 to-indigo-600/20 border border-blue-400/50 text-blue-300 hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-indigo-600/30'
-                            }`}
-                            title={
-                              !ttsEnabled
-                                ? 'Voice is disabled'
-                                : isSpeaking
-                                  ? 'Already speaking'
-                                  : 'Replay tutorial step with voice'
-                            }
-                          >
-                            <span className='text-xs'>{isSpeaking ? '⏸️' : '▶️'}</span>
-                          </button>
-
-                          {/* TTS Toggle */}
-                          <button
-                            onClick={toggleTts}
-                            className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                              ttsEnabled
-                                ? 'bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-400/50 text-green-300'
-                                : 'bg-gradient-to-r from-red-500/20 to-pink-600/20 border border-red-400/50 text-red-300'
-                            }`}
-                            title={ttsEnabled ? 'Disable Voice' : 'Enable Voice'}
-                          >
-                            <span className='text-xs'>{ttsEnabled ? '🔊' : '🔇'}</span>
-                          </button>
                         </div>
                       </div>
 
@@ -569,25 +421,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                   {/* Simple Message */}
                   <div className='text-center'>
                     <p className='text-white/90 text-sm font-medium'>
-                      Click to chat with NEXUS PRIME
+                      {hasShownWelcome ? 'Click to chat with NEXUS PRIME' : 'Welcome! Click to meet NEXUS PRIME'}
                     </p>
-                    <p className='text-cyan-300 text-xs mt-1'>Your AI Guardian</p>
-
-                    {/* TTS Status in Tooltip */}
-                    <div className='mt-2 pt-2 border-t border-white/10'>
-                      <div className='flex items-center justify-center space-x-2'>
-                        <span className='text-xs text-white/60'>Voice:</span>
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            ttsEnabled
-                              ? 'bg-green-500/20 text-green-300 border border-green-400/50'
-                              : 'bg-red-500/20 text-red-300 border border-red-400/50'
-                          }`}
-                        >
-                          {ttsEnabled ? 'ON 🔊' : 'OFF 🔇'}
-                        </span>
-                      </div>
-                    </div>
+                    <p className='text-cyan-300 text-xs mt-1'>
+                      {hasShownWelcome ? 'Your AI Guardian' : 'Your Stellar AI Guardian 🚀'}
+                    </p>
                   </div>
                 </div>
               </div>

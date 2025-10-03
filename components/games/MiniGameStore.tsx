@@ -5,10 +5,11 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import { EscrowProvider } from '@/contexts/data/EscrowContext';
-import { WalletProvider } from '@/contexts/wallet/WalletContext';
+import { WalletProvider, useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import Image from 'next/image';
 
-export default function MiniGameStore() {
+function MiniGameStoreContent() {
+  const { isConnected } = useGlobalWallet();
   const [activePromo, setActivePromo] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1029,7 +1030,7 @@ export default function MiniGameStore() {
           </main>
 
           {/* Nexus Prime */}
-          <NexusPrime currentPage='mini-games' />
+          <NexusPrime currentPage='mini-games' walletConnected={isConnected} />
 
           <Footer />
         </div>
@@ -1110,6 +1111,16 @@ export default function MiniGameStore() {
             </div>
           </div>
         )}
+      </EscrowProvider>
+    </WalletProvider>
+  );
+}
+
+export default function MiniGameStore() {
+  return (
+    <WalletProvider>
+      <EscrowProvider>
+        <MiniGameStoreContent />
       </EscrowProvider>
     </WalletProvider>
   );

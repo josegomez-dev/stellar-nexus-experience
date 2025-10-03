@@ -265,7 +265,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
           {/* Level Progress Info */}
           <div className='flex-1 min-w-0'>
             <div className='mb-4'>
-              <h3 className='text-2xl font-bold text-white mb-1'>Level {level}</h3>
+              <h3 className='text-2xl font-bold text-white mb-1'>Lvl: {level}</h3>
               <p className='text-sm text-gray-300'>
                 {expProgress.current} / {expProgress.next} XP
               </p>
@@ -399,7 +399,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
       // Separate badges into categories
       const topBadges = ['welcome_explorer', 'escrow_expert', 'trust_guardian', 'stellar_champion', 'nexus_master'];
-      const extraBadges = ['social_butterfly', 'hashtag_hero', 'discord_warrior', 'quest_master', 'first_referral', 'referral_champion', 'referral_legend', 'community_builder'];
+      const extraBadges = ['social_butterfly', 'hashtag_hero', 'discord_warrior', 'quest_master'];
       
       const earnedTopBadges = earnedBadgeIds.filter(id => topBadges.includes(id));
       const earnedExtraBadges = earnedBadgeIds.filter(id => extraBadges.includes(id));

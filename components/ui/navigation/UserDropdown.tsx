@@ -394,22 +394,6 @@ export const UserDropdown = () => {
             
           </div>
 
-          {/* Network Status */}
-          <div className='relative z-10 px-4 py-2 border-b border-white/10'>
-            <div className='flex items-center justify-between'>
-              <span className='text-white/60 text-xs'>Network:</span>
-              <span
-                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  stellarConfig.network === 'TESTNET'
-                    ? 'bg-warning-500/30 text-warning-200 border border-warning-400/30'
-                    : 'bg-success-500/30 text-success-200 border border-success-400/30'
-                }`}
-              >
-                {stellarConfig.network}
-              </span>
-            </div>
-          </div>
-
           {/* Menu Items */}
           <div className='relative z-10 p-2'>
             {isConnected ? (

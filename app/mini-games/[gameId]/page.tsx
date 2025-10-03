@@ -10,6 +10,7 @@ import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import Image from 'next/image';
 
 // Game data with detailed information - synced with MiniGameStore
@@ -161,6 +162,7 @@ const gameLibrary = {
 export default function GamePage() {
   const params = useParams();
   const router = useRouter();
+  const { isConnected } = useGlobalWallet();
   const gameId = params.gameId as string;
   const game = gameLibrary[gameId as keyof typeof gameLibrary];
 
@@ -495,7 +497,7 @@ export default function GamePage() {
       </main>
 
       {/* Nexus Prime */}
-      <NexusPrime currentPage='mini-games' />
+      <NexusPrime currentPage='mini-games' walletConnected={isConnected} />
 
       <Footer />
     </div>
