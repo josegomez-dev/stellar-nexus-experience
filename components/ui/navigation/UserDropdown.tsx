@@ -482,17 +482,6 @@ export const UserDropdown = () => {
 
                   <button
                     onClick={() => {
-                      setIsLeaderboardOpen(true);
-                      setIsOpen(false);
-                    }}
-                    className='w-full flex items-center space-x-3 text-yellow-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
-                  >
-                    <span className='text-lg'>🏆</span>
-                    <span>Global Leaderboard</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
                       setIsReferralModalOpen(true);
                       setIsOpen(false);
                     }}

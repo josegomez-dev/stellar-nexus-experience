@@ -78,7 +78,8 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({ onSignUpClick, onSignInC
                 {/* Sign Up Button */}
                 <button
                   onClick={onSignUpClick}
-                  className='px-4 py-2 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40 text-sm'
+                  className='px-4 py-2 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border border-white/20 hover:border-white/40 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                  disabled={true}
                 >
                   <div className='flex items-center space-x-2'>
                     <span>✨</span>
@@ -89,7 +90,8 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({ onSignUpClick, onSignInC
                 {/* Sign In Button */}
                 <button
                   onClick={onSignInClick}
-                  className='px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/40 text-sm'
+                  className='px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/40 text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                  disabled={true}
                 >
                   <div className='flex items-center space-x-2'>
                     <span>🔑</span>

@@ -1131,7 +1131,12 @@ export default function HomePageContent() {
       // Play intro sound when video starts
       try {
         const audio = new Audio('/sounds/intro.mp3');
+        const audio2 = new Audio('/sounds/nexus_voice.mp3');
+
         audio.volume = 0.6;
+        audio2.volume = 0.6;
+
+        audio2.play().catch(() => {}); // Silent fallback if audio fails
         audio.play().catch(() => {}); // Silent fallback if audio fails
       } catch (error) {
         // Silent fallback if audio fails

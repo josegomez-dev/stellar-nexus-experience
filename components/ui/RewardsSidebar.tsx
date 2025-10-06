@@ -136,9 +136,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   // Character phase logic
   const getAvailableCharacterPhases = () => {
     const phases = [
-      { id: 0, name: 'Baby', video: '/videos/phases/baby.mp4', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', video: '/videos/phases/teen.mp4', image: '/images/character/teen.png', minLevel: 2 },
-      { id: 2, name: 'Adult', video: '/videos/phases/adullt.mp4', image: '/images/character/character.png', minLevel: 3 }
+      { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 2 },
+      { id: 2, name: 'Nexus Prime', image: '/images/character/nexus-prime-chat.png', minLevel: 3 }
     ];
     return phases.filter(phase => level >= phase.minLevel);
   };
@@ -150,9 +150,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   useEffect(() => {
     // Find the highest available phase based on current level
     const phases = [
-      { id: 0, name: 'Baby', video: '/videos/phases/baby.mp4', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', video: '/videos/phases/teen.mp4', image: '/images/character/teen.png', minLevel: 2 },
-      { id: 2, name: 'Adult', video: '/videos/phases/adullt.mp4', image: '/images/character/character.png', minLevel: 3 }
+      { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 2 },
+      { id: 2, name: 'Nexus Prime', image: '/images/character/nexus-prime-chat.png', minLevel: 3 }
     ];
     
     // Find the highest phase the user has unlocked
@@ -223,45 +223,20 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                 </>
               )}
 
-              {/* Character Display with Reverse Playback */}
+              {/* Character Display */}
               {currentPhase && (
-                <video
+                <img
                   key={currentPhase.id} // Force re-render when phase changes
-                  autoPlay
-                  muted
-                  playsInline
-                  className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
+                  src={currentPhase.image}
+                  alt={`${currentPhase.name} Character`}
+                  className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30 transition-all duration-300 hover:scale-105'
                   style={{
-                    animation: '4s ease-in-out infinite alternate',
-                  }}
-                  onEnded={(e) => {
-                    try {
-                      const video = e.target as HTMLVideoElement;
-                      // Start reverse playback
-                      const reverseInterval = setInterval(() => {
-                        if (video.currentTime <= 0) {
-                          clearInterval(reverseInterval);
-                          video.currentTime = 0;
-                          video.play(); // Start forward playback again
-                        } else {
-                          video.currentTime -= 0.1; // Reverse playback
-                        }
-                      }, 100);
-                    } catch (error) {
-                      console.warn('Error in video playback:', error);
-                    }
+                    animation: 'pulse 2s ease-in-out infinite',
                   }}
                   onError={(e) => {
-                    console.warn('Video failed to load:', currentPhase.video);
+                    console.warn('Image failed to load:', currentPhase.image);
                   }}
-                >
-                  <source src={currentPhase.video} type='video/mp4' />
-                  <img
-                    src={currentPhase.image}
-                    alt={`${currentPhase.name} Character`}
-                    className='w-32 h-32 object-cover drop-shadow-2xl rounded-full border-2 border-purple-400/30'
-                  />
-                </video>
+                />
               )}
 
               {/* Level Badge */}
