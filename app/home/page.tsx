@@ -562,20 +562,6 @@ const DemoSelector = ({
 
                     return (
                       <>
-                        {/* <div className='absolute top-4 left-4 floating-particle opacity-70'>
-                          <BadgeEmblem id={badgeId} size='sm' className='text-yellow-400' />
-                        </div> */}
-                        {/* <div className='absolute top-8 right-8 floating-particle opacity-80' style={{ animationDelay: '0.5s' }}>
-                          <BadgeEmblem id={badgeId} size='sm' className='text-orange-400' />
-                        </div> */}
-                        {/* <div
-                          className='absolute bottom-8 left-8 opacity-60'
-                          style={{ animationDelay: '1s' }}
-                        >
-                          {getBadgeIcon(badgeId, BADGE_SIZES.sm) || (
-                            <BadgeEmblem id={badgeId} size='sm' className='text-yellow-300' />
-                          )}
-                        </div> */}
                         <div
                           className='absolute bottom-4 right-4 opacity-90'
                           style={{ animationDelay: '1.5s' }}
@@ -646,26 +632,6 @@ const DemoSelector = ({
                                 </div>
                               </button>
 
-                              {/* Animated sparks effect */}
-                              {clapAnimations[demo.id] && (
-                                <>
-                                  <div className='absolute inset-0 pointer-events-none'>
-                                    <div className='absolute top-0 left-1/2 w-1 h-1 bg-yellow-400 rounded-full animate-ping'></div>
-                                    <div
-                                      className='absolute top-1 left-1/3 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping'
-                                      style={{ animationDelay: '0.1s' }}
-                                    ></div>
-                                    <div
-                                      className='absolute top-1 right-1/3 w-0.5 h-0.5 bg-yellow-300 rounded-full animate-ping'
-                                      style={{ animationDelay: '0.2s' }}
-                                    ></div>
-                                    <div
-                                      className='absolute bottom-0 left-1/2 w-1 h-1 bg-emerald-400 rounded-full animate-ping'
-                                      style={{ animationDelay: '0.3s' }}
-                                    ></div>
-                                  </div>
-                                </>
-                              )}
                             </div>
                           </div>
                         );
@@ -688,51 +654,6 @@ const DemoSelector = ({
                   <>
                     {/* Epic Legendary Background for Demo Title */}
                     <div className='relative mb-3'>
-                      {/* Energy Background */}
-                      <div className='absolute inset-0 pointer-events-none'>
-                        {/* Energy Core */}
-                        <div
-                          className='absolute inset-0 rounded-lg blur-sm'
-                          style={{
-                            background: `linear-gradient(to right, var(--demo-color-1)/20, var(--demo-color-2)/25, var(--demo-color-3)/20)`,
-                          }}
-                        ></div>
-
-                        {/* Floating Particles */}
-                        <div
-                          className='absolute top-1 left-1/4 w-1 h-1 rounded-full animate-ping opacity-70'
-                          style={{ backgroundColor: 'var(--demo-color-1)' }}
-                        ></div>
-                        <div
-                          className='absolute top-2 right-1/3 w-1 h-1 rounded-full animate-ping opacity-80'
-                          style={{
-                            backgroundColor: 'var(--demo-color-2)',
-                            animationDelay: '0.5s',
-                          }}
-                        ></div>
-                        <div
-                          className='absolute bottom-1 left-1/3 w-1 h-1 rounded-full animate-ping opacity-60'
-                          style={{
-                            backgroundColor: 'var(--demo-color-3)',
-                            animationDelay: '1s',
-                          }}
-                        ></div>
-
-                        {/* Energy Streams */}
-                        <div
-                          className='absolute left-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent to-transparent animate-pulse opacity-50'
-                          style={{
-                            background: `linear-gradient(to bottom, transparent, var(--demo-color-1)/40, transparent)`,
-                          }}
-                        ></div>
-                        <div
-                          className='absolute right-0 top-1/2 w-1 h-4 bg-gradient-to-b from-transparent to-transparent animate-pulse opacity-60'
-                          style={{
-                            background: `linear-gradient(to bottom, transparent, var(--demo-color-2)/40, transparent)`,
-                          }}
-                        ></div>
-                      </div>
-
                       {/* Demo Title with Enhanced Styling */}
                       <h3
                         className={`relative z-10 font-bold text-left text-lg leading-tight drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-500 ${getDemoCardColors(demo.color, isCompleted).titleColor} ${getDemoCardColors(demo.color, isCompleted).hoverTitleColor}`}
@@ -909,31 +830,6 @@ const DemoSelector = ({
                     ) : (
                       /* Incomplete Demo - Show launch button */
                       <div className='relative group'>
-                        {/* Epic Background Glow */}
-                        <div className='absolute inset-0 bg-gradient-to-r from-brand-500/30 via-accent-500/40 to-brand-400/30 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse'></div>
-
-                        {/* Floating Particles */}
-                        <div className='absolute inset-0 overflow-hidden rounded-xl'>
-                          <div className='absolute top-2 left-1/4 w-1 h-1 bg-brand-400 rounded-full animate-ping opacity-70'></div>
-                          <div
-                            className='absolute top-4 right-1/3 w-1 h-1 bg-accent-400 rounded-full animate-ping opacity-80'
-                            style={{ animationDelay: '0.5s' }}
-                          ></div>
-                          <div
-                            className='absolute bottom-2 left-1/3 w-1 h-1 bg-brand-300 rounded-full animate-ping opacity-60'
-                            style={{ animationDelay: '1s' }}
-                          ></div>
-                          <div
-                            className='absolute bottom-4 right-1/4 w-1 h-1 bg-accent-300 rounded-full animate-ping opacity-90'
-                            style={{ animationDelay: '1.5s' }}
-                          ></div>
-                        </div>
-
-                        {/* Energy Streams */}
-                        <div className='absolute inset-0 overflow-hidden rounded-xl'>
-                          <div className='absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-transparent via-brand-400/50 to-transparent animate-pulse opacity-60'></div>
-                          <div className='absolute right-0 top-1/2 w-1 h-6 bg-gradient-to-b from-transparent via-accent-400/50 to-transparent animate-pulse opacity-70'></div>
-                        </div>
                         <br />
 
                         {/* Main Button */}
@@ -1525,30 +1421,7 @@ export default function HomePageContent() {
                         <div className='absolute inset-0 rounded-full bg-gradient-to-r from-brand-400/20 via-accent-500/30 to-brand-300/20 blur-2xl scale-250'></div>
                       </div>
 
-                      {/* Floating Energy Particles */}
-                      <div className='absolute inset-0'>
-                        <div className='absolute top-6 left-1/4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-80'></div>
-                        <div
-                          className='absolute top-12 right-1/3 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-90'
-                          style={{ animationDelay: '0.5s' }}
-                        ></div>
-                        <div
-                          className='absolute bottom-8 left-1/3 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-70'
-                          style={{ animationDelay: '1s' }}
-                        ></div>
-                        <div
-                          className='absolute bottom-12 right-1/4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
-                          style={{ animationDelay: '1.5s' }}
-                        ></div>
-                        <div
-                          className='absolute top-1/2 left-1/6 w-1.5 h-1.5 bg-brand-200 rounded-full animate-ping opacity-60'
-                          style={{ animationDelay: '2s' }}
-                        ></div>
-                        <div
-                          className='absolute top-1/2 right-1/6 w-2 h-2 bg-accent-200 rounded-full animate-ping opacity-75'
-                          style={{ animationDelay: '2.5s' }}
-                        ></div>
-                      </div>
+                    
 
                       {/* Energy Wave Rings */}
                       <div className='absolute inset-0'>
@@ -1841,48 +1714,6 @@ export default function HomePageContent() {
 
               {/* Content */}
               <div className='relative z-10 max-w-6xl mx-auto px-4 text-center'>
-                {/* Additional Floating Decorative Elements - Repositioned for better balance */}
-                <div className='absolute top-20 left-1/4 w-6 h-6 bg-gradient-to-r from-brand-400/40 to-accent-400/40 rounded-full blur-sm animate-pulse opacity-60'></div>
-                <div
-                  className='absolute top-32 right-1/3 w-4 h-4 bg-gradient-to-r from-accent-400/40 to-brand-400/40 rounded-full blur-sm animate-pulse opacity-70'
-                  style={{ animationDelay: '1.5s' }}
-                ></div>
-                <div
-                  className='absolute bottom-32 left-1/3 w-5 h-5 bg-gradient-to-r from-brand-500/40 to-accent-500/40 rounded-full blur-sm animate-pulse opacity-50'
-                  style={{ animationDelay: '2s' }}
-                ></div>
-                <div
-                  className='absolute bottom-24 right-1/4 w-4 h-4 bg-gradient-to-r from-accent-500/40 to-brand-500/40 rounded-full blur-sm animate-pulse opacity-65'
-                  style={{ animationDelay: '2.5s' }}
-                ></div>
-
-                {/* Floating Character Images - Left and Right - Repositioned for bottom alignment */}
-
-                <div className='absolute bottom-12 -left-20 opacity-80 pointer-events-none'>
-                  <div className='relative w-full h-full'>
-                    <Image
-                      src='/images/character/baby-full.png'
-                      alt='Guide Character Left'
-                      width={200}
-                      height={200}
-                      className='w-full h-full object-contain drop-shadow-2xl animate-float mr-40 -mb-40'
-                    />
-                    {/* Floating sparkles around right character */}
-                    <div className='absolute top-4 left-4 w-3 h-3 bg-brand-400 rounded-full animate-ping opacity-70'></div>
-                    <div
-                      className='absolute top-8 right-6 w-2 h-2 bg-accent-400 rounded-full animate-ping opacity-80'
-                      style={{ animationDelay: '0.5s' }}
-                    ></div>
-                    <div
-                      className='absolute bottom-6 left-8 w-2.5 h-2.5 bg-brand-300 rounded-full animate-ping opacity-60'
-                      style={{ animationDelay: '1s' }}
-                    ></div>
-                    <div
-                      className='absolute bottom-8 right-4 w-2 h-2 bg-accent-300 rounded-full animate-ping opacity-85'
-                      style={{ animationDelay: '1.5s' }}
-                    ></div>
-                  </div>
-                </div>
 
                 <div className='mb-12'>
                   <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
