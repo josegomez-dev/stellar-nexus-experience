@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface TutorialStep {
@@ -350,67 +350,35 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
             {/* Content */}
             <div className="flex-1 p-6 overflow-y-auto">
               {currentStepData && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    {/* Text Content */}
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex items-center space-x-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center text-2xl">
-                            {currentStepData.icon || '📚'}
-                          </div>
-                          <div>
-                            <h3 className="text-2xl font-bold text-white">{currentStepData.title}</h3>
-                            <p className="text-white/60 text-sm">
-                              {tutorialSections[currentSection].title}
-                            </p>
-                          </div>
+                <div className="max-w-3xl mx-auto">
+                  {/* Text Content */}
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="w-16 h-16 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center text-3xl">
+                          {currentStepData.icon || '📚'}
                         </div>
-                        <p className="text-white/90 text-lg leading-relaxed">
-                          {currentStepData.description}
-                        </p>
-                      </div>
-
-                      {/* Action Items */}
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <h4 className="text-white font-semibold mb-2">💡 What to do next:</h4>
-                        <ul className="text-white/80 space-y-1 text-sm">
-                          <li>• Follow the step instructions carefully</li>
-                          <li>• Use the navigation buttons or keyboard arrows</li>
-                          <li>• Take your time to understand each concept</li>
-                          <li>• Complete each step before moving to the next</li>
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Image Content */}
-                    <div className="flex-shrink-0">
-                      {currentStepData.image ? (
-                        <div className="relative bg-white/5 rounded-lg p-4 border border-white/10">
-                          <Image
-                            src={currentStepData.image}
-                            alt={currentStepData.imageAlt || currentStepData.title}
-                            width={400}
-                            height={300}
-                            className="w-full h-auto rounded-lg shadow-lg"
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/tutorial/placeholder.svg';
-                            }}
-                          />
-                          <div className="absolute top-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                            Step {currentStep + 1}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-white/5 rounded-lg p-8 border border-white/10 text-center">
-                          <div className="text-6xl mb-4 opacity-50">
-                            {currentStepData.icon || '📚'}
-                          </div>
-                          <p className="text-white/60 text-sm">
-                            Visual guide coming soon
+                        <div>
+                          <h3 className="text-3xl font-bold text-white">{currentStepData.title}</h3>
+                          <p className="text-white/60">
+                            {tutorialSections[currentSection].title}
                           </p>
                         </div>
-                      )}
+                      </div>
+                      <p className="text-white/90 text-xl leading-relaxed">
+                        {currentStepData.description}
+                      </p>
+                    </div>
+
+                    {/* Action Items */}
+                    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+                      <h4 className="text-white font-semibold mb-3 text-lg">💡 What to do next:</h4>
+                      <ul className="text-white/80 space-y-2">
+                        <li>• Follow the step instructions carefully</li>
+                        <li>• Use the navigation buttons or keyboard arrows</li>
+                        <li>• Take your time to understand each concept</li>
+                        <li>• Complete each step before moving to the next</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
