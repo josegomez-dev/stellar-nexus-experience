@@ -97,9 +97,8 @@ export default function HomePageContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
 
   // Initialize Firebase data on app load
   useEffect(() => {
@@ -154,27 +153,6 @@ export default function HomePageContent() {
       }, 15000); // 15 second timeout
 
       return () => clearTimeout(timeout);
-    }
-  }, [isLoading]);
-
-  // Set video playing state when loading completes and play intro sound
-  useEffect(() => {
-    if (!isLoading) {
-      setIsVideoPlaying(true);
-      
-      // Play intro sound when video starts
-      try {
-        const audio = new Audio('/sounds/intro.mp3');
-        const audio2 = new Audio('/sounds/nexus_voice.mp3');
-
-        audio.volume = AUDIO_VOLUMES.intro;
-        audio2.volume = AUDIO_VOLUMES.nexusVoice;
-
-        audio2.play().catch(() => {}); // Silent fallback if audio fails
-        audio.play().catch(() => {}); // Silent fallback if audio fails
-      } catch (error) {
-        // Silent fallback if audio fails
-      }
     }
   }, [isLoading]);
 
@@ -332,15 +310,15 @@ export default function HomePageContent() {
           })
         }}
       />
-      {/* Header - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && hasStarted && (
+      {/* Header - Hidden when preloader is active */}
+      {preloaderComplete && hasStarted && (
         <div className='animate-fadeIn'>
           <Header />
         </div>
       )}
 
-      {/* Authentication Banner - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && hasStarted && (
+      {/* Authentication Banner - Hidden when preloader is active */}
+      {preloaderComplete && hasStarted && (
         <div className='animate-fadeIn'>
           <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
         </div>
@@ -358,105 +336,32 @@ export default function HomePageContent() {
         {/* Start Button Screen - Show before everything else */}
         {!hasStarted && <StartButtonScreen onStart={handleStartClick} />}
 
-        {/* Video Preloader Screen - Only show after Start button is clicked */}
-        {hasStarted && (
+        {/* Unified Video Preloader Screen - Handles loading + video intro */}
+        {hasStarted && !preloaderComplete && (
           <VideoPreloaderScreen 
             isLoading={isLoading}
+            videoPath="/videos/preloader.mp4"
+            audioPath="/sounds/intro.mp3"
+            secondaryAudioPath="/sounds/nexus_voice.mp3"
             title="STELLAR NEXUS EXPERIENCE"
-            subtitle="Initializing Stellar Nexus Experience..."
+            subtitle="Web3 Early Adopters Program"
             showText={true}
-            minDuration={5000}
+            showVideoAfterLoad={true}
+            minDuration={3000}
+            audioVolumes={{
+              primary: AUDIO_VOLUMES.intro,
+              secondary: AUDIO_VOLUMES.nexusVoice,
+            }}
+            onComplete={() => setPreloaderComplete(true)}
           />
         )}
 
-
-        {/* Main Content - Only show when not loading and started */}
-        {!isLoading && hasStarted && (
+        {/* Main Content - Only show when preloader is complete */}
+        {preloaderComplete && hasStarted && (
           <>
-            {/* Full-Screen Video Overlay with fade-in animation */}
-            <video
-              autoPlay
-              muted
-              playsInline
-              onLoadedData={() => {
-                // Trigger fade-in when video is loaded and ready
-                setVideoLoaded(true);
-              }}
-              onEnded={() => {
-                // Hide video after it ends
-                setIsVideoPlaying(false);
-                setVideoLoaded(false);
-                const videoElement = document.querySelector('.fullscreen-video') as HTMLVideoElement;
-                if (videoElement) {
-                  videoElement.style.opacity = '0';
-                  setTimeout(() => {
-                    videoElement.style.display = 'none';
-                  }, 1000);
-                }
-              }}
-              className={`fullscreen-video fixed inset-0 w-full h-full object-cover z-[99999] transition-opacity duration-1000 ${
-                videoLoaded ? 'opacity-100 animate-fadeIn' : 'opacity-0'
-              }`}
-            >
-              <source src={'/videos/preloader.mp4'} type='video/mp4' />
-              Your browser does not support the video tag.
-            </video>
-
-            {/* Text Overlay for Video */}
-            {videoLoaded && (
-              <div className="fixed inset-0 z-[100000] flex items-center justify-center pointer-events-none">
-                <div className="text-center px-4">
-                  {/* Main Title */}
-                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-6 animate-fadeInUp drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
-                    STELLAR NEXUS EXPERIENCE
-                  </h1>
-                  
-                  {/* Subtitle */}
-                  <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-8 animate-fadeInUp drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" style={{ animationDelay: '0.4s' }}>
-                    Web3 Early Adopters Program
-                  </p>
-                  
-                  {/* Loading Indicator */}
-                  <div className="animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
-                    <div className="flex justify-center space-x-2">
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"
-                          style={{
-                            animationDelay: `${i * 0.2}s`,
-                            animationDuration: '1s',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Gradient Overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
-                
-                {/* Animated Particles */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
-                      style={{
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        animationDelay: `${Math.random() * 3}s`,
-                        animationDuration: `${2 + Math.random() * 3}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-              
             {/* Hero Section */}
             <HeroSection
-              isVideoPlaying={isVideoPlaying}
+              isVideoPlaying={false}
               miniGamesUnlocked={miniGamesUnlocked}
               onTutorialClick={() => {
                 const tutorialSection = document.getElementById('interactive-tutorial');
@@ -480,7 +385,7 @@ export default function HomePageContent() {
             </div>
 
 
-            <section className={`mx-auto px-4 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
+            <section className='mx-auto px-4 animate-fadeIn'>
               <div className=' mx-auto'>
                 {isConnected && firebaseLoading && !isInitialized && (
                   <div className='text-center py-16'>
@@ -541,7 +446,7 @@ export default function HomePageContent() {
             </section>
 
             {/* Quest System Section */}
-            <section className={`container mx-auto px-4 py-16 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
+            <section className='container mx-auto px-4 py-16 animate-fadeIn'>
               <QuestAndReferralSection
                 account={account}
                 onQuestComplete={(questId, rewards) => {
@@ -558,19 +463,20 @@ export default function HomePageContent() {
 
             {/* Interactive Tutorial Section */}
             <InteractiveTutorialSection
-              isVideoPlaying={isVideoPlaying}
+              isVideoPlaying={false}
               onStartTutorial={() => setShowInteractiveTutorial(true)}
             />
           </>
         )}
       </main>
       
-      {/* Leaderboard Section */}
-      <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
+      {/* Leaderboard Section - Hidden when preloader is active */}
+      {preloaderComplete && hasStarted && (
+        <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
+      )}
 
-
-      {/* Footer - Hidden when preloader or video is playing */}
-      {!isLoading && !isVideoPlaying && hasStarted && (
+      {/* Footer - Hidden when preloader is active */}
+      {preloaderComplete && hasStarted && (
         <div className='animate-fadeIn'>
           <Footer />
         </div>
@@ -587,17 +493,17 @@ export default function HomePageContent() {
             setWalletExpanded(true);
           }
         }}
-        showBanner={!isLoading && !isVideoPlaying && hasStarted}
-        hideFloatingButton={isLoading || isVideoPlaying || !hasStarted}
+        showBanner={preloaderComplete && hasStarted}
+        hideFloatingButton={!preloaderComplete || !hasStarted}
       />
 
-      {/* NEXUS PRIME Character - Only show after started */}
-      {hasStarted && (
+      {/* NEXUS PRIME Character - Only show after preloader complete */}
+      {preloaderComplete && hasStarted && (
         <NexusPrime 
           currentPage='home' 
           currentDemo={activeDemo} 
           walletConnected={isConnected}
-          autoOpen={isVideoPlaying}
+          autoOpen={false}
         />
       )}
 
