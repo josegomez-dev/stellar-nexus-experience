@@ -84,6 +84,12 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         'Drama Queen Escrow 👑🎭 - Arbitration drama at its finest! Who will win the trust battle?',
       'micro-marketplace': 'Gig Economy Madness 🛒 - Where tasks meet escrow in beautiful chaos!',
     },
+    'mini-games': {
+      welcome:
+        'Welcome to the Gaming Store, adventurer! 🎮 Epic Web3 learning games await you!',
+      loading:
+        'Preparing your gaming arsenal... Get ready to level up your blockchain skills! 🚀',
+    },
     wallet: {
       connected:
         'Excellent! Your Stellar wallet is now connected. The power of trustless systems is yours!',
@@ -113,6 +119,8 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
       } else {
         message = characterMessages.demos.welcome;
       }
+    } else if (currentPage === 'mini-games') {
+      message = characterMessages['mini-games'].welcome;
     } else if (currentPage === 'wallet') {
       message = walletConnected
         ? characterMessages.wallet.connected
@@ -183,8 +191,11 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     }
   }, [walletConnected, hasShownWelcome]);
 
-  // Effect to auto-open chat when autoOpen prop is true
+  // Effect to auto-open chat when autoOpen prop is true (but not during loading)
   useEffect(() => {
+    // Don't auto-open if we're showing the loading state
+    if (showDuringLoading) return;
+    
     if (autoOpen && !isExpanded && !hasShownAutoWelcome) {
       setTimeout(() => {
         setIsExpanded(true);
@@ -205,7 +216,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         }, 500); // Small delay after panel opens
       }, 1000); // Small delay to let the component render
     }
-  }, [autoOpen, isExpanded, hasShownAutoWelcome, startTypewriter, walletConnected]);
+  }, [autoOpen, isExpanded, hasShownAutoWelcome, startTypewriter, walletConnected, showDuringLoading]);
 
 
   // Effect to handle clicks outside the chat container
@@ -280,7 +291,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         <div ref={chatContainerRef} className='relative group animate-fadeIn'>
             {/* Character Image/Icon */}
             <div
-              className={`w-26 h-26 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 ${showDuringLoading ? 'border-cyan-400 animate-pulse' : 'border-cyan-400/50'} shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative ${showDuringLoading ? 'shadow-[0_0_40px_rgba(34,211,238,0.8)]' : ''}`}
+              className={`w-26 h-26 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 ${showDuringLoading ? 'border-cyan-400 animate-pulse' : 'border-cyan-400/50'} shadow-2xl ${showDuringLoading ? 'cursor-not-allowed' : 'cursor-pointer'} transition-all duration-300 hover:scale-105 backdrop-blur-sm relative ${showDuringLoading ? 'shadow-[0_0_40px_rgba(34,211,238,0.8)]' : ''}`}
               onClick={() => {
                 // Don't allow interaction during loading
                 if (showDuringLoading) return;
@@ -344,8 +355,8 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
               </div>
             </div>
 
-            {/* Speech Bubble */}
-            {isExpanded && (
+            {/* Speech Bubble - Don't show during loading */}
+            {isExpanded && !showDuringLoading && (
               <div className='absolute bottom-32 left-0 w-80 bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl p-4'>
                 {/* Arrow */}
                 <div className='absolute -bottom-2 left-6 w-4 h-4 bg-slate-900/95 border-b border-r border-cyan-400/30 transform rotate-45'></div>
@@ -505,7 +516,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             
             {/* Loading Tooltip */}
             {showDuringLoading && (
-              <div className='absolute bottom-20 left-0 animate-pulse pointer-events-none'>
+              <div className='absolute bottom-32 left-0 animate-pulse pointer-events-none'>
                 <div className='bg-gradient-to-br from-cyan-900/95 to-purple-900/95 backdrop-blur-xl border border-cyan-400/50 rounded-xl shadow-[0_0_30px_rgba(34,211,238,0.5)] p-3 w-56'>
                   {/* Arrow */}
                   <div className='absolute -bottom-2 left-6 w-3 h-3 bg-cyan-900/95 border-b border-r border-cyan-400/50 transform rotate-45'></div>
@@ -513,10 +524,16 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                   {/* Loading Message */}
                   <div className='text-center'>
                     <p className='text-cyan-200 text-sm font-bold animate-pulse'>
-                      ⚡ Initializing NEXUS PRIME
+                      {currentPage === 'mini-games' 
+                        ? '🎮 Loading Gaming Store' 
+                        : '⚡ Initializing Web3 Learning Platform'
+                      }
                     </p>
                     <p className='text-white/80 text-xs mt-2'>
-                      Connecting to Stellar Network...
+                      {currentPage === 'mini-games'
+                        ? 'Preparing epic web3 games...'
+                        : 'Connecting to Stellar Network...'
+                      }
                     </p>
                     <div className='flex justify-center items-center space-x-1 mt-2'>
                       <div className='w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce' style={{ animationDelay: '0ms' }}></div>

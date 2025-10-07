@@ -4,27 +4,39 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
-import { EscrowProvider } from '@/contexts/data/EscrowContext';
-import { WalletProvider, useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import { useFirebase } from '@/contexts/data/FirebaseContext';
+import { useToast } from '@/contexts/ui/ToastContext';
+import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
+import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
+import { ToastContainer } from '@/components/ui/Toast';
+import { AuthBanner } from '@/components/ui/auth/AuthBanner';
+import { AuthModal } from '@/components/ui/auth/AuthModal';
+import { UserProfile } from '@/components/ui/navigation/UserProfile';
+import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
+import { AUDIO_VOLUMES } from '@/utils/constants/ui';
 
-function MiniGameStoreContent() {
+export default function MiniGameStore() {
   const { isConnected } = useGlobalWallet();
+  const { account, isLoading: firebaseLoading, isInitialized } = useFirebase();
+  const { addToast } = useToast();
   const [activePromo, setActivePromo] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showDonationModal, setShowDonationModal] = useState<string | null>(null);
   const [hoveredGame, setHoveredGame] = useState<string | null>(null);
   const [gamesPerPage, setGamesPerPage] = useState(4);
-  const [isLoading, setIsLoading] = useState(() => {
-    // Check if this is the first time loading the page
-    if (typeof window !== 'undefined') {
-      const hasLoadedBefore = localStorage.getItem('miniGamesPageLoaded');
-      return !hasLoadedBefore;
-    }
-    return true;
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
+  const [walletExpanded, setWalletExpanded] = useState(false);
+  
+  // Authentication modals
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   // Epic promotional banners
   const promotionalBanners = [
@@ -84,7 +96,7 @@ function MiniGameStoreContent() {
     { id: 'coming-soon', name: '⏳ Coming Soon', count: 1 },
   ];
 
-  // Loading effect - only on first load
+  // Loading effect - simulate loading (auto-start)
   useEffect(() => {
     if (!isLoading) return; // Skip if already loaded
 
@@ -105,16 +117,47 @@ function MiniGameStoreContent() {
         clearInterval(interval);
         setTimeout(() => {
           setIsLoading(false);
-          // Mark that the page has been loaded
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('miniGamesPageLoaded', 'true');
-          }
         }, 500);
       }
     }, 800);
 
     return () => clearInterval(interval);
   }, [isLoading]);
+
+  // Listen for wallet sidebar state changes
+  useEffect(() => {
+    const handleWalletSidebarToggle = (event: CustomEvent) => {
+      setWalletSidebarOpen(event.detail.isOpen);
+      // Always ensure the sidebar is expanded when it opens
+      if (event.detail.isOpen) {
+        setWalletExpanded(true);
+      } else {
+        setWalletExpanded(event.detail.isExpanded);
+      }
+    };
+
+    const handleOpenUserProfile = () => {
+      setShowUserProfile(true);
+    };
+
+    window.addEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
+    window.addEventListener('openUserProfile', handleOpenUserProfile);
+    return () => {
+      window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
+      window.removeEventListener('openUserProfile', handleOpenUserProfile);
+    };
+  }, []);
+
+  // Authentication handlers
+  const handleSignUpClick = () => {
+    setAuthModalMode('signup');
+    setShowAuthModal(true);
+  };
+
+  const handleSignInClick = () => {
+    setAuthModalMode('signin');
+    setShowAuthModal(true);
+  };
 
   // Enhanced mini games with epic descriptions and thumbnails
   const miniGames = [
@@ -165,10 +208,10 @@ function MiniGameStoreContent() {
       currentPlayers: 892,
       rating: 4.9,
       thumbnail: '/images/games/escrow-puzzle-master.png',
-      progress: 0,
-      estimatedRelease: 'Available Now',
-      donationGoal: 0,
-      currentDonations: 0,
+      progress: 35,
+      estimatedRelease: 'Q1 2025',
+      donationGoal: 4000,
+      currentDonations: 2100,
       features: [
         'Escrow Systems',
         'Multi-Sig Wallets',
@@ -373,9 +416,27 @@ function MiniGameStoreContent() {
   };
 
   return (
-    <WalletProvider>
-      <EscrowProvider>
-        <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
+    <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
+          {/* Unified Video Preloader Screen - Auto-starts when page loads */}
+          {!preloaderComplete && (
+            <VideoPreloaderScreen 
+              isLoading={isLoading}
+              videoPath="/videos/preloader.mp4"
+              audioPath="/sounds/intro.mp3"
+              secondaryAudioPath="/sounds/nexus_voice.mp3"
+              title="NEXUS WEB3 LEARNING Experience"
+              subtitle="Build the future on Stellar"
+              showText={true}
+              showVideoAfterLoad={true}
+              minDuration={3000}
+              audioVolumes={{
+                primary: AUDIO_VOLUMES.intro,
+                secondary: AUDIO_VOLUMES.nexusVoice,
+              }}
+              onComplete={() => setPreloaderComplete(true)}
+            />
+          )}
+
           {/* Epic Background Effects */}
           <div className='absolute inset-0'>
             {/* Floating Particles */}
@@ -403,10 +464,22 @@ function MiniGameStoreContent() {
             </div>
           </div>
 
-          <Header />
+          {/* Header - Always visible */}
+          {!isLoading && (
+            <div className='animate-fadeIn'>
+              <Header />
+            </div>
+          )}
 
-          {/* Loading Screen */}
-          {isLoading && (
+          {/* Authentication Banner */}
+          {!isLoading && preloaderComplete && (
+            <div className='animate-fadeIn'>
+              <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
+            </div>
+          )}
+
+          {/* Loading Screen - REMOVED (now using VideoPreloaderScreen) */}
+          {false && (
             <div className='fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center'>
               {/* Animated Background */}
               <div className='absolute inset-0 overflow-hidden'>
@@ -487,8 +560,13 @@ function MiniGameStoreContent() {
             </div>
           )}
 
-          {/* Main Content */}
-          <main className='relative z-10 pt-20 '>
+          {/* Main Content - Show when preloader is complete */}
+          {preloaderComplete && (
+          <main 
+            className={`relative z-10 pt-20 animate-fadeIn ${
+              walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
+            } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
+          >
             <div className='container mx-auto px-4'>
               <div className='max-w-7xl mx-auto'>
                 {/* Epic Hero Section */}
@@ -1000,7 +1078,7 @@ function MiniGameStoreContent() {
                           </p>
 
                           {/* Player Count */}
-                          <div className='mb-6 text-white/80 text-sm'>👥 {banner.players}</div>
+                          {/* <div className='mb-6 text-white/80 text-sm'>👥 {banner.players}</div> */}
 
                           {/* <button className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-2xl border-2 border-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl backdrop-blur-sm">
                               {banner.cta} →
@@ -1028,15 +1106,56 @@ function MiniGameStoreContent() {
               </div>
             </div>
           </main>
+          )}
 
-          {/* Nexus Prime */}
-          <NexusPrime currentPage='mini-games' walletConnected={isConnected} />
+          {/* Wallet Sidebar - Consistent with home page */}
+          <WalletSidebar
+            isOpen={walletSidebarOpen}
+            onToggle={() => {
+              const newOpenState = !walletSidebarOpen;
+              setWalletSidebarOpen(newOpenState);
+              // Always ensure it's expanded when opening
+              if (newOpenState) {
+                setWalletExpanded(true);
+              }
+            }}
+            showBanner={preloaderComplete}
+            hideFloatingButton={!preloaderComplete}
+          />
 
-          <Footer />
-        </div>
+          {/* NEXUS PRIME Character - Show during loading for cool effect */}
+          <NexusPrime 
+            currentPage='mini-games' 
+            walletConnected={isConnected}
+            autoOpen={false}
+            showDuringLoading={!preloaderComplete}
+          />
 
-        {/* Enhanced Donation Modal with Game Info */}
-        {showDonationModal && (
+          {/* Footer - Only show when preloader is complete */}
+          {preloaderComplete && (
+            <div className='animate-fadeIn'>
+              <Footer />
+            </div>
+          )}
+
+          {/* Authentication Modal */}
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            mode={authModalMode}
+          />
+
+          {/* User Profile Modal */}
+          <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
+
+          {/* Account Status Indicator */}
+          {preloaderComplete && <AccountStatusIndicator />}
+
+          {/* Toast Container */}
+          {preloaderComplete && <ToastContainer />}
+
+          {/* Enhanced Donation Modal with Game Info */}
+          {showDonationModal && (
           <div className='fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
             <div className='bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-white/20 shadow-2xl max-w-lg w-full p-8'>
               <div className='text-center mb-6'>
@@ -1051,6 +1170,7 @@ function MiniGameStoreContent() {
               {(() => {
                 const game = miniGames.find(g => g.id === showDonationModal);
                 if (!game) return null;
+                const donationProgress = (game.currentDonations / game.donationGoal) * 100;
                 return (
                   <div className='mb-6 p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-400/20'>
                     <div className='text-center mb-4'>
@@ -1066,13 +1186,13 @@ function MiniGameStoreContent() {
                         <div
                           className='h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 shadow-lg'
                           style={{
-                            width: `${Math.min((game.currentDonations / game.donationGoal) * 100, 100)}%`,
+                            width: `${Math.min(donationProgress, 100)}%`,
                           }}
                         ></div>
                       </div>
 
                       <p className='text-sm text-purple-200 font-medium mb-2'>
-                        {Math.round((game.currentDonations / game.donationGoal) * 100)}% funded
+                        {Math.round(donationProgress)}% funded
                       </p>
 
                       <p className='text-xs text-white/60'>
@@ -1110,18 +1230,7 @@ function MiniGameStoreContent() {
               </div>
             </div>
           </div>
-        )}
-      </EscrowProvider>
-    </WalletProvider>
-  );
-}
-
-export default function MiniGameStore() {
-  return (
-    <WalletProvider>
-      <EscrowProvider>
-        <MiniGameStoreContent />
-      </EscrowProvider>
-    </WalletProvider>
+          )}
+    </div>
   );
 }

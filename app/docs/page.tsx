@@ -4,15 +4,10 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
-import { EscrowProvider } from '@/contexts/data/EscrowContext';
-import { WalletProvider, useGlobalWallet } from '@/contexts/wallet/WalletContext';
-import { AuthProvider } from '@/contexts/auth/AuthContext';
-import { ToastProvider } from '@/contexts/ui/ToastContext';
-import { TransactionProvider } from '@/contexts/data/TransactionContext';
-import { AccountProvider } from '@/contexts/auth/AccountContext';
+import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import Image from 'next/image';
 
-function DocsPageContent() {
+export default function DocsPage() {
   const { isConnected } = useGlobalWallet();
   const [activeTab, setActiveTab] = useState('developer'); // 'developer' or 'founder'
   const [activeSection, setActiveSection] = useState('starters');
@@ -75,14 +70,8 @@ function DocsPageContent() {
   const sections = activeTab === 'developer' ? developerSections : founderSections;
 
   return (
-    <WalletProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <TransactionProvider>
-            <AccountProvider>
-              <EscrowProvider>
-                <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900'>
-                  <Header />
+    <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900'>
+      <Header />
 
                   {/* Loading Screen */}
                   {isLoading && (
@@ -1322,15 +1311,5 @@ export default VibecodingComponent;`}
 
                   <Footer />
                 </div>
-              </EscrowProvider>
-            </AccountProvider>
-          </TransactionProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </WalletProvider>
   );
-}
-
-export default function DocsPage() {
-  return <DocsPageContent />;
 }

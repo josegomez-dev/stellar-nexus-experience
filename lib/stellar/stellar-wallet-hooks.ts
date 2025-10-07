@@ -62,7 +62,20 @@ export interface UseWalletReturn {
 }
 
 export const useWallet = (): UseWalletReturn => {
-  const [walletData, setWalletData] = useState<WalletData | null>(null);
+  // Initialize from localStorage if available
+  const [walletData, setWalletData] = useState<WalletData | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('stellar-wallet-data');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isFreighterAvailable, setIsFreighterAvailable] = useState(false);
@@ -73,6 +86,17 @@ export const useWallet = (): UseWalletReturn => {
   // Use refs to prevent repeated checks
   const hasCheckedFreighter = useRef(false);
   const checkInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Persist wallet data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (walletData) {
+        localStorage.setItem('stellar-wallet-data', JSON.stringify(walletData));
+      } else {
+        localStorage.removeItem('stellar-wallet-data');
+      }
+    }
+  }, [walletData]);
 
   // Periodic Freighter availability check
   useEffect(() => {
@@ -100,7 +124,11 @@ export const useWallet = (): UseWalletReturn => {
           setWalletKit(globalWalletKit);
           const supportedWallets = await globalWalletKit.getSupportedWallets();
           setAvailableWallets(supportedWallets);
-          await checkConnectionStatus(globalWalletKit);
+          
+          // If we have saved wallet data, try to reconnect
+          if (walletData?.isConnected) {
+            await checkConnectionStatus(globalWalletKit);
+          }
           return;
         }
 
@@ -151,7 +179,7 @@ export const useWallet = (): UseWalletReturn => {
         const freighterAvailable = freighterWallet?.isAvailable || false;
         setIsFreighterAvailable(freighterAvailable);
 
-        // Check if already connected
+        // Check if already connected OR if we have saved wallet data
         await checkConnectionStatus(kit);
         isInitializing = false;
       } catch (error) {
@@ -190,7 +218,7 @@ export const useWallet = (): UseWalletReturn => {
               }
             : null;
 
-          setWalletData({
+          const newWalletData = {
             publicKey: addressResponse.address,
             network: networkResponse.network,
             isConnected: true,
@@ -202,10 +230,29 @@ export const useWallet = (): UseWalletReturn => {
             walletId: connectedWallet?.id || 'unknown',
             walletIcon: connectedWallet?.icon,
             walletUrl: connectedWallet?.url,
-          });
+          };
+          
+          setWalletData(newWalletData);
+          
+          // Persist to localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('stellar-wallet-data', JSON.stringify(newWalletData));
+          }
         }
       } catch (error) {
-        // Connection check failed, continue without error
+        // Connection check failed, check if we have saved data
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('stellar-wallet-data');
+          if (saved) {
+            try {
+              const savedData = JSON.parse(saved);
+              // Don't mark as connected if check failed, but keep the data
+              console.log('Using saved wallet data, connection will be re-established');
+            } catch (e) {
+              console.warn('Failed to parse saved wallet data:', e);
+            }
+          }
+        }
         console.warn('Failed to check connection status:', error);
       }
     };
@@ -458,9 +505,10 @@ export const useWallet = (): UseWalletReturn => {
       }
       setWalletData(null);
       
-      // Clear localStorage flags to reset user experience on reconnect
+      // Clear all localStorage wallet data
       if (typeof window !== 'undefined') {
         localStorage.removeItem('wallet-connected-before');
+        localStorage.removeItem('stellar-wallet-data');
       }
     } catch (err) {}
   }, [walletKit]);

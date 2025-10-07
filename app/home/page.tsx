@@ -23,18 +23,16 @@ import { AuthModal } from '@/components/ui/auth/AuthModal';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
-import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
+import { PreloaderScreen } from '@/components/ui/PreloaderScreen';
 import { QuestAndReferralSection } from '@/components/ui/quest/QuestAndReferralSection';
 import { TOP_BADGES } from '@/utils/constants/demos';
 import { 
   DemoSelector, 
   HeroSection, 
   InteractiveTutorialSection,
-  LeaderboardSection,
-  StartButtonScreen 
+  LeaderboardSection
 } from '@/components/home';
 import { DEMO_CARDS } from '@/utils/constants/demos';
-import { LOADING_STEPS, AUDIO_VOLUMES } from '@/utils/constants/ui';
 
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
@@ -88,8 +86,6 @@ export default function HomePageContent() {
     completionTime: number;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingStep, setLoadingStep] = useState(0);
   const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
   const [showTechTree, setShowTechTree] = useState(false);
 
@@ -97,52 +93,21 @@ export default function HomePageContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [preloaderComplete, setPreloaderComplete] = useState(false);
 
   // Initialize Firebase data on app load
   useEffect(() => {
     // Firebase initialization is handled by FirebaseContext
   }, []);
 
-  // Check if this is the first time loading the page
+  // Simple preloader - only show until Firebase is initialized
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hasLoadedBefore = localStorage.getItem('homePageLoaded');
-      if (hasLoadedBefore) {
-        // Don't auto-start anything - wait for user to click start button
-        // Keep isLoading as true and hasStarted as false until user clicks
-      }
+    if (isInitialized && demoStats.length >= 0 && isLoading) {
+      // Small delay for smooth transition
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
-  }, []);
-
-  // Preloader effect - track actual loading progress
-  useEffect(() => {
-    if (!isLoading || !hasStarted) return; // Skip if already loaded or not started
-
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      if (currentStep < LOADING_STEPS.length) {
-        setLoadingStep(currentStep);
-        setLoadingProgress(LOADING_STEPS[currentStep].progress);
-        currentStep++;
-      } else {
-        // Wait for Firebase initialization and demo stats to complete
-        if (isInitialized && demoStats.length >= 0) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsLoading(false);
-            // Mark that the page has been loaded
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('homePageLoaded', 'true');
-            }
-          }, 500);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isLoading, hasStarted, isInitialized, demoStats]);
+  }, [isInitialized, demoStats, isLoading]);
 
   // Fallback timeout to ensure preloader doesn't get stuck
   useEffect(() => {
@@ -150,7 +115,7 @@ export default function HomePageContent() {
       const timeout = setTimeout(() => {
         console.log('Preloader timeout - forcing completion');
         setIsLoading(false);
-      }, 15000); // 15 second timeout
+      }, 5000); // 5 second timeout
 
       return () => clearTimeout(timeout);
     }
@@ -258,13 +223,6 @@ export default function HomePageContent() {
     setFeedbackDemoData(null);
   };
 
-  // Handle start button click
-  const handleStartClick = () => {
-    // Start the experience
-    setHasStarted(true);
-    setIsLoading(true);
-  };
-
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 relative overflow-hidden'>
       {/* Structured Data for SEO */}
@@ -310,15 +268,18 @@ export default function HomePageContent() {
           })
         }}
       />
-      {/* Header - Hidden when preloader is active */}
-      {preloaderComplete && hasStarted && (
+      {/* Simple Preloader Screen */}
+      <PreloaderScreen isLoading={isLoading} />
+
+      {/* Header */}
+      {!isLoading && (
         <div className='animate-fadeIn'>
           <Header />
         </div>
       )}
 
-      {/* Authentication Banner - Hidden when preloader is active */}
-      {preloaderComplete && hasStarted && (
+      {/* Authentication Banner */}
+      {!isLoading && (
         <div className='animate-fadeIn'>
           <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
         </div>
@@ -333,31 +294,8 @@ export default function HomePageContent() {
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
-        {/* Start Button Screen - Show before everything else */}
-        {!hasStarted && <StartButtonScreen onStart={handleStartClick} />}
-
-        {/* Unified Video Preloader Screen - Handles loading + video intro */}
-        {hasStarted && !preloaderComplete && (
-          <VideoPreloaderScreen 
-            isLoading={isLoading}
-            videoPath="/videos/preloader.mp4"
-            audioPath="/sounds/intro.mp3"
-            secondaryAudioPath="/sounds/nexus_voice.mp3"
-            title="STELLAR NEXUS EXPERIENCE"
-            subtitle="Web3 Early Adopters Program"
-            showText={true}
-            showVideoAfterLoad={true}
-            minDuration={3000}
-            audioVolumes={{
-              primary: AUDIO_VOLUMES.intro,
-              secondary: AUDIO_VOLUMES.nexusVoice,
-            }}
-            onComplete={() => setPreloaderComplete(true)}
-          />
-        )}
-
-        {/* Main Content - Only show when preloader is complete */}
-        {preloaderComplete && hasStarted && (
+        {/* Main Content - Show after loading */}
+        {!isLoading && (
           <>
             {/* Hero Section */}
             <HeroSection
@@ -470,13 +408,13 @@ export default function HomePageContent() {
         )}
       </main>
       
-      {/* Leaderboard Section - Hidden when preloader is active */}
-      {preloaderComplete && hasStarted && (
+      {/* Leaderboard Section */}
+      {!isLoading && (
         <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
       )}
 
-      {/* Footer - Hidden when preloader is active */}
-      {preloaderComplete && hasStarted && (
+      {/* Footer */}
+      {!isLoading && (
         <div className='animate-fadeIn'>
           <Footer />
         </div>
@@ -493,18 +431,17 @@ export default function HomePageContent() {
             setWalletExpanded(true);
           }
         }}
-        showBanner={preloaderComplete && hasStarted}
-        hideFloatingButton={!preloaderComplete || !hasStarted}
+        showBanner={!isLoading}
+        hideFloatingButton={isLoading}
       />
 
-      {/* NEXUS PRIME Character - Show during loading for cool effect */}
-      {hasStarted && (
+      {/* NEXUS PRIME Character */}
+      {!isLoading && (
         <NexusPrime 
           currentPage='home' 
           currentDemo={activeDemo} 
           walletConnected={isConnected}
           autoOpen={false}
-          showDuringLoading={!preloaderComplete}
         />
       )}
 
@@ -564,8 +501,8 @@ export default function HomePageContent() {
       {/* User Profile Modal */}
       <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
-      {/* Account Status Indicator - Only show after started */}
-      {hasStarted && <AccountStatusIndicator />}
+      {/* Account Status Indicator */}
+      {!isLoading && <AccountStatusIndicator />}
 
       {/* Demo Feedback Modal */}
       {showFeedbackModal && feedbackDemoData && (
@@ -586,8 +523,8 @@ export default function HomePageContent() {
       />
 
 
-      {/* Toast Container - Only show after started */}
-      {hasStarted && <ToastContainer />}
+      {/* Toast Container */}
+      {!isLoading && <ToastContainer />}
     </div>
   );
 }

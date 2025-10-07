@@ -1,69 +1,62 @@
 'use client';
 
-import Image from 'next/image';
+import Image from "next/image";
 
 interface PreloaderScreenProps {
   isLoading: boolean;
-  title?: string;
-  subtitle?: string;
-  logoPath?: string;
-  logoAlt?: string;
 }
 
-export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({
-  isLoading,
-  title = 'INITIALIZING STELLAR NEXUS EXPERIENCE',
-  subtitle = 'Preparing your trustless work experience...',
-  logoPath = '/images/logo/logoicon.png',
-  logoAlt = 'STELLAR NEXUS',
-}) => {
+export const PreloaderScreen: React.FC<PreloaderScreenProps> = ({ isLoading }) => {
   if (!isLoading) return null;
 
   return (
-    <div className='fixed inset-0 z-[9999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center'>
-      {/* Animated Background */}
-      <div className='absolute inset-0 overflow-hidden'>
-        {/* Floating Energy Orbs */}
-        <div className='absolute top-1/4 left-1/4 w-32 h-32 bg-brand-400/20 rounded-full animate-ping'></div>
-        <div
-          className='absolute top-1/3 right-1/4 w-24 h-24 bg-accent-400/20 rounded-full animate-ping'
-          style={{ animationDelay: '0.5s' }}
-        ></div>
-        <div
-          className='absolute bottom-1/3 left-1/3 w-28 h-28 bg-brand-500/20 rounded-full animate-ping'
-          style={{ animationDelay: '1s' }}
-        ></div>
-        <div
-          className='absolute bottom-1/4 right-1/3 w-20 h-20 bg-accent-500/20 rounded-full animate-ping'
-          style={{ animationDelay: '1.5s' }}
-        ></div>
-
-        {/* Energy Grid */}
-        <div className='absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.1)_0%,_transparent_70%)] animate-pulse'></div>
+    <div className="fixed inset-0 z-[99999] bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center">
+      {/* Simple animated background */}
+      <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 3}s`,
+            }}
+          />
+        ))}
       </div>
 
-      {/* Main Content */}
-      <div className='relative z-10 text-center'>
-        {/* Logo Animation */}
-        <div className='mb-8 animate-bounce'>
-          <Image
-            src={logoPath}
-            alt={logoAlt}
-            width={120}
-            height={120}
-            className='w-30 h-30'
-            style={{ width: 'auto', height: 'auto' }}
-          />
+      {/* Loading Content */}
+      <div className="relative z-10 text-center">
+        {/* Image Logo */}
+        <div className="flex justify-center">
+          <Image className="animate-pulse" src="/images/logo/logoicon.png" alt="Stellar Nexus" width={150} height={150} />
         </div>
+        {/* Title Text */}
+        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-2">
+          Stellar Nexus Experience
+        </h2>
+        <p className="text-white/70 text-lg animate-pulse">
+          Web3 Early Adopters Program
+        </p>
 
-        {/* Loading Text */}
-        <h1 className='text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-accent-600 mb-6 animate-pulse'>
-          {title}
-        </h1>
-
-        {/* Subtitle */}
-        <p className='text-xl text-brand-300 mb-8 animate-pulse'>{subtitle}</p>
-
+        {/* Pulsing Dots */}
+        <div className="flex justify-center space-x-2 mt-4">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2 h-2 bg-brand-400 rounded-full animate-pulse"
+              style={{
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '1s',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
