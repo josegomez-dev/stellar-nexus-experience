@@ -7,6 +7,9 @@ export * from './account';
 // Trustless Work Types
 export * from './trustless-work';
 
+// UI Component Types
+export * from './ui';
+
 // Re-export commonly used types for convenience
 export type {
   DemoProgress,

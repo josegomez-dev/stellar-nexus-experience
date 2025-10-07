@@ -209,3 +209,81 @@ export const DEMO_COLOR_VALUES: Record<string, Record<number, string>> = {
     3: '#f0abfc',
   },
 };
+
+// Helper functions
+export const getDemoButtonColors = (demoColor: string) => {
+  const mapping = DEMO_COLOR_MAPPINGS.button[demoColor as keyof typeof DEMO_COLOR_MAPPINGS.button];
+  if (mapping) return mapping;
+  
+  return {
+    gradient: 'from-brand-500 via-accent-500 to-brand-400',
+    hoverGradient: 'hover:from-brand-600 hover:via-accent-600 hover:to-brand-500',
+    shadow: 'hover:shadow-brand-500/50',
+  };
+};
+
+export const getDemoBadgeColors = (demoColor: string) => {
+  const mapping = DEMO_COLOR_MAPPINGS.badge[demoColor as keyof typeof DEMO_COLOR_MAPPINGS.badge];
+  if (mapping) return mapping;
+  
+  return {
+    gradient: 'from-brand-500 to-brand-400',
+    background: 'from-brand-500/20 to-brand-400/20',
+    border: 'border-brand-400/30',
+    titleColor: 'text-brand-200',
+    descriptionColor: 'text-brand-300/80',
+  };
+};
+
+export const getDemoColorValue = (demoColor: string, variant: number) => {
+  const colors = DEMO_COLOR_VALUES[demoColor];
+  if (colors && colors[variant]) return colors[variant];
+  
+  // Default to brand colors
+  return variant === 1 ? '#0ea5e9' : variant === 2 ? '#38bdf8' : '#7dd3fc';
+};
+
+export const getDemoCardColors = (demoColor: string, isCompleted: boolean = false) => {
+  const config = DEMO_COLOR_MAPPINGS.card[demoColor as keyof typeof DEMO_COLOR_MAPPINGS.card];
+  
+  if (!config) {
+    return {
+      background: 'bg-gradient-to-br from-white/5 to-white/10',
+      hoverBackground: 'hover:from-white/10 hover:to-white/15',
+      border: 'border-white/20',
+      hoverBorder: 'hover:border-white/30',
+      titleColor: 'text-white',
+      hoverTitleColor: 'group-hover:text-brand-200',
+      shadow: '',
+      hoverShadow: '',
+    };
+  }
+
+  const baseOpacity = isCompleted ? config.completedOpacity : config.baseOpacity;
+  const hoverOpacity = isCompleted ? config.completedHoverOpacity : config.hoverOpacity;
+  const borderOpacity = isCompleted ? config.completedBorderOpacity : config.borderOpacity;
+  const hoverBorderOpacity = isCompleted ? config.completedHoverBorderOpacity : config.hoverBorderOpacity;
+  const shadowOpacity = isCompleted ? config.completedShadowOpacity : config.shadowOpacity;
+  const hoverShadowOpacity = isCompleted ? config.completedHoverShadowOpacity : config.hoverShadowOpacity;
+
+  // Map demo colors to actual color names
+  const colorMap: Record<string, string> = {
+    'from-brand-500 to-brand-400': 'brand',
+    'from-success-500 to-success-400': 'success',
+    'from-warning-500 to-warning-400': 'warning',
+    'from-accent-500 to-accent-400': 'accent',
+  };
+
+  const color = colorMap[demoColor] || 'brand';
+
+  return {
+    background: `bg-gradient-to-br from-${color}-500/${baseOpacity} via-${color}-400/${baseOpacity - 5} to-${color}-600/${baseOpacity}`,
+    hoverBackground: `hover:from-${color}-500/${hoverOpacity} hover:via-${color}-400/${hoverOpacity - 5} hover:to-${color}-600/${hoverOpacity}`,
+    border: `border-${color}-400/${borderOpacity}`,
+    hoverBorder: `hover:border-${color}-400/${hoverBorderOpacity}`,
+    titleColor: `text-${color}-200`,
+    hoverTitleColor: `group-hover:text-${color}-100`,
+    shadow: `shadow-${color}-500/${shadowOpacity}`,
+    hoverShadow: `hover:shadow-${color}-500/${hoverShadowOpacity}`,
+  };
+};
