@@ -24,6 +24,8 @@ import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import { PreloaderScreen } from '@/components/ui/PreloaderScreen';
+import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
+import { StartButtonScreen } from '@/components/home/StartButtonScreen';
 import { QuestAndReferralSection } from '@/components/ui/quest/QuestAndReferralSection';
 import { TOP_BADGES } from '@/utils/constants/demos';
 import { 
@@ -33,6 +35,7 @@ import {
   LeaderboardSection
 } from '@/components/home';
 import { DEMO_CARDS } from '@/utils/constants/demos';
+import { AUDIO_VOLUMES } from '@/utils/constants/ui';
 
 export default function HomePageContent() {
   const { isConnected } = useGlobalWallet();
@@ -88,6 +91,12 @@ export default function HomePageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [showImmersiveDemo, setShowImmersiveDemo] = useState(false);
   const [showTechTree, setShowTechTree] = useState(false);
+  
+  // Preloader flow state
+  const [showStartButton, setShowStartButton] = useState(true);
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [hasStartedExperience, setHasStartedExperience] = useState(false);
 
   // Authentication modals
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -99,19 +108,37 @@ export default function HomePageContent() {
     // Firebase initialization is handled by FirebaseContext
   }, []);
 
-  // Simple preloader - only show until Firebase is initialized
+  // Loading effect - simulate loading (auto-start when start button is clicked)
   useEffect(() => {
-    if (isInitialized && demoStats.length >= 0 && isLoading) {
-      // Small delay for smooth transition
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    }
-  }, [isInitialized, demoStats, isLoading]);
+    if (!isLoading || showStartButton) return; // Skip if already loaded or start button is showing
+
+    const loadingSteps = [
+      { progress: 20, message: 'Loading Experience Engine...' },
+      { progress: 40, message: 'Initializing Web3 Demos...' },
+      { progress: 60, message: 'Preparing Trustless Work System...' },
+      { progress: 80, message: 'Setting up Stellar Network...' },
+      { progress: 100, message: 'Experience Ready to Launch!' },
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < loadingSteps.length) {
+        setLoadingProgress(loadingSteps[currentStep].progress);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      }
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, [isLoading, showStartButton]);
 
   // Fallback timeout to ensure preloader doesn't get stuck
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && !showStartButton) {
       const timeout = setTimeout(() => {
         console.log('Preloader timeout - forcing completion');
         setIsLoading(false);
@@ -119,7 +146,30 @@ export default function HomePageContent() {
 
       return () => clearTimeout(timeout);
     }
-  }, [isLoading]);
+  }, [isLoading, showStartButton]);
+
+  // Check if this is user's first visit to the page
+  useEffect(() => {
+    const hasVisitedHome = localStorage.getItem('hasVisitedHome');
+    if (hasVisitedHome) {
+      // User has visited before, skip the start button and preloader
+      setShowStartButton(false);
+      setPreloaderComplete(true);
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Start button handler
+  const handleStartExperience = () => {
+    setHasStartedExperience(true);
+    setShowStartButton(false);
+    // Mark that user has visited the home page
+    localStorage.setItem('hasVisitedHome', 'true');
+    // Trigger loading after start button is clicked
+    setTimeout(() => {
+      setIsLoading(true);
+    }, 100);
+  };
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -268,18 +318,40 @@ export default function HomePageContent() {
           })
         }}
       />
-      {/* Simple Preloader Screen */}
-      <PreloaderScreen isLoading={isLoading} />
+      {/* Start Button Screen - Shows first */}
+      {showStartButton && (
+        <StartButtonScreen onStart={handleStartExperience} />
+      )}
+
+      {/* Unified Video Preloader Screen - Shows after start button is clicked */}
+      {!showStartButton && !preloaderComplete && (
+        <VideoPreloaderScreen 
+          isLoading={isLoading}
+          videoPath="/videos/preloader.mp4"
+          audioPath="/sounds/home_welcome.mp3"
+          secondaryAudioPath="/sounds/nexus_voice.mp3"
+          title="STELLAR NEXUS EXPERIENCE"
+          subtitle="Web3 Early Adopters Program"
+          showText={true}
+          showVideoAfterLoad={true}
+          minDuration={3000}
+          audioVolumes={{
+            primary: AUDIO_VOLUMES.intro,
+            secondary: AUDIO_VOLUMES.nexusVoice,
+          }}
+          onComplete={() => setPreloaderComplete(true)}
+        />
+      )}
 
       {/* Header */}
-      {!isLoading && (
+      {preloaderComplete && (
         <div className='animate-fadeIn'>
           <Header />
         </div>
       )}
 
       {/* Authentication Banner */}
-      {!isLoading && (
+      {preloaderComplete && (
         <div className='animate-fadeIn'>
           <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
         </div>
@@ -294,8 +366,8 @@ export default function HomePageContent() {
           walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
         } ${!walletSidebarOpen ? 'pb-32' : 'pb-8'}`}
       >
-        {/* Main Content - Show after loading */}
-        {!isLoading && (
+        {/* Main Content - Show after preloader is complete */}
+        {preloaderComplete && (
           <>
             {/* Hero Section */}
             <HeroSection
@@ -409,12 +481,12 @@ export default function HomePageContent() {
       </main>
       
       {/* Leaderboard Section */}
-      {!isLoading && (
+      {preloaderComplete && (
         <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
       )}
 
       {/* Footer */}
-      {!isLoading && (
+      {preloaderComplete && (
         <div className='animate-fadeIn'>
           <Footer />
         </div>
@@ -431,19 +503,18 @@ export default function HomePageContent() {
             setWalletExpanded(true);
           }
         }}
-        showBanner={!isLoading}
-        hideFloatingButton={isLoading}
+        showBanner={preloaderComplete}
+        hideFloatingButton={!preloaderComplete}
       />
 
-      {/* NEXUS PRIME Character */}
-      {!isLoading && (
-        <NexusPrime 
-          currentPage='home' 
-          currentDemo={activeDemo} 
-          walletConnected={isConnected}
-          autoOpen={false}
-        />
-      )}
+      {/* NEXUS PRIME Character - Show during loading only after user starts experience */}
+      <NexusPrime 
+        currentPage='home' 
+        currentDemo={activeDemo} 
+        walletConnected={isConnected}
+        autoOpen={false}
+        showDuringLoading={!preloaderComplete && hasStartedExperience}
+      />
 
       {/* Onboarding Overlay */}
       <OnboardingOverlay
@@ -502,7 +573,7 @@ export default function HomePageContent() {
       <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
       {/* Account Status Indicator */}
-      {!isLoading && <AccountStatusIndicator />}
+      {preloaderComplete && <AccountStatusIndicator />}
 
       {/* Demo Feedback Modal */}
       {showFeedbackModal && feedbackDemoData && (
@@ -524,7 +595,7 @@ export default function HomePageContent() {
 
 
       {/* Toast Container */}
-      {!isLoading && <ToastContainer />}
+      {preloaderComplete && <ToastContainer />}
     </div>
   );
 }

@@ -526,13 +526,17 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                     <p className='text-cyan-200 text-sm font-bold animate-pulse'>
                       {currentPage === 'mini-games' 
                         ? '🎮 Loading Gaming Store' 
+                        : currentPage === 'home'
+                        ? '🌟 Loading Stellar Nexus Experience'
                         : '⚡ Initializing Web3 Learning Platform'
                       }
                     </p>
                     <p className='text-white/80 text-xs mt-2'>
                       {currentPage === 'mini-games'
                         ? 'Preparing epic web3 games...'
-                        : 'Connecting to Stellar Network...'
+                        : currentPage === '/'
+                        ? 'Web3 Early Adopters Program...'
+                        : 'Web3 Early Adopters Program...'
                       }
                     </p>
                     <div className='flex justify-center items-center space-x-1 mt-2'>

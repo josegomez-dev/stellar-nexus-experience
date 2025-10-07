@@ -8,7 +8,7 @@ interface StartButtonScreenProps {
 
 export const StartButtonScreen = ({ onStart }: StartButtonScreenProps) => {
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-neutral-900 via-brand-900 to-neutral-900 flex items-center justify-center z-[100000]">
+    <div className="fixed inset-0 flex items-center justify-center z-[100000]">
       {/* Animated background elements */}
       <div className='absolute inset-0 opacity-20 bg-gradient-to-r from-brand-500/10 via-transparent to-accent-500/10'></div>
       
@@ -38,7 +38,6 @@ export const StartButtonScreen = ({ onStart }: StartButtonScreenProps) => {
             height={200}
             priority
             className="animate-pulse"
-            style={{ width: 'auto', height: 'auto', marginBottom: '-50px' }}
           />
         </div>
 
@@ -51,7 +50,7 @@ export const StartButtonScreen = ({ onStart }: StartButtonScreenProps) => {
           {/* Main Button */}
           <button
             onClick={onStart}
-            className='relative px-12 py-6 font-bold rounded-2xl transition-all duration-500 transform shadow-2xl border-2 text-2xl hover:scale-110 hover:rotate-1 hover:from-brand-600 hover:via-accent-600 hover:to-brand-700 text-white border-white/30 hover:border-white/60'
+            className='relative px-12 py-6 hover:from-blue-700 hover:to-blue-800 font-bold rounded-2xl transition-all duration-500 transform shadow-2xl border-2 text-2xl hover:scale-110 text-white border-blue-400/50 hover:border-blue-300/70'
           >
             {/* Button Content */}
             <div className='flex items-center justify-center space-x-4'>
@@ -66,15 +65,15 @@ export const StartButtonScreen = ({ onStart }: StartButtonScreenProps) => {
         {/* Loading Indicator */}
         <div className="mt-8 animate-fadeInUp">
           <p className="text-white/60 text-sm mt-4">
-            Click to begin your journey into the <span className="text-brand-400">Stellar Nexus Experience</span>
+            Click to begin your journey into the <span className="text-blue-300">Stellar Nexus Experience</span>
           </p>
         </div>
 
         {/* Powered by Trustless Work */}
         <div className='text-center mt-4'>
-          <p className='text-brand-300/70 text-sm font-medium animate-pulse'>
+          <p className='text-blue-300/70 text-sm font-medium animate-pulse'>
             Powered by{' '}
-            <span className='text-brand-200 font-semibold'>Trustless Work</span>
+            <span className='text-blue-200 font-semibold'>Trustless Work</span>
           </p>
         </div>
       </div>

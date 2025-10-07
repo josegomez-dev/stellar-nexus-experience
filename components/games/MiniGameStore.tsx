@@ -30,6 +30,7 @@ export default function MiniGameStore() {
   const [isLoading, setIsLoading] = useState(true);
   const [preloaderComplete, setPreloaderComplete] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   
@@ -96,9 +97,23 @@ export default function MiniGameStore() {
     { id: 'coming-soon', name: '⏳ Coming Soon', count: 1 },
   ];
 
-  // Loading effect - simulate loading (auto-start)
+  // Check if this is user's first visit to mini games
   useEffect(() => {
-    if (!isLoading) return; // Skip if already loaded
+    const hasVisitedMiniGames = localStorage.getItem('hasVisitedMiniGames');
+    if (hasVisitedMiniGames) {
+      // User has visited before, skip the preloader
+      setIsFirstVisit(false);
+      setIsLoading(false);
+      setPreloaderComplete(true);
+    } else {
+      // Mark that user has visited mini games
+      localStorage.setItem('hasVisitedMiniGames', 'true');
+    }
+  }, []);
+
+  // Loading effect - simulate loading (auto-start only on first visit)
+  useEffect(() => {
+    if (!isLoading || !isFirstVisit) return; // Skip if already loaded or not first visit
 
     const loadingSteps = [
       { progress: 20, message: 'Loading Game Engine...' },
@@ -122,7 +137,7 @@ export default function MiniGameStore() {
     }, 800);
 
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [isLoading, isFirstVisit]);
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -417,12 +432,12 @@ export default function MiniGameStore() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
-          {/* Unified Video Preloader Screen - Auto-starts when page loads */}
-          {!preloaderComplete && (
+          {/* Unified Video Preloader Screen - Only shows on first visit */}
+          {!preloaderComplete && isFirstVisit && (
             <VideoPreloaderScreen 
               isLoading={isLoading}
               videoPath="/videos/preloader.mp4"
-              audioPath="/sounds/intro.mp3"
+              audioPath="/sounds/games_welcome.mp3"
               secondaryAudioPath="/sounds/nexus_voice.mp3"
               title="NEXUS WEB3 LEARNING Experience"
               subtitle="Build the future on Stellar"
@@ -1123,12 +1138,12 @@ export default function MiniGameStore() {
             hideFloatingButton={!preloaderComplete}
           />
 
-          {/* NEXUS PRIME Character - Show during loading for cool effect */}
+          {/* NEXUS PRIME Character - Show during loading only on first visit */}
           <NexusPrime 
             currentPage='mini-games' 
             walletConnected={isConnected}
             autoOpen={false}
-            showDuringLoading={!preloaderComplete}
+            showDuringLoading={!preloaderComplete && isFirstVisit}
           />
 
           {/* Footer - Only show when preloader is complete */}
