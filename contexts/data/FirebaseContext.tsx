@@ -107,7 +107,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       }
       
       if (!walletData?.publicKey) {
+        // Clear account data when wallet disconnects
+        setAccount(null);
         setIsInitialized(true);
+        setIsLoading(false);
         return;
       }
       

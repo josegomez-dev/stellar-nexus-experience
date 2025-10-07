@@ -457,6 +457,11 @@ export const useWallet = (): UseWalletReturn => {
         await currentKit.disconnect();
       }
       setWalletData(null);
+      
+      // Clear localStorage flags to reset user experience on reconnect
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('wallet-connected-before');
+      }
     } catch (err) {}
   }, [walletKit]);
 
