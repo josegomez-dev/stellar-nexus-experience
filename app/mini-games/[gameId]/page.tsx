@@ -163,7 +163,7 @@ export default function GamePage() {
   const params = useParams();
   const router = useRouter();
   const { isConnected } = useGlobalWallet();
-  const gameId = params.gameId as string;
+  const gameId = params?.gameId as string;
   const game = gameLibrary[gameId as keyof typeof gameLibrary];
 
   const [loadingState, setLoadingState] = useState<'initializing' | 'loading' | 'ready' | 'error'>(
