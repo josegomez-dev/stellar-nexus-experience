@@ -497,13 +497,14 @@ export default function HomePageContent() {
         hideFloatingButton={!preloaderComplete || !hasStarted}
       />
 
-      {/* NEXUS PRIME Character - Only show after preloader complete */}
-      {preloaderComplete && hasStarted && (
+      {/* NEXUS PRIME Character - Show during loading for cool effect */}
+      {hasStarted && (
         <NexusPrime 
           currentPage='home' 
           currentDemo={activeDemo} 
           walletConnected={isConnected}
           autoOpen={false}
+          showDuringLoading={!preloaderComplete}
         />
       )}
 

@@ -8,6 +8,7 @@ interface NexusPrimeProps {
   currentDemo?: string;
   walletConnected?: boolean;
   autoOpen?: boolean;
+  showDuringLoading?: boolean;
 }
 
 export const NexusPrime: React.FC<NexusPrimeProps> = ({
@@ -15,6 +16,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   currentDemo,
   walletConnected = false,
   autoOpen = false,
+  showDuringLoading = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -273,13 +275,16 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   return (
     <>
 
-      <div className='fixed bottom-6 left-6 z-50'>
+      <div className={`fixed bottom-6 left-6 ${showDuringLoading ? 'z-[100000]' : 'z-50'}`}>
         {/* Character Avatar - Always visible */}
         <div ref={chatContainerRef} className='relative group animate-fadeIn'>
             {/* Character Image/Icon */}
             <div
-              className='w-26 h-26 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50 shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative'
+              className={`w-26 h-26 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 ${showDuringLoading ? 'border-cyan-400 animate-pulse' : 'border-cyan-400/50'} shadow-2xl cursor-pointer transition-all duration-300 hover:scale-105 backdrop-blur-sm relative ${showDuringLoading ? 'shadow-[0_0_40px_rgba(34,211,238,0.8)]' : ''}`}
               onClick={() => {
+                // Don't allow interaction during loading
+                if (showDuringLoading) return;
+                
                 const newExpandedState = !isExpanded;
                 setIsExpanded(newExpandedState);
                 
@@ -294,7 +299,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 }
               }}
               style={{ 
-                animation: 'fadeIn 0.8s ease-out',
+                animation: showDuringLoading ? 'fadeIn 0.8s ease-out, float 3s ease-in-out infinite' : 'fadeIn 0.8s ease-out',
                 transform: 'translateX(-10px)',
                 animationFillMode: 'forwards'
               }}
@@ -313,7 +318,16 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                   className='rounded-full relative z-10 object-cover'
                 />
                 {/* Glowing Effect */}
-                <div className='absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-purple-400/20'></div>
+                <div className={`absolute inset-0 rounded-full ${showDuringLoading ? 'bg-gradient-to-r from-cyan-400/40 to-purple-400/40' : 'bg-gradient-to-r from-cyan-400/20 to-purple-400/20'}`}></div>
+                
+                {/* Pulsing Rings During Loading */}
+                {showDuringLoading && (
+                  <>
+                    <div className='absolute inset-0 rounded-full border-2 border-cyan-400/50 animate-ping' style={{ animationDuration: '2s' }}></div>
+                    <div className='absolute -inset-2 rounded-full border-2 border-purple-400/30 animate-ping' style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}></div>
+                    <div className='absolute -inset-4 rounded-full border border-cyan-400/20 animate-ping' style={{ animationDuration: '3s', animationDelay: '0.6s' }}></div>
+                  </>
+                )}
                 
                 {/* New Message Indicator */}
                 {walletConnected && hasShownWelcome && (
@@ -464,7 +478,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
             )}
 
             {/* Simple Hover Tooltip */}
-            {!isExpanded && (
+            {!isExpanded && !showDuringLoading && (
               <div className='absolute bottom-20 left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none'>
                 <div className='bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-cyan-400/30 rounded-xl shadow-2xl p-3 w-48'>
                   {/* Arrow */}
@@ -484,6 +498,31 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                         : 'Your Stellar AI Guardian 🚀'
                       }
                     </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Loading Tooltip */}
+            {showDuringLoading && (
+              <div className='absolute bottom-20 left-0 animate-pulse pointer-events-none'>
+                <div className='bg-gradient-to-br from-cyan-900/95 to-purple-900/95 backdrop-blur-xl border border-cyan-400/50 rounded-xl shadow-[0_0_30px_rgba(34,211,238,0.5)] p-3 w-56'>
+                  {/* Arrow */}
+                  <div className='absolute -bottom-2 left-6 w-3 h-3 bg-cyan-900/95 border-b border-r border-cyan-400/50 transform rotate-45'></div>
+
+                  {/* Loading Message */}
+                  <div className='text-center'>
+                    <p className='text-cyan-200 text-sm font-bold animate-pulse'>
+                      ⚡ Initializing NEXUS PRIME
+                    </p>
+                    <p className='text-white/80 text-xs mt-2'>
+                      Connecting to Stellar Network...
+                    </p>
+                    <div className='flex justify-center items-center space-x-1 mt-2'>
+                      <div className='w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce' style={{ animationDelay: '0ms' }}></div>
+                      <div className='w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce' style={{ animationDelay: '150ms' }}></div>
+                      <div className='w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce' style={{ animationDelay: '300ms' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
