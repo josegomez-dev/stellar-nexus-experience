@@ -909,9 +909,9 @@ export const DisputeResolutionDemo = () => {
 
           {/* Role Selection - Only show after escrow is funded */}
           {contractId && escrowData?.metadata?.funded && (
-            <div className='mb-8 p-6 bg-white/5 rounded-lg border border-white/20'>
-              <h3 className='text-xl font-semibold text-white mb-4'>👤 Select Your Role</h3>
-              <div className='flex space-x-4'>
+            <div className='mb-6 sm:mb-8 p-4 sm:p-6 bg-white/5 rounded-lg border border-white/20'>
+              <h3 className='text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4'>👤 Select Your Role</h3>
+              <div className='flex flex-col sm:flex-row gap-3 sm:gap-0 sm:space-x-4'>
                 {(['client', 'worker', 'arbitrator'] as const).map(role => {
                   // Check if worker button should be highlighted (user needs to switch to worker for pending milestones)
                   const hasPendingMilestones = milestones.some(m => m.status === 'pending');
@@ -951,10 +951,10 @@ export const DisputeResolutionDemo = () => {
                     shouldHighlightWorker || shouldHighlightClient || shouldHighlightArbitrator;
 
                   return (
-                    <div key={role} className={isHighlighted ? 'relative' : ''}>
+                    <div key={role} className={`${isHighlighted ? 'relative' : ''} w-full sm:w-auto`}>
                       <button
                         onClick={() => setCurrentRole(role)}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                        className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-300 text-sm sm:text-base ${
                           currentRole === role
                             ? 'bg-warning-500/30 border-2 border-warning-400/50 text-warning-200'
                             : 'bg-white/5 border border-white/20 text-white/70 hover:bg-white/10 hover:border-white/30'
@@ -975,21 +975,21 @@ export const DisputeResolutionDemo = () => {
 
                       {/* Animated notification badge for worker button */}
                       {shouldHighlightWorker && (
-                        <div className='absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        <div className='absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 bg-blue-500 text-white text-[10px] sm:text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 animate-bounce whitespace-nowrap'>
                           Complete tasks!
                         </div>
                       )}
 
                       {/* Animated notification badge for client button */}
                       {shouldHighlightClient && (
-                        <div className='absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        <div className='absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 bg-green-500 text-white text-[10px] sm:text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 animate-bounce whitespace-nowrap'>
                           Review & Approve!
                         </div>
                       )}
 
                       {/* Animated notification badge for arbitrator button */}
                       {shouldHighlightArbitrator && (
-                        <div className='absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full px-2 py-1 animate-bounce'>
+                        <div className='absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 bg-orange-500 text-white text-[10px] sm:text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 animate-bounce whitespace-nowrap'>
                           Resolve Disputes!
                         </div>
                       )}
@@ -997,8 +997,8 @@ export const DisputeResolutionDemo = () => {
                   );
                 })}
               </div>
-              <p className='text-sm text-white/60 mt-3'>
-                Current role: <span className='text-warning-300 capitalize'>{currentRole}</span>
+              <p className='text-xs sm:text-sm text-white/60 mt-2 sm:mt-3'>
+                Current role: <span className='text-warning-300 capitalize font-semibold'>{currentRole}</span>
               </p>
             </div>
           )}
@@ -1247,55 +1247,55 @@ export const DisputeResolutionDemo = () => {
 
           {/* Milestones Management */}
           {contractId && escrowData?.metadata?.funded && (
-            <div className='mb-8'>
-              <div className='flex items-center justify-between mb-6'>
-                <h3 className='text-xl font-semibold text-white'>📋 Milestones Management</h3>
+            <div className='mb-6 sm:mb-8'>
+              <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6'>
+                <h3 className='text-lg sm:text-xl font-semibold text-white'>📋 Milestones Management</h3>
                 {/* Single notification for role guidance */}
                 {currentRole !== 'worker' && milestones.some(m => m.status === 'pending') && (
-                  <div className='px-4 py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg'>
-                    <p className='text-blue-300 text-sm'>
+                  <div className='px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg w-full sm:w-auto'>
+                    <p className='text-blue-300 text-xs sm:text-sm'>
                       👷 Switch to <strong>Worker</strong> role to complete milestones
                     </p>
                   </div>
                 )}
                 {/* Notification for arbitrator role when disputes exist */}
                 {currentRole !== 'arbitrator' && disputes.some(d => d.status === 'open') && (
-                  <div className='px-4 py-2 bg-orange-500/10 border border-orange-400/30 rounded-lg'>
-                    <p className='text-orange-300 text-sm'>
+                  <div className='px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-500/10 border border-orange-400/30 rounded-lg w-full sm:w-auto'>
+                    <p className='text-orange-300 text-xs sm:text-sm'>
                       ⚖️ Switch to <strong>Arbitrator</strong> role to resolve disputes
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className='space-y-6'>
+              <div className='space-y-4 sm:space-y-6'>
                 {milestones.map(milestone => (
                   <div
                     key={milestone.id}
-                    className='p-6 bg-white/5 rounded-lg border border-white/20'
+                    className='p-4 sm:p-6 bg-white/5 rounded-lg border border-white/20'
                   >
-                    <div className='flex items-start justify-between mb-4'>
-                      <div className='flex-1'>
-                        <h4 className='text-lg font-semibold text-white mb-2'>{milestone.title}</h4>
-                        <p className='text-white/70 mb-3'>{milestone.description}</p>
-                        <div className='flex items-center space-x-4 text-sm'>
-                          <span className='text-warning-300'>
+                    <div className='flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4'>
+                      <div className='flex-1 w-full sm:w-auto'>
+                        <h4 className='text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2'>{milestone.title}</h4>
+                        <p className='text-sm sm:text-base text-white/70 mb-2 sm:mb-3'>{milestone.description}</p>
+                        <div className='flex items-center gap-2 sm:gap-4 text-sm flex-wrap'>
+                          <span className='text-warning-300 font-semibold'>
                             {(parseInt(milestone.amount) / 100000).toFixed(1)} USDC
                           </span>
                           <span
-                            className={`px-2 py-1 rounded text-xs ${getMilestoneStatusColor(milestone.status)}`}
+                            className={`px-2 py-1 rounded text-xs whitespace-nowrap ${getMilestoneStatusColor(milestone.status)}`}
                           >
                             {milestone.status.charAt(0).toUpperCase() + milestone.status.slice(1)}
                           </span>
                         </div>
                       </div>
-                      <div className='text-right space-y-2'>
+                      <div className='w-full sm:w-auto sm:text-right space-y-2'>
                         {/* Worker Actions */}
                         {currentRole === 'worker' && milestone.status === 'pending' && (
                           <button
                             onClick={() => handleCompleteMilestone(milestone.id)}
                             disabled={milestoneLoadingStates[milestone.id]}
-                            className='px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full'
+                            className='px-3 sm:px-4 py-2 bg-warning-500/20 hover:bg-warning-500/30 border border-warning-400/30 rounded-lg text-warning-300 hover:text-warning-200 transition-colors block w-full text-sm sm:text-base'
                           >
                             {milestoneLoadingStates[milestone.id]
                               ? 'Completing...'
@@ -1305,10 +1305,10 @@ export const DisputeResolutionDemo = () => {
 
                         {/* Client Actions - Demo Focus: Dispute Resolution */}
                         {currentRole === 'client' && milestone.status === 'completed' && (
-                          <div className='space-y-3'>
+                          <div className='space-y-2 sm:space-y-3'>
                             {/* UI Guide for demo */}
-                            <div className='px-3 py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg'>
-                              <p className='text-blue-300 text-xs'>
+                            <div className='px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-500/10 border border-blue-400/30 rounded-lg'>
+                              <p className='text-blue-300 text-[10px] sm:text-xs'>
                                 💡 <strong>Demo Focus:</strong> Experience the dispute resolution
                                 process!
                               </p>
@@ -1326,7 +1326,7 @@ export const DisputeResolutionDemo = () => {
                                 });
                               }}
                               disabled
-                              className='px-4 py-2 bg-gray-500/20 border border-gray-400/30 rounded-lg text-gray-400 cursor-not-allowed transition-colors block w-full opacity-60'
+                              className='px-3 sm:px-4 py-2 bg-gray-500/20 border border-gray-400/30 rounded-lg text-gray-400 cursor-not-allowed transition-colors block w-full opacity-60 text-xs sm:text-base'
                             >
                               Approve (Disabled for Demo)
                             </button>
@@ -1338,7 +1338,7 @@ export const DisputeResolutionDemo = () => {
                                 milestoneLoadingStates[milestone.id] ||
                                 !(disputeReasons[milestone.id] || '').trim()
                               }
-                              className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors block w-full'
+                              className='px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg text-red-300 hover:text-red-200 transition-colors block w-full text-sm sm:text-base'
                             >
                               {milestoneLoadingStates[milestone.id]
                                 ? 'Starting Dispute...'
@@ -1351,8 +1351,8 @@ export const DisputeResolutionDemo = () => {
 
                     {/* Dispute Input for Client */}
                     {currentRole === 'client' && milestone.status === 'completed' && (
-                      <div className='mt-4 p-4 bg-red-500/10 border border-red-400/30 rounded-lg'>
-                        <h5 className='text-sm font-medium text-red-300 mb-2'>Raise Dispute</h5>
+                      <div className='mt-3 sm:mt-4 p-3 sm:p-4 bg-red-500/10 border border-red-400/30 rounded-lg'>
+                        <h5 className='text-xs sm:text-sm font-medium text-red-300 mb-2'>Raise Dispute</h5>
                         <div className='flex space-x-2'>
                           <input
                             type='text'
@@ -1364,7 +1364,7 @@ export const DisputeResolutionDemo = () => {
                               }))
                             }
                             placeholder='Enter dispute reason...'
-                            className='flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-400/50'
+                            className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-400/50 text-sm'
                           />
                         </div>
                       </div>

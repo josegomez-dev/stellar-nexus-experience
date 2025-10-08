@@ -235,7 +235,7 @@ export const ImmersiveDemoModal = ({
     addToast({
       type: 'success',
       title: '🚀 Demo Started!',
-      message: `You're now in immersive mode. Transaction sidebar is always visible for real-time tracking!`,
+      message: `You're now in immersive mode. Click "Live Transactions" to toggle the sidebar!`,
       duration: 4000,
     });
   };
@@ -491,43 +491,45 @@ export const ImmersiveDemoModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4'>
+    <div className='fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4'>
       <div
-        className={`bg-gradient-to-br ${colorClasses.bgGradient} border ${colorClasses.borderColor} rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`bg-gradient-to-br ${colorClasses.bgGradient} border ${colorClasses.borderColor} rounded-lg sm:rounded-2xl shadow-2xl max-w-6xl w-full max-h-[100vh] sm:max-h-[90vh] overflow-hidden flex flex-col`}
       >
         {/* Header */}
         <div
-          className={`bg-gradient-to-r ${colorClasses.headerGradient} border-b ${colorClasses.borderColor} p-6 flex-shrink-0`}
+          className={`bg-gradient-to-r ${colorClasses.headerGradient} border-b ${colorClasses.borderColor} p-3 sm:p-6 flex-shrink-0`}
         >
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center space-x-4'>
+          <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0'>
+            <div className='flex items-center space-x-2 sm:space-x-4 w-full lg:w-auto'>
               <Image
                 src='/images/logo/logoicon.png'
                 alt='Stellar Nexus'
-                width={40}
-                height={40}
-                className='animate-pulse'
+                width={32}
+                height={32}
+                className='animate-pulse sm:w-10 sm:h-10'
               />
-              <div>
-                <h2 className='text-xl font-bold text-white'>{demoTitle}</h2>
-                <p className={`${colorClasses.textColor} text-sm`}>{demoDescription}</p>
+              <div className='flex-1 min-w-0'>
+                <h2 className='text-base sm:text-xl font-bold text-white truncate'>{demoTitle}</h2>
+                <p className={`${colorClasses.textColor} text-xs sm:text-sm truncate`}>{demoDescription}</p>
               </div>
             </div>
 
             {/* Enhanced Progress Bar and Transaction Status */}
             {currentStep === 'demo' && (
-              <div className='flex items-center space-x-4'>
-                <div className='flex items-center space-x-3'>
-                  <div className='text-sm text-white/70'>{formatTime(elapsedTime)}</div>
-                  <div className='w-40 h-2 bg-white/10 rounded-full overflow-hidden'>
+              <div className='flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-4 w-full lg:w-auto'>
+                {/* Progress Info - Mobile: Full width, Desktop: Auto */}
+                <div className='flex items-center gap-2 sm:gap-3 flex-wrap w-full lg:w-auto'>
+                  <div className='text-xs sm:text-sm text-white/70 whitespace-nowrap'>{formatTime(elapsedTime)}</div>
+                  <div className='flex-1 min-w-[80px] sm:w-32 lg:w-40 h-2 bg-white/10 rounded-full overflow-hidden'>
                     <div
                       className={`h-full bg-gradient-to-r ${colorClasses.progressGradient} transition-all duration-300`}
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
-                  <div className='text-sm text-white/70'>{estimatedTime} mins&nbsp;</div>|
+                  <div className='text-xs sm:text-sm text-white/70 whitespace-nowrap hidden sm:inline'>{estimatedTime} mins</div>
+                  <div className='hidden sm:inline text-white/70'>|</div>
                   <div
-                    className={`text-sm flex items-center space-x-1 ${
+                    className={`text-xs sm:text-sm flex items-center space-x-1 whitespace-nowrap ${
                       completedSteps.length === 0
                         ? 'text-gray-400'
                         : completedSteps.length === demoSteps.length
@@ -538,15 +540,15 @@ export const ImmersiveDemoModal = ({
                     {completedSteps.length === demoSteps.length ? (
                       <>
                         <span className='font-semibold text-green-300'>
-                          ({completedSteps.length}/{demoSteps.length} steps)
+                          ({completedSteps.length}/{demoSteps.length})
                         </span>
                         <span className='text-green-400'>✅</span>
                       </>
                     ) : (
                       <>
-                        <span className='w-2 h-2 rounded-full bg-current mr-1'></span>
+                        <span className='w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-current mr-1'></span>
                         <span>
-                          ({completedSteps.length}/{demoSteps.length} steps)
+                          ({completedSteps.length}/{demoSteps.length})
                         </span>
                       </>
                     )}
@@ -554,13 +556,17 @@ export const ImmersiveDemoModal = ({
                 </div>
 
                 {/* Transaction Status Indicator and Account Explorer */}
-                <div className='flex items-center space-x-3'>
-                  <div className='flex items-center space-x-2 px-3 py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg'>
-                    <div className='w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
-                    <span className='text-sm font-medium text-green-300'>
-                      📊 Live Transactions ({demoTransactions.length})
+                <div className='flex items-center gap-2 sm:gap-3 flex-wrap w-full lg:w-auto'>
+                  <button
+                    onClick={() => setShowTransactionHistory(!showTransactionHistory)}
+                    className='flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg hover:bg-green-500/30 transition-all duration-300 cursor-pointer text-xs sm:text-sm'
+                    title={showTransactionHistory ? 'Hide transaction sidebar' : 'Show transaction sidebar'}
+                  >
+                    <div className='w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse'></div>
+                    <span className='font-medium text-green-300'>
+                      📊 <span className='hidden sm:inline'>Live </span>Txns ({demoTransactions.length})
                     </span>
-                  </div>
+                  </button>
 
                   {/* Account Explorer Button */}
                   {isConnected && walletData?.publicKey && (
@@ -579,11 +585,12 @@ export const ImmersiveDemoModal = ({
                           duration: 4000,
                         });
                       }}
-                      className='px-3 py-1.5 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded-lg hover:bg-blue-500/30 transition-all duration-300 flex items-center space-x-2'
+                      className='px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded-lg hover:bg-blue-500/30 transition-all duration-300 flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm'
                       title='View account on Stellar Explorer'
                     >
-                      <span className='text-sm'>🌐</span>
-                      <span className='text-sm font-medium'>Account Explorer</span>
+                      <span>🌐</span>
+                      <span className='font-medium hidden sm:inline'>Account Explorer</span>
+                      <span className='font-medium sm:hidden'>Explorer</span>
                     </button>
                   )}
                 </div>
@@ -593,7 +600,7 @@ export const ImmersiveDemoModal = ({
             {/* Close Button */}
             <button
               onClick={handleCloseClick}
-              className={`transition-colors p-2 rounded-lg ${
+              className={`transition-colors p-1.5 sm:p-2 rounded-lg absolute top-3 right-3 lg:relative lg:top-0 lg:right-0 z-10 ${
                 currentStep === 'demo'
                   ? 'text-white/70 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-400/30'
                   : 'text-white/70 hover:text-white'
@@ -602,7 +609,7 @@ export const ImmersiveDemoModal = ({
                 currentStep === 'demo' ? 'Exit demo (will ask for confirmation)' : 'Close modal'
               }
             >
-              <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <svg className='w-5 h-5 sm:w-6 sm:h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -615,19 +622,19 @@ export const ImmersiveDemoModal = ({
         </div>
 
         {/* Content */}
-        <div className='flex flex-1 overflow-hidden'>
+        <div className='flex flex-col lg:flex-row flex-1 overflow-hidden'>
           {/* Main Content */}
-          <div className={`p-6 overflow-y-auto ${currentStep === 'demo' ? 'flex-1' : 'w-full'}`}>
+          <div className={`p-3 sm:p-6 overflow-y-auto ${currentStep === 'demo' ? 'flex-1' : 'w-full'}`}>
             {currentStep === 'warning' && (
-              <div className='text-center space-y-6'>
-                <div className='text-6xl mb-4'>⚠️</div>
-                <h3 className='text-2xl font-bold text-white mb-4'>Immersive Demo Experience</h3>
+              <div className='text-center space-y-4 sm:space-y-6'>
+                <div className='text-4xl sm:text-6xl mb-2 sm:mb-4'>⚠️</div>
+                <h3 className='text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-4'>Immersive Demo Experience</h3>
 
-                <div className='bg-white/5 rounded-xl p-6 border border-white/20'>
-                  <h4 className={`text-lg font-semibold ${colorClasses.textColor} mb-4`}>
+                <div className='bg-white/5 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-white/20'>
+                  <h4 className={`text-base sm:text-lg font-semibold ${colorClasses.textColor} mb-3 sm:mb-4`}>
                     What to Expect:
                   </h4>
-                  <ul className='text-white/80 space-y-2 text-left'>
+                  <ul className='text-white/80 space-y-2 text-left text-sm sm:text-base'>
                     <li className='flex items-center space-x-2'>
                       <span className={colorClasses.accentColor}>⏱️</span>
                       <span>
@@ -652,7 +659,7 @@ export const ImmersiveDemoModal = ({
                     </li>
                     <li className='flex items-center space-x-2'>
                       <span className={colorClasses.accentColor}>📊</span>
-                      <span>Transaction sidebar always visible with blockchain links</span>
+                      <span>Toggle transaction sidebar for real-time blockchain tracking</span>
                     </li>
                     <li className='flex items-center space-x-2'>
                       <span className={colorClasses.accentColor}>🔔</span>
@@ -662,25 +669,25 @@ export const ImmersiveDemoModal = ({
                 </div>
 
                 {!isConnected && (
-                  <div className='bg-yellow-500/20 border border-yellow-400/30 rounded-xl p-4'>
-                    <p className='text-yellow-300'>
+                  <div className='bg-yellow-500/20 border border-yellow-400/30 rounded-lg sm:rounded-xl p-3 sm:p-4'>
+                    <p className='text-yellow-300 text-sm sm:text-base'>
                       🔗 <strong>Wallet Required:</strong> Please connect your Stellar wallet to
                       start the demo
                     </p>
                   </div>
                 )}
 
-                <div className='flex justify-center space-x-4'>
+                <div className='flex flex-col sm:flex-row justify-center gap-3 sm:gap-4'>
                   <button
                     onClick={onClose}
-                    className='px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white transition-colors'
+                    className='px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white transition-colors text-sm sm:text-base'
                   >
                     Maybe Later
                   </button>
                   <button
                     onClick={handleStartDemo}
                     disabled={!isConnected}
-                    className={`px-6 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base`}
                   >
                     Start Immersive Demo
                   </button>
@@ -689,15 +696,15 @@ export const ImmersiveDemoModal = ({
             )}
 
             {currentStep === 'demo' && (
-              <div className='space-y-4'>
+              <div className='space-y-3 sm:space-y-4'>
                 {/* Transaction Tracking Info */}
-                <div className='bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl p-4'>
-                  <div className='flex items-center space-x-3'>
-                    <span className='text-2xl'>📊</span>
+                <div className='bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-lg sm:rounded-xl p-3 sm:p-4'>
+                  <div className='flex items-center space-x-2 sm:space-x-3'>
+                    <span className='text-xl sm:text-2xl'>📊</span>
                     <div>
-                      <h4 className='text-green-300 font-semibold'>Live Transaction Tracking</h4>
-                      <p className='text-white/70 text-sm'>
-                        Watch your transactions appear in real-time on the right sidebar with direct
+                      <h4 className='text-green-300 font-semibold text-sm sm:text-base'>Live Transaction Tracking</h4>
+                      <p className='text-white/70 text-xs sm:text-sm'>
+                        Watch your transactions appear in real-time <span className='hidden lg:inline'>on the right sidebar </span>with direct
                         blockchain explorer links
                       </p>
                     </div>
@@ -705,7 +712,7 @@ export const ImmersiveDemoModal = ({
                 </div>
 
                 {/* Demo Content */}
-                <div className='bg-white/5 rounded-xl p-4 border border-white/20'>
+                <div className=''>
                   <ProgressContext.Provider
                     value={{ updateProgress: updateDemoProgress, markStepCompleted }}
                   >
@@ -722,7 +729,7 @@ export const ImmersiveDemoModal = ({
                       handleCompleteDemo();
                     }}
                     disabled={isCompletingDemo || completedSteps.length < demoSteps.length}
-                    className={`px-8 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer relative z-10 ${
+                    className={`px-4 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer relative z-10 text-sm sm:text-base ${
                       isCompletingDemo || completedSteps.length < demoSteps.length
                         ? 'opacity-50 cursor-not-allowed'
                         : ''
@@ -731,19 +738,20 @@ export const ImmersiveDemoModal = ({
                     type='button'
                   >
                     {isCompletingDemo ? (
-                      <div className='flex items-center space-x-2'>
+                      <div className='flex items-center justify-center space-x-2'>
                         <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
-                        <span>Completing Demo...</span>
+                        <span className='hidden sm:inline'>Completing Demo...</span>
+                        <span className='sm:hidden'>Completing...</span>
                       </div>
                     ) : completedSteps.length < demoSteps.length ? (
-                      <div className='flex items-center space-x-2'>
+                      <div className='flex items-center justify-center space-x-2'>
                         <span>⏳ Complete Steps First</span>
                       </div>
                     ) : (
                       '🎉 Complete Demo'
                     )}
                   </button>
-                  <p className='text-xs text-white/50 mt-2'>
+                  <p className='text-xs text-white/50 mt-2 px-2'>
                     {isCompletingDemo
                       ? 'Processing demo completion...'
                       : completedSteps.length < demoSteps.length
@@ -755,16 +763,16 @@ export const ImmersiveDemoModal = ({
             )}
 
             {currentStep === 'feedback' && (
-              <div className='space-y-6'>
+              <div className='space-y-4 sm:space-y-6'>
                 <div className='text-center'>
-                  <div className='text-6xl mb-4'>🎉</div>
-                  <h3 className='text-2xl font-bold text-white mb-2'>Demo Completed!</h3>
-                  <p className='text-white/70'>Time taken: {formatTime(elapsedTime)}</p>
+                  <div className='text-4xl sm:text-6xl mb-3 sm:mb-4'>🎉</div>
+                  <h3 className='text-xl sm:text-2xl font-bold text-white mb-2'>Demo Completed!</h3>
+                  <p className='text-white/70 text-sm sm:text-base'>Time taken: {formatTime(elapsedTime)}</p>
                 </div>
 
                 {/* Rating */}
                 <div className='space-y-3'>
-                  <label className='block text-white font-semibold'>
+                  <label className='block text-white font-semibold text-sm sm:text-base'>
                     How would you rate this demo experience? 🤔
                   </label>
                   <div className='flex justify-center space-x-2'>
@@ -792,7 +800,7 @@ export const ImmersiveDemoModal = ({
 
                 {/* Difficulty */}
                 <div className='space-y-3'>
-                  <label className='block text-white font-semibold'>
+                  <label className='block text-white font-semibold text-sm sm:text-base'>
                     How difficult was this demo? 🧠
                   </label>
                   <div className='flex justify-center space-x-3'>
@@ -821,7 +829,7 @@ export const ImmersiveDemoModal = ({
 
                 {/* Would Recommend */}
                 <div className='space-y-3'>
-                  <label className='block text-white font-semibold'>
+                  <label className='block text-white font-semibold text-sm sm:text-base'>
                     Would you recommend this demo to others? 💭
                   </label>
                   <div className='flex justify-center space-x-4'>
@@ -852,14 +860,14 @@ export const ImmersiveDemoModal = ({
 
                 {/* Comment */}
                 <div className='space-y-3'>
-                  <label className='block text-white font-semibold'>
+                  <label className='block text-white font-semibold text-sm sm:text-base'>
                     Any additional comments? 💬
                   </label>
                   <textarea
                     value={feedback.comment}
                     onChange={e => setFeedback(prev => ({ ...prev, comment: e.target.value }))}
                     placeholder='Share your thoughts about the demo experience...'
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-brand-400/50 resize-none'
+                    className='w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-brand-400/50 resize-none text-sm sm:text-base'
                     rows={3}
                   />
                 </div>
@@ -869,7 +877,7 @@ export const ImmersiveDemoModal = ({
                   <button
                     onClick={handleSubmitFeedback}
                     disabled={isSubmittingFeedback || feedback.rating === 0}
-                    className={`px-8 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`px-4 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base`}
                   >
                     {isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback'}
                   </button>
@@ -878,35 +886,52 @@ export const ImmersiveDemoModal = ({
             )}
           </div>
 
-          {/* Transaction History Sidebar - Always visible in demo mode */}
-          {currentStep === 'demo' && (
+          {/* Transaction History Sidebar - Toggleable and Responsive */}
+          {currentStep === 'demo' && showTransactionHistory && (
             <div
-              className={`w-80 bg-gradient-to-b from-neutral-800/50 to-neutral-900/50 border-l ${colorClasses.borderColor} flex flex-col`}
+              className={`w-full lg:w-80 max-h-64 lg:max-h-none bg-gradient-to-b from-neutral-800/50 to-neutral-900/50 border-t lg:border-t-0 lg:border-l ${colorClasses.borderColor} flex flex-col`}
             >
               {/* Sidebar Header */}
               <div
-                className={`p-4 border-b ${colorClasses.borderColor} bg-gradient-to-r ${colorClasses.sidebarGradient}`}
+                className={`p-3 sm:p-4 border-b ${colorClasses.borderColor} bg-gradient-to-r ${colorClasses.sidebarGradient}`}
               >
-                <div className='flex items-center space-x-3'>
-                  <div className='w-3 h-3 bg-green-400 rounded-full animate-pulse'></div>
-                  <div>
-                    <h3 className='text-lg font-semibold text-white flex items-center space-x-2'>
-                      <span>📊 Live Transactions</span>
-                    </h3>
-                    <p className='text-sm text-green-300 mt-1'>
-                      Real-time blockchain tracking • Always visible
-                    </p>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center space-x-2 sm:space-x-3'>
+                    <div className='w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse'></div>
+                    <div>
+                      <h3 className='text-base sm:text-lg font-semibold text-white flex items-center space-x-2'>
+                        <span>📊 Live Transactions</span>
+                      </h3>
+                      <p className='text-xs sm:text-sm text-green-300 mt-0.5 sm:mt-1'>
+                        Real-time blockchain tracking
+                      </p>
+                    </div>
                   </div>
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setShowTransactionHistory(false)}
+                    className='text-white/70 hover:text-white hover:bg-red-500/20 border border-transparent hover:border-red-400/30 p-1 sm:p-1.5 rounded-lg transition-all duration-300'
+                    title='Hide transaction sidebar'
+                  >
+                    <svg className='w-4 h-4 sm:w-5 sm:h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M6 18L18 6M6 6l12 12'
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
               {/* Transaction List */}
-              <div className='flex-1 overflow-y-auto p-4 space-y-3'>
+              <div className='flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-3'>
                 {demoTransactions.length === 0 ? (
-                  <div className='text-center py-8'>
-                    <div className='text-4xl mb-3'>📝</div>
-                    <p className='text-white/60 text-sm'>No transactions yet</p>
-                    <p className='text-white/40 text-xs mt-1'>
+                  <div className='text-center py-4 sm:py-8'>
+                    <div className='text-3xl sm:text-4xl mb-2 sm:mb-3'>📝</div>
+                    <p className='text-white/60 text-xs sm:text-sm'>No transactions yet</p>
+                    <p className='text-white/40 text-xs mt-1 px-2'>
                       Transactions will appear here as you interact with the demo
                     </p>
                   </div>
@@ -914,7 +939,7 @@ export const ImmersiveDemoModal = ({
                   demoTransactions.map((transaction, index) => (
                     <div
                       key={transaction.hash}
-                      className={`p-3 rounded-lg border transition-all duration-200 ${
+                      className={`p-2 sm:p-3 rounded-lg border transition-all duration-200 ${
                         transaction.status === 'success'
                           ? 'bg-green-500/10 border-green-400/30'
                           : transaction.status === 'failed'
@@ -922,31 +947,31 @@ export const ImmersiveDemoModal = ({
                             : 'bg-yellow-500/10 border-yellow-400/30'
                       }`}
                     >
-                      <div className='flex items-start space-x-3'>
-                        <div className='text-lg flex-shrink-0'>
+                      <div className='flex items-start space-x-2 sm:space-x-3'>
+                        <div className='text-base sm:text-lg flex-shrink-0'>
                           {getTransactionStatusIcon(transaction.status, transaction.type)}
                         </div>
                         <div className='flex-1 min-w-0'>
                           <div className='flex items-center justify-between'>
-                            <h4 className='text-sm font-medium text-white capitalize'>
+                            <h4 className='text-xs sm:text-sm font-medium text-white capitalize'>
                               {transaction.type}
                             </h4>
-                            <span className='text-xs text-white/60'>
+                            <span className='text-[10px] sm:text-xs text-white/60 whitespace-nowrap ml-1'>
                               {formatTransactionTime(transaction.timestamp)}
                             </span>
                           </div>
-                          <p className='text-xs text-white/70 mt-1 truncate'>
+                          <p className='text-[10px] sm:text-xs text-white/70 mt-0.5 sm:mt-1 truncate'>
                             {transaction.message}
                           </p>
                           {transaction.amount && (
-                            <p className='text-xs text-brand-300 mt-1'>
+                            <p className='text-[10px] sm:text-xs text-brand-300 mt-0.5 sm:mt-1'>
                               {transaction.amount} {transaction.asset || 'XLM'}
                             </p>
                           )}
-                          <div className='flex items-center justify-between mt-2'>
-                            <div className='flex items-center space-x-2'>
+                          <div className='flex items-center justify-between mt-1 sm:mt-2 gap-1'>
+                            <div className='flex items-center space-x-1 sm:space-x-2 flex-wrap'>
                               <span
-                                className={`text-xs px-2 py-1 rounded-full ${
+                                className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
                                   transaction.status === 'success'
                                     ? 'bg-green-500/20 text-green-300'
                                     : transaction.status === 'failed'
@@ -956,12 +981,12 @@ export const ImmersiveDemoModal = ({
                               >
                                 {transaction.status}
                               </span>
-                              <span className='text-xs text-white/50 font-mono'>
-                                {transaction.hash.slice(0, 8)}...
+                              <span className='text-[10px] sm:text-xs text-white/50 font-mono whitespace-nowrap'>
+                                {transaction.hash.slice(0, 6)}...
                               </span>
                               {transaction.message.includes('(Simulated for demo)') && (
-                                <span className='text-xs text-yellow-400 bg-yellow-400/20 px-1.5 py-0.5 rounded'>
-                                  🎭 Demo
+                                <span className='text-[10px] sm:text-xs text-yellow-400 bg-yellow-400/20 px-1 sm:px-1.5 py-0.5 rounded whitespace-nowrap'>
+                                  🎭
                                 </span>
                               )}
                             </div>
@@ -979,7 +1004,7 @@ export const ImmersiveDemoModal = ({
                               !transaction.hash.startsWith('approve_') &&
                               !transaction.hash.startsWith('release_') &&
                               !transaction.message.includes('(Simulated for demo)') && (
-                                <div className='flex space-x-1'>
+                                <div className='flex space-x-1 flex-shrink-0'>
                                   <button
                                     onClick={() => {
                                       const explorerUrl = `https://stellar.expert/explorer/testnet/tx/${transaction.hash}`;
@@ -991,7 +1016,7 @@ export const ImmersiveDemoModal = ({
                                         duration: 2000,
                                       });
                                     }}
-                                    className='px-1.5 py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-xs hover:bg-purple-500/30 transition-all duration-300'
+                                    className='px-1 sm:px-1.5 py-0.5 sm:py-1 bg-purple-500/20 border border-purple-400/30 text-purple-200 rounded text-xs hover:bg-purple-500/30 transition-all duration-300'
                                     title='View on Stellar Expert'
                                   >
                                     🌐
@@ -1006,7 +1031,7 @@ export const ImmersiveDemoModal = ({
                                         duration: 2000,
                                       });
                                     }}
-                                    className='px-1.5 py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-xs hover:bg-blue-500/30 transition-all duration-300'
+                                    className='px-1 sm:px-1.5 py-0.5 sm:py-1 bg-blue-500/20 border border-blue-400/30 text-blue-200 rounded text-xs hover:bg-blue-500/30 transition-all duration-300'
                                     title='Copy transaction hash'
                                   >
                                     📋
@@ -1023,9 +1048,9 @@ export const ImmersiveDemoModal = ({
 
               {/* Sidebar Footer */}
               <div
-                className={`p-4 border-t ${colorClasses.borderColor} bg-gradient-to-r from-neutral-800/50 to-neutral-900/50`}
+                className={`p-2 sm:p-4 border-t ${colorClasses.borderColor} bg-gradient-to-r from-neutral-800/50 to-neutral-900/50`}
               >
-                <div className='text-xs text-white/50 space-y-2'>
+                <div className='text-[10px] sm:text-xs text-white/50 space-y-1 sm:space-y-2'>
                   <div className='flex items-center justify-between'>
                     <span>💡 Real-time tracking</span>
                     <span className='font-mono'>{demoTransactions.length} txns</span>
@@ -1033,9 +1058,6 @@ export const ImmersiveDemoModal = ({
                   <div className='flex items-center justify-between'>
                     <span>🌐 Explorer links</span>
                     <span className='text-green-400'>Available</span>
-                  </div>
-                  <div className='text-center mt-2 pt-2 border-t border-white/10'>
-                    <p className='text-green-300 font-medium'>Always visible during demo</p>
                   </div>
                 </div>
               </div>
@@ -1045,25 +1067,25 @@ export const ImmersiveDemoModal = ({
 
         {/* Close Confirmation Dialog */}
         {showCloseConfirmation && (
-          <div className='absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4'>
-            <div className='bg-gradient-to-br from-neutral-800 to-neutral-900 border border-red-400/30 rounded-2xl shadow-2xl max-w-md w-full p-6'>
-              <div className='text-center space-y-4'>
-                <div className='text-4xl'>⚠️</div>
-                <h3 className='text-xl font-bold text-white'>Exit Demo?</h3>
-                <p className='text-white/70 text-sm leading-relaxed'>
+          <div className='absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4'>
+            <div className='bg-gradient-to-br from-neutral-800 to-neutral-900 border border-red-400/30 rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6'>
+              <div className='text-center space-y-3 sm:space-y-4'>
+                <div className='text-3xl sm:text-4xl'>⚠️</div>
+                <h3 className='text-lg sm:text-xl font-bold text-white'>Exit Demo?</h3>
+                <p className='text-white/70 text-xs sm:text-sm leading-relaxed'>
                   You're currently in the middle of a demo. If you exit now, your progress will be
                   lost and you'll need to start over.
                 </p>
 
                 {/* Enhanced Progress indicator */}
-                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
-                  <div className='flex items-center justify-between mb-3'>
-                    <div className='text-sm font-medium text-white'>Current Progress</div>
-                    <div className='text-sm font-bold text-brand-300'>{Math.round(progress)}%</div>
+                <div className='bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10'>
+                  <div className='flex items-center justify-between mb-2 sm:mb-3'>
+                    <div className='text-xs sm:text-sm font-medium text-white'>Current Progress</div>
+                    <div className='text-xs sm:text-sm font-bold text-brand-300'>{Math.round(progress)}%</div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className='w-full h-3 bg-white/10 rounded-full overflow-hidden mb-3'>
+                  <div className='w-full h-2 sm:h-3 bg-white/10 rounded-full overflow-hidden mb-2 sm:mb-3'>
                     <div
                       className={`h-full bg-gradient-to-r ${colorClasses.progressGradient} transition-all duration-500 ease-out`}
                       style={{ width: `${progress}%` }}
@@ -1071,7 +1093,7 @@ export const ImmersiveDemoModal = ({
                   </div>
 
                   {/* Progress Details */}
-                  <div className='grid grid-cols-2 gap-3 text-xs'>
+                  <div className='grid grid-cols-2 gap-2 sm:gap-3 text-[10px] sm:text-xs'>
                     <div className='bg-white/5 rounded-lg p-2 border border-white/5'>
                       <div className='text-white/60 mb-1'>Steps Completed</div>
                       <div className='text-white font-semibold'>
@@ -1086,13 +1108,13 @@ export const ImmersiveDemoModal = ({
 
                   {/* Completed Steps List */}
                   {completedSteps.length > 0 && (
-                    <div className='mt-3 pt-3 border-t border-white/10'>
-                      <div className='text-xs text-white/60 mb-2'>Completed Steps:</div>
-                      <div className='space-y-1'>
+                    <div className='mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/10'>
+                      <div className='text-[10px] sm:text-xs text-white/60 mb-1 sm:mb-2'>Completed Steps:</div>
+                      <div className='space-y-1 max-h-20 sm:max-h-24 overflow-y-auto'>
                         {completedSteps.map((step, index) => (
                           <div key={step} className='flex items-center space-x-2'>
-                            <div className='w-1.5 h-1.5 bg-green-400 rounded-full'></div>
-                            <span className='text-xs text-green-300'>{step}</span>
+                            <div className='w-1 h-1 sm:w-1.5 sm:h-1.5 bg-green-400 rounded-full flex-shrink-0'></div>
+                            <span className='text-[10px] sm:text-xs text-green-300'>{step}</span>
                           </div>
                         ))}
                       </div>
@@ -1102,19 +1124,19 @@ export const ImmersiveDemoModal = ({
                   {/* Remaining Steps */}
                   {demoSteps.filter(step => !completedSteps.includes(step)).length > 0 && (
                     <div className='mt-2'>
-                      <div className='text-xs text-white/60 mb-2'>Remaining Steps:</div>
+                      <div className='text-[10px] sm:text-xs text-white/60 mb-1 sm:mb-2'>Remaining Steps:</div>
                       <div className='space-y-1'>
                         {demoSteps
                           .filter(step => !completedSteps.includes(step))
                           .slice(0, 3)
                           .map((step, index) => (
                             <div key={step} className='flex items-center space-x-2'>
-                              <div className='w-1.5 h-1.5 bg-white/30 rounded-full'></div>
-                              <span className='text-xs text-white/60'>{step}</span>
+                              <div className='w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white/30 rounded-full flex-shrink-0'></div>
+                              <span className='text-[10px] sm:text-xs text-white/60'>{step}</span>
                             </div>
                           ))}
                         {demoSteps.filter(step => !completedSteps.includes(step)).length > 3 && (
-                          <div className='text-xs text-white/40 ml-3'>
+                          <div className='text-[10px] sm:text-xs text-white/40 ml-3'>
                             +{demoSteps.filter(step => !completedSteps.includes(step)).length - 3}{' '}
                             more steps
                           </div>
@@ -1124,22 +1146,22 @@ export const ImmersiveDemoModal = ({
                   )}
                 </div>
 
-                <div className='flex space-x-3'>
+                <div className='flex flex-col sm:flex-row gap-2 sm:gap-3'>
                   <button
                     onClick={() => setShowCloseConfirmation(false)}
-                    className={`flex-1 px-4 py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105`}
+                    className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r ${colorClasses.buttonGradient} ${colorClasses.buttonHover} text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-sm sm:text-base`}
                   >
                     Continue Demo
                   </button>
                   <button
                     onClick={handleCloseModal}
-                    className='flex-1 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 hover:border-red-400/50 text-red-300 hover:text-red-200 font-semibold rounded-lg transition-all duration-300'
+                    className='flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 hover:border-red-400/50 text-red-300 hover:text-red-200 font-semibold rounded-lg transition-all duration-300 text-sm sm:text-base'
                   >
                     Exit Anyway
                   </button>
                 </div>
 
-                <p className='text-xs text-white/50'>
+                <p className='text-[10px] sm:text-xs text-white/50'>
                   💡 You can always restart the demo later from the demos page
                 </p>
               </div>

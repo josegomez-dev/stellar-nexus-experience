@@ -227,13 +227,13 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/20 shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg sm:rounded-2xl border border-white/20 shadow-2xl max-w-6xl w-full max-h-[100vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-brand-500/20 to-accent-500/20 p-6 border-b border-white/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 rounded-full flex items-center justify-center">
+        <div className="bg-gradient-to-r from-brand-500/20 to-accent-500/20 p-3 sm:p-6 border-b border-white/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Image
                   src="/images/character/baby.png"
                   alt="NEXUS PRIME"
@@ -242,28 +242,28 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
                   className="rounded-full"
                 />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">Interactive Tutorial</h2>
-                <p className="text-white/60 text-sm">Learn how to be an early adopter of Web3 & the ESCROW ARSENAL step by step</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base sm:text-2xl font-bold text-white truncate">Interactive Tutorial</h2>
+                <p className="text-white/60 text-xs sm:text-sm line-clamp-1 sm:line-clamp-none">Learn how to be an early adopter of Web3 & the ESCROW ARSENAL step by step</p>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <button
                 onClick={onClose}
-                className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-200 hover:scale-105 text-sm"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs sm:text-sm whitespace-nowrap"
               >
-                ✕ Close
+                ✕ <span className="hidden sm:inline">Close</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Steps Navigation */}
-          <div className="w-80 bg-white/5 border-r border-white/10 flex flex-col">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          {/* Left Sidebar - Steps Navigation - Hidden on mobile, shown on desktop */}
+          <div className="hidden lg:flex lg:w-80 bg-white/5 border-r border-white/10 flex-col">
             {/* Sections */}
             <div className="p-4 border-b border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">Sections</h3>
@@ -329,53 +329,68 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
 
           {/* Right Content Area */}
           <div className="flex-1 flex flex-col">
+            {/* Mobile Section Selector - Only visible on mobile */}
+            <div className="lg:hidden p-3 border-b border-white/10 bg-white/5">
+              <select
+                value={currentSection}
+                onChange={(e) => handleSectionChange(Number(e.target.value))}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-brand-400/50"
+              >
+                {tutorialSections.map((section, index) => (
+                  <option key={section.id} value={index} className="bg-slate-900 text-white">
+                    {section.icon} {section.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Progress Bar */}
-            <div className="p-4 border-b border-white/10">
-              <div className="flex items-center justify-between text-sm text-white/60 mb-2">
-                <span>
+            <div className="p-3 sm:p-4 border-b border-white/10">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm text-white/60 mb-2 gap-1">
+                <span className="text-[10px] sm:text-sm">
                   Step {currentStep + 1} of {currentSectionData?.steps.length} • Section {currentSection + 1} of {tutorialSections.length}
                 </span>
-                <span>
+                <span className="text-[10px] sm:text-sm font-semibold text-brand-300">
                   {overallProgress}% Complete
                 </span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
+              <div className="w-full bg-white/10 rounded-full h-1.5 sm:h-2">
                 <div
-                  className="bg-gradient-to-r from-brand-500 to-accent-500 h-2 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-brand-500 to-accent-500 h-1.5 sm:h-2 rounded-full transition-all duration-500"
                   style={{ width: `${overallProgress}%` }}
                 ></div>
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-3 sm:p-6 overflow-y-auto">
               {currentStepData && (
                 <div className="max-w-3xl mx-auto">
                   {/* Text Content */}
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <div className="flex items-center space-x-3 mb-6">
-                        <div className="w-16 h-16 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center text-3xl">
+                      <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0">
                           {currentStepData.icon || '📚'}
                         </div>
-                        <div>
-                          <h3 className="text-3xl font-bold text-white">{currentStepData.title}</h3>
-                          <p className="text-white/60">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg sm:text-3xl font-bold text-white line-clamp-2">{currentStepData.title}</h3>
+                          <p className="text-white/60 text-xs sm:text-base truncate">
                             {tutorialSections[currentSection].title}
                           </p>
                         </div>
                       </div>
-                      <p className="text-white/90 text-xl leading-relaxed">
+                      <p className="text-white/90 text-sm sm:text-xl leading-relaxed">
                         {currentStepData.description}
                       </p>
                     </div>
 
                     {/* Action Items */}
-                    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-                      <h4 className="text-white font-semibold mb-3 text-lg">💡 What to do next:</h4>
-                      <ul className="text-white/80 space-y-2">
+                    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
+                      <h4 className="text-white font-semibold mb-2 sm:mb-3 text-base sm:text-lg">💡 What to do next:</h4>
+                      <ul className="text-white/80 space-y-1 sm:space-y-2 text-xs sm:text-base">
                         <li>• Follow the step instructions carefully</li>
-                        <li>• Use the navigation buttons or keyboard arrows</li>
+                        <li>• Use the navigation buttons <span className="hidden sm:inline">or keyboard arrows</span></li>
                         <li>• Take your time to understand each concept</li>
                         <li>• Complete each step before moving to the next</li>
                       </ul>
@@ -386,12 +401,12 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
             </div>
 
             {/* Navigation */}
-            <div className="p-6 border-t border-white/10">
-              <div className="flex items-center justify-between">
+            <div className="p-3 sm:p-6 border-t border-white/10">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button
                   onClick={prevStep}
                   disabled={currentStep === 0 && currentSection === 0}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                  className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-300 text-sm sm:text-base ${
                     currentStep === 0 && currentSection === 0
                       ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white hover:scale-105'
@@ -400,7 +415,7 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
                   ← Previous
                 </button>
 
-                <div className="flex items-center space-x-4">
+                <div className="hidden lg:flex items-center space-x-4">
                   <span className="text-brand-300 text-sm">
                     Use ← → arrow keys to navigate
                   </span>
@@ -408,7 +423,7 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
 
                 <button
                   onClick={nextStep}
-                  className="px-6 py-3 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                 >
                   {currentStep === currentSectionData?.steps.length - 1 && currentSection === tutorialSections.length - 1
                     ? 'Complete Tutorial'

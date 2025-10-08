@@ -1481,21 +1481,21 @@ export const HelloMilestoneDemo = ({
         )}
 
         {/* Demo Progress */}
-        <div className='mb-8'>
-          <div className='flex items-center justify-between mb-4'>
-            <h3 className='text-xl font-semibold text-white'>Demo Progress</h3>
+        <div className='mb-6 sm:mb-8'>
+          <div className='flex items-center justify-between mb-3 sm:mb-4'>
+            <h3 className='text-lg sm:text-xl font-semibold text-white'>Demo Progress</h3>
           </div>
 
           <div className='space-y-4'>
             {steps.map((step, index) => (
               <div
                 key={step.id}
-                className={`flex items-center p-4 rounded-lg border-2 transition-all duration-300 ${getStepColor(step.status)}`}
+                className={`flex flex-col sm:flex-row items-start sm:items-center p-3 sm:p-4 rounded-lg border-2 transition-all duration-300 gap-3 sm:gap-0 ${getStepColor(step.status)}`}
               >
-                <div className='text-2xl mr-4'>{getStepIcon(step.status)}</div>
-                <div className='flex-1'>
-                  <h4 className='font-semibold text-white'>{step.title}</h4>
-                  <p className='text-sm text-white/70'>{step.description}</p>
+                <div className='text-2xl sm:mr-4'>{getStepIcon(step.status)}</div>
+                <div className='flex-1 w-full sm:w-auto'>
+                  <h4 className='font-semibold text-white text-sm sm:text-base'>{step.title}</h4>
+                  <p className='text-xs sm:text-sm text-white/70'>{step.description}</p>
                   {step.details && <p className='text-xs text-white/50 mt-1'>{step.details}</p>}
                 </div>
                 {step.action && (
@@ -1537,7 +1537,7 @@ export const HelloMilestoneDemo = ({
                     <button
                       onClick={step.action}
                       disabled={step.disabled}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 ${
+                      className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 text-sm sm:text-base ${
                         step.disabled
                           ? 'bg-neutral-500/20 text-neutral-400 cursor-not-allowed opacity-50'
                           : step.status === 'current'

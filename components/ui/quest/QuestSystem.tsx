@@ -165,7 +165,7 @@ export const QuestSystem: React.FC<QuestSystemProps> = ({ account, onQuestComple
           <div className="text-2xl font-bold text-green-400">{completedQuests.length}</div>
           <div className="text-sm text-white/70">Completed</div>
         </div>
-        <div className="bg-white/10 rounded-lg p-4 text-center">
+        <div className="bg-white/10 rounded-lg p-4 text-center col-span-2 md:col-span-1">
           <div className="text-2xl font-bold text-purple-400">
             <p>
               Nexus Quest Master
