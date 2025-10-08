@@ -129,6 +129,7 @@ export interface UserEngagementMetrics {
     userId: string;
     displayName: string;
     level: number;
+    experience: number;
     totalPoints: number;
     demosCompleted: number;
     badgesEarned: number;

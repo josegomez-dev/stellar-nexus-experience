@@ -413,6 +413,7 @@ export class AnalyticsService {
             userId: account.walletAddress,
             displayName: account.displayName,
             level: account.level,
+            experience: account.experience,
             totalPoints: account.totalPoints,
             demosCompleted: demosCompleted.length,
             badgesEarned: badgesEarned.length,

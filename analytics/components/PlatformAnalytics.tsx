@@ -337,12 +337,13 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({ className 
                 </div>
                 <div>
                   <p className={`${themeClasses.text} font-medium`}>{user.displayName}</p>
-                  <p className={`${themeClasses.textMuted} text-sm`}>Level {user.level}</p>
+                  {/* <p className={`${themeClasses.textMuted} text-sm`}>Level {user.level}</p> */}
                 </div>
               </div>
               <div className='text-right'>
                 <p className={`${themeClasses.text} font-medium`}>
-                  {user.totalPoints.toLocaleString()} pts
+                  {user.totalPoints.toLocaleString()} pts / 
+                  {(user.experience || 0).toLocaleString()} XP
                 </p>
                 <p className={`${themeClasses.textMuted} text-sm`}>
                   {user.demosCompleted} demos, {user.badgesEarned} badges

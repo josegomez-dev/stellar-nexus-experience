@@ -23,7 +23,6 @@ import { AuthModal } from '@/components/ui/auth/AuthModal';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
-import { PreloaderScreen } from '@/components/ui/PreloaderScreen';
 import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
 import { StartButtonScreen } from '@/components/home/StartButtonScreen';
 import { QuestAndReferralSection } from '@/components/ui/quest/QuestAndReferralSection';
