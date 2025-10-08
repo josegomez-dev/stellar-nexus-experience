@@ -8,7 +8,7 @@ interface LeaderboardSectionProps {
 
 export const LeaderboardSection = ({ onOpenLeaderboard }: LeaderboardSectionProps) => {
   return (
-    <>
+    <div data-leaderboard-section>
       {/* Leaderboard Button - Centered between Tutorial and Footer */}
       <div className='text-center mb-12'>
         <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
@@ -28,6 +28,7 @@ export const LeaderboardSection = ({ onOpenLeaderboard }: LeaderboardSectionProp
 
           <Tooltip content='Join the Challenge!'>
             <button
+              data-leaderboard-button
               onClick={onOpenLeaderboard}
               className='relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3 hover:animate-none'
             >
@@ -38,7 +39,7 @@ export const LeaderboardSection = ({ onOpenLeaderboard }: LeaderboardSectionProp
           </Tooltip>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

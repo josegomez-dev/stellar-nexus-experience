@@ -89,7 +89,7 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
-            <a
+            {/* <a
               target='_blank'
               href='/docs'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
@@ -124,7 +124,7 @@ export const Header = () => {
               </span>
               <span>Analytics</span>
               <span className='text-xs text-white/40 ml-2 rounded-full bg-white/10 px-2 py-1'>WIP</span>
-            </a>
+            </a> */}
             {/* <a
               href='/'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'

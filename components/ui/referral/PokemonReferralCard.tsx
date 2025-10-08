@@ -125,7 +125,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       id: 2,
       name: 'Expert',
       level: 3,
-      image: '/images/character/character.png',
+      image: '/images/games/web3-basics-adventure.png',
       available: userLevel >= 3,
     },
   ];
@@ -192,21 +192,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       ? Object.values(account.badgesEarned)
       : [];
 
-  // Navigation functions
-  const handlePreviousPhase = () => {
-    const prevIndex = selectedPhase > 0 ? selectedPhase - 1 : phases.length - 1;
-    if (phases[prevIndex].available) {
-      setSelectedPhase(prevIndex);
-    }
-  };
-
-  const handleNextPhase = () => {
-    const nextIndex = selectedPhase < phases.length - 1 ? selectedPhase + 1 : 0;
-    if (phases[nextIndex].available) {
-      setSelectedPhase(nextIndex);
-    }
-  };
-
   const handleDownloadPng = async () => {
     if (!cardRef.current) return;
 
@@ -253,9 +238,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       setIsGeneratingPng(false);
     }
   };
-
-
-
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'copy') => {
     setIsSharing(true);
@@ -405,7 +387,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                     <div className='flex flex-col items-center'>
                       <div className='text-center mb-3'>
                         <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
-                          NEXUS CARD
+                          NEXUS CARD <br/>
+                          Trustless Worker
                         </div>
                       </div>
                     </div>
@@ -444,14 +427,15 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   /* Modern Layout - Profile Card Style */
                   <div className='flex flex-col h-full'>
                     {/* Top Section - Card Type and Icon */}
-                    <div className='flex justify-between items-start mb-4'>
+                    <br/>
+                    {/* <div className='flex justify-between items-start mb-4'>
                       <div className='text-sm font-bold text-white/90'>
                         COMMON
                       </div>
                       <div className='w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center'>
                         <div className='w-3 h-3 bg-white rounded-full'></div>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Center Section - Avatar and Name */}
                     <div className='flex flex-col items-center mb-6'>
@@ -502,7 +486,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
                     {/* Badges Section */}
                     {earnedBadges.length > 0 && (
-                      <div className='flex flex-wrap justify-center gap-2'>
+                      <div className='flex flex-wrap justify-center gap-2 mt-4'>
                         {earnedBadges.slice(0, 6).map((badgeId, index) => (
                           <div key={index} className='w-6 h-6'>
                             <BadgeEmblem
@@ -524,7 +508,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
                 {currentLayout.id === 2 && (
                   /* Minimal Layout - Clean Design */
-                  <div className='flex flex-col items-center text-center space-y-2'>
+                  <div className='flex flex-col items-center text-center space-y-2 -mb-10'>
+                    <br/>
                     <div className='text-xs font-medium opacity-60' style={{ color: currentTheme.text }}>
                       NEXUS
                     </div>
@@ -853,6 +838,18 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   <span>Download PNG</span>
                 </>
               )}
+            </button>
+
+            {/* Mint as NFT Button - Coming Soon */}
+            <button
+              disabled
+              className='relative bg-gradient-to-r from-purple-500/50 to-indigo-500/50 text-white/60 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg cursor-not-allowed flex items-center justify-center space-x-2 w-full opacity-60'
+            >
+              <span>🎨</span>
+              <span>Mint as NFT</span>
+              <span className='absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse'>
+                Coming Soon
+              </span>
             </button>
 
           </div>

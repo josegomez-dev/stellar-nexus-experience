@@ -13,7 +13,6 @@ import { getAllBadges } from '@/lib/firebase/firebase-types';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { accountService } from '@/lib/firebase/firebase-service';
 import { ReferralInvitationModal } from '@/components/ui/referral';
-import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import Image from 'next/image';
 
 export const UserDropdown = () => {
@@ -29,8 +28,22 @@ export const UserDropdown = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
-  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Listen for custom event to open dropdown and referral center
+  useEffect(() => {
+    const handleOpenReferralCenter = () => {
+      setIsOpen(true);
+      // Small delay to ensure dropdown opens first
+      setTimeout(() => {
+        setIsReferralModalOpen(true);
+        setIsOpen(false); // Close dropdown after opening modal
+      }, 100);
+    };
+
+    window.addEventListener('openReferralCenter', handleOpenReferralCenter);
+    return () => window.removeEventListener('openReferralCenter', handleOpenReferralCenter);
+  }, []);
 
   // Check if user has unlocked mini-games access (earned all 5 top badges)
   const miniGamesUnlocked = useMemo(() => {
@@ -490,6 +503,31 @@ export const UserDropdown = () => {
                     <span className='text-lg'>🎴</span>
                     <span>Referral Center</span>
                   </button>
+
+                  <button
+                    onClick={() => {
+                      // Close the dropdown
+                      setIsOpen(false);
+                      
+                      // Scroll to the leaderboard section
+                      const leaderboardSection = document.querySelector('[data-leaderboard-section]');
+                      if (leaderboardSection) {
+                        leaderboardSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                      
+                      // Wait for scroll to complete, then trigger the button click
+                      setTimeout(() => {
+                        const leaderboardButton = document.querySelector('[data-leaderboard-button]') as HTMLButtonElement;
+                        if (leaderboardButton) {
+                          leaderboardButton.click();
+                        }
+                      }, 500);
+                    }}
+                    className='w-full flex items-center space-x-3 text-yellow-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
+                  >
+                    <span className='text-lg'>🏆</span>
+                    <span>Global Leaderboard</span>
+                  </button>
                 </div>
 
                 <hr />
@@ -523,13 +561,6 @@ export const UserDropdown = () => {
         onClose={() => setIsReferralModalOpen(false)}
         account={account}
       />
-
-      {/* Leaderboard Sidebar */}
-      <LeaderboardSidebar
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-      />
-
     </div>
   );
 };

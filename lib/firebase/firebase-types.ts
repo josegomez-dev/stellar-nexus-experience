@@ -213,7 +213,7 @@ export const PREDEFINED_BADGES = [
   {
     id: 'social_butterfly',
     name: 'Social Butterfly',
-    description: 'Followed Trustless Work and Stellar on X',
+    description: 'Followed Nexus on X',
     earningPoints: 25,
     baseColor: '#1DA1F2',
     icon: 'social',
@@ -223,7 +223,7 @@ export const PREDEFINED_BADGES = [
   {
     id: 'hashtag_hero',
     name: 'Hashtag Hero',
-    description: 'Posted about Trustless Work with hashtags',
+    description: 'Posted about Nexus Experience with hashtags',
     earningPoints: 30,
     baseColor: '#E1306C',
     icon: 'hashtag',
@@ -233,7 +233,7 @@ export const PREDEFINED_BADGES = [
   {
     id: 'discord_warrior',
     name: 'Discord Warrior',
-    description: 'Joined the Trustless Work Discord server',
+    description: 'Joined the Nexus Discord community',
     earningPoints: 35,
     baseColor: '#5865F2',
     icon: 'discord',
@@ -243,7 +243,7 @@ export const PREDEFINED_BADGES = [
   {
     id: 'quest_master',
     name: 'Quest Master',
-    description: 'Completed all available quests',
+    description: 'Completed all quests - Ready to build with Starter Kits',
     earningPoints: 100,
     baseColor: '#FF6B35',
     icon: 'quest',
@@ -274,12 +274,12 @@ export const PREDEFINED_QUESTS: Quest[] = [
   {
     id: 'follow_both_accounts',
     title: 'Social Butterfly',
-    description: 'Follow both @TrustlessWork and @StellarOrg on X to stay updated with the latest news and learn about the Stellar ecosystem',
+    description: 'Follow @n3xusEx on X to stay updated with the latest Nexus news and Web3 innovations',
     category: 'social',
     type: 'follow',
     requirements: {
-      action: 'Follow both @TrustlessWork and @StellarOrg on X',
-      target: 'https://x.com/TrustlessWork and https://x.com/StellarOrg',
+      action: 'Follow @n3xusEx on X',
+      target: 'https://x.com/n3xusEx',
       verification: 'manual',
     },
     rewards: {
@@ -294,12 +294,12 @@ export const PREDEFINED_QUESTS: Quest[] = [
   {
     id: 'post_hashtags',
     title: 'Share the Love',
-    description: '🚀 trust is cool. trustless is cooler. ship escrow flows, earn XP, mint your rep. welcome to Stellar Nexus Experience—where work clears on-chain, fast. join the run → build / test / win. #escrow-master #nexus-master #trustless-work #stellar-nexus #stellar-nexus-experience',
+    description: '🚀 Share your Nexus Experience journey! Post about your progress, achievements, and learnings. Use the hashtags below and download your Referral Card from the Referral Center to share your progress with friends!',
     category: 'social',
     type: 'post',
     requirements: {
-      action: 'Post about Trustless Work with hashtags',
-      target: '#escrow-master #nexus-master #trustless-work #stellar',
+      action: 'Post about Nexus Experience with hashtags: #NexusExperience #TrustlessWork #StellarBlockchain #BuildOnStellar',
+      target: '#NexusExperience #Web3Learning #TrustlessWork #StellarBlockchain #BuildOnStellar',
       verification: 'manual',
     },
     rewards: {
@@ -314,12 +314,12 @@ export const PREDEFINED_QUESTS: Quest[] = [
   {
     id: 'join_discord',
     title: 'Join the Community',
-    description: 'Join the Trustless Work Discord server to see weekly leaderboard updates',
+    description: 'Join the Nexus Discord server to connect with fellow builders, see the global leaderboard rankings, and stay updated with the community!',
     category: 'community',
     type: 'join',
     requirements: {
-      action: 'Join the Trustless Work Discord server',
-      target: 'https://discord.gg/trustlesswork',
+      action: 'Join the Nexus Discord server and check the Leaderboard rankings',
+      target: 'https://discord.gg/fqrKA6NB',
       verification: 'manual',
     },
     rewards: {
@@ -334,11 +334,11 @@ export const PREDEFINED_QUESTS: Quest[] = [
   {
     id: 'claim_quest_master_badge',
     title: 'Quest Master Badge',
-    description: 'Claim your Quest Master Badge after completing all social quests',
+    description: 'Congratulations! You\'ve completed all quests! 🎉 Now it\'s time to build your own product. Visit the Starter Kits section to download templates and start creating your Web3 projects!',
     category: 'community',
     type: 'complete',
     requirements: {
-      action: 'Claim the Quest Master Badge',
+      action: 'Claim the Quest Master Badge and visit Starter Kits to start building',
       verification: 'manual',
     },
     rewards: {

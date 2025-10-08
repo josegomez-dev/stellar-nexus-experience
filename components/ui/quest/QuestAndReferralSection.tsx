@@ -115,6 +115,15 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
     );
   }
 
+  // Check if user has earned the Quest Master badge
+  let badgesEarnedArray: string[] = [];
+  if (Array.isArray(account.badgesEarned)) {
+    badgesEarnedArray = account.badgesEarned;
+  } else if (account.badgesEarned && typeof account.badgesEarned === 'object') {
+    badgesEarnedArray = Object.values(account.badgesEarned);
+  }
+  const hasQuestMasterBadge = badgesEarnedArray.includes('quest_master');
+
   return (
     <div className="space-y-6">
       <QuestSystem
@@ -122,6 +131,101 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
         onQuestComplete={onQuestComplete}
         refreshAccountData={refreshAccountData}
       />
+
+      {/* Quest Master Congratulations Message */}
+      {hasQuestMasterBadge && (
+        <div className="relative overflow-hidden bg-gradient-to-br from-yellow-500/20 via-orange-500/20 to-red-500/20 border-2 border-yellow-400/50 rounded-2xl p-8 shadow-2xl">
+          {/* Animated background effects */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-orange-400/10 to-red-400/10 animate-pulse"></div>
+          
+          <div className="relative z-10 text-center">
+           
+            
+            {/* Main Message */}
+            <h2 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">
+              Congratulations, Quest Master!
+            </h2>
+            
+            <p className="text-lg text-white/90 mb-2 max-w-2xl mx-auto">
+              You've successfully completed the entire Nexus Experience journey!
+            </p>
+            
+            <p className="text-base text-white/80 mb-6 max-w-2xl mx-auto">
+              Thank you for exploring our demos, mastering trustless work concepts, and engaging with the community. 
+              You're now equipped with the knowledge to build amazing Web3 applications!
+            </p>
+            
+            {/* Call to Action - 3 Columns */}
+            <div className="mb-4">
+              <h3 className="text-2xl font-bold text-white mb-4 text-center">🚀 Ready to Build?</h3>
+              
+              <div className="grid md:grid-cols-3 gap-4">
+                {/* Box 1: Starter Kits */}
+                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-400/30 hover:border-green-400/50 transition-all duration-300 flex flex-col">
+                  <div className="text-center mb-3">
+                    <div className="text-4xl mb-2">📦</div>
+                    <h4 className="text-lg font-bold text-white mb-2">Nexus Starter Kits</h4>
+                    <p className="text-white/80 text-sm mb-4 flex-1">
+                      Download comprehensive templates to build trustless work applications on Stellar blockchain
+                    </p>
+                  </div>
+                  <a
+                    href="/docs"
+                    className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm"
+                  >
+                    <span>Explore Kits</span>
+                    <span>→</span>
+                  </a>
+                </div>
+
+                {/* Box 2: Referral Card */}
+                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 flex flex-col">
+                  <div className="text-center mb-3">
+                    <div className="text-4xl mb-2">🎴</div>
+                    <h4 className="text-lg font-bold text-white mb-2">Share & Invite</h4>
+                    <p className="text-white/80 text-sm mb-4 flex-1">
+                      Download your custom referral card and invite friends to join the Nexus Experience
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      // Dispatch custom event to open user dropdown and referral center
+                      window.dispatchEvent(new CustomEvent('openReferralCenter'));
+                    }}
+                    className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm"
+                  >
+                    <span>Open Referral Center</span>
+                    <span>→</span>
+                  </button>
+                </div>
+
+                {/* Box 3: Web3 Playground */}
+                <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/50 transition-all duration-300 flex flex-col">
+                  <div className="text-center mb-3">
+                    <div className="text-4xl mb-2">🎮</div>
+                    <h4 className="text-lg font-bold text-white mb-2">Web3 Playground</h4>
+                    <p className="text-white/80 text-sm mb-4 flex-1">
+                      Explore interactive Web3 games and challenges to level up your blockchain skills
+                    </p>
+                  </div>
+                  <a
+                    href="/mini-games"
+                    className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm"
+                  >
+                    <span>Play Now</span>
+                    <span>→</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            {/* Additional Info */}
+            <p className="text-xs text-white/60">
+              Continue exploring demos, invite friends, and keep building! The Web3 journey never ends. 🌟
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

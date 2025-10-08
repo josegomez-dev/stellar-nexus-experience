@@ -7,7 +7,6 @@ import {
   LeaderboardEntry,
   LeaderboardStats,
 } from '@/lib/services/leaderboard-service';
-import { Tooltip } from './Tooltip';
 
 // Utility function to format wallet address
 const formatWalletAddress = (address: string): string => {
@@ -117,20 +116,10 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
 
           {/* User info */}
           <div className='flex-1 min-w-0'>
-            <Tooltip
-              content={
-                <div className='text-center'>
-                  <div className='text-sm font-medium text-white'>{entry.displayName}</div>
-                  <div className='text-xs text-gray-300 mt-1'>{entry.walletAddress}</div>
-                </div>
-              }
-              position='top'
-            >
-              <div className='cursor-help'>
-                <h4 className='font-bold text-white text-sm truncate'>{entry.displayName}</h4>
-                <p className='text-xs text-gray-400 truncate'>{formatWalletAddress(entry.walletAddress)}</p>
-              </div>
-            </Tooltip>
+            <div>
+              <h4 className='font-bold text-white text-sm truncate'>{entry.displayName}</h4>
+              <p className='text-xs text-gray-400 truncate'>{formatWalletAddress(entry.walletAddress)}</p>
+            </div>
           </div>
 
           {/* Stats */}
@@ -332,7 +321,7 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
         </div>
 
         {/* Content */}
-        <div className='relative z-10 p-6 overflow-y-auto h-full'>
+        <div className='relative z-10 p-6 overflow-y-auto h-2/3'>
           {activeTab === 'global' ? renderGlobalLeaderboard() : renderAroundMeLeaderboard()}
         </div>
 

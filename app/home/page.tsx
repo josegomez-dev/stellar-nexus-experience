@@ -593,7 +593,6 @@ export default function HomePageContent() {
         onClose={() => setLeaderboardSidebarOpen(false)}
       />
 
-
       {/* Toast Container */}
       {preloaderComplete && <ToastContainer />}
     </div>
