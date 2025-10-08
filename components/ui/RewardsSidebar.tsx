@@ -704,7 +704,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
         <div
           ref={dropdownRef}
           onClick={e => e.stopPropagation()}
-          className='absolute right-0 mt-2 w-80 bg-black/80 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[80vh]'
+          className='absolute -right-20 mt-2 w-80 bg-black/80 backdrop-blur-2xl border border-white/30 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[80vh]'
         >
           {/* Enhanced background blur overlay */}
           <div className='absolute inset-0 bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-3xl'></div>

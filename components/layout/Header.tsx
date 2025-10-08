@@ -3,12 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
-import { appConfig, stellarConfig } from '@/lib/stellar/wallet-config';
+import { appConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
-import { NetworkIndicator } from '@/components/ui/wallet/NetworkIndicator';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
-import { getAllBadges } from '@/lib/firebase/firebase-types';
 import Image from 'next/image';
 
 export const Header = () => {
@@ -89,42 +87,6 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
-            {/* <a
-              target='_blank'
-              href='/docs'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
-            >
-              <span className='text-lg'>
-                <Image
-                  src='/images/icons/docs.png'
-                  alt='Analytics'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5'
-                  style={{ width: 'auto', height: 'auto' }}
-                />
-              </span>
-              <span>Starter Kits</span>
-              <span className='text-xs text-white/40 ml-2 rounded-full bg-white/10 px-2 py-1'>WIP</span>
-            </a>
-            <a
-              target='_blank'
-              href='/docs'
-              className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
-            >
-              <span className='text-lg'>
-                <Image
-                  src='/images/icons/docs.png'
-                  alt='Analytics'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5'
-                  style={{ width: 'auto', height: 'auto' }}
-                />
-              </span>
-              <span>Analytics</span>
-              <span className='text-xs text-white/40 ml-2 rounded-full bg-white/10 px-2 py-1'>WIP</span>
-            </a> */}
             {/* <a
               href='/'
               className='text-white/80 hover:text-white transition-colors flex items-center space-x-2'
@@ -255,18 +217,8 @@ export const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className='md:hidden absolute top-full left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20 shadow-xl z-50'>
+        <div className='md:hidden absolute top-full left-0 right-0 bg-black/80 backdrop-blur-md border-t border-white/20 shadow-xl z-50'>
           <div className='px-2 pt-2 pb-3 space-y-1'>
-            <a
-              href='/analytics'
-              className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <div className='flex items-center space-x-2'>
-                <span className='text-lg'>📊</span>
-                <span>Analytics</span>
-              </div>
-            </a>
             <a
               href='/'
               className='block px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-colors'
@@ -281,7 +233,7 @@ export const Header = () => {
                   className='w-5 h-5'
                   style={{ width: 'auto', height: 'auto' }}
                 />
-                <span>Demos</span>
+                <span>ESCROW ARSENAL</span>
               </div>
             </a>
             {/* Only show Nexus Web3 Playground in mobile menu when wallet is connected */}
@@ -338,7 +290,7 @@ export const Header = () => {
                   height={20}
                   className='w-5 h-5'
                 />
-                <span>Docs</span>
+                <span>Nexus Starter Kits</span>
               </div>
             </a>
           </div>
