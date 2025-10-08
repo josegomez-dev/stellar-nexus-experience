@@ -90,7 +90,7 @@ export const HeroSection = ({
           <br />
 
           {/* Tutorial Buttons */}
-          <div className='flex justify-center gap-6 mb-8'>
+          <div className='flex flex-col md:flex-row justify-center gap-4 md:gap-6 mb-8 px-4'>
             <Tooltip content='Scroll down to the tutorial section'>
               <button
                 onClick={() => {
@@ -102,7 +102,7 @@ export const HeroSection = ({
                     });
                   }
                 }}
-                className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                className='w-full md:w-auto px-6 md:px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center justify-center space-x-3'
               >
                 <Image
                   src='/images/character/baby.png'
@@ -121,9 +121,9 @@ export const HeroSection = ({
               <button
                 onClick={onTechTreeClick}
                 disabled={false}
-                className='px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
+                className='w-full md:w-auto px-6 md:px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 bg-gradient-to-r from-brand-500/20 to-accent-500/20 hover:from-brand-800/50 hover:to-accent-800/50 text-white transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
               >
-                <span>Trustless Work Tech Tree</span>
+                <span className='text-center md:text-left'>Trustless Work Tech Tree</span>
                 <span className='text-xl'>
                   <Image
                     src='/images/icons/demos.png'
@@ -141,7 +141,7 @@ export const HeroSection = ({
               </button>
             </Tooltip>
 
-            <div className={`relative ${miniGamesUnlocked ? 'animate-pulse hover:animate-none cursor-pointer' : ''}`}>
+            <div className={`relative w-full md:w-auto ${miniGamesUnlocked ? 'animate-pulse hover:animate-none cursor-pointer' : ''}`}>
               {/* Wave Effect - Only show when unlocked */}
               {miniGamesUnlocked && (
                 <>
@@ -167,7 +167,7 @@ export const HeroSection = ({
                       e.preventDefault();
                     }
                   }}
-                  className={`relative px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center space-x-3 transform shadow-lg border-2 ${
+                  className={`relative w-full md:w-auto px-6 md:px-8 py-4 font-bold rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 transform shadow-lg border-2 ${
                     miniGamesUnlocked
                       ? 'bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white hover:scale-105 hover:shadow-xl border-white/20 hover:border-white/40 cursor-pointer hover:animate-none'
                       : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
@@ -178,7 +178,7 @@ export const HeroSection = ({
                       : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
                   }
                 >
-                  <span>
+                  <span className='text-center md:text-left'>
                     {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
                   </span>
                   <span className='text-xl'>
