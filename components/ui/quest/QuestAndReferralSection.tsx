@@ -7,6 +7,7 @@ import { QuestSystem } from './QuestSystem';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { Tooltip } from '../Tooltip';
 import { AnimatedGiftBox } from './AnimatedGiftBox';
+import Image from 'next/image';
 
 interface QuestAndReferralSectionProps {
   account: Account | null;
@@ -163,7 +164,16 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
                 {/* Box 1: Starter Kits */}
                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-400/30 hover:border-green-400/50 transition-all duration-300 flex flex-col">
                   <div className="text-center mb-3">
-                    <div className="text-4xl mb-2">📦</div>
+                    <div className="text-4xl mb-2 flex justify-center items-center">
+                      <Image
+                        src='/images/icons/docs.png'
+                        alt='Nexus Starter Kits'
+                        width={50}
+                        height={50}
+                        style={{ width: 'auto', height: 'auto' }}
+                        className='rounded-full'
+                      />
+                    </div>
                     <h4 className="text-lg font-bold text-white mb-2">Nexus Starter Kits</h4>
                     <p className="text-white/80 text-sm mb-4 flex-1">
                       Download comprehensive templates to build trustless work applications on Stellar blockchain
@@ -181,7 +191,16 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
                 {/* Box 2: Referral Card */}
                 <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 flex flex-col">
                   <div className="text-center mb-3">
-                    <div className="text-4xl mb-2">🎴</div>
+                    <div className="text-4xl mb-2 flex justify-center items-center">
+                      <Image
+                        src='/images/icons/demos.png'
+                        alt='Share & Invite'
+                        width={50}
+                        height={50}
+                        style={{ width: 'auto', height: 'auto' }}
+                        className='rounded-full'
+                      />
+                    </div>
                     <h4 className="text-lg font-bold text-white mb-2">Share & Invite</h4>
                     <p className="text-white/80 text-sm mb-4 flex-1">
                       Download your custom referral card and invite friends to join the Nexus Experience
@@ -202,7 +221,16 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
                 {/* Box 3: Web3 Playground */}
                 <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/50 transition-all duration-300 flex flex-col">
                   <div className="text-center mb-3">
-                    <div className="text-4xl mb-2">🎮</div>
+                    <div className="text-4xl mb-2 flex justify-center items-center">
+                      <Image
+                        src='/images/icons/console.png'
+                        alt='Web3 Playground'
+                        width={50}
+                        height={50}
+                        style={{ width: 'auto', height: 'auto' }}
+                        className='rounded-full'
+                      />
+                    </div>
                     <h4 className="text-lg font-bold text-white mb-2">Web3 Playground</h4>
                     <p className="text-white/80 text-sm mb-4 flex-1">
                       Explore interactive Web3 games and challenges to level up your blockchain skills

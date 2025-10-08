@@ -58,7 +58,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
       setLoadingComplete(true);
       
       if (showVideoAfterLoad) {
-        // Start playing video after loading
+        // Start playing video immediately for fluid transition
         setTimeout(() => {
           setIsVideoPlaying(true);
           
@@ -81,7 +81,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
               // Silent fallback if audio fails
             }
           }
-        }, 300);
+        }, 100);
       } else {
         // No video, just fade out
         handleComplete();
@@ -102,7 +102,7 @@ export const VideoPreloaderScreen: React.FC<VideoPreloaderScreenProps> = ({
       setIsVisible(false);
       setIsFadingOut(false);
       onComplete?.();
-    }, 1000); // Smooth fade out
+    }, 800); // Smooth and quick fade out
   };
 
   if (!isVisible) return null;

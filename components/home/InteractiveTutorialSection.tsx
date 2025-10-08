@@ -75,11 +75,6 @@ export const InteractiveTutorialSection = ({
             New to Trustless Work or Stellar? <br /> Start with our tutorial to learn how everything
             works!
           </p>
-          <div className='mt-4 text-center'>
-            <p className='text-brand-300 text-sm animate-pulse'>
-              💡 New here? Start with the tutorial to learn how everything works!
-            </p>
-          </div>
         </div>
 
         <div className='mb-8 flex justify-center'>
@@ -88,10 +83,24 @@ export const InteractiveTutorialSection = ({
             className='px-8 py-4 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40'
           >
             <div className='flex items-center space-x-2'>
-              <span>📚</span>
+              <Image
+                src='/images/character/baby.png'
+                alt='Tutorial'
+                width={50}
+                height={50}
+                style={{ width: 'auto', height: 'auto' }}
+                className='rounded-full'
+              />
               <span>Interactive Tutorial</span>
             </div>
           </button>
+        </div>
+
+        <div className='mt-4 text-center'>
+          <p className='text-brand-300 text-sm animate-pulse'>
+            💡 New here? Start with the tutorial to learn how everything works!
+          </p>
+          <br />
         </div>
 
         <div className='grid md:grid-cols-3 gap-8 text-sm'>
@@ -148,8 +157,8 @@ export const InteractiveTutorialSection = ({
                   style={{ width: 'auto', height: 'auto', margin: '0 auto' }}
                 />
               </div>
-              <div className='font-semibold text-white/90 mb-2 text-base'>Smart Tips</div>
-              <div className='text-white/70'>Pro tips and best practices included</div>
+              <div className='font-semibold text-white/90 mb-2 text-base'>NEXUS PRIME</div>
+              <div className='text-white/70'>Guardian of STELLAR NEXUS</div>
             </div>
           </div>
         </div>

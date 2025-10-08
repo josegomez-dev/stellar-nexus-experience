@@ -235,10 +235,10 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 rounded-full flex items-center justify-center">
                 <Image
-                  src="/images/character/nexus-prime-chat.png"
+                  src="/images/character/baby.png"
                   alt="NEXUS PRIME"
-                  width={32}
-                  height={32}
+                  width={62}
+                  height={62}
                   className="rounded-full"
                 />
               </div>

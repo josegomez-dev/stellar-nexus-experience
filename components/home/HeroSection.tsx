@@ -104,7 +104,14 @@ export const HeroSection = ({
                 }}
                 className='px-8 py-4 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
               >
-                <span className='text-xl'>👨‍🏫&nbsp;</span>
+                <Image
+                  src='/images/character/baby.png'
+                  alt='Tutorial'
+                  width={50}
+                  height={50}
+                  style={{ width: 'auto', height: 'auto' }}
+                  className='rounded-full'
+                />
                 <span>Tutorial</span>
                 <span className='text-xl'>&nbsp;→</span>
               </button>

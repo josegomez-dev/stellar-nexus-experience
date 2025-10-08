@@ -129,7 +129,7 @@ export const ReferralInvitationModal: React.FC<ReferralInvitationModalProps> = (
   return (
     <div
       className='fixed inset-0 flex items-center justify-center z-50 p-4'
-      style={{ marginTop: '500px' }}
+      style={{ marginTop: '350px' }}
     >
       <div className='bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 w-full max-w-2xl mx-4 border border-white/20 shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto'>
         {/* Background Effects */}

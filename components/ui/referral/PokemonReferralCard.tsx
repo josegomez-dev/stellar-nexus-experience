@@ -1,15 +1,10 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Account } from '@/lib/firebase/firebase-types';
-import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { UserAvatar } from '@/components/ui/navigation/UserAvatar';
-import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
-import { useAuth } from '@/contexts/auth/AuthContext';
-import html2canvas from 'html2canvas';
-import Image from 'next/image';
 
 interface PokemonReferralCardProps {
   account: Account | null;
@@ -21,13 +16,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   className = '',
 }) => {
   const { addToast } = useToast();
-  const { walletData } = useGlobalWallet();
-  const { user } = useAuth();
-  const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [selectedPhase, setSelectedPhase] = useState(0); // 0: baby, 1: teen, 2: adult
   const [selectedBackground, setSelectedBackground] = useState(0); // 0: explorer, 1: mid-level, 2: expert
-  const [selectedForm, setSelectedForm] = useState(0); // 0: initial, 1: mid, 2: final
   const [selectedLayout, setSelectedLayout] = useState(0); // 0: classic, 1: modern, 2: minimal
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -77,34 +67,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
   const currentTheme = rankingThemes[mockRanking as keyof typeof rankingThemes];
 
-  // Define phases with images
-  const phases = [
-    {
-      id: 0,
-      name: 'Explorer',
-      level: 1,
-      backgroundImage: '/images/games/escrow-puzzle-master.png',
-      avatarImage: '/images/character/baby.png',
-      available: true,
-    },
-    {
-      id: 1,
-      name: 'Mid-Level',
-      level: 2,
-      backgroundImage: '/images/games/defi-trading-arena.png',
-      avatarImage: '/images/character/teen.png',
-      available: userLevel >= 2,
-    },
-    {
-      id: 2,
-      name: 'Expert',
-      level: 3,
-      backgroundImage: '/images/games/web3-basics-adventure.png',
-      avatarImage: '/images/character/character.png',
-      available: userLevel >= 3,
-    },
-  ];
-
   // Define background options
   const backgroundOptions = [
     {
@@ -126,31 +88,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       name: 'Expert',
       level: 3,
       image: '/images/games/web3-basics-adventure.png',
-      available: userLevel >= 3,
-    },
-  ];
-
-  // Define form options
-  const formOptions = [
-    {
-      id: 0,
-      name: 'Initial Form',
-      level: 1,
-      image: '/images/character/baby.png',
-      available: true,
-    },
-    {
-      id: 1,
-      name: 'Mid Form',
-      level: 2,
-      image: '/images/character/teen.png',
-      available: userLevel >= 2,
-    },
-    {
-      id: 2,
-      name: 'Final Form',
-      level: 3,
-      image: '/images/character/character.png',
       available: userLevel >= 3,
     },
   ];
@@ -180,9 +117,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     },
   ];
 
-  const currentPhase = phases[selectedPhase];
   const currentBackground = backgroundOptions[selectedBackground];
-  const currentForm = formOptions[selectedForm];
   const currentLayout = layoutOptions[selectedLayout];
 
   // Get earned badges for display
@@ -191,53 +126,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     : account.badgesEarned && typeof account.badgesEarned === 'object'
       ? Object.values(account.badgesEarned)
       : [];
-
-  const handleDownloadPng = async () => {
-    if (!cardRef.current) return;
-
-    setIsGeneratingPng(true);
-    try {
-      // Create a canvas from the card
-      const canvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: true,
-      });
-
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>(resolve => {
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob);
-        }, 'image/png');
-      });
-
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `nexus-referral-card-${referralCode}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      addToast({
-        type: 'success',
-        title: '🎉 Card Downloaded!',
-        message: 'Your Nexus card has been saved!',
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error('Error generating card:', error);
-      addToast({
-        type: 'error',
-        title: '❌ Download Failed',
-        message: 'Failed to generate Nexus card. Please try again.',
-        duration: 3000,
-      });
-    } finally {
-      setIsGeneratingPng(false);
-    }
-  };
 
   const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'copy') => {
     setIsSharing(true);
@@ -286,15 +174,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     } finally {
       setIsSharing(false);
     }
-  };
-
-  const handleMint = () => {
-    addToast({
-      type: 'info',
-      title: '🚀 Coming Soon!',
-      message: 'NFT minting functionality will be available soon. Stay tuned!',
-      duration: 4000,
-    });
   };
 
   return (
@@ -814,45 +693,6 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
         </div>
 
       </div>
-      
-      <br/>
-      <hr/>
-      <br/>
-
-          {/* Right Column - Download Buttons */}
-          <div className='space-y-4'>
-            {/* Download PNG Button */}
-            <button
-              onClick={handleDownloadPng}
-              disabled={isGeneratingPng}
-              className='bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 w-full'
-            >
-              {isGeneratingPng ? (
-                <>
-                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <span>📱</span>
-                  <span>Download PNG</span>
-                </>
-              )}
-            </button>
-
-            {/* Mint as NFT Button - Coming Soon */}
-            <button
-              disabled
-              className='relative bg-gradient-to-r from-purple-500/50 to-indigo-500/50 text-white/60 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg cursor-not-allowed flex items-center justify-center space-x-2 w-full opacity-60'
-            >
-              <span>🎨</span>
-              <span>Mint as NFT</span>
-              <span className='absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse'>
-                Coming Soon
-              </span>
-            </button>
-
-          </div>
     </div>
   );
 };

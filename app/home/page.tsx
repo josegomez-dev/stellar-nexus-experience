@@ -129,9 +129,9 @@ export default function HomePageContent() {
         clearInterval(interval);
         setTimeout(() => {
           setIsLoading(false);
-        }, 500);
+        }, 200);
       }
-    }, 800);
+    }, 400);
 
     return () => clearInterval(interval);
   }, [isLoading, showStartButton]);
@@ -139,20 +139,18 @@ export default function HomePageContent() {
   // Fallback timeout to ensure preloader doesn't get stuck
   useEffect(() => {
     if (isLoading && !showStartButton) {
-      const timeout = setTimeout(() => {
-        console.log('Preloader timeout - forcing completion');
-        setIsLoading(false);
-      }, 5000); // 5 second timeout
-
-      return () => clearTimeout(timeout);
+      setIsLoading(false);
     }
   }, [isLoading, showStartButton]);
 
-  // Check if this is user's first visit to the page
+  // Check if this is user's first visit to the page or if wallet is already connected
   useEffect(() => {
     const hasVisitedHome = localStorage.getItem('hasVisitedHome');
-    if (hasVisitedHome) {
-      // User has visited before, skip the start button and preloader
+    const hasWalletStored = localStorage.getItem('stellar-wallet-data');
+    
+    // If user has visited before OR has a wallet connected, skip the start button and preloader
+    if (hasVisitedHome || hasWalletStored) {
+      // User has visited before or has wallet stored, skip the start button and preloader for better UX
       setShowStartButton(false);
       setPreloaderComplete(true);
       setIsLoading(false);
@@ -165,10 +163,8 @@ export default function HomePageContent() {
     setShowStartButton(false);
     // Mark that user has visited the home page
     localStorage.setItem('hasVisitedHome', 'true');
-    // Trigger loading after start button is clicked
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 100);
+    // Trigger loading immediately for snappier experience
+    setIsLoading(true);
   };
 
   // Listen for wallet sidebar state changes
@@ -334,7 +330,7 @@ export default function HomePageContent() {
           subtitle="Web3 Early Adopters Program"
           showText={true}
           showVideoAfterLoad={true}
-          minDuration={3000}
+          minDuration={1500}
           audioVolumes={{
             primary: AUDIO_VOLUMES.intro,
             secondary: AUDIO_VOLUMES.nexusVoice,
