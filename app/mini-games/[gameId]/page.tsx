@@ -30,9 +30,9 @@ const gameLibrary = {
     currentPlayers: 1247,
     rating: 4.8,
     thumbnail: '/images/games/web3-basics-adventure.png',
-    progress: 20,
-    estimatedRelease: 'Available Now',
-    donationGoal: 0,
+    progress: 5,
+    estimatedRelease: 'Beta Available',
+    donationGoal: 15000,
     currentDonations: 0,
     features: [
       'Smart Contract Basics',
@@ -69,12 +69,12 @@ const gameLibrary = {
     difficulty: 'Intermediate',
     estimatedTime: '4-5 hours',
     rewards: '100 XLM + Expert Badge',
-    currentPlayers: 892,
-    rating: 4.9,
+    currentPlayers: 0,
+    rating: 0,
     thumbnail: '/images/games/escrow-puzzle-master.png',
     progress: 0,
-    estimatedRelease: 'Available Now',
-    donationGoal: 0,
+    estimatedRelease: 'TBA',
+    donationGoal: 15000,
     currentDonations: 0,
     features: ['Escrow Systems', 'Multi-Sig Wallets', 'Trustless Transactions', 'Stellar Network'],
     achievements: ['Escrow Master', 'Trust Guardian', 'Stellar Expert', 'Security Champion'],
@@ -105,13 +105,13 @@ const gameLibrary = {
     difficulty: 'Advanced',
     estimatedTime: '6-8 hours',
     rewards: '200 XLM + Trading Trophy',
-    currentPlayers: 567,
-    rating: 4.7,
+    currentPlayers: 0,
+    rating: 0,
     thumbnail: '/images/games/defi-trading-arena.png',
     progress: 0,
-    estimatedRelease: 'Beta Testing',
-    donationGoal: 5000,
-    currentDonations: 3200,
+    estimatedRelease: 'TBA',
+    donationGoal: 15000,
+    currentDonations: 0,
     features: ['Liquidity Pools', 'Yield Farming', 'AMM Strategies', 'Risk Management'],
     achievements: ['Trading Champion', 'Yield Master', 'Risk Taker', 'DeFi Legend'],
     developers: [
@@ -137,13 +137,13 @@ const gameLibrary = {
     difficulty: 'Intermediate',
     estimatedTime: '3-4 hours',
     rewards: '75 XLM + Creator Badge',
-    currentPlayers: 423,
-    rating: 4.6,
+    currentPlayers: 0,
+    rating: 0,
     thumbnail: '/images/games/blank.png',
     progress: 0,
-    estimatedRelease: 'Beta Testing',
-    donationGoal: 3000,
-    currentDonations: 1800,
+    estimatedRelease: 'TBA',
+    donationGoal: 15000,
+    currentDonations: 0,
     features: ['NFT Design Tools', 'Minting Process', 'Marketplace Trading', 'Royalty Systems'],
     achievements: ['Creative Genius', 'NFT Pioneer', 'Market Master', 'Digital Artist'],
     developers: [
@@ -497,7 +497,11 @@ export default function GamePage() {
       </main>
 
       {/* Nexus Prime */}
-      <NexusPrime currentPage='mini-games' walletConnected={isConnected} />
+      <NexusPrime 
+        currentPage='mini-games' 
+        walletConnected={isConnected}
+        autoOpen={false}
+      />
 
       <Footer />
     </div>

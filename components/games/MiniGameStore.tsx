@@ -220,13 +220,13 @@ export default function MiniGameStore() {
       difficulty: 'Intermediate',
       estimatedTime: '4-5 hours',
       rewards: '100 XLM + Expert Badge',
-      currentPlayers: 892,
-      rating: 4.9,
-      thumbnail: '/images/games/escrow-puzzle-master.png',
-      progress: 35,
-      estimatedRelease: 'Q1 2025',
-      donationGoal: 4000,
-      currentDonations: 2100,
+      currentPlayers: 0,
+      rating: 0,
+      thumbnail: '/images/games/blank.png',
+      progress: 0,
+      estimatedRelease: 'TBA',
+      donationGoal: 15000,
+      currentDonations: 0,
       features: [
         'Escrow Systems',
         'Multi-Sig Wallets',
@@ -247,13 +247,13 @@ export default function MiniGameStore() {
       difficulty: 'Advanced',
       estimatedTime: '6-8 hours',
       rewards: '200 XLM + Trading Trophy',
-      currentPlayers: 567,
-      rating: 4.7,
-      thumbnail: '/images/games/defi-trading-arena.png',
+      currentPlayers: 0,
+      rating: 0,
+      thumbnail: '/images/games/blank.png',
       progress: 0,
-      estimatedRelease: 'Beta Testing',
-      donationGoal: 5000,
-      currentDonations: 3200,
+      estimatedRelease: 'TBA',
+      donationGoal: 15000,
+      currentDonations: 0,
       features: ['Liquidity Pools', 'Yield Farming', 'AMM Strategies', 'Risk Management'],
       achievements: ['Trading Champion', 'Yield Master', 'Risk Taker', 'DeFi Legend'],
     },
@@ -269,13 +269,13 @@ export default function MiniGameStore() {
       difficulty: 'Intermediate',
       estimatedTime: '3-4 hours',
       rewards: '75 XLM + Creator Badge',
-      currentPlayers: 423,
-      rating: 4.6,
+      currentPlayers: 0,
+      rating: 0,
       thumbnail: '/images/games/blank.png',
       progress: 0,
-      estimatedRelease: 'Beta Testing',
-      donationGoal: 3000,
-      currentDonations: 1800,
+      estimatedRelease: 'TBA',
+      donationGoal: 15000,
+      currentDonations: 0,
       features: ['NFT Design Tools', 'Minting Process', 'Marketplace Trading', 'Royalty Systems'],
       achievements: ['Creative Genius', 'NFT Pioneer', 'Market Master', 'Digital Artist'],
     },
@@ -1040,7 +1040,7 @@ export default function MiniGameStore() {
               </div>
 
               {/* Epic Promotional Banner Carousel */}
-              <div id='news-banner-carousel' className='mb-16 relative'>
+              <div id='news-banner-carousel' className='relative'>
                 <div className='relative h-96 rounded-3xl overflow-hidden shadow-2xl'>
                   {promotionalBanners.map((banner, index) => (
                     <div
@@ -1175,7 +1175,9 @@ export default function MiniGameStore() {
             <div className='bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl border border-white/20 shadow-2xl max-w-lg w-full p-8'>
               <div className='text-center mb-6'>
                 <div className='text-5xl mb-4'>🚀</div>
-                <h3 className='text-2xl font-bold text-white mb-2'>Speed Up Game Development</h3>
+                <div className='flex items-center justify-center gap-3 mb-2'>
+                  <h3 className='text-2xl font-bold text-white'>Speed Up Game Development</h3>
+                </div>
                 <p className='text-white/70 text-sm'>
                   Help us reach our funding goal faster and unlock exclusive rewards!
                 </p>
@@ -1193,8 +1195,8 @@ export default function MiniGameStore() {
                       <h4 className='text-xl font-semibold text-white mb-2'>{game.title}</h4>
 
                       <div className='flex items-center justify-between text-sm text-white/80 mb-3'>
-                        <span>💰 Current: ${game.currentDonations}</span>
-                        <span>🎯 Goal: ${game.donationGoal}</span>
+                        <span>💰 Current: ${game.currentDonations.toLocaleString()}</span>
+                        <span>🎯 Goal: ${game.donationGoal.toLocaleString()}</span>
                       </div>
 
                       <div className='w-full bg-white/10 rounded-full h-3 mb-3'>
@@ -1222,17 +1224,23 @@ export default function MiniGameStore() {
               <div className='space-y-4'>
                 <div>
                   <label className='block text-white/80 text-sm font-medium mb-2'>
-                    Donation Amount (USD)
+                    Donation Amount (USD) <span className='px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold rounded-full animate-pulse'>
+                    🔜 COMING SOON
+                  </span>
                   </label>
                   <input
                     type='number'
                     placeholder='Enter amount'
-                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent'
+                    disabled
+                    className='w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white/50 placeholder-white/40 cursor-not-allowed opacity-60'
                   />
                 </div>
 
                 <div className='flex space-x-3'>
-                  <button className='flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-300'>
+                  <button 
+                    disabled
+                    className='flex-1 py-3 px-4 bg-gradient-to-r from-purple-500/50 to-pink-500/50 text-white/50 font-semibold rounded-xl cursor-not-allowed opacity-60'
+                  >
                     💝 Donate Now
                   </button>
                   <button
@@ -1241,6 +1249,33 @@ export default function MiniGameStore() {
                   >
                     Cancel
                   </button>
+                </div>
+
+                {/* Contact Section */}
+                <div className='pt-4 border-t border-white/10'>
+                  <p className='text-white/70 text-sm text-center mb-3'>
+                    💬 For official donation channels and inquiries:
+                  </p>
+                  <div className='flex gap-3'>
+                    <a
+                      href='https://t.me/josegomezdev'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2'
+                    >
+                      <span>💬</span>
+                      <span>Telegram</span>
+                    </a>
+                    <a
+                      href='https://discord.gg/y8jADgKK'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='flex-1 py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2'
+                    >
+                      <span>💬</span>
+                      <span>Discord</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

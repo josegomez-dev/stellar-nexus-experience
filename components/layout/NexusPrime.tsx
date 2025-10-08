@@ -169,14 +169,17 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   }, []);
 
 
-  // Effect to trigger typewriter when context changes
+  // Effect to trigger typewriter when context changes (only if panel is expanded)
   useEffect(() => {
+    // Only trigger if the panel is expanded so the user can see the message
+    if (!isExpanded) return;
+    
     const message = getContextMessage();
     if (message && message !== lastProcessedMessageRef.current) {
       lastProcessedMessageRef.current = message;
       startTypewriter(message);
     }
-  }, [getContextMessage, startTypewriter]);
+  }, [getContextMessage, startTypewriter, isExpanded]);
 
   // Effect to show welcome message when wallet first connects
   useEffect(() => {
@@ -299,12 +302,18 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
                 const newExpandedState = !isExpanded;
                 setIsExpanded(newExpandedState);
                 
-                // If we're opening the chat and haven't shown auto welcome, start typewriter with context message
-                if (newExpandedState && !hasShownAutoWelcome) {
+                // If we're opening the chat, always start typewriter with context message
+                if (newExpandedState) {
                   const message = getContextMessage();
                   if (message) {
+                    // Reset the last processed message so it triggers again
+                    lastProcessedMessageRef.current = '';
                     setTimeout(() => {
                       startTypewriter(message);
+                      // Mark that we've shown the auto welcome so it doesn't auto-open again
+                      if (!hasShownAutoWelcome) {
+                        setHasShownAutoWelcome(true);
+                      }
                     }, 300); // Small delay to let the panel animation start
                   }
                 }
