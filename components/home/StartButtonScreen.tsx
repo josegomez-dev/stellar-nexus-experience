@@ -28,9 +28,9 @@ export const StartButtonScreen = ({ onStart }: StartButtonScreenProps) => {
         ))}
       </div>
 
-      <div className="text-center px-4 relative z-10">
+      <div className="text-center px-4 -mt-24 relative z-10">
         {/* Logo */}
-        <div className='flex justify-center mb-8'>
+        <div className='flex justify-center'>
           <Image
             src='/images/logo/logoicon.png'
             alt='STELLAR NEXUS'
