@@ -358,7 +358,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                         </div>
                         <div className='flex justify-between items-center'>
                           <span className='text-yellow-400 font-semibold'>BADGES</span>
-                          <span className='text-white font-bold'>{earnedBadges.length} / 13</span>
+                          <span className='text-white font-bold'>{earnedBadges.length}</span>
                         </div>
                       </div>
                     </div>
