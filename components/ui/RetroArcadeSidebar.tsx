@@ -48,7 +48,7 @@ export default function RetroArcadeSidebar({
           className={`bg-gradient-to-b from-slate-800 via-slate-900 to-black rounded-3xl border-4 border-cyan-400 shadow-2xl shadow-cyan-400/50 p-6 relative transition-all duration-300 ease-in-out ${
             isCollapsed ? 'w-20' : 'w-80'
           }`}
-          style={{ maxHeight: '65vh', marginTop: '-100px' }}
+          style={{ maxHeight: isCollapsed ? '22vh' : '65vh', marginTop: '-100px' }}
         >
           {/* Arcade Screen Glow */}
           <div className='absolute inset-0 rounded-3xl bg-gradient-to-r from-cyan-400/10 via-purple-400/5 to-pink-400/10 opacity-50'></div>

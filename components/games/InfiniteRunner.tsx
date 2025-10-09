@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAccount } from '@/contexts/auth/AccountContext';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { accountService } from '@/lib/services/account-service';
+import { gameSocialService } from '@/lib/services/game-social-service';
 import Image from 'next/image';
+import GameSidebar from './GameSidebar';
 
 interface InfiniteRunnerProps {
   gameId: string;
@@ -32,6 +34,14 @@ interface Coin {
   collected: boolean;
 }
 
+interface PowerUp {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+  type: 'grow'; // Can add more types later
+}
+
 type GameState = 'ready' | 'playing' | 'paused' | 'gameOver';
 
 const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embedded = false }) => {
@@ -43,6 +53,16 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [isMounted, setIsMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false); // For collapsible controls
+
+  // Audio refs
+  const menuMusicRef = useRef<HTMLAudioElement | null>(null);
+  const winSoundRef = useRef<HTMLAudioElement | null>(null);
+  const jumpSoundRef = useRef<HTMLAudioElement | null>(null);
+  const levelUpSoundRef = useRef<HTMLAudioElement | null>(null);
+  const gameOverSoundRef = useRef<HTMLAudioElement | null>(null);
+  const hitSoundRef = useRef<HTMLAudioElement | null>(null);
+  const grabCoinSoundRef = useRef<HTMLAudioElement | null>(null);
+  const extraLifeSoundRef = useRef<HTMLAudioElement | null>(null);
 
   // Game state
   const [gameState, setGameState] = useState<GameState>('ready');
@@ -59,6 +79,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [isJumping, setIsJumping] = useState(false);
   const [isDucking, setIsDucking] = useState(false);
   const [jumpCount, setJumpCount] = useState(0); // For double jump
+  const [isPoweredUp, setIsPoweredUp] = useState(false); // Power-up transformation state
 
   // Game speed
   const [gameSpeed, setGameSpeed] = useState(5);
@@ -67,6 +88,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   // Obstacles and coins
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
 
   // Background
   const [bgOffset, setBgOffset] = useState(0);
@@ -76,16 +98,23 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [quizAnswered, setQuizAnswered] = useState(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [lastLevelUpScore, setLastLevelUpScore] = useState(0);
   const [invulnerableUntil, setInvulnerableUntil] = useState(0); // Timestamp for invulnerability
+  const [powerUpSpawnedThisLevel, setPowerUpSpawnedThisLevel] = useState(false);
+  const [activeChallenges, setActiveChallenges] = useState<any[]>([]);
+  const [completedChallengeIds, setCompletedChallengeIds] = useState<Set<string>>(new Set());
 
   // Refs
   const gameLoopRef = useRef<number>();
   const obstacleIdRef = useRef(0);
   const coinIdRef = useRef(0);
+  const powerUpIdRef = useRef(0);
   const lastObstacleRef = useRef(0);
   const lastCoinRef = useRef(0);
+  const lastPowerUpRef = useRef(0);
   const levelTimerRef = useRef(0);
+  const frameCountRef = useRef(0);
 
   // Constants
   const GRAVITY = 0.6;
@@ -95,7 +124,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const PLAYER_X = 100;
   const PLAYER_WIDTH = 50;
   const PLAYER_HEIGHT = 50;
-  const DUCKING_HEIGHT = 30;
+  const DUCKING_HEIGHT = 20; // Make ducking more effective (lower to ground)
   const MAX_JUMPS = 2; // Allow double jump
 
   // Web3 Quiz Questions
@@ -157,27 +186,27 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     }
   ];
 
-  // Theme colors based on level
+  // Theme colors based on level - Space theme
   const themes = {
     day: {
-      bg: 'from-blue-400 via-cyan-300 to-blue-500',
-      ground: 'fill-green-600',
-      accent: 'fill-green-800',
-    },
-    sunset: {
-      bg: 'from-orange-400 via-pink-400 to-purple-500',
-      ground: 'fill-orange-600',
-      accent: 'fill-orange-800',
-    },
-    night: {
-      bg: 'from-indigo-900 via-purple-900 to-black',
+      bg: 'from-slate-800 via-slate-700 to-slate-900',
       ground: 'fill-gray-700',
       accent: 'fill-gray-900',
     },
+    sunset: {
+      bg: 'from-blue-900 via-indigo-900 to-slate-900',
+      ground: 'fill-blue-900',
+      accent: 'fill-indigo-950',
+    },
+    night: {
+      bg: 'from-black via-slate-950 to-black',
+      ground: 'fill-gray-800',
+      accent: 'fill-black',
+    },
     cyber: {
-      bg: 'from-cyan-500 via-purple-600 to-pink-600',
-      ground: 'fill-purple-800',
-      accent: 'fill-pink-900',
+      bg: 'from-purple-900 via-pink-900 to-slate-900',
+      ground: 'fill-purple-900',
+      accent: 'fill-pink-950',
     },
   };
 
@@ -220,7 +249,125 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   // Client-side only mounting
   useEffect(() => {
     setIsMounted(true);
+    
+    // Initialize audio
+    if (typeof window !== 'undefined') {
+      menuMusicRef.current = new Audio('/sounds/infiniteRunner/game.mp3');
+      menuMusicRef.current.loop = true;
+      menuMusicRef.current.volume = 0.3;
+      
+      winSoundRef.current = new Audio('/sounds/infiniteRunner/win.mp3');
+      winSoundRef.current.volume = 0.5;
+      
+      jumpSoundRef.current = new Audio('/sounds/infiniteRunner/jump.mp3');
+      jumpSoundRef.current.volume = 0.4;
+      
+      levelUpSoundRef.current = new Audio('/sounds/infiniteRunner/levelup.mp3');
+      levelUpSoundRef.current.volume = 0.6;
+      
+      gameOverSoundRef.current = new Audio('/sounds/infiniteRunner/gameover.mp3');
+      gameOverSoundRef.current.volume = 0.5;
+      
+      hitSoundRef.current = new Audio('/sounds/infiniteRunner/hit.mp3');
+      hitSoundRef.current.volume = 0.5;
+      
+      grabCoinSoundRef.current = new Audio('/sounds/infiniteRunner/grabcoin.mp3');
+      grabCoinSoundRef.current.volume = 0.4;
+      
+      extraLifeSoundRef.current = new Audio('/sounds/infiniteRunner/extralife.mp3');
+      extraLifeSoundRef.current.volume = 0.6;
+    }
+    
+    return () => {
+      // Cleanup audio on unmount
+      if (menuMusicRef.current) {
+        menuMusicRef.current.pause();
+        menuMusicRef.current = null;
+      }
+      if (winSoundRef.current) winSoundRef.current = null;
+      if (jumpSoundRef.current) jumpSoundRef.current = null;
+      if (levelUpSoundRef.current) levelUpSoundRef.current = null;
+      if (gameOverSoundRef.current) gameOverSoundRef.current = null;
+      if (hitSoundRef.current) hitSoundRef.current = null;
+      if (grabCoinSoundRef.current) grabCoinSoundRef.current = null;
+      if (extraLifeSoundRef.current) extraLifeSoundRef.current = null;
+    };
   }, []);
+
+  // Load active challenges for current user
+  useEffect(() => {
+    if (!account || gameState !== 'playing') return;
+    
+    const loadChallenges = async () => {
+      const challenges = await gameSocialService.getOpenChallenges(gameId);
+      const userChallenges = challenges.filter(
+        c => c.acceptedBy === account.id || (c.targetUserId === account.id && c.status === 'open')
+      );
+      setActiveChallenges(userChallenges);
+    };
+    
+    loadChallenges();
+  }, [account, gameState, gameId]);
+
+  // Check for challenge completion based on score
+  useEffect(() => {
+    if (!account || gameState !== 'playing' || activeChallenges.length === 0) return;
+    
+    activeChallenges.forEach(async (challenge) => {
+      if (
+        challenge.requiredScore && 
+        score >= challenge.requiredScore && 
+        !completedChallengeIds.has(challenge.id)
+      ) {
+        try {
+          // Mark as completed locally to prevent duplicate completions
+          setCompletedChallengeIds(prev => {
+            const newSet = new Set(prev);
+            newSet.add(challenge.id);
+            return newSet;
+          });
+          
+          // Complete challenge and award points
+          const result = await gameSocialService.completeChallenge(challenge.id, account.id);
+          
+          // Award points
+          await accountService.addExperienceAndPoints(account.id, 0, result.pointsReward);
+          
+          addToast({
+            type: 'success',
+            title: '🎯 Challenge Completed!',
+            message: `Earned ${result.pointsReward} points!`,
+            duration: 5000,
+          });
+          
+          // Post to chat
+          gameSocialService.sendGameMessage(
+            gameId,
+            account.id,
+            account.profile?.username || account.profile?.displayName || 'Anonymous',
+            `Completed challenge: ${challenge.requirement}! Won ${result.pointsReward} points! 🏆`,
+            'achievement'
+          );
+        } catch (error) {
+          console.error('Failed to complete challenge:', error);
+        }
+      }
+    });
+  }, [score, activeChallenges, account, gameState, gameId, completedChallengeIds, addToast]);
+
+  // Handle menu music based on game state
+  useEffect(() => {
+    if (gameState === 'ready') {
+      // Play menu music on ready screen
+      menuMusicRef.current?.play().catch(err => console.log('Menu music autoplay prevented:', err));
+    } else {
+      // Stop menu music when game starts or ends
+      if (menuMusicRef.current) {
+        menuMusicRef.current.pause();
+        menuMusicRef.current.currentTime = 0;
+      }
+    }
+  }, [gameState]);
 
   // Disable scrolling when game is active
   useEffect(() => {
@@ -273,8 +420,53 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     }
   }, []);
 
-  // Start game
-  const startGame = useCallback(() => {
+  // Start game (initial play - costs 500 points)
+  const startGame = useCallback(async (isReplay: boolean = false) => {
+    // Check if user has account and enough points
+    if (!account) {
+      addToast({
+        type: 'error',
+        title: '🔒 Account Required',
+        message: 'Please connect your wallet to play!',
+        duration: 4000,
+      });
+      return;
+    }
+
+    const GAME_COST = isReplay ? 100 : 250; // Initial game cost reduced!
+    const currentPoints = account.totalPoints || account.profile?.totalPoints || 0;
+    
+    if (currentPoints < GAME_COST) {
+      addToast({
+        type: 'error',
+        title: '💰 Insufficient Points',
+        message: `You need ${GAME_COST} points to play. You have ${currentPoints} points.`,
+        duration: 5000,
+      });
+      return;
+    }
+
+    // Deduct points from account
+    try {
+      await accountService.addExperienceAndPoints(account.id, 0, -GAME_COST);
+      
+      addToast({
+        type: 'success',
+        title: isReplay ? '🔄 Playing Again!' : '🎮 Game Started!',
+        message: `${GAME_COST} points deducted. ${isReplay ? 'Keep going!' : 'Good luck!'}`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Failed to deduct points:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Could not start game. Please try again.',
+        duration: 4000,
+      });
+      return;
+    }
+    
     setGameState('playing');
     setScore(0);
     setLevel(1);
@@ -290,20 +482,32 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     setBaseSpeed(5);
     setObstacles([]);
     setCoins([]);
+    setPowerUps([]);
+    setIsPoweredUp(false);
+    setPowerUpSpawnedThisLevel(false);
     setBgOffset(0);
     setTheme('day');
     setLastLevelUpScore(0);
     obstacleIdRef.current = 0;
     coinIdRef.current = 0;
+    powerUpIdRef.current = 0;
     lastObstacleRef.current = 0;
     lastCoinRef.current = 0;
+    lastPowerUpRef.current = 0;
     levelTimerRef.current = 0;
+    frameCountRef.current = 0;
     
     // Give player 5 seconds of invulnerability at start
     setInvulnerableUntil(Date.now() + 5000);
     
+    // Play win sound when starting game
+    if (winSoundRef.current) {
+      winSoundRef.current.currentTime = 0;
+      winSoundRef.current.play().catch(err => console.log('Win sound play error:', err));
+    }
+    
     // Don't auto-enter fullscreen - let user choose with button
-  }, []);
+  }, [account, addToast]);
 
   // Handle keyboard input
   useEffect(() => {
@@ -316,7 +520,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
       if (gameState !== 'playing') {
         if (e.code === 'Space' && gameState === 'ready') {
-          startGame();
+          startGame(false);
         }
         return;
       }
@@ -334,6 +538,12 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               setPlayerVelocity(DOUBLE_JUMP_FORCE);
             }
             setJumpCount(prev => prev + 1);
+            
+            // Play jump sound
+            if (jumpSoundRef.current) {
+              jumpSoundRef.current.currentTime = 0;
+              jumpSoundRef.current.play().catch(err => console.log('Jump sound play error:', err));
+            }
           }
           break;
         case 'ArrowDown':
@@ -394,31 +604,49 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       // Update background
       setBgOffset(offset => (offset + gameSpeed) % 1000);
 
-      // Update score
-      setScore(s => {
-        const newScore = s + 1;
+      // Update score - only if not in safe zone
+      const isInSafeZone = Date.now() < invulnerableUntil;
+      if (!isInSafeZone) {
+        // Increment frame counter
+        frameCountRef.current += 1;
         
-        // Level up every 1000 points
-        if (newScore > 0 && newScore % 1000 === 0 && newScore !== lastLevelUpScore) {
-          setLastLevelUpScore(newScore);
+        setScore(s => {
+          // Score increment slows down with level to make it harder
+          // Level 1: +1 every frame, Level 2: +1 every 2 frames, Level 3: +1 every 3 frames, etc.
+          const shouldIncrement = frameCountRef.current % level === 0;
+          const newScore = shouldIncrement ? s + 1 : s;
           
-          // Pause game and show quiz
-          setTimeout(() => {
-            setGameState('paused');
-            setShowQuiz(true);
-            setCurrentQuestion(Math.floor(Math.random() * quizQuestions.length));
-            setQuizAnswered(false);
-          }, 100);
-        }
-        
-        return newScore;
-      });
+          // Level up at 1000, 2000, 3000, 4000, 5000, etc.
+          if (newScore > 0 && newScore % 1000 === 0 && newScore !== lastLevelUpScore) {
+            setLastLevelUpScore(newScore);
+            
+            // Play level up sound
+            if (levelUpSoundRef.current) {
+              levelUpSoundRef.current.currentTime = 0;
+              levelUpSoundRef.current.play().catch(err => console.log('Level up sound play error:', err));
+            }
+            
+            // Pause game and show quiz
+            setTimeout(() => {
+              setGameState('paused');
+              setShowQuiz(true);
+              setCurrentQuestion(Math.floor(Math.random() * quizQuestions.length));
+              setQuizAnswered(false);
+              setIsAnswerCorrect(false);
+            }, 100);
+          }
+          
+          return newScore;
+        });
+      }
 
       // Spawn obstacles (but not during invulnerability period)
       const isInvulnerable = Date.now() < invulnerableUntil;
       
       lastObstacleRef.current += 1;
-      const obstacleInterval = Math.max(60 - level * 5, 30);
+      // Add randomness to obstacle interval for more variety
+      const baseInterval = Math.max(60 - level * 5, 30);
+      const obstacleInterval = baseInterval + Math.floor(Math.random() * 20) - 10; // ±10 frames variation
       if (lastObstacleRef.current > obstacleInterval && !isInvulnerable) {
         lastObstacleRef.current = 0;
         const obstacleTypes: Obstacle['type'][] = ['cactus', 'rock'];
@@ -431,28 +659,39 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
         const isFlying = type === 'bird' || type === 'drone' || type === 'satellite' || type === 'meteor';
         
-        // Different heights and behaviors for different types
+        // Different heights and behaviors for different types with MORE RANDOMNESS
         let yPos = GROUND_Y;
         let verticalSpeed = 0;
         let amplitude = 0;
         
-        if (type === 'bird') {
-          yPos = GROUND_Y - 80 - Math.random() * 40;
-          verticalSpeed = 0.5 + Math.random() * 0.5; // Slow wave motion
-          amplitude = 15 + Math.random() * 10;
+        if (type === 'cactus' || type === 'rock') {
+          // Ground obstacles - randomize height slightly
+          yPos = GROUND_Y - Math.random() * 5;
+        } else if (type === 'bird') {
+          yPos = GROUND_Y - 70 - Math.random() * 60; // More height variation
+          verticalSpeed = 0.3 + Math.random() * 0.8; // More speed variation
+          amplitude = 10 + Math.random() * 20; // More wave amplitude
         } else if (type === 'drone') {
-          yPos = GROUND_Y - 100 - Math.random() * 60;
-          verticalSpeed = 1 + Math.random(); // Faster wave motion
-          amplitude = 20 + Math.random() * 15;
+          yPos = GROUND_Y - 80 - Math.random() * 80; // Much more variation
+          verticalSpeed = 0.8 + Math.random() * 1.2; // Variable speed
+          amplitude = 15 + Math.random() * 25; // Variable amplitude
         } else if (type === 'satellite') {
-          yPos = GROUND_Y - 150 - Math.random() * 30;
-          verticalSpeed = 0.3; // Slow, steady
-          amplitude = 5;
+          yPos = GROUND_Y - 130 - Math.random() * 50; // More variation
+          verticalSpeed = 0.2 + Math.random() * 0.4; // Variable speed
+          amplitude = 5 + Math.random() * 10;
         } else if (type === 'meteor') {
-          yPos = GROUND_Y - 200 - Math.random() * 50;
-          verticalSpeed = 2 + Math.random() * 2; // Fast diagonal
-          amplitude = 30;
+          yPos = GROUND_Y - 150 - Math.random() * 80; // Much more variation
+          verticalSpeed = 1.5 + Math.random() * 2.5; // Variable speed
+          amplitude = 20 + Math.random() * 30;
+        } else if (type === 'blockchain' || type === 'crypto') {
+          // Mid-height obstacles with variation
+          yPos = GROUND_Y - 30 - Math.random() * 40;
         }
+        
+        // Add size variation for more unpredictability
+        const sizeVariation = 0.8 + Math.random() * 0.4; // 80% to 120% of base size
+        const baseWidth = type === 'blockchain' || type === 'crypto' ? 50 : type === 'satellite' ? 40 : 30;
+        const baseHeight = type === 'blockchain' || type === 'crypto' ? 50 : type === 'satellite' ? 40 : isFlying ? 30 : 40;
         
         setObstacles(obs => [
           ...obs,
@@ -460,8 +699,8 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             id: obstacleIdRef.current++,
             x: 800,
             y: yPos,
-            width: type === 'blockchain' || type === 'crypto' ? 50 : type === 'satellite' ? 40 : 30,
-            height: type === 'blockchain' || type === 'crypto' ? 50 : type === 'satellite' ? 40 : isFlying ? 30 : 40,
+            width: Math.floor(baseWidth * sizeVariation),
+            height: Math.floor(baseHeight * sizeVariation),
             type,
             verticalSpeed: isFlying ? verticalSpeed : 0,
             amplitude: isFlying ? amplitude : 0,
@@ -470,19 +709,43 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         ]);
       }
 
-      // Spawn coins
-      lastCoinRef.current += 1;
-      if (lastCoinRef.current > 100) {
-        lastCoinRef.current = 0;
-        setCoins(c => [
-          ...c,
-          {
-            id: coinIdRef.current++,
-            x: 800,
-            y: GROUND_Y - 50 - Math.random() * 100,
-            collected: false,
-          },
-        ]);
+      // Spawn coins (only if not in safe zone) with random intervals
+      if (!isInSafeZone) {
+        lastCoinRef.current += 1;
+        const coinInterval = 80 + Math.floor(Math.random() * 40); // 80-120 frames variation
+        if (lastCoinRef.current > coinInterval) {
+          lastCoinRef.current = 0;
+          setCoins(c => [
+            ...c,
+            {
+              id: coinIdRef.current++,
+              x: 800,
+              y: GROUND_Y - 50 - Math.random() * 120, // More height variation
+              collected: false,
+            },
+          ]);
+        }
+      }
+
+      // Spawn power-ups (only once per level, after safe zone ends)
+      if (!powerUpSpawnedThisLevel && !isInSafeZone) {
+        lastPowerUpRef.current += 1;
+        // Spawn after 150-250 frames into the level (after safe zone)
+        const powerUpInterval = 150 + Math.random() * 100;
+        if (lastPowerUpRef.current > powerUpInterval) {
+          setPowerUpSpawnedThisLevel(true);
+          lastPowerUpRef.current = 0;
+          setPowerUps(p => [
+            ...p,
+            {
+              id: powerUpIdRef.current++,
+              x: 800,
+              y: GROUND_Y - 60, // Just above ground
+              collected: false,
+              type: 'grow',
+            },
+          ]);
+        }
       }
 
       // Move obstacles with dynamic vertical movement
@@ -512,13 +775,20 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           .filter(coin => coin.x > -50)
       );
 
+      // Move power-ups
+      setPowerUps(p =>
+        p
+          .map(powerUp => ({ ...powerUp, x: powerUp.x - gameSpeed }))
+          .filter(powerUp => powerUp.x > -50)
+      );
+
       // Check collisions with obstacles (skip if invulnerable)
       const isInvulnerableNow = Date.now() < invulnerableUntil;
       
       // Adjust hitbox when ducking - make it smaller and lower
       const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
       const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
-      const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT + 5 : playerY;
+      const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
       const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
       
       const collision = !isInvulnerableNow && obstacles.some(obs => {
@@ -536,20 +806,50 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       });
 
       if (collision) {
-        setGameState('gameOver');
-        if (score > highScore) {
-          setHighScore(score);
+        // Play hit sound on collision
+        if (hitSoundRef.current) {
+          hitSoundRef.current.currentTime = 0;
+          hitSoundRef.current.play().catch(err => console.log('Hit sound play error:', err));
         }
-        // Calculate XP earned (1 XP per 10 score)
-        const earnedXP = Math.floor(score / 10);
-        setXpEarned(earnedXP);
         
-        // Save progress automatically
-        setTimeout(() => {
-          saveGameProgress(score, level, earnedXP);
-        }, 1000);
-        
-        return;
+        if (isPoweredUp) {
+          // If powered up, lose power-up instead of dying
+          setIsPoweredUp(false);
+          // Give 2 seconds invulnerability after losing power-up
+          setInvulnerableUntil(Date.now() + 2000);
+          // Add visual feedback
+          addToast({
+            type: 'warning',
+            title: '⚠️ Power-Up Lost!',
+            message: 'Transform back to baby mode!',
+            duration: 2000,
+          });
+        } else {
+          // Normal death - game over
+          setGameState('gameOver');
+          
+          // Play game over sound after hit sound
+          setTimeout(() => {
+            if (gameOverSoundRef.current) {
+              gameOverSoundRef.current.currentTime = 0;
+              gameOverSoundRef.current.play().catch(err => console.log('Game over sound play error:', err));
+            }
+          }, 200);
+          
+          if (score > highScore) {
+            setHighScore(score);
+          }
+          // Calculate XP earned (1 XP per 10 score)
+          const earnedXP = Math.floor(score / 10);
+          setXpEarned(earnedXP);
+          
+          // Save progress automatically
+          setTimeout(() => {
+            saveGameProgress(score, level, earnedXP);
+          }, 1000);
+          
+          return;
+        }
       }
 
       // Check coin collection (use adjusted hitbox for ducking)
@@ -559,7 +859,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           
           const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
           const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
-          const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT + 5 : playerY;
+          const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
           const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
           
           const playerRight = playerLeft + playerWidth;
@@ -574,9 +874,60 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             playerBottom > coin.y
           ) {
             setScore(s => s + 50);
+            
+            // Play grab coin sound
+            if (grabCoinSoundRef.current) {
+              grabCoinSoundRef.current.currentTime = 0;
+              grabCoinSoundRef.current.play().catch(err => console.log('Grab coin sound play error:', err));
+            }
+            
             return { ...coin, collected: true };
           }
           return coin;
+        })
+      );
+
+      // Check power-up collection
+      setPowerUps(p =>
+        p.map(powerUp => {
+          if (powerUp.collected) return powerUp;
+          
+          const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
+          const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
+          const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
+          const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
+          
+          const playerRight = playerLeft + playerWidth;
+          const playerBottom = playerTop + playerHeight;
+          const powerUpRight = powerUp.x + 30;
+          const powerUpBottom = powerUp.y + 30;
+
+          if (
+            playerLeft < powerUpRight &&
+            playerRight > powerUp.x &&
+            playerTop < powerUpBottom &&
+            playerBottom > powerUp.y
+          ) {
+            // Transform to powered-up state
+            setIsPoweredUp(true);
+            
+            // Play extra life sound for power-up
+            if (extraLifeSoundRef.current) {
+              extraLifeSoundRef.current.currentTime = 0;
+              extraLifeSoundRef.current.play().catch(err => console.log('Extra life sound play error:', err));
+            }
+            
+            // Add visual feedback
+            addToast({
+              type: 'success',
+              title: '⚡ Plasma Power!',
+              message: 'Transformed to Teen Mode! Extra life activated!',
+              duration: 3000,
+            });
+            
+            return { ...powerUp, collected: true };
+          }
+          return powerUp;
         })
       );
 
@@ -600,66 +951,115 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       case 'cactus':
         return (
           <g key={obs.id} transform={`translate(${obs.x}, ${obs.y})`}>
-            {/* Main trunk */}
-            <rect x="8" y="0" width="14" height={obs.height} className="fill-green-700" stroke="#2d5016" strokeWidth="1" />
-            {/* Left arm */}
-            <rect x="0" y="15" width="8" height="15" className="fill-green-700" stroke="#2d5016" strokeWidth="1" />
-            <rect x="0" y="15" width="6" height="2" className="fill-green-600" />
-            {/* Right arm */}
-            <rect x="22" y="10" width="8" height="20" className="fill-green-700" stroke="#2d5016" strokeWidth="1" />
-            <rect x="22" y="10" width="6" height="2" className="fill-green-600" />
-            {/* Spikes */}
-            {[...Array(6)].map((_, i) => (
-              <line key={i} x1="8" y1={i * 6} x2="6" y2={i * 6 + 3} stroke="#2d5016" strokeWidth="1" />
-            ))}
-            {[...Array(6)].map((_, i) => (
-              <line key={i} x1="22" y1={i * 6} x2="24" y2={i * 6 + 3} stroke="#2d5016" strokeWidth="1" />
-            ))}
+            {/* Broken spaceship piece - angular wreckage */}
+            {/* Main body fragment */}
+            <polygon
+              points="15,0 28,12 25,35 20,40 8,40 5,35 2,12"
+              className="fill-gray-600"
+              stroke="#555"
+              strokeWidth="2"
+            />
+            {/* Metal plating highlights */}
+            <polygon
+              points="15,5 22,15 20,30 10,30 8,15"
+              className="fill-gray-500"
+              opacity="0.8"
+            />
+            {/* Broken edge with jagged metal */}
+            <polygon
+              points="2,12 8,8 12,15 8,18"
+              className="fill-gray-700"
+            />
+            <polygon
+              points="28,12 22,8 18,15 22,18"
+              className="fill-gray-700"
+            />
+            {/* Exposed wiring/circuits */}
+            <line x1="10" y1="10" x2="8" y2="20" stroke="#00FFFF" strokeWidth="1.5" opacity="0.7" />
+            <line x1="20" y1="12" x2="22" y2="22" stroke="#00FFFF" strokeWidth="1.5" opacity="0.7" />
+            <circle cx="8" cy="20" r="2" className="fill-cyan-400" opacity="0.8" />
+            <circle cx="22" cy="22" r="2" className="fill-cyan-400" opacity="0.8" />
+            {/* Damaged panels */}
+            <rect x="10" y="15" width="10" height="8" className="fill-red-900" opacity="0.6" />
+            <rect x="12" y="25" width="6" height="6" className="fill-orange-800" opacity="0.5" />
+            {/* Scorch marks */}
+            <ellipse cx="15" cy="18" rx="6" ry="4" className="fill-black" opacity="0.4" />
           </g>
         );
       case 'rock':
         return (
           <g key={obs.id} transform={`translate(${obs.x}, ${obs.y})`}>
-            {/* Base rock */}
+            {/* Space asteroid - irregular shape */}
             <polygon
-              points="15,0 30,35 25,40 5,40 0,35"
+              points="15,0 28,8 30,20 25,35 15,40 5,35 0,20 3,8"
               className="fill-gray-600"
-              stroke="#444"
+              stroke="#555"
               strokeWidth="2"
             />
-            {/* Highlight */}
+            {/* Asteroid surface texture */}
             <polygon
-              points="15,5 25,35 10,35"
+              points="15,5 24,15 20,30 10,30 6,15"
               className="fill-gray-500"
+              opacity="0.7"
             />
-            {/* Shadow */}
+            {/* Craters - multiple impact marks */}
+            <circle cx="10" cy="12" r="4" className="fill-gray-700" opacity="0.8" />
+            <circle cx="10" cy="12" r="3" className="fill-gray-800" opacity="0.6" />
+            <circle cx="20" cy="20" r="3.5" className="fill-gray-700" opacity="0.8" />
+            <circle cx="20" cy="20" r="2.5" className="fill-gray-800" opacity="0.6" />
+            <circle cx="15" cy="28" r="3" className="fill-gray-700" opacity="0.8" />
+            <circle cx="15" cy="28" r="2" className="fill-gray-800" opacity="0.6" />
+            {/* Small craters */}
+            <circle cx="8" cy="22" r="2" className="fill-gray-800" opacity="0.5" />
+            <circle cx="22" cy="10" r="1.5" className="fill-gray-800" opacity="0.5" />
+            <circle cx="18" cy="32" r="2" className="fill-gray-800" opacity="0.5" />
+            {/* Mineral deposits (cyan glow) */}
+            <circle cx="12" cy="18" r="1.5" className="fill-cyan-400" opacity="0.6">
+              <animate attributeName="opacity" values="0.6;0.3;0.6" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="16" cy="15" r="1" className="fill-cyan-400" opacity="0.5">
+              <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2.5s" repeatCount="indefinite" />
+            </circle>
+            {/* Shadow side */}
             <polygon
-              points="15,20 25,35 20,40 10,40 5,35"
-              className="fill-gray-700"
-              opacity="0.5"
+              points="15,20 5,35 10,38 15,40"
+              className="fill-black"
+              opacity="0.3"
             />
-            {/* Cracks */}
-            <line x1="12" y1="15" x2="10" y2="25" stroke="#333" strokeWidth="1.5" />
-            <line x1="18" y1="10" x2="20" y2="20" stroke="#333" strokeWidth="1.5" />
           </g>
         );
       case 'bird':
         return (
           <g key={obs.id} transform={`translate(${obs.x}, ${obs.y})`}>
-            {/* Body */}
-            <ellipse cx="15" cy="15" rx="15" ry="12" className="fill-red-600" stroke="#8B0000" strokeWidth="1" />
-            {/* Wing flap animation */}
-            <ellipse cx="8" cy="12" rx="8" ry="10" className="fill-red-700" opacity="0.9" 
-              style={{ animation: 'flap 0.3s ease-in-out infinite alternate' }} />
-            <ellipse cx="22" cy="12" rx="8" ry="10" className="fill-red-700" opacity="0.9"
-              style={{ animation: 'flap 0.3s ease-in-out infinite alternate-reverse' }} />
-            {/* Beak */}
-            <polygon points="25,15 32,13 32,17" className="fill-yellow-500" stroke="#DAA520" strokeWidth="1" />
-            {/* Eye */}
-            <circle cx="20" cy="13" r="3" className="fill-white" />
-            <circle cx="21" cy="13" r="1.5" className="fill-black" />
-            {/* Tail feathers */}
-            <polygon points="0,15 5,10 5,20" className="fill-red-800" />
+            {/* Small Alien Spacecraft - UFO style */}
+            {/* Energy field */}
+            <ellipse cx="15" cy="15" rx="18" ry="14" className="fill-green-400" opacity="0.2">
+              <animate attributeName="opacity" values="0.2;0.4;0.2" dur="0.8s" repeatCount="indefinite" />
+            </ellipse>
+            {/* Main saucer body */}
+            <ellipse cx="15" cy="15" rx="15" ry="10" className="fill-gray-600" stroke="#555" strokeWidth="1.5" />
+            <ellipse cx="15" cy="14" rx="14" ry="8" className="fill-gray-500" />
+            {/* Dome cockpit */}
+            <ellipse cx="15" cy="10" rx="8" ry="6" className="fill-cyan-300" opacity="0.7" stroke="#00FFFF" strokeWidth="1" />
+            <ellipse cx="15" cy="9" rx="6" ry="4" className="fill-white" opacity="0.5" />
+            {/* Lights underneath - pulsing */}
+            <circle cx="8" cy="18" r="2" className="fill-red-500" opacity="0.8">
+              <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.4s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="15" cy="19" r="2" className="fill-green-400" opacity="0.8">
+              <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="22" cy="18" r="2" className="fill-blue-400" opacity="0.8">
+              <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.6s" repeatCount="indefinite" />
+            </circle>
+            {/* Panel details */}
+            <line x1="5" y1="15" x2="25" y2="15" stroke="#444" strokeWidth="0.5" />
+            <line x1="10" y1="13" x2="20" y2="13" stroke="#444" strokeWidth="0.5" />
+            {/* Antenna */}
+            <line x1="15" y1="6" x2="15" y2="3" stroke="#666" strokeWidth="1" />
+            <circle cx="15" cy="3" r="1.5" className="fill-red-500">
+              <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
+            </circle>
           </g>
         );
       case 'blockchain':
@@ -787,20 +1187,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   }
 
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 w-screen h-screen z-50' : 'relative w-full h-full'} flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900`}>
-      {/* Fullscreen toggle button - Outside game frame, always visible */}
-      {gameState === 'playing' && (
-        <div className='w-full max-w-[1200px] px-4 mb-2 flex justify-end'>
-          <button
-            onClick={isFullscreen ? exitFullscreen : enterFullscreen}
-            className='px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl border-2 border-white/30 shadow-xl transition-all transform hover:scale-105 flex items-center gap-2'
-          >
-            <span className='text-xl'>{isFullscreen ? '⛶' : '⛶'}</span>
-            <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Mode'}</span>
-          </button>
-        </div>
-      )}
-      
+    <div className='relative w-full h-full flex flex-col items-center justify-center'>
       {/* Arcade Machine Border & Game Canvas */}
       <div className='relative w-full h-full flex items-center justify-center p-4'>
         {/* Arcade Machine Frame */}
@@ -827,6 +1214,12 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             <div className='text-white font-bold text-2xl mb-1'>Score: {score}</div>
             <div className='text-white/80 text-sm'>High Score: {highScore}</div>
             <div className='text-cyan-400 text-sm font-semibold'>Level: {level}</div>
+            {/* Power-up status indicator */}
+            {isPoweredUp && (
+              <div className='text-yellow-400 text-xs font-bold mt-2 animate-pulse'>
+                ⭐ Teen Mode! Extra Life!
+              </div>
+            )}
             {/* Invulnerability indicator */}
             {Date.now() < invulnerableUntil && (
               <div className='text-green-400 text-xs font-bold mt-2 animate-pulse'>
@@ -839,7 +1232,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             <div className='text-white/80 text-xs mb-2 font-semibold'>Controls:</div>
             <div className='text-white text-xs space-y-1'>
               <div>⬆️ SPACE/↑: Jump (x2!)</div>
-              <div>⬇️ ↓: Duck</div>
+              <div>⬇️ ↓: Crouch (toggle)</div>
               <div>➡️ →: Speed Up</div>
               <div>⬅️ ←: Slow Down</div>
               <div>⏸️ ESC: Pause</div>
@@ -853,47 +1246,107 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           viewBox="0 0 800 400"
           preserveAspectRatio="xMidYMid slice"
           style={{ 
-            background: theme === 'day' ? 'linear-gradient(to bottom, #3b82f6, #22d3ee, #3b82f6)' :
-                       theme === 'sunset' ? 'linear-gradient(to bottom, #fb923c, #f472b6, #a855f7)' :
-                       theme === 'night' ? 'linear-gradient(to bottom, #4c1d95, #581c87, #000000)' :
-                       'linear-gradient(to bottom, #06b6d4, #9333ea, #ec4899)'
+            background: theme === 'day' ? 'linear-gradient(to bottom, #0f172a, #1e1b4b, #0c0a1e)' :
+                       theme === 'sunset' ? 'linear-gradient(to bottom, #1e1b4b, #312e81, #1e3a8a)' :
+                       theme === 'night' ? 'linear-gradient(to bottom, #020617, #0f172a, #000000)' :
+                       'linear-gradient(to bottom, #0c0a1e, #1e1b4b, #0f172a)'
           }}
         >
-          {/* Animated Background Elements */}
+          {/* Animated Space Background */}
           <g id="background">
-            {/* Realistic Clouds/Stars based on theme */}
-            {theme === 'night' || theme === 'cyber' ? (
-              // Stars for night/cyber theme
-              [...Array(20)].map((_, i) => (
-                <g key={`star-${i}`}>
-                  <circle
-                    cx={(bgOffset * 0.3 + i * 100) % 1000}
-                    cy={20 + (i * 37) % 100}
-                    r={1 + (i % 3)}
-                    className="fill-white"
-                    opacity={0.6 + (i % 4) * 0.1}
-                  />
-                </g>
-              ))
-            ) : (
-              // Realistic clouds for day/sunset
-              [...Array(4)].map((_, i) => {
-                const x = (bgOffset * 0.4 + i * 250) % 1000;
-                const y = 40 + i * 25;
-                return (
-                  <g key={`cloud-${i}`} transform={`translate(${x}, ${y})`}>
-                    {/* Main cloud body - multiple overlapping circles */}
-                    <ellipse cx="0" cy="0" rx="40" ry="25" className="fill-white/40" />
-                    <ellipse cx="30" cy="-5" rx="35" ry="28" className="fill-white/45" />
-                    <ellipse cx="60" cy="0" rx="40" ry="25" className="fill-white/40" />
-                    <ellipse cx="25" cy="8" rx="30" ry="20" className="fill-white/35" />
-                    <ellipse cx="15" cy="-8" rx="25" ry="20" className="fill-white/50" />
-                    <ellipse cx="45" cy="-10" rx="28" ry="22" className="fill-white/48" />
-                    {/* Cloud shadow */}
-                    <ellipse cx="30" cy="12" rx="50" ry="15" className="fill-white/20" />
-                  </g>
-                );
-              })
+            {/* Distant stars (background layer) - slow moving */}
+            {[...Array(50)].map((_, i) => (
+              <circle
+                key={`far-star-${i}`}
+                cx={(bgOffset * 0.1 + i * 50) % 1000}
+                cy={10 + (i * 17) % 300}
+                r={0.5 + (i % 2) * 0.5}
+                className="fill-white"
+                opacity={0.3 + (i % 3) * 0.1}
+              >
+                <animate attributeName="opacity" values={`${0.3 + (i % 3) * 0.1};${0.5 + (i % 3) * 0.1};${0.3 + (i % 3) * 0.1}`} dur={`${2 + (i % 3)}s`} repeatCount="indefinite" />
+              </circle>
+            ))}
+            
+            {/* Medium stars - medium speed */}
+            {[...Array(30)].map((_, i) => (
+              <circle
+                key={`mid-star-${i}`}
+                cx={(bgOffset * 0.3 + i * 80) % 1000}
+                cy={15 + (i * 23) % 300}
+                r={1 + (i % 2)}
+                className="fill-white"
+                opacity={0.5 + (i % 4) * 0.1}
+              >
+                <animate attributeName="opacity" values={`${0.5 + (i % 4) * 0.1};${0.8};${0.5 + (i % 4) * 0.1}`} dur={`${1.5 + (i % 2)}s`} repeatCount="indefinite" />
+              </circle>
+            ))}
+            
+            {/* Close bright stars - faster movement */}
+            {[...Array(15)].map((_, i) => (
+              <g key={`bright-star-${i}`}>
+                <circle
+                  cx={(bgOffset * 0.5 + i * 120) % 1000}
+                  cy={20 + (i * 31) % 250}
+                  r={1.5 + (i % 2) * 0.5}
+                  className="fill-white"
+                  opacity="0.9"
+                >
+                  <animate attributeName="opacity" values="0.9;0.5;0.9" dur={`${1 + (i % 3) * 0.5}s`} repeatCount="indefinite" />
+                </circle>
+                {/* Star glow */}
+                <circle
+                  cx={(bgOffset * 0.5 + i * 120) % 1000}
+                  cy={20 + (i * 31) % 250}
+                  r={3 + (i % 2)}
+                  className="fill-white"
+                  opacity="0.2"
+                >
+                  <animate attributeName="r" values={`${3 + (i % 2)};${5 + (i % 2)};${3 + (i % 2)}`} dur={`${1 + (i % 3) * 0.5}s`} repeatCount="indefinite" />
+                </circle>
+              </g>
+            ))}
+            
+            {/* Distant planets */}
+            {level >= 2 && (
+              <g transform={`translate(${(bgOffset * 0.15 + 650) % 1000}, 80)`}>
+                {/* Blue planet */}
+                <circle cx="0" cy="0" r="30" className="fill-blue-400" opacity="0.8" />
+                <circle cx="0" cy="0" r="28" className="fill-blue-500" opacity="0.6" />
+                <ellipse cx="-8" cy="0" rx="12" ry="25" className="fill-blue-600" opacity="0.4" />
+                <circle cx="-10" cy="-8" r="8" className="fill-white" opacity="0.3" />
+              </g>
+            )}
+            
+            {level >= 3 && (
+              <g transform={`translate(${(bgOffset * 0.12 + 200) % 1000}, 120)`}>
+                {/* Red planet */}
+                <circle cx="0" cy="0" r="25" className="fill-red-500" opacity="0.7" />
+                <circle cx="0" cy="0" r="23" className="fill-red-600" opacity="0.5" />
+                <ellipse cx="5" cy="-5" rx="8" ry="15" className="fill-red-700" opacity="0.4" />
+              </g>
+            )}
+            
+            {level >= 4 && (
+              <g transform={`translate(${(bgOffset * 0.18 + 400) % 1000}, 60)`}>
+                {/* Purple ringed planet */}
+                <ellipse cx="0" cy="0" rx="50" ry="8" className="fill-purple-400" opacity="0.5" />
+                <circle cx="0" cy="0" r="20" className="fill-purple-500" opacity="0.8" />
+                <circle cx="0" cy="0" r="18" className="fill-purple-600" opacity="0.6" />
+                <ellipse cx="0" cy="0" rx="50" ry="5" className="fill-purple-300" opacity="0.3" />
+              </g>
+            )}
+            
+            {/* Shooting stars occasionally */}
+            {score % 500 < 50 && (
+              <g>
+                <line x1={bgOffset % 800} y1="50" x2={(bgOffset % 800) + 60} y2="80" stroke="#FFFFFF" strokeWidth="2" opacity="0.8">
+                  <animate attributeName="opacity" values="0;0.8;0" dur="0.5s" repeatCount="1" />
+                </line>
+                <circle cx={bgOffset % 800} cy="50" r="3" className="fill-white" opacity="0.9">
+                  <animate attributeName="opacity" values="0;0.9;0" dur="0.5s" repeatCount="1" />
+                </circle>
+              </g>
             )}
           </g>
 
@@ -901,16 +1354,29 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           <rect x="0" y={GROUND_Y + PLAYER_HEIGHT} width="800" height="100" className={currentTheme.ground} />
           <rect x="0" y={GROUND_Y + PLAYER_HEIGHT + 10} width="800" height="90" className={currentTheme.accent} />
 
-          {/* Ground decoration */}
+          {/* Ground decoration - Metal panels and tech lines */}
           {[...Array(20)].map((_, i) => (
-            <rect
-              key={`ground-${i}`}
-              x={(bgOffset + i * 40) % 800}
-              y={GROUND_Y + PLAYER_HEIGHT - 5}
-              width="30"
-              height="5"
-              className="fill-white/20"
-            />
+            <g key={`ground-${i}`}>
+              {/* Metal panel */}
+              <rect
+                x={(bgOffset + i * 40) % 800}
+                y={GROUND_Y + PLAYER_HEIGHT - 5}
+                width="35"
+                height="5"
+                className="fill-cyan-400"
+                opacity="0.15"
+              />
+              {/* Tech detail lines */}
+              <line
+                x1={(bgOffset + i * 40 + 5) % 800}
+                y1={GROUND_Y + PLAYER_HEIGHT - 3}
+                x2={(bgOffset + i * 40 + 30) % 800}
+                y2={GROUND_Y + PLAYER_HEIGHT - 3}
+                stroke="#00FFFF"
+                strokeWidth="0.5"
+                opacity="0.3"
+              />
+            </g>
           ))}
 
           {/* Coins */}
@@ -921,11 +1387,50 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             </g>
           ))}
 
+          {/* Power-Ups - Plasma Ball */}
+          {powerUps.filter(p => !p.collected).map(powerUp => (
+            <g key={powerUp.id} transform={`translate(${powerUp.x}, ${powerUp.y})`}>
+              {/* Outer glow pulse */}
+              <circle cx="15" cy="15" r="20" className="fill-cyan-400" opacity="0.2">
+                <animate attributeName="r" values="20;25;20" dur="0.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.2;0.4;0.2" dur="0.8s" repeatCount="indefinite" />
+              </circle>
+              {/* Middle glow */}
+              <circle cx="15" cy="15" r="16" className="fill-blue-400" opacity="0.4">
+                <animate attributeName="r" values="16;18;16" dur="0.6s" repeatCount="indefinite" />
+              </circle>
+              {/* Core plasma ball */}
+              <circle cx="15" cy="15" r="12" className="fill-cyan-300" stroke="#00FFFF" strokeWidth="2" opacity="0.9" />
+              <circle cx="15" cy="15" r="10" className="fill-blue-500" opacity="0.7" />
+              <circle cx="15" cy="15" r="8" className="fill-white" opacity="0.8" />
+              {/* Electric arcs */}
+              <path d="M 15 3 Q 12 8 15 15" stroke="#00FFFF" strokeWidth="1.5" fill="none" opacity="0.8">
+                <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.3s" repeatCount="indefinite" />
+              </path>
+              <path d="M 27 15 Q 22 12 15 15" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.7">
+                <animate attributeName="opacity" values="0.7;0.3;0.7" dur="0.4s" repeatCount="indefinite" />
+              </path>
+              <path d="M 15 27 Q 18 22 15 15" stroke="#00FFFF" strokeWidth="1.5" fill="none" opacity="0.6">
+                <animate attributeName="opacity" values="0.6;0.3;0.6" dur="0.35s" repeatCount="indefinite" />
+              </path>
+              <path d="M 3 15 Q 8 18 15 15" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.8">
+                <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.45s" repeatCount="indefinite" />
+              </path>
+              {/* Energy particles */}
+              <circle cx="10" cy="8" r="1.5" className="fill-cyan-300">
+                <animate attributeName="cy" values="8;5;8" dur="0.6s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="20" cy="22" r="1.5" className="fill-white">
+                <animate attributeName="cy" values="22;25;22" dur="0.7s" repeatCount="indefinite" />
+              </circle>
+            </g>
+          ))}
+
           {/* Obstacles */}
           {obstacles.map(renderObstacle)}
 
-          {/* Player - Baby Character */}
-          <g transform={`translate(${PLAYER_X}, ${isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY})`}>
+          {/* Player - Dynamic Character */}
+          <g transform={`translate(${PLAYER_X}, ${isDucking ? GROUND_Y : playerY})`}>
             {/* Invulnerability shield */}
             {Date.now() < invulnerableUntil && (
               <g>
@@ -940,26 +1445,30 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               </g>
             )}
             
-            <foreignObject x="-5" y={isDucking ? "5" : "-5"} width={PLAYER_WIDTH + 10} height={isDucking ? DUCKING_HEIGHT + 10 : PLAYER_HEIGHT + 10}>
+            <foreignObject x="-5" y={isDucking ? "-20" : "-5"} width={PLAYER_WIDTH + 10} height={PLAYER_HEIGHT + 10}>
               <div style={{ 
                 width: '100%', 
                 height: '100%', 
                 display: 'flex', 
-                alignItems: 'center', 
+                alignItems: 'flex-end',
                 justifyContent: 'center',
-                transform: isDucking ? 'scaleY(0.5)' : 'scaleY(1)',
-                transition: 'transform 0.15s ease-out'
+                transformOrigin: 'bottom center'
               }}>
                 <Image 
-                  src="/images/character/baby-full.png" 
-                  alt="Baby character"
+                  src={isPoweredUp ? "/images/character/teen-full.png" : "/images/character/baby-full.png"}
+                  alt={isPoweredUp ? "Teen character" : "Baby character"}
                   width={PLAYER_WIDTH}
                   height={PLAYER_HEIGHT}
                   style={{ 
                     objectFit: 'contain',
                     imageRendering: 'pixelated',
+                    transform: isDucking ? 'scaleY(0.4)' : 'scaleY(1)',
+                    transformOrigin: 'bottom center',
+                    transition: 'transform 0.15s ease-out',
                     filter: Date.now() < invulnerableUntil 
                       ? 'drop-shadow(0 0 10px rgba(0,255,255,0.8)) drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
+                      : isPoweredUp
+                      ? 'drop-shadow(0 0 8px rgba(255,215,0,0.6)) drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
                       : 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
                   }}
                   priority
@@ -981,81 +1490,82 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         {/* Ready Screen */}
         {gameState === 'ready' && (
           <div className='absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40'>
-            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-12 rounded-3xl border-2 border-cyan-400/30 max-w-2xl shadow-2xl'>
-              <div className='mb-6'>
-                <h1 className='text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4'>
-                  {gameTitle}
-                </h1>
+            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-3xl border-2 border-cyan-400/30 max-w-2xl w-full mx-4 shadow-2xl'>
+              {/* Title */}
+              <h1 className='text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-3'>
+                {gameTitle}
+              </h1>
+              
+              {/* Quick Info */}
+              <div className='bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl p-3 mb-4 border border-purple-400/30'>
+                <p className='text-cyan-300 font-semibold text-sm'>🎯 Level up every 1,000 points • 🧠 Answer Web3 quizzes</p>
               </div>
               
-              <p className='text-white/80 text-xl mb-4'>
-                Infinite Runner is a simple game where you control a character and run through an endless runner.
-              </p>
-              <div className='bg-gradient-to-r from-purple-500/30 to-cyan-500/30 rounded-xl p-4 mb-8 border border-purple-400/40'>
-                <p className='text-cyan-300 font-semibold'>🎯 Level up every 1,000 points!</p>
-                <p className='text-white/70 text-sm mt-1'>Answer Web3 questions to advance</p>
-              </div>
-              
-              <div className='bg-black/30 rounded-2xl border border-white/10 overflow-hidden'>
-                {/* Collapsible Header */}
-                <button
-                  onClick={() => setShowControls(!showControls)}
-                  className='w-full p-4 flex items-center justify-between hover:bg-white/5 transition-all duration-300'
-                >
-                  <h3 className='text-white font-semibold text-lg flex items-center gap-2'>
-                    🎯 Controls & Features
-                  </h3>
-                  <span className={`text-white text-2xl transform transition-transform duration-300 ${showControls ? 'rotate-180' : 'rotate-0'}`}>
-                    ▼
-                  </span>
-                </button>
-                
-                {/* Collapsible Content */}
-                <div className={`transition-all duration-300 overflow-hidden ${showControls ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <div className='px-6 pb-6'>
-                    <div className='grid grid-cols-2 gap-3 text-white/70 text-sm mb-4'>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>⬆️</span>
-                        <span>SPACE/↑ to Jump (x2!)</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>⬇️</span>
-                        <span>↓ to Duck</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>➡️</span>
-                        <span>→ to Speed Up</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>⬅️</span>
-                        <span>← to Slow Down</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>⏸️</span>
-                        <span>ESC to Pause</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-xl'>⛶</span>
-                        <span>Fullscreen mode</span>
-                      </div>
-                    </div>
-                    <div className='bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-lg p-3 border border-purple-400/30'>
-                      <p className='text-cyan-300 text-xs font-semibold'>🧠 Level up every 1,000 points with Web3 quizzes!</p>
-                    </div>
+              {/* Compact Controls */}
+              <div className='bg-black/30 rounded-xl p-4 mb-4 border border-white/10'>
+                <div className='grid grid-cols-2 gap-2 text-white/70 text-xs'>
+                  <div className='flex items-center gap-1.5'>
+                    <span>⬆️</span>
+                    <span>Jump (x2!)</span>
+                  </div>
+                  <div className='flex items-center gap-1.5'>
+                    <span>⬇️</span>
+                    <span>Crouch (toggle)</span>
+                  </div>
+                  <div className='flex items-center gap-1.5'>
+                    <span>➡️</span>
+                    <span>Speed Up</span>
+                  </div>
+                  <div className='flex items-center gap-1.5'>
+                    <span>⬅️</span>
+                    <span>Slow Down</span>
                   </div>
                 </div>
               </div>
               
+              {/* Cost & Balance */}
+              <div className='bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-xl p-4 mb-4 border-2 border-purple-400/50'>
+                <div className='flex items-center justify-between'>
+                  <div className='text-white/80 text-sm font-semibold'>💰 Cost:</div>
+                  <div className='text-yellow-400 font-bold text-2xl'>250 Points</div>
+                </div>
+                {account && (() => {
+                  const currentPoints = account.totalPoints || account.profile?.totalPoints || 0;
+                  return (
+                    <div className='flex items-center justify-between mt-2 pt-2 border-t border-white/20'>
+                      <div className='text-white/80 text-sm'>Balance:</div>
+                      <div className={`font-bold text-xl ${currentPoints >= 250 ? 'text-green-400' : 'text-red-400'}`}>
+                        {currentPoints} pts
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              
+              {/* Start Button */}
               <button
-                onClick={startGame}
-                className='mt-4 px-12 py-6 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white font-bold text-2xl rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-cyan-500/50 animate-pulse'
+                onClick={() => startGame(false)}
+                disabled={!account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 250)}
+                className={`w-full px-10 py-5 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white font-bold text-2xl rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-cyan-500/50 ${
+                  !account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 250) 
+                    ? 'opacity-50 cursor-not-allowed animate-none' 
+                    : 'animate-pulse'
+                }`}
               >
                 🚀 START GAME
               </button>
               
-              <p className='text-white/50 text-xs mt-6'>
-                💡 Tip: Use fullscreen for the best experience!
-              </p>
+              {/* Warning Messages */}
+              {!account && (
+                <p className='text-yellow-300 text-xs mt-3'>
+                  🔒 Connect wallet to play
+                </p>
+              )}
+              {account && (account.totalPoints || account.profile?.totalPoints || 0) < 250 && (
+                <p className='text-red-300 text-xs mt-3'>
+                  💰 Need {250 - (account.totalPoints || account.profile?.totalPoints || 0)} more points
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -1063,27 +1573,34 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         {/* Web3 Quiz Modal */}
         {showQuiz && gameState === 'paused' && (
           <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='text-center bg-gradient-to-br from-purple-900/90 to-cyan-900/90 p-8 rounded-3xl border-2 border-cyan-400/50 max-w-2xl shadow-2xl'>
-              <div className='mb-6'>
-                <div className='text-6xl mb-4'>🧠</div>
-                <h2 className='text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2'>
-                  Level Up Challenge!
-                </h2>
-                <p className='text-cyan-300 text-lg mb-4'>Answer correctly to advance to Level {level + 1}</p>
-              </div>
+            <div className='text-center bg-gradient-to-br from-purple-900/90 to-cyan-900/90 p-6 rounded-3xl border-2 border-cyan-400/50 max-w-xl w-full mx-4 shadow-2xl'>
+              {/* Header */}
+              <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2'>
+                🧠 Level Up Challenge!
+              </h2>
+              <p className='text-cyan-300 text-sm mb-4'>Answer correctly → Level {level + 1}</p>
 
               {!quizAnswered ? (
                 <>
-                  <div className='bg-black/30 rounded-2xl p-6 mb-6 border border-cyan-400/30'>
-                    <h3 className='text-white text-xl font-semibold mb-6'>{quizQuestions[currentQuestion].question}</h3>
+                  <div className='bg-black/30 rounded-xl p-5 mb-4 border border-cyan-400/30'>
+                    <h3 className='text-white text-lg font-semibold mb-4'>{quizQuestions[currentQuestion].question}</h3>
                     
-                    <div className='space-y-3'>
+                    <div className='space-y-2'>
                       {quizQuestions[currentQuestion].options.map((option, index) => (
                         <button
                           key={index}
                           onClick={() => {
+                            const isCorrect = index === quizQuestions[currentQuestion].correctAnswer;
                             setQuizAnswered(true);
-                            if (index === quizQuestions[currentQuestion].correctAnswer) {
+                            setIsAnswerCorrect(isCorrect);
+                            
+                            if (isCorrect) {
+                              // Play win sound for correct answer
+                              if (winSoundRef.current) {
+                                winSoundRef.current.currentTime = 0;
+                                winSoundRef.current.play().catch(err => console.log('Win sound play error:', err));
+                              }
+                              
                               // Correct answer - level up!
                               setLevel(l => {
                                 const newLevel = l + 1;
@@ -1102,14 +1619,34 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                                 
                                 // Clear existing obstacles for fair start
                                 setObstacles([]);
+                                
+                                // Reset power-up spawn for new level
+                                setPowerUpSpawnedThisLevel(false);
+                                lastPowerUpRef.current = 0;
+                                
+                                // Post achievement to chat
+                                if (account && newLevel >= 3) {
+                                  setTimeout(() => {
+                                    gameSocialService.sendGameMessage(
+                                      gameId,
+                                      account.id,
+                                      account.profile?.username || account.profile?.displayName || 'Anonymous',
+                                      `Reached Level ${newLevel}! 🎉`,
+                                      'achievement'
+                                    ).catch(err => console.log('Failed to post achievement:', err));
+                                  }, 500);
+                                }
 
                                 return newLevel;
                               });
+                            } else {
+                              // Wrong answer - still give 2 seconds safe zone to resume
+                              setInvulnerableUntil(Date.now() + 2000);
                             }
                           }}
-                          className='w-full p-4 text-left rounded-xl border-2 border-white/20 hover:border-cyan-400/50 bg-white/5 hover:bg-cyan-500/20 text-white font-medium transition-all duration-300 transform hover:scale-105'
+                          className='w-full p-3 text-left rounded-lg border-2 border-white/20 hover:border-cyan-400/50 bg-white/5 hover:bg-cyan-500/20 text-white text-sm font-medium transition-all duration-200 transform hover:scale-102'
                         >
-                          <span className='mr-3'>{String.fromCharCode(65 + index)}.</span>
+                          <span className='mr-2 font-bold'>{String.fromCharCode(65 + index)}.</span>
                           {option}
                         </button>
                       ))}
@@ -1118,18 +1655,22 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                 </>
               ) : (
                 <>
-                  <div className='bg-black/30 rounded-2xl p-6 mb-6 border-2 border-cyan-400/50'>
-                    <div className='text-6xl mb-4'>
-                      {quizAnswered && quizQuestions[currentQuestion].correctAnswer >= 0 ? '🎉' : '❌'}
-                    </div>
-                    <h3 className='text-2xl font-bold text-cyan-400 mb-4'>
-                      {quizAnswered ? '✅ Correct!' : '❌ Incorrect'}
+                  <div className='bg-black/30 rounded-xl p-5 mb-4 border-2 border-cyan-400/50'>
+                    <h3 className={`text-2xl font-bold mb-3 ${isAnswerCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                      {isAnswerCorrect ? '✅ Correct!' : '❌ Incorrect'}
                     </h3>
-                    <p className='text-white/80 text-lg mb-4'>{quizQuestions[currentQuestion].explanation}</p>
-                    {quizAnswered && (
-                      <div className='bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl p-4 border border-cyan-400/30'>
-                        <p className='text-cyan-300 font-bold text-xl'>🎊 Level {level} Unlocked!</p>
-                        <p className='text-white/70 text-sm mt-2'>Speed increased • New challenges await!</p>
+                    <p className='text-white/80 text-sm mb-3'>{quizQuestions[currentQuestion].explanation}</p>
+                    {isAnswerCorrect ? (
+                      <div className='bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-lg p-3 border border-cyan-400/30'>
+                        <p className='text-cyan-300 font-bold text-lg'>🎊 Level {level} Unlocked!</p>
+                        <p className='text-white/70 text-xs mt-1'>
+                          ⚡ Speed up {level === 2 && '• 🌅 Sunset'}{level === 3 && '• 🌙 Night'}{level >= 4 && '• 🌐 Cyber'} • 🛡️ 4s safe zone
+                        </p>
+                      </div>
+                    ) : (
+                      <div className='bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-lg p-3 border border-red-400/30'>
+                        <p className='text-red-300 font-bold text-lg'>💪 Keep Trying!</p>
+                        <p className='text-white/70 text-xs mt-1'>Same level • 🛡️ 2s safe zone</p>
                       </div>
                     )}
                   </div>
@@ -1140,7 +1681,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                       setGameState('playing');
                       levelTimerRef.current = 0;
                     }}
-                    className='px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-xl rounded-xl transition-all duration-300 transform hover:scale-105 w-full'
+                    className='w-full px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-105'
                   >
                     ▶️ Continue Playing
                   </button>
@@ -1153,19 +1694,18 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         {/* Paused Screen (only show if not showing quiz) */}
         {gameState === 'paused' && !showQuiz && (
           <div className='absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-12 rounded-3xl border border-white/20'>
-              <h2 className='text-4xl font-bold text-white mb-4'>⏸️ PAUSED</h2>
-              <p className='text-white/70 text-lg mb-8'>Press ESC to continue</p>
-              <div className='space-y-4'>
+            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-3xl border border-white/20 w-full max-w-md mx-4'>
+              <h2 className='text-3xl font-bold text-white mb-2'>⏸️ PAUSED</h2>
+              <p className='text-white/70 text-sm mb-6'>Press ESC to continue</p>
+              <div className='space-y-2'>
                 <button
                   onClick={() => setGameState('playing')}
-                  className='px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-xl rounded-xl transition-all duration-300 transform hover:scale-105 w-full'
+                  className='w-full px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-105'
                 >
                   ▶️ Continue
                 </button>
                 <button
                   onClick={() => {
-                    exitFullscreen();
                     if (embedded) {
                       // If embedded, just reset to ready state
                       setGameState('ready');
@@ -1178,7 +1718,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                       router.push(`/mini-games/${gameId}`);
                     }
                   }}
-                  className='px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xl rounded-xl border border-white/20 transition-all duration-300 w-full'
+                  className='w-full px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-lg border border-white/20 transition-all duration-200'
                 >
                   🏠 {embedded ? 'Back to Start' : 'Exit to Menu'}
                 </button>
@@ -1190,74 +1730,90 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         {/* Game Over Screen */}
         {gameState === 'gameOver' && (
           <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-12 rounded-3xl border border-white/20 max-w-xl'>
-              <div className='text-6xl mb-4'>💀</div>
-              <h2 className='text-4xl font-bold text-white mb-4'>Game Over!</h2>
+            <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-3xl border border-white/20 max-w-lg w-full mx-4'>
+              {/* Header */}
+              <div className='text-5xl mb-3'>💀</div>
+              <h2 className='text-3xl font-bold text-white mb-4'>Game Over!</h2>
               
-              <div className='bg-white/5 rounded-xl p-6 mb-6'>
-                <div className='grid grid-cols-2 gap-4 text-white'>
+              {/* Stats Grid - Compact */}
+              <div className='bg-white/5 rounded-xl p-4 mb-4'>
+                <div className='grid grid-cols-2 gap-3 text-white'>
                   <div>
-                    <div className='text-white/60 text-sm'>Score</div>
-                    <div className='text-3xl font-bold'>{score}</div>
+                    <div className='text-white/60 text-xs'>Score</div>
+                    <div className='text-2xl font-bold'>{score}</div>
                   </div>
                   <div>
-                    <div className='text-white/60 text-sm'>Level</div>
-                    <div className='text-3xl font-bold'>{level}</div>
+                    <div className='text-white/60 text-xs'>Level</div>
+                    <div className='text-2xl font-bold'>{level}</div>
                   </div>
                   <div>
-                    <div className='text-white/60 text-sm'>High Score</div>
-                    <div className='text-2xl font-bold text-yellow-400'>{highScore}</div>
+                    <div className='text-white/60 text-xs'>High Score</div>
+                    <div className='text-xl font-bold text-yellow-400'>{highScore}</div>
                   </div>
                   <div>
-                    <div className='text-white/60 text-sm'>XP Earned</div>
-                    <div className='text-2xl font-bold text-cyan-400'>+{xpEarned}</div>
+                    <div className='text-white/60 text-xs'>XP Earned</div>
+                    <div className='text-xl font-bold text-cyan-400'>+{xpEarned}</div>
                   </div>
                 </div>
               </div>
 
-              {/* Progress Save Status */}
-              {account && (
-                <div className='bg-white/5 rounded-xl p-4 mb-8 border-2 border-white/10'>
-                  {isSavingProgress && (
-                    <div className='flex items-center justify-center gap-2 text-white'>
-                      <div className='animate-spin text-2xl'>⏳</div>
-                      <span>Saving progress...</span>
-                    </div>
-                  )}
-                  {progressSaved && (
-                    <div className='flex items-center justify-center gap-2 text-green-400'>
-                      <span className='text-2xl'>✅</span>
-                      <span className='font-semibold'>Progress saved to your account!</span>
-                    </div>
-                  )}
-                  {!isSavingProgress && !progressSaved && xpEarned > 0 && (
-                    <div className='flex items-center justify-center gap-2 text-yellow-400'>
-                      <span className='text-2xl'>💾</span>
-                      <span>Saving your progress...</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {!account && (
-                <div className='bg-yellow-500/10 rounded-xl p-4 mb-8 border-2 border-yellow-500/30'>
-                  <div className='flex items-center justify-center gap-2 text-yellow-400'>
-                    <span className='text-2xl'>⚠️</span>
-                    <span className='text-sm'>Connect wallet to save your progress</span>
+              {/* Progress Save Status - Compact */}
+              {account && progressSaved && (
+                <div className='bg-green-500/20 rounded-lg p-2 mb-4 border border-green-400/30'>
+                  <div className='flex items-center justify-center gap-2 text-green-400 text-sm'>
+                    <span>✅</span>
+                    <span className='font-semibold'>Progress saved!</span>
                   </div>
                 </div>
               )}
 
-              <div className='space-y-4'>
+              {/* Play Again Cost - More Compact */}
+              <div className='bg-gradient-to-r from-green-600/30 to-cyan-600/30 rounded-xl p-3 mb-4 border-2 border-green-400/50'>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <div className='text-white/80 text-xs'>Play Again</div>
+                    <div className='text-green-300 text-xs'>⚡ 80% cheaper!</div>
+                  </div>
+                  <div className='text-green-400 font-bold text-2xl'>💰 100</div>
+                </div>
+                {account && (() => {
+                  const currentPoints = account.totalPoints || account.profile?.totalPoints || 0;
+                  return (
+                    <div className='flex items-center justify-between mt-2 pt-2 border-t border-white/20'>
+                      <div className='text-white/80 text-xs'>Balance:</div>
+                      <div className={`font-bold text-lg ${currentPoints >= 100 ? 'text-green-400' : 'text-red-400'}`}>
+                        {currentPoints} pts
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Buttons - Compact */}
+              <div className='space-y-2'>
                 <button
-                  onClick={startGame}
-                  className='px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-xl rounded-xl transition-all duration-300 transform hover:scale-105 w-full'
+                  onClick={() => startGame(true)}
+                  disabled={!account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 100)}
+                  className={`w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-105 ${
+                    !account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 100)
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                  }`}
                 >
                   🔄 Play Again
                 </button>
+                {!account && (
+                  <p className='text-yellow-300 text-xs text-center'>
+                    🔒 Connect wallet
+                  </p>
+                )}
+                {account && (account.totalPoints || account.profile?.totalPoints || 0) < 100 && (
+                  <p className='text-red-300 text-xs text-center'>
+                    💰 Need {100 - (account.totalPoints || account.profile?.totalPoints || 0)} more pts
+                  </p>
+                )}
                 <button
                   onClick={() => {
-                    exitFullscreen();
                     if (embedded) {
                       // If embedded, scroll to top and reset game
                       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1273,7 +1829,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                       router.push(`/mini-games/${gameId}`);
                     }
                   }}
-                  className='px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-xl rounded-xl border border-white/20 transition-all duration-300 w-full'
+                  className='w-full px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-lg border border-white/20 transition-all duration-200'
                 >
                   🏠 {embedded ? 'Back to Start' : 'Exit to Menu'}
                 </button>
@@ -1295,6 +1851,16 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           
         </div>
       </div>
+      
+      {/* Interactive Sidebar */}
+      {isMounted && (
+        <GameSidebar
+          gameId={gameId}
+          gameTitle={gameTitle}
+          currentScore={score}
+          currentLevel={level}
+        />
+      )}
     </div>
   );
 };
