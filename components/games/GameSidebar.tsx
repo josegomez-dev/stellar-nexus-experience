@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAccount } from '@/contexts/auth/AccountContext';
 import { useToast } from '@/contexts/ui/ToastContext';
-import { gameSocialService, GameMessage, Challenge } from '@/lib/services/game-social-service';
+import { gameSocialService, GameMessage, Challenge, ChallengeTimeLimit } from '@/lib/services/game-social-service';
 import { accountService } from '@/lib/services/account-service';
 
 interface GameSidebarProps {
@@ -13,28 +13,33 @@ interface GameSidebarProps {
   currentLevel?: number;
 }
 
-type SidebarView = 'games' | 'social' | 'challenges' | 'chat';
-
-const AVAILABLE_GAMES = [
-  { id: 'web3-basics-adventure', name: 'Web3 Basics Adventure', icon: '🚀' },
-  // Add more games as needed
-];
+type SidebarView = 'social' | 'milestones' | 'chat';
 
 const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentScore = 0, currentLevel = 1 }) => {
   const { account } = useAccount();
   const { addToast } = useToast();
   
   const [isOpen, setIsOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<SidebarView>('games');
+  const [currentView, setCurrentView] = useState<SidebarView>('chat');
   const [messages, setMessages] = useState<GameMessage[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [newChallengeDesc, setNewChallengeDesc] = useState('');
   const [newChallengeReward, setNewChallengeReward] = useState(1000);
   const [newChallengeScore, setNewChallengeScore] = useState(3000);
+  const [newChallengeTimeLimit, setNewChallengeTimeLimit] = useState<ChallengeTimeLimit>('this_week');
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
+  const [targetUserId, setTargetUserId] = useState<string | undefined>(undefined);
+  const [targetUsername, setTargetUsername] = useState<string | undefined>(undefined);
+  
+  // @ Mention functionality
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  const [mentionPosition, setMentionPosition] = useState(0);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const challengeDescInputRef = useRef<HTMLInputElement>(null);
   
   // Subscribe to game messages
   useEffect(() => {
@@ -53,9 +58,9 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
     return () => unsubscribe();
   }, [gameId, isOpen, currentView]);
 
-  // Subscribe to challenges
+  // Subscribe to milestones
   useEffect(() => {
-    if (!isOpen || currentView !== 'challenges') return;
+    if (!isOpen || currentView !== 'milestones') return;
     
     const unsubscribe = gameSocialService.subscribeToOpenChallenges(
       gameId,
@@ -78,6 +83,71 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
     
     loadUsers();
   }, [isOpen]);
+
+  // Search users when mention search changes
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (mentionSearch.length > 0) {
+        const results = await gameSocialService.searchUsers(mentionSearch, 10);
+        setMentionResults(results);
+      } else {
+        setMentionResults([]);
+      }
+    };
+
+    if (showMentionDropdown) {
+      searchUsers();
+    }
+  }, [mentionSearch, showMentionDropdown]);
+
+  const handleChallengeDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewChallengeDesc(value);
+
+    // Detect @ symbol
+    const atIndex = value.lastIndexOf('@');
+    if (atIndex !== -1 && atIndex === value.length - 1) {
+      // User just typed @
+      setShowMentionDropdown(true);
+      setMentionPosition(atIndex);
+      setMentionSearch('');
+    } else if (atIndex !== -1 && showMentionDropdown) {
+      // User is typing after @
+      const searchText = value.substring(atIndex + 1);
+      if (searchText.includes(' ')) {
+        // Space typed, close dropdown
+        setShowMentionDropdown(false);
+      } else {
+        setMentionSearch(searchText);
+      }
+    } else if (!value.includes('@')) {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  const handleSelectMentionedUser = (user: any) => {
+    // Set target user
+    setTargetUserId(user.id);
+    setTargetUsername(user.displayName);
+
+    // Replace @search with @username in description
+    const atIndex = newChallengeDesc.lastIndexOf('@');
+    const beforeAt = newChallengeDesc.substring(0, atIndex);
+    const newDesc = `${beforeAt}@${user.displayName} `;
+    setNewChallengeDesc(newDesc);
+
+    // Close dropdown
+    setShowMentionDropdown(false);
+    setMentionSearch('');
+
+    // Focus back on input
+    challengeDescInputRef.current?.focus();
+  };
+
+  const handleClearTargetUser = () => {
+    setTargetUserId(undefined);
+    setTargetUsername(undefined);
+  };
 
   const handleSendMessage = async () => {
     if (!account || !newMessage.trim()) return;
@@ -110,7 +180,7 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
       addToast({
         type: 'error',
         title: 'Insufficient Points',
-        message: `You need ${newChallengeReward} points to create this challenge`,
+        message: `You need ${newChallengeReward} points to create this milestone`,
         duration: 3000,
       });
       return;
@@ -120,32 +190,36 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
       // Deduct points from challenger
       await accountService.addExperienceAndPoints(account.id, 0, -newChallengeReward);
       
-      await gameSocialService.createChallenge(
+      const challengeResult = await gameSocialService.createChallenge(
         gameId,
         account.id,
         account.profile?.username || account.profile?.displayName || 'Anonymous',
         newChallengeDesc.trim(),
         `Reach ${newChallengeScore} points`,
         newChallengeReward,
-        undefined,
-        undefined,
+        newChallengeTimeLimit,
+        targetUserId,
+        targetUsername,
         newChallengeScore
       );
       
       addToast({
         type: 'success',
-        title: '🎯 Challenge Created!',
-        message: `${newChallengeReward} points staked!`,
+        title: '🎯 Milestone Created!',
+        message: `${newChallengeReward} points staked in escrow!`,
         duration: 3000,
       });
       
       setNewChallengeDesc('');
       setNewChallengeReward(1000);
       setNewChallengeScore(3000);
+      setNewChallengeTimeLimit('this_week');
+      setTargetUserId(undefined);
+      setTargetUsername(undefined);
     } catch (error) {
       addToast({
         type: 'error',
-        title: 'Failed to create challenge',
+        title: 'Failed to create milestone',
         message: 'Please try again',
         duration: 3000,
       });
@@ -164,14 +238,14 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
       
       addToast({
         type: 'success',
-        title: '✅ Challenge Accepted!',
-        message: `Win ${challenge.pointsReward} points!`,
+        title: '✅ Milestone Accepted!',
+        message: `Complete to earn ${challenge.pointsReward} points!`,
         duration: 3000,
       });
     } catch (error) {
       addToast({
         type: 'error',
-        title: 'Failed to accept challenge',
+        title: 'Failed to accept milestone',
         message: 'Please try again',
         duration: 3000,
       });
@@ -210,13 +284,13 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
         >
           <button
             onClick={() => {
-              setCurrentView('games');
+              setCurrentView('chat');
               setIsOpen(true);
             }}
-            className='bg-gradient-to-l from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-purple-400'
-            title="Game Selector"
+            className='bg-gradient-to-l from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-green-400'
+            title="Chat"
           >
-            <span className='text-2xl'>🎮</span>
+            <span className='text-2xl'>💬</span>
           </button>
           
           <button
@@ -232,24 +306,13 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
           
           <button
             onClick={() => {
-              setCurrentView('challenges');
+              setCurrentView('milestones');
               setIsOpen(true);
             }}
             className='bg-gradient-to-l from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-cyan-400'
-            title="Challenges"
+            title="Milestones"
           >
             <span className='text-2xl'>🎯</span>
-          </button>
-          
-          <button
-            onClick={() => {
-              setCurrentView('chat');
-              setIsOpen(true);
-            }}
-            className='bg-gradient-to-l from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-green-400'
-            title="Chat"
-          >
-            <span className='text-2xl'>💬</span>
           </button>
         </div>
       )}
@@ -264,10 +327,9 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
           <div className='bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-b border-purple-500/30 p-4'>
             <div className='flex items-center justify-between mb-3'>
               <h3 className='text-white font-bold text-lg'>
-                {currentView === 'games' && '🎮 Games'}
-                {currentView === 'social' && '🔗 Share'}
-                {currentView === 'challenges' && '🎯 Challenges'}
                 {currentView === 'chat' && '💬 Chat'}
+                {currentView === 'social' && '🔗 Share'}
+                {currentView === 'milestones' && '🎯 Milestones'}
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
@@ -278,16 +340,16 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             </div>
             
             {/* View Tabs */}
-            <div className='grid grid-cols-4 gap-1 bg-black/30 p-1 rounded-lg'>
+            <div className='grid grid-cols-3 gap-1 bg-black/30 p-1 rounded-lg'>
               <button
-                onClick={() => setCurrentView('games')}
+                onClick={() => setCurrentView('chat')}
                 className={`py-2 text-xs rounded transition-all ${
-                  currentView === 'games'
-                    ? 'bg-purple-600 text-white font-bold'
+                  currentView === 'chat'
+                    ? 'bg-green-600 text-white font-bold'
                     : 'text-white/60 hover:text-white/80'
                 }`}
               >
-                🎮
+                💬
               </button>
               <button
                 onClick={() => setCurrentView('social')}
@@ -300,199 +362,20 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
                 🔗
               </button>
               <button
-                onClick={() => setCurrentView('challenges')}
+                onClick={() => setCurrentView('milestones')}
                 className={`py-2 text-xs rounded transition-all ${
-                  currentView === 'challenges'
+                  currentView === 'milestones'
                     ? 'bg-cyan-600 text-white font-bold'
                     : 'text-white/60 hover:text-white/80'
                 }`}
               >
                 🎯
               </button>
-              <button
-                onClick={() => setCurrentView('chat')}
-                className={`py-2 text-xs rounded transition-all ${
-                  currentView === 'chat'
-                    ? 'bg-green-600 text-white font-bold'
-                    : 'text-white/60 hover:text-white/80'
-                }`}
-              >
-                💬
-              </button>
             </div>
           </div>
 
           {/* Content Area */}
           <div className='flex-1 overflow-y-auto p-4'>
-            {/* GAMES VIEW */}
-            {currentView === 'games' && (
-              <div className='space-y-2'>
-                <p className='text-white/60 text-xs mb-3'>Available Mini-Games:</p>
-                {AVAILABLE_GAMES.map((game) => (
-                  <a
-                    key={game.id}
-                    href={`/mini-games/${game.id}`}
-                    className='block p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 hover:border-purple-400/50 transition-all'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <span className='text-2xl'>{game.icon}</span>
-                      <div className='flex-1'>
-                        <div className='text-white font-semibold text-sm'>{game.name}</div>
-                        {game.id === gameId && (
-                          <div className='text-green-400 text-xs'>▶ Playing now</div>
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-
-            {/* SOCIAL SHARE VIEW */}
-            {currentView === 'social' && (
-              <div className='space-y-3'>
-                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
-                  <div className='text-white font-semibold text-sm mb-2'>Your Stats:</div>
-                  <div className='grid grid-cols-2 gap-2 text-xs'>
-                    <div>
-                      <div className='text-white/60'>Score</div>
-                      <div className='text-white font-bold text-lg'>{currentScore}</div>
-                    </div>
-                    <div>
-                      <div className='text-white/60'>Level</div>
-                      <div className='text-white font-bold text-lg'>{currentLevel}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='text-white/60 text-xs mb-2'>Share your progress:</div>
-                
-                <button
-                  onClick={shareToTwitter}
-                  className='w-full p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>🐦</span>
-                  <span>Share on Twitter/X</span>
-                </button>
-                
-                <button
-                  onClick={shareToFacebook}
-                  className='w-full p-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>📘</span>
-                  <span>Share on Facebook</span>
-                </button>
-                
-                <button
-                  onClick={copyShareLink}
-                  className='w-full p-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>📋</span>
-                  <span>Copy Share Link</span>
-                </button>
-              </div>
-            )}
-
-            {/* CHALLENGES VIEW */}
-            {currentView === 'challenges' && (
-              <div className='space-y-3'>
-                {account && (
-                  <div className='bg-gradient-to-br from-cyan-600/20 to-purple-600/20 rounded-lg p-3 border border-cyan-400/30'>
-                    <div className='text-white font-semibold text-sm mb-2'>Create Challenge</div>
-                    
-                    <input
-                      type='text'
-                      value={newChallengeDesc}
-                      onChange={(e) => setNewChallengeDesc(e.target.value)}
-                      placeholder='Challenge description...'
-                      className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20 mb-2'
-                      maxLength={100}
-                    />
-                    
-                    <div className='grid grid-cols-2 gap-2 mb-2'>
-                      <div>
-                        <label className='text-white/60 text-xs'>Target Score:</label>
-                        <input
-                          type='number'
-                          value={newChallengeScore}
-                          onChange={(e) => setNewChallengeScore(Number(e.target.value))}
-                          className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
-                          min={500}
-                          max={10000}
-                          step={500}
-                        />
-                      </div>
-                      <div>
-                        <label className='text-white/60 text-xs'>Reward:</label>
-                        <input
-                          type='number'
-                          value={newChallengeReward}
-                          onChange={(e) => setNewChallengeReward(Number(e.target.value))}
-                          className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
-                          min={100}
-                          max={5000}
-                          step={100}
-                        />
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={handleCreateChallenge}
-                      className='w-full py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-xs rounded transition-all duration-200'
-                    >
-                      🎯 Create Challenge
-                    </button>
-                  </div>
-                )}
-
-                {!account && (
-                  <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30 text-center'>
-                    <span className='text-yellow-300 text-xs'>🔒 Connect wallet to create challenges</span>
-                  </div>
-                )}
-
-                <div className='text-white/60 text-xs mb-2'>Open Challenges:</div>
-                
-                <div className='space-y-2 max-h-96 overflow-y-auto'>
-                  {challenges.length === 0 && (
-                    <div className='text-white/40 text-xs text-center py-8'>
-                      No open challenges yet. Be the first to create one!
-                    </div>
-                  )}
-                  
-                  {challenges.map((challenge) => (
-                    <div
-                      key={challenge.id}
-                      className='bg-white/5 rounded-lg p-3 border border-white/10 hover:border-cyan-400/30 transition-all'
-                    >
-                      <div className='flex items-start justify-between mb-2'>
-                        <div className='flex-1'>
-                          <div className='text-white font-semibold text-xs'>{challenge.challengerName}</div>
-                          <div className='text-white/70 text-xs mt-1'>{challenge.description}</div>
-                        </div>
-                        <div className='text-green-400 font-bold text-sm ml-2'>+{challenge.pointsReward}</div>
-                      </div>
-                      
-                      <div className='flex items-center justify-between'>
-                        <div className='text-cyan-300 text-xs'>{challenge.requirement}</div>
-                        {account && account.id !== challenge.challengerId && (
-                          <button
-                            onClick={() => handleAcceptChallenge(challenge)}
-                            className='px-3 py-1 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold rounded transition-all'
-                          >
-                            Accept
-                          </button>
-                        )}
-                        {account && account.id === challenge.challengerId && (
-                          <div className='text-yellow-400 text-xs'>Your challenge</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* CHAT VIEW */}
             {currentView === 'chat' && (
               <div className='flex flex-col h-full'>
@@ -558,6 +441,242 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
                     </div>
                   ))}
                   <div ref={chatEndRef} />
+                </div>
+              </div>
+            )}
+
+            {/* SOCIAL SHARE VIEW */}
+            {currentView === 'social' && (
+              <div className='space-y-3'>
+                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
+                  <div className='text-white font-semibold text-sm mb-2'>Your Stats:</div>
+                  <div className='grid grid-cols-2 gap-2 text-xs'>
+                    <div>
+                      <div className='text-white/60'>Score</div>
+                      <div className='text-white font-bold text-lg'>{currentScore}</div>
+                    </div>
+                    <div>
+                      <div className='text-white/60'>Level</div>
+                      <div className='text-white font-bold text-lg'>{currentLevel}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='text-white/60 text-xs mb-2'>Share your progress:</div>
+                
+                <button
+                  onClick={shareToTwitter}
+                  className='w-full p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
+                >
+                  <span className='text-xl'>🐦</span>
+                  <span>Share on Twitter/X</span>
+                </button>
+                
+                <button
+                  onClick={shareToFacebook}
+                  className='w-full p-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
+                >
+                  <span className='text-xl'>📘</span>
+                  <span>Share on Facebook</span>
+                </button>
+                
+                <button
+                  onClick={copyShareLink}
+                  className='w-full p-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
+                >
+                  <span className='text-xl'>📋</span>
+                  <span>Copy Share Link</span>
+                </button>
+              </div>
+            )}
+
+            {/* MILESTONES VIEW */}
+            {currentView === 'milestones' && (
+              <div className='space-y-3'>
+                {/* Trustless Work Info */}
+                <div className='bg-gradient-to-br from-purple-600/10 to-pink-600/10 rounded-lg p-3 border border-purple-400/20'>
+                  <div className='text-white/90 text-xs leading-relaxed'>
+                    <span className='text-cyan-400 font-semibold'>💡 Trustless Milestones:</span> Lock points in escrow, set a score goal, and challenge others! When completed, points transfer automatically. ⚡
+                  </div>
+                </div>
+
+                {account && (
+                  <div className='bg-gradient-to-br from-cyan-600/20 to-purple-600/20 rounded-lg p-3 border border-cyan-400/30'>
+                    <div className='text-white font-semibold text-sm mb-2'>🎯 Create Milestone</div>
+                    
+                    {/* Milestone Description with @ Mention */}
+                    <div className='relative mb-2'>
+                      <input
+                        ref={challengeDescInputRef}
+                        type='text'
+                        value={newChallengeDesc}
+                        onChange={handleChallengeDescChange}
+                        placeholder='Milestone goal... (use @ to challenge someone)'
+                        className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
+                        maxLength={100}
+                      />
+                      
+                      {/* @ Mention Dropdown */}
+                      {showMentionDropdown && (
+                        <div className='absolute z-50 w-full mt-1 bg-slate-800 border border-cyan-400/30 rounded-lg shadow-xl max-h-48 overflow-y-auto'>
+                          {mentionResults.length > 0 ? (
+                            mentionResults.map((user) => (
+                              <button
+                                key={user.id}
+                                onClick={() => handleSelectMentionedUser(user)}
+                                className='w-full text-left px-3 py-2 hover:bg-cyan-500/20 border-b border-white/10 last:border-b-0 transition-colors'
+                              >
+                                <div className='flex items-center justify-between'>
+                                  <div>
+                                    <div className='text-white text-xs font-semibold'>
+                                      {user.displayName}
+                                    </div>
+                                    <div className='text-white/60 text-xs'>
+                                      @{user.username} • Lvl {user.level}
+                                    </div>
+                                  </div>
+                                  <div className='text-green-400 text-xs'>
+                                    {user.points} pts
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                          ) : (
+                            <div className='px-3 py-2 text-white/60 text-xs text-center'>
+                              {mentionSearch ? 'No users found' : 'Start typing to search...'}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Show Selected Target User */}
+                    {targetUserId && targetUsername && (
+                      <div className='mb-2 p-2 bg-cyan-500/20 border border-cyan-400/30 rounded flex items-center justify-between'>
+                        <div className='text-xs'>
+                          <span className='text-white/60'>Milestone for: </span>
+                          <span className='text-cyan-300 font-semibold'>@{targetUsername}</span>
+                        </div>
+                        <button
+                          onClick={handleClearTargetUser}
+                          className='text-red-400 hover:text-red-300 text-xs'
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                    
+                    <div className='grid grid-cols-2 gap-2 mb-2'>
+                      <div>
+                        <label className='text-white/60 text-xs'>🎯 Target Score:</label>
+                        <input
+                          type='number'
+                          value={newChallengeScore}
+                          onChange={(e) => setNewChallengeScore(Number(e.target.value))}
+                          className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
+                          min={500}
+                          max={10000}
+                          step={500}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-white/60 text-xs'>💰 Reward (Escrow):</label>
+                        <input
+                          type='number'
+                          value={newChallengeReward}
+                          onChange={(e) => setNewChallengeReward(Number(e.target.value))}
+                          className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
+                          min={100}
+                          max={5000}
+                          step={100}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Time Limit Selector */}
+                    <div className='mb-2'>
+                      <label className='text-white/60 text-xs mb-1 block'>⏰ Time Limit:</label>
+                      <select
+                        value={newChallengeTimeLimit}
+                        onChange={(e) => setNewChallengeTimeLimit(e.target.value as ChallengeTimeLimit)}
+                        className='w-full p-2 bg-black/30 text-white text-xs rounded border border-white/20'
+                      >
+                        <option value='today'>Today</option>
+                        <option value='this_week'>This Week</option>
+                        <option value='this_month'>This Month</option>
+                      </select>
+                    </div>
+                    
+                    <button
+                      onClick={handleCreateChallenge}
+                      className='w-full py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-xs rounded transition-all duration-200'
+                    >
+                      🎯 Create Milestone & Lock Points
+                    </button>
+                  </div>
+                )}
+
+                {!account && (
+                  <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30 text-center'>
+                    <span className='text-yellow-300 text-xs'>🔒 Connect wallet to create milestones</span>
+                  </div>
+                )}
+
+                <div className='text-white/60 text-xs mb-2'>📋 Active Milestones:</div>
+                
+                <div className='space-y-2 max-h-96 overflow-y-auto'>
+                  {challenges.length === 0 && (
+                    <div className='text-white/40 text-xs text-center py-8'>
+                      No active milestones yet. Create the first trustless work milestone!
+                    </div>
+                  )}
+                  
+                  {challenges.map((challenge) => (
+                    <div
+                      key={challenge.id}
+                      className='bg-gradient-to-br from-white/5 to-white/10 rounded-lg p-3 border border-white/10 hover:border-cyan-400/30 transition-all'
+                    >
+                      {/* Milestone Header */}
+                      <div className='flex items-start justify-between mb-2'>
+                        <div className='flex-1'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <div className='text-white font-semibold text-xs'>{challenge.challengerName}</div>
+                            {challenge.targetUsername && (
+                              <span className='text-cyan-400 text-xs'>→ @{challenge.targetUsername}</span>
+                            )}
+                          </div>
+                          <div className='text-white/70 text-xs'>{challenge.description}</div>
+                        </div>
+                        <div className='flex flex-col items-end gap-1'>
+                          <div className='text-green-400 font-bold text-sm'>💰 {challenge.pointsReward}</div>
+                          <div className='text-xs text-purple-400'>Escrowed</div>
+                        </div>
+                      </div>
+                      
+                      {/* Milestone Details */}
+                      <div className='flex items-center justify-between mb-2'>
+                        <div className='text-cyan-300 text-xs'>🎯 {challenge.requirement}</div>
+                        <div className='text-white/50 text-xs'>
+                          ⏰ {challenge.timeLimit === 'today' ? 'Today' : challenge.timeLimit === 'this_week' ? 'This Week' : 'This Month'}
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className='flex items-center justify-between'>
+                        {account && account.id !== challenge.challengerId && (
+                          <button
+                            onClick={() => handleAcceptChallenge(challenge)}
+                            className='px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white text-xs font-bold rounded-lg transition-all'
+                          >
+                            ✅ Accept & Commit
+                          </button>
+                        )}
+                        {account && account.id === challenge.challengerId && (
+                          <div className='text-yellow-400 text-xs font-semibold'>🔒 Your Milestone (Points Locked)</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

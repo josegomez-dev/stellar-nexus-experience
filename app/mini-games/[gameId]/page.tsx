@@ -10,6 +10,8 @@ import { Footer } from '@/components/layout/Footer';
 import { NexusPrime } from '@/components/layout/NexusPrime';
 import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
+import { LeaderboardSection } from '@/components/home/LeaderboardSection';
+import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import InfiniteRunner from '@/components/games/InfiniteRunner';
 import Image from 'next/image';
@@ -174,6 +176,7 @@ export default function GamePage() {
   const [showGameSelector, setShowGameSelector] = useState(false);
   const [selectedGame, setSelectedGame] = useState(gameId);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [leaderboardSidebarOpen, setLeaderboardSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!game) {
@@ -352,12 +355,19 @@ export default function GamePage() {
               <>
                 {/* Beta/Available Games - Show Actual Game */}
                 {(game.status === 'beta' || game.status === 'available') && (
-                  <div className='mt-10'>
-                    {/* Game Container */}
-                    <div className='relative' style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
-                      <InfiniteRunner gameId={gameId} gameTitle={game.title} embedded={true} />
+                  <>
+                    <div className='mt-10'>
+                      {/* Game Container */}
+                      <div className='relative' style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
+                        <InfiniteRunner gameId={gameId} gameTitle={game.title} embedded={true} />
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Leaderboard Section - Added for game detail page */}
+                    <div className='mt-16 mb-16'>
+                      <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
+                    </div>
+                  </>
                 )}
 
                 {/* Development Games - Show Info Screen (old behavior) */}
@@ -481,6 +491,12 @@ export default function GamePage() {
         currentPage='mini-games' 
         walletConnected={isConnected}
         autoOpen={false}
+      />
+
+      {/* Leaderboard Sidebar */}
+      <LeaderboardSidebar
+        isOpen={leaderboardSidebarOpen}
+        onClose={() => setLeaderboardSidebarOpen(false)}
       />
 
       {/* Hide footer for beta games (where game is shown) */}

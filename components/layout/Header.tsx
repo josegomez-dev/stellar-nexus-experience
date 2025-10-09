@@ -7,6 +7,7 @@ import { appConfig } from '@/lib/stellar/wallet-config';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { UserDropdown } from '@/components/ui/navigation/UserDropdown';
 import { RewardsSidebar } from '@/components/ui/RewardsSidebar';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 import Image from 'next/image';
 
 export const Header = () => {
@@ -168,8 +169,8 @@ export const Header = () => {
                         >
                           <span className='text-xl'>🎮</span>
                           {account.totalPoints > 0 && (
-                            <span className='absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
-                              {account.totalPoints}
+                            <span className='absolute -top-1 -right-1 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
+                              {account.experience}
                             </span>
                           )}
                         </button>
@@ -200,6 +201,9 @@ export const Header = () => {
             {/* <div className='hidden sm:flex items-center'>
               <NetworkIndicator className='scale-90' showSwitchButton={true} />
             </div> */}
+
+            {/* Notification Bell - Only show when wallet is connected */}
+            {isConnected && <NotificationBell />}
 
             {/* User Dropdown - Only show when wallet is connected */}
             {isConnected && <UserDropdown />}

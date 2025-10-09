@@ -7,13 +7,11 @@ import { NexusPrime } from '@/components/layout/NexusPrime';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
 import { useFirebase } from '@/contexts/data/FirebaseContext';
 import { useToast } from '@/contexts/ui/ToastContext';
-import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
 import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
 import { ToastContainer } from '@/components/ui/Toast';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
-import { AUDIO_VOLUMES } from '@/utils/constants/ui';
 
 export default function MiniGameStore() {
   const { isConnected } = useGlobalWallet();
@@ -25,10 +23,6 @@ export default function MiniGameStore() {
   const [showDonationModal, setShowDonationModal] = useState<string | null>(null);
   const [hoveredGame, setHoveredGame] = useState<string | null>(null);
   const [gamesPerPage, setGamesPerPage] = useState(4);
-  const [isLoading, setIsLoading] = useState(true);
-  const [preloaderComplete, setPreloaderComplete] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
@@ -90,48 +84,6 @@ export default function MiniGameStore() {
     { id: 'development', name: '🚧 In Development', count: 2 },
     { id: 'coming-soon', name: '⏳ Coming Soon', count: 1 },
   ];
-
-  // Check if this is user's first visit to mini games
-  useEffect(() => {
-    const hasVisitedMiniGames = localStorage.getItem('hasVisitedMiniGames');
-    if (hasVisitedMiniGames) {
-      // User has visited before, skip the preloader
-      setIsFirstVisit(false);
-      setIsLoading(false);
-      setPreloaderComplete(true);
-    } else {
-      // Mark that user has visited mini games
-      localStorage.setItem('hasVisitedMiniGames', 'true');
-    }
-  }, []);
-
-  // Loading effect - simulate loading (auto-start only on first visit)
-  useEffect(() => {
-    if (!isLoading || !isFirstVisit) return; // Skip if already loaded or not first visit
-
-    const loadingSteps = [
-      { progress: 20, message: 'Loading Game Engine...' },
-      { progress: 40, message: 'Initializing Web3 Games...' },
-      { progress: 60, message: 'Preparing Rewards System...' },
-      { progress: 80, message: 'Setting up Analytics...' },
-      { progress: 100, message: 'Games Ready to Play!' },
-    ];
-
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      if (currentStep < loadingSteps.length) {
-        setLoadingProgress(loadingSteps[currentStep].progress);
-        currentStep++;
-      } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
-      }
-    }, 800);
-
-    return () => clearInterval(interval);
-  }, [isLoading, isFirstVisit]);
 
   // Listen for wallet sidebar state changes
   useEffect(() => {
@@ -415,26 +367,6 @@ export default function MiniGameStore() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
-          {/* Unified Video Preloader Screen - Only shows on first visit */}
-          {!preloaderComplete && isFirstVisit && (
-            <VideoPreloaderScreen 
-              isLoading={isLoading}
-              videoPath="/videos/preloader.mp4"
-              audioPath="/sounds/games_welcome.mp3"
-              secondaryAudioPath="/sounds/nexus_voice.mp3"
-              title="NEXUS WEB3 LEARNING Experience"
-              subtitle="Build the future on Stellar"
-              showText={true}
-              showVideoAfterLoad={true}
-              minDuration={3000}
-              audioVolumes={{
-                primary: AUDIO_VOLUMES.intro,
-                secondary: AUDIO_VOLUMES.nexusVoice,
-              }}
-              onComplete={() => setPreloaderComplete(true)}
-            />
-          )}
-
           {/* Epic Background Effects */}
           <div className='absolute inset-0'>
             {/* Floating Particles */}
@@ -462,97 +394,12 @@ export default function MiniGameStore() {
             </div>
           </div>
 
-          {/* Header - Always visible */}
-          {!isLoading && (
-            <div className='animate-fadeIn'>
-              <Header />
-            </div>
-          )}
+          {/* Header */}
+          <div className='animate-fadeIn'>
+            <Header />
+          </div>
 
-          {/* Loading Screen - REMOVED (now using VideoPreloaderScreen) */}
-          {false && (
-            <div className='fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center'>
-              {/* Animated Background */}
-              <div className='absolute inset-0 overflow-hidden'>
-                {/* Floating Energy Orbs */}
-                <div className='absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-400/20 rounded-full animate-ping'></div>
-                <div
-                  className='absolute top-1/3 right-1/4 w-24 h-24 bg-purple-400/20 rounded-full animate-ping'
-                  style={{ animationDelay: '0.5s' }}
-                ></div>
-                <div
-                  className='absolute bottom-1/3 left-1/3 w-28 h-28 bg-pink-400/20 rounded-full animate-ping'
-                  style={{ animationDelay: '1s' }}
-                ></div>
-                <div
-                  className='absolute bottom-1/4 right-1/3 w-20 h-20 bg-blue-400/20 rounded-full animate-ping'
-                  style={{ animationDelay: '1.5s' }}
-                ></div>
-
-                {/* Energy Grid */}
-                <div className='absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(139,92,246,0.1)_0%,_transparent_70%)] animate-pulse'></div>
-              </div>
-
-              {/* Main Content */}
-              <div className='relative z-10 text-center'>
-                {/* Logo Animation */}
-                <div className='mb-8 animate-bounce'>
-                  <Image
-                    src='/images/logo/logoicon.png'
-                    alt='STELLAR NEXUS'
-                    width={120}
-                    height={120}
-                    className='w-30 h-30'
-                  />
-                </div>
-
-                {/* Loading Text */}
-                <div className='mb-8'>
-                  <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4'>
-                    Loading Gaming Store
-                  </h2>
-                  <p className='text-white/70 text-lg animate-pulse'>
-                    Preparing epic web3 gaming experience...
-                  </p>
-                </div>
-
-                {/* Loading Bar */}
-                <div className='w-80 bg-white/10 rounded-full h-3 overflow-hidden mb-6'>
-                  <div
-                    className='bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 h-3 rounded-full transition-all duration-500'
-                    style={{ width: `${loadingProgress}%` }}
-                  ></div>
-                </div>
-
-                {/* Loading Steps */}
-                <div className='space-y-2'>
-                  <p className='animate-fadeInUp' style={{ animationDelay: '1s' }}>
-                    Loading Game Engine...
-                  </p>
-                  <p className='animate-fadeInUp' style={{ animationDelay: '2s' }}>
-                    Initializing Web3 Games...
-                  </p>
-                  <p className='animate-fadeInUp' style={{ animationDelay: '3s' }}>
-                    Preparing Rewards System...
-                  </p>
-                  <p className='animate-fadeInUp' style={{ animationDelay: '4s' }}>
-                    Setting up Analytics...
-                  </p>
-                  <p className='animate-fadeInUp' style={{ animationDelay: '5s' }}>
-                    Games Ready to Play!
-                  </p>
-                </div>
-
-                {/* Progress Percentage */}
-                <div className='mt-6 text-white/60'>
-                  <span className='font-bold'>{loadingProgress}%</span> Complete
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Main Content - Show when preloader is complete */}
-          {preloaderComplete && (
+          {/* Main Content */}
           <main 
             className={`relative z-10 pt-20 animate-fadeIn ${
               walletSidebarOpen && walletExpanded ? 'mr-96' : walletSidebarOpen ? 'mr-20' : 'mr-0'
@@ -1097,9 +944,8 @@ export default function MiniGameStore() {
               </div>
             </div>
           </main>
-          )}
 
-          {/* Wallet Sidebar - Consistent with home page */}
+          {/* Wallet Sidebar */}
           <WalletSidebar
             isOpen={walletSidebarOpen}
             onToggle={() => {
@@ -1110,33 +956,31 @@ export default function MiniGameStore() {
                 setWalletExpanded(true);
               }
             }}
-            showBanner={preloaderComplete}
-            hideFloatingButton={!preloaderComplete}
+            showBanner={true}
+            hideFloatingButton={false}
           />
 
-          {/* NEXUS PRIME Character - Show during loading only on first visit */}
+          {/* NEXUS PRIME Character */}
           <NexusPrime 
             currentPage='mini-games' 
             walletConnected={isConnected}
             autoOpen={false}
-            showDuringLoading={!preloaderComplete && isFirstVisit}
+            showDuringLoading={false}
           />
 
-          {/* Footer - Only show when preloader is complete */}
-          {preloaderComplete && (
-            <div className='animate-fadeIn'>
-              <Footer />
-            </div>
-          )}
+          {/* Footer */}
+          <div className='animate-fadeIn'>
+            <Footer />
+          </div>
 
           {/* User Profile Modal */}
           <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
           {/* Account Status Indicator */}
-          {preloaderComplete && <AccountStatusIndicator />}
+          <AccountStatusIndicator />
 
           {/* Toast Container */}
-          {preloaderComplete && <ToastContainer />}
+          <ToastContainer />
 
           {/* Enhanced Donation Modal with Game Info */}
           {showDonationModal && (

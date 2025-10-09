@@ -101,6 +101,10 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [lastLevelUpScore, setLastLevelUpScore] = useState(0);
   const [invulnerableUntil, setInvulnerableUntil] = useState(0); // Timestamp for invulnerability
+  
+  // Confirmation modal state
+  const [showStartConfirmation, setShowStartConfirmation] = useState(false);
+  const [showReplayConfirmation, setShowReplayConfirmation] = useState(false);
   const [powerUpSpawnedThisLevel, setPowerUpSpawnedThisLevel] = useState(false);
   const [activeChallenges, setActiveChallenges] = useState<any[]>([]);
   const [completedChallengeIds, setCompletedChallengeIds] = useState<Set<string>>(new Set());
@@ -183,6 +187,281 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       ],
       correctAnswer: 1,
       explanation: "Gas fees are the transaction costs paid to validators/miners for processing blockchain transactions."
+    },
+    {
+      question: "What is an NFT?",
+      options: [
+        "Non-Fungible Token",
+        "New Finance Technology",
+        "Network File Transfer",
+        "Node Function Test"
+      ],
+      correctAnswer: 0,
+      explanation: "NFT stands for Non-Fungible Token, a unique digital asset stored on a blockchain."
+    },
+    {
+      question: "What consensus mechanism does Bitcoin use?",
+      options: [
+        "Proof of Stake",
+        "Delegated Proof of Stake",
+        "Proof of Work",
+        "Proof of Authority"
+      ],
+      correctAnswer: 2,
+      explanation: "Bitcoin uses Proof of Work (PoW), where miners solve complex mathematical puzzles to validate transactions."
+    },
+    {
+      question: "What is a DAO?",
+      options: [
+        "Digital Asset Operation",
+        "Decentralized Autonomous Organization",
+        "Data Access Object",
+        "Distributed Application Order"
+      ],
+      correctAnswer: 1,
+      explanation: "A DAO is a Decentralized Autonomous Organization, governed by smart contracts and community voting."
+    },
+    {
+      question: "What does 'HODL' mean in crypto?",
+      options: [
+        "Hold On for Dear Life",
+        "High Order Digital Ledger",
+        "Heavily Optimized Data Link",
+        "Hybrid Online Decentralized Loan"
+      ],
+      correctAnswer: 0,
+      explanation: "HODL means 'Hold On for Dear Life', a term for holding crypto long-term despite volatility."
+    },
+    {
+      question: "What is Layer 2 in blockchain?",
+      options: [
+        "Second generation blockchain",
+        "Scaling solution built on top of Layer 1",
+        "Mining difficulty level",
+        "Security protocol"
+      ],
+      correctAnswer: 1,
+      explanation: "Layer 2 refers to scaling solutions built on top of the main blockchain (Layer 1) to increase speed and reduce costs."
+    },
+    {
+      question: "What is staking in crypto?",
+      options: [
+        "Trading on margin",
+        "Mining with special hardware",
+        "Locking tokens to secure network and earn rewards",
+        "Selling tokens at high prices"
+      ],
+      correctAnswer: 2,
+      explanation: "Staking involves locking up cryptocurrency to help secure a blockchain network and earn rewards in return."
+    },
+    {
+      question: "What is a dApp?",
+      options: [
+        "Digital Application Protocol",
+        "Decentralized Application",
+        "Data Access Point",
+        "Distributed API"
+      ],
+      correctAnswer: 1,
+      explanation: "A dApp is a Decentralized Application that runs on a blockchain network instead of centralized servers."
+    },
+    {
+      question: "What does 'Web3' refer to?",
+      options: [
+        "The third version of the internet",
+        "Decentralized internet based on blockchain",
+        "A web development framework",
+        "World Wide Web version 3"
+      ],
+      correctAnswer: 1,
+      explanation: "Web3 refers to the vision of a decentralized internet built on blockchain technology with user ownership."
+    },
+    {
+      question: "What is tokenomics?",
+      options: [
+        "Token creation process",
+        "Economic model of a cryptocurrency",
+        "Token exchange rates",
+        "Mining economics"
+      ],
+      correctAnswer: 1,
+      explanation: "Tokenomics refers to the economic model and incentive structure of a cryptocurrency or token."
+    },
+    {
+      question: "What is a liquidity pool?",
+      options: [
+        "A pool of miners",
+        "Collection of locked tokens for trading",
+        "Water supply for cooling",
+        "Investment fund"
+      ],
+      correctAnswer: 1,
+      explanation: "A liquidity pool is a collection of tokens locked in a smart contract to facilitate decentralized trading."
+    },
+    {
+      question: "What does 'APY' stand for in DeFi?",
+      options: [
+        "Annual Percentage Yield",
+        "Automated Payment Yield",
+        "Average Price Year",
+        "Asset Performance Yearly"
+      ],
+      correctAnswer: 0,
+      explanation: "APY stands for Annual Percentage Yield, showing the yearly return on staked or deposited crypto."
+    },
+    {
+      question: "What is a private key?",
+      options: [
+        "Password for exchange accounts",
+        "Secret code to access your crypto",
+        "Mining difficulty setting",
+        "Network encryption key"
+      ],
+      correctAnswer: 1,
+      explanation: "A private key is a secret cryptographic code that proves ownership and allows you to access your cryptocurrency."
+    },
+    {
+      question: "What is an oracle in blockchain?",
+      options: [
+        "A prediction market",
+        "A data feed connecting blockchain to real-world data",
+        "A type of smart contract",
+        "A consensus mechanism"
+      ],
+      correctAnswer: 1,
+      explanation: "An oracle is a service that provides external real-world data to smart contracts on the blockchain."
+    },
+    {
+      question: "What does 'burning' tokens mean?",
+      options: [
+        "Selling tokens quickly",
+        "Permanently removing tokens from circulation",
+        "Converting to another token",
+        "Staking for long periods"
+      ],
+      correctAnswer: 1,
+      explanation: "Burning tokens means permanently removing them from circulation by sending them to an inaccessible address."
+    },
+    {
+      question: "What is a flash loan?",
+      options: [
+        "Quick approval loan",
+        "Uncollateralized loan that must be repaid in same transaction",
+        "Instant crypto purchase",
+        "Emergency funding mechanism"
+      ],
+      correctAnswer: 1,
+      explanation: "A flash loan is an uncollateralized DeFi loan that must be borrowed and repaid within a single transaction block."
+    },
+    {
+      question: "What is the Stellar Consensus Protocol (SCP)?",
+      options: [
+        "Proof of Work system",
+        "Federated Byzantine Agreement mechanism",
+        "Proof of Stake variant",
+        "Mining algorithm"
+      ],
+      correctAnswer: 1,
+      explanation: "SCP is a Federated Byzantine Agreement consensus mechanism that enables fast, secure transactions on Stellar."
+    },
+    {
+      question: "What are lumens (XLM) on Stellar?",
+      options: [
+        "Smart contract language",
+        "Native cryptocurrency of Stellar network",
+        "Mining rewards",
+        "Transaction validators"
+      ],
+      correctAnswer: 1,
+      explanation: "Lumens (XLM) are the native cryptocurrency of the Stellar network, used for transactions and anti-spam measures."
+    },
+    {
+      question: "What is a seed phrase?",
+      options: [
+        "Password hint",
+        "12-24 word backup for wallet recovery",
+        "Transaction ID",
+        "Smart contract code"
+      ],
+      correctAnswer: 1,
+      explanation: "A seed phrase is a sequence of 12-24 words that can restore your wallet and access to your crypto assets."
+    },
+    {
+      question: "What is impermanent loss?",
+      options: [
+        "Temporary network downtime",
+        "Loss from providing liquidity due to price changes",
+        "Failed transaction fees",
+        "Exchange rate fluctuation"
+      ],
+      correctAnswer: 1,
+      explanation: "Impermanent loss occurs when providing liquidity to a pool and the token prices change compared to holding them."
+    },
+    {
+      question: "What is a testnet?",
+      options: [
+        "Security audit system",
+        "Network for testing without real money",
+        "Mining difficulty test",
+        "Speed testing tool"
+      ],
+      correctAnswer: 1,
+      explanation: "A testnet is a separate blockchain network used for testing and development without using real cryptocurrency."
+    },
+    {
+      question: "What does 'DYOR' mean?",
+      options: [
+        "Distribute Your Own Rewards",
+        "Do Your Own Research",
+        "Deploy Your Own Resource",
+        "Develop Your Own Rules"
+      ],
+      correctAnswer: 1,
+      explanation: "DYOR means 'Do Your Own Research', reminding people to research before investing in crypto projects."
+    },
+    {
+      question: "What is a whale in crypto?",
+      options: [
+        "Large mining operation",
+        "Individual/entity holding large amounts of crypto",
+        "Market manipulation bot",
+        "Exchange platform"
+      ],
+      correctAnswer: 1,
+      explanation: "A whale is an individual or entity that holds a very large amount of cryptocurrency, able to influence market prices."
+    },
+    {
+      question: "What is yield farming?",
+      options: [
+        "Mining cryptocurrency",
+        "Earning rewards by providing liquidity",
+        "Creating new tokens",
+        "Trading strategies"
+      ],
+      correctAnswer: 1,
+      explanation: "Yield farming involves providing liquidity to DeFi protocols to earn interest, fees, or token rewards."
+    },
+    {
+      question: "What is cross-chain?",
+      options: [
+        "Multiple wallets",
+        "Interoperability between different blockchains",
+        "Chain of transactions",
+        "Mining pools"
+      ],
+      correctAnswer: 1,
+      explanation: "Cross-chain refers to the ability to transfer assets and data between different blockchain networks."
+    },
+    {
+      question: "What is a validator?",
+      options: [
+        "Code auditor",
+        "Node that validates transactions in PoS networks",
+        "Wallet security check",
+        "Smart contract tester"
+      ],
+      correctAnswer: 1,
+      explanation: "A validator is a node in a Proof of Stake network that validates transactions and creates new blocks."
     }
   ];
 
@@ -517,9 +796,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       }
 
       if (gameState !== 'playing') {
-        if (e.code === 'Space' && gameState === 'ready') {
-          startGame(false);
-        }
+        // Removed space key to start game to avoid conflicts with sidebar
         return;
       }
 
@@ -1542,7 +1819,12 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               
               {/* Start Button */}
               <button
-                onClick={() => startGame(false)}
+                onClick={() => {
+                  if (!account || (account.totalPoints || account.profile?.totalPoints || 0) < 250) {
+                    return;
+                  }
+                  setShowStartConfirmation(true);
+                }}
                 disabled={!account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 250)}
                 className={`w-full px-10 py-5 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white font-bold text-2xl rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-cyan-500/50 ${
                   !account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 250) 
@@ -1790,7 +2072,12 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               {/* Buttons - Compact */}
               <div className='space-y-2'>
                 <button
-                  onClick={() => startGame(true)}
+                  onClick={() => {
+                    if (!account || (account.totalPoints || account.profile?.totalPoints || 0) < 100) {
+                      return;
+                    }
+                    setShowReplayConfirmation(true);
+                  }}
                   disabled={!account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 100)}
                   className={`w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold text-lg rounded-xl transition-all duration-200 transform hover:scale-105 ${
                     !account || (account && (account.totalPoints || account.profile?.totalPoints || 0) < 100)
@@ -1849,6 +2136,102 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           
         </div>
       </div>
+
+      {/* Start Game Confirmation Modal */}
+      {showStartConfirmation && (
+        <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+          <div className='bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 rounded-3xl border-2 border-cyan-400/50 p-8 max-w-md w-full mx-4 shadow-2xl'>
+            <div className='text-center'>
+              {/* Icon */}
+              <div className='text-6xl mb-4'>🎮</div>
+              
+              {/* Title */}
+              <h2 className='text-3xl font-bold text-white mb-4'>Start Game?</h2>
+              
+              {/* Points Cost Info */}
+              <div className='bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-2xl p-4 mb-6 border border-yellow-400/30'>
+                <div className='text-yellow-300 text-sm mb-2'>💰 Entry Cost</div>
+                <div className='text-white text-3xl font-bold mb-1'>250 Points</div>
+                <div className='text-white/70 text-xs'>
+                  Your current balance: {account?.totalPoints || account?.profile?.totalPoints || 0} points
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className='text-white/80 text-sm mb-6 leading-relaxed'>
+                Starting this game will deduct 250 points from your account. You'll earn XP and rewards based on your performance!
+              </p>
+
+              {/* Buttons */}
+              <div className='grid grid-cols-2 gap-3'>
+                <button
+                  onClick={() => setShowStartConfirmation(false)}
+                  className='px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition-all duration-200'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowStartConfirmation(false);
+                    startGame(false);
+                  }}
+                  className='px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-105'
+                >
+                  ✅ Confirm & Play
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Replay Game Confirmation Modal */}
+      {showReplayConfirmation && (
+        <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+          <div className='bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 rounded-3xl border-2 border-cyan-400/50 p-8 max-w-md w-full mx-4 shadow-2xl'>
+            <div className='text-center'>
+              {/* Icon */}
+              <div className='text-6xl mb-4'>🔄</div>
+              
+              {/* Title */}
+              <h2 className='text-3xl font-bold text-white mb-4'>Play Again?</h2>
+              
+              {/* Points Cost Info */}
+              <div className='bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-4 mb-6 border border-green-400/30'>
+                <div className='text-green-300 text-sm mb-2'>💰 Replay Cost</div>
+                <div className='text-white text-3xl font-bold mb-1'>100 Points</div>
+                <div className='text-white/70 text-xs'>
+                  Your current balance: {account?.totalPoints || account?.profile?.totalPoints || 0} points
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className='text-white/80 text-sm mb-6 leading-relaxed'>
+                Playing again will deduct 100 points from your account. Try to beat your high score of {highScore} points!
+              </p>
+
+              {/* Buttons */}
+              <div className='grid grid-cols-2 gap-3'>
+                <button
+                  onClick={() => setShowReplayConfirmation(false)}
+                  className='px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/20 transition-all duration-200'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowReplayConfirmation(false);
+                    startGame(true);
+                  }}
+                  className='px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-105'
+                >
+                  ✅ Confirm & Replay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Interactive Sidebar */}
       {isMounted && (

@@ -29,6 +29,8 @@ export interface GameMessage {
   createdAt: Timestamp;
 }
 
+export type ChallengeTimeLimit = 'today' | 'this_week' | 'this_month';
+
 export interface Challenge {
   id: string;
   gameId: string;
@@ -40,12 +42,16 @@ export interface Challenge {
   requirement: string; // e.g., "Reach 3000 points"
   requiredScore?: number;
   pointsReward: number;
+  pointsStaked: number; // Points locked from challenger
   status: 'open' | 'accepted' | 'completed' | 'expired';
+  timeLimit: ChallengeTimeLimit;
   acceptedBy?: string;
   acceptedByName?: string;
   completedBy?: string;
+  winnerId?: string; // User who won the challenge
+  loserId?: string; // User who lost the challenge
   createdAt: Timestamp;
-  expiresAt?: Timestamp;
+  expiresAt: Timestamp;
   completedAt?: Timestamp;
 }
 
@@ -66,6 +72,89 @@ const DIRECT_MESSAGES_COLLECTION = 'directMessages';
 const MAX_MESSAGES_PER_GAME = 50;
 
 class GameSocialService {
+  // ============ UTILITY METHODS ============
+
+  /**
+   * Calculate expiration date based on time limit
+   */
+  private getExpirationDate(timeLimit: ChallengeTimeLimit): Timestamp {
+    const now = new Date();
+    let expiresAt: Date;
+
+    switch (timeLimit) {
+      case 'today':
+        expiresAt = new Date(now);
+        expiresAt.setHours(23, 59, 59, 999); // End of today
+        break;
+      case 'this_week':
+        expiresAt = new Date(now);
+        const daysUntilSunday = 7 - now.getDay(); // Days until end of week (Sunday)
+        expiresAt.setDate(now.getDate() + daysUntilSunday);
+        expiresAt.setHours(23, 59, 59, 999);
+        break;
+      case 'this_month':
+        expiresAt = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
+        expiresAt.setHours(23, 59, 59, 999);
+        break;
+      default:
+        expiresAt = new Date(now);
+        expiresAt.setHours(23, 59, 59, 999);
+    }
+
+    return Timestamp.fromDate(expiresAt);
+  }
+
+  /**
+   * Search users by username (for @ mentions)
+   */
+  async searchUsers(searchQuery: string, maxResults: number = 10): Promise<Array<{
+    id: string;
+    username: string;
+    displayName: string;
+    walletAddress: string;
+    level: number;
+    points: number;
+  }>> {
+    try {
+      const normalizedQuery = searchQuery.toLowerCase().trim();
+      
+      // Query users where username starts with the search query
+      const usersQuery = query(
+        collection(db, 'accounts'),
+        orderBy('profile.username'),
+        limit(maxResults * 2) // Get more to filter client-side
+      );
+
+      const snapshot = await getDocs(usersQuery);
+      const users = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          const username = data.profile?.username || '';
+          const displayName = data.profile?.displayName || username || 'Anonymous';
+          
+          return {
+            id: doc.id,
+            username,
+            displayName,
+            walletAddress: data.walletAddress || '',
+            level: data.profile?.level || 1,
+            points: data.totalPoints || 0,
+          };
+        })
+        .filter(user => 
+          user.username.toLowerCase().includes(normalizedQuery) ||
+          user.displayName.toLowerCase().includes(normalizedQuery) ||
+          user.walletAddress.toLowerCase().includes(normalizedQuery)
+        )
+        .slice(0, maxResults);
+
+      return users;
+    } catch (error) {
+      console.error('Error searching users:', error);
+      return [];
+    }
+  }
+
   // ============ GAME CHAT ============
   
   async sendGameMessage(gameId: string, userId: string, username: string, message: string, type: GameMessage['type'] = 'chat') {
@@ -163,11 +252,14 @@ class GameSocialService {
     description: string,
     requirement: string,
     pointsReward: number,
+    timeLimit: ChallengeTimeLimit,
     targetUserId?: string,
     targetUsername?: string,
     requiredScore?: number
   ) {
     try {
+      const expiresAt = this.getExpirationDate(timeLimit);
+
       const challengeData = {
         gameId,
         challengerId,
@@ -178,9 +270,11 @@ class GameSocialService {
         requirement,
         requiredScore,
         pointsReward,
+        pointsStaked: pointsReward, // Points are staked and locked
         status: 'open' as const,
+        timeLimit,
         createdAt: serverTimestamp(),
-        expiresAt: null, // Can add expiration later
+        expiresAt,
       };
 
       const docRef = await addDoc(collection(db, CHALLENGES_COLLECTION), challengeData);
