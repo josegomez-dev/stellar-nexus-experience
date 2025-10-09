@@ -11,6 +11,7 @@ import { NexusPrime } from '@/components/layout/NexusPrime';
 import XboxStyleConsole from '@/components/ui/XboxStyleConsole';
 import RetroArcadeSidebar from '@/components/ui/RetroArcadeSidebar';
 import { useGlobalWallet } from '@/contexts/wallet/WalletContext';
+import InfiniteRunner from '@/components/games/InfiniteRunner';
 import Image from 'next/image';
 
 // Game data with detailed information - synced with MiniGameStore
@@ -349,155 +350,19 @@ export default function GamePage() {
             {/* Game Ready Screen */}
             {loadingState === 'ready' && (
               <>
-                {/* Beta Games - Start Screen */}
-                {game.status === 'beta' && (
-                  <div className='space-y-8 mt-10'>
-                    {/* Epic Game Start Screen */}
-                    <div className='relative'>
-                      {/* Animated Background Effect */}
-                      <div className='absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-3xl animate-pulse'></div>
-                      
-                      {/* Main Game Screen Container */}
-                      <div className='relative bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-xl border-4 border-cyan-400/30 rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden'>
-                        {/* Animated Corner Accents */}
-                        <div className='absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyan-400/20 to-transparent rounded-br-full'></div>
-                        <div className='absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-purple-400/20 to-transparent rounded-tl-full'></div>
-                        
-                        {/* Game Title Section */}
-                        <div className='relative text-center mb-12'>
-                          <div className='flex justify-center mb-6'>
-                            <div className='text-9xl animate-bounce drop-shadow-2xl'>
-                              {game.icon}
-                            </div>
-                          </div>
-                          
-                          <h1 className='text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4 animate-pulse tracking-tight'>
-                            {game.title}
-                          </h1>
-                          
-                          <div className='inline-block px-6 py-2 bg-blue-500/30 border-2 border-blue-400 rounded-full mb-6'>
-                            <span className='text-blue-300 font-bold text-lg uppercase tracking-wider'>
-                              🎮 Beta Access Available
-                            </span>
-                          </div>
-                          
-                          <p className='text-2xl text-white/90 font-semibold max-w-2xl mx-auto leading-relaxed'>
-                            {game.subtitle}
-                          </p>
-                        </div>
-
-                        {/* Stats Grid */}
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-12'>
-                          {/* XP Reward */}
-                          <div className='bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300'>
-                            <div className='text-5xl mb-3'>⭐</div>
-                            <div className='text-yellow-300 text-sm font-semibold uppercase tracking-wider mb-2'>
-                              Earn XP
-                            </div>
-                            <div className='text-white text-3xl font-black'>
-                              {game.rewards.split('+')[0].trim()}
-                            </div>
-                          </div>
-
-                          {/* NFT Badge */}
-                          <div className='bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400/50 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300'>
-                            <div className='text-5xl mb-3'>🏆</div>
-                            <div className='text-purple-300 text-sm font-semibold uppercase tracking-wider mb-2'>
-                              Unlock Badge
-                            </div>
-                            <div className='text-white text-xl font-black'>
-                              {game.rewards.includes('+') ? game.rewards.split('+')[1].trim() : 'Exclusive NFT'}
-                            </div>
-                          </div>
-
-                          {/* Difficulty */}
-                          <div className='bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-400/50 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300'>
-                            <div className='text-5xl mb-3'>🎯</div>
-                            <div className='text-cyan-300 text-sm font-semibold uppercase tracking-wider mb-2'>
-                              Difficulty
-                            </div>
-                            <div className='text-white text-2xl font-black'>
-                              {game.difficulty}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Additional Info Row */}
-                        <div className='flex flex-wrap justify-center gap-4 mb-12'>
-                          <div className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20'>
-                            <span className='text-2xl'>⏱️</span>
-                            <span className='text-white font-semibold'>{game.estimatedTime}</span>
-                          </div>
-                          <div className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20'>
-                            <span className='text-2xl'>👥</span>
-                            <span className='text-white font-semibold'>{game.currentPlayers.toLocaleString()} Players</span>
-                          </div>
-                          <div className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20'>
-                            <span className='text-2xl'>⭐</span>
-                            <span className='text-white font-semibold'>{game.rating}/5.0</span>
-                          </div>
-                        </div>
-
-                        {/* Start Button */}
-                        <div className='text-center'>
-                          <button
-                            disabled={!isConnected}
-                            className={`group relative px-16 py-6 text-3xl font-black uppercase tracking-wider rounded-2xl transform transition-all duration-300 ${
-                              isConnected
-                                ? 'bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white shadow-2xl hover:scale-110 hover:shadow-cyan-500/50 animate-pulse'
-                                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            <span className='relative z-10 flex items-center justify-center gap-3'>
-                              {isConnected ? (
-                                <>
-                                  <span>🎮</span>
-                                  <span>Start Game</span>
-                                  <span>🚀</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>🔒</span>
-                                  <span>Connect Wallet to Play</span>
-                                </>
-                              )}
-                            </span>
-                            {isConnected && (
-                              <div className='absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity'></div>
-                            )}
-                          </button>
-                          
-                          {!isConnected && (
-                            <p className='text-white/70 text-sm mt-4'>
-                              Connect your wallet to start playing and earning rewards
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Feature Pills */}
-                        <div className='mt-12 pt-8 border-t border-white/20'>
-                          <h4 className='text-center text-white/80 font-semibold mb-4 text-lg'>
-                            What You'll Master:
-                          </h4>
-                          <div className='flex flex-wrap justify-center gap-3'>
-                            {game.features.map((feature, index) => (
-                              <span
-                                key={index}
-                                className='px-4 py-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 text-purple-200 text-sm font-semibold rounded-full'
-                              >
-                                ✨ {feature}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                {/* Beta/Available Games - Show Actual Game */}
+                {(game.status === 'beta' || game.status === 'available') && (
+                  <div className='mt-10'>
+                    {/* Game Container */}
+                    <div className='relative' style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
+                      <InfiniteRunner gameId={gameId} gameTitle={game.title} embedded={true} />
                     </div>
                   </div>
                 )}
 
-                {/* Development Games - Info Screen (Keep Current Design) */}
+                {/* Development Games - Show Info Screen (old behavior) */}
                 {game.status === 'development' && (
-                  <div className='space-y-12 mt-10'>
+                  <div className='space-y-8 mt-10 mb-20'>
                     {/* Game Header */}
                     <div className='text-center'>
                       <h1 className='text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 mb-4'>
@@ -618,7 +483,8 @@ export default function GamePage() {
         autoOpen={false}
       />
 
-      <Footer />
+      {/* Hide footer for beta games (where game is shown) */}
+      {game.status !== 'beta' && game.status !== 'available' && <Footer />}
     </div>
   );
 }
