@@ -258,8 +258,20 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
     window.open(url, '_blank');
   };
 
-  const shareToFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+  const shareToDiscord = () => {
+    const discordMessage = `🎮 **Gaming on Stellar Nexus!**\n\n**Game:** ${gameTitle}\n**Score:** ${currentScore}\n**Level:** ${currentLevel}\n\nJoin me and share your progress in 🎴|nexus-cards!\n${window.location.href}`;
+    
+    navigator.clipboard.writeText(discordMessage);
+    addToast({
+      type: 'success',
+      title: '📋 Discord Message Copied!',
+      message: 'Paste it in the 🎴|nexus-cards channel!',
+      duration: 3000,
+    });
+  };
+
+  const shareToLinkedIn = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
     window.open(url, '_blank');
   };
 
@@ -447,46 +459,81 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
 
             {/* SOCIAL SHARE VIEW */}
             {currentView === 'social' && (
-              <div className='space-y-3'>
-                <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
-                  <div className='text-white font-semibold text-sm mb-2'>Your Stats:</div>
-                  <div className='grid grid-cols-2 gap-2 text-xs'>
-                    <div>
-                      <div className='text-white/60'>Score</div>
-                      <div className='text-white font-bold text-lg'>{currentScore}</div>
+              <div className='space-y-4'>
+                {/* Epic Stats Card */}
+                <div className='bg-gradient-to-br from-pink-600/20 to-purple-600/20 rounded-xl p-4 border-2 border-pink-500/40 shadow-lg'>
+                  <div className='text-center mb-3'>
+                    <div className='text-yellow-400 font-bold text-lg mb-1'>🏆 Epic Achievement!</div>
+                    <div className='text-white/80 text-xs'>Show off your gaming skills</div>
+                  </div>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='bg-black/30 rounded-lg p-3 border border-white/20'>
+                      <div className='text-cyan-400 text-xs mb-1'>Score</div>
+                      <div className='text-white font-bold text-2xl'>{currentScore.toLocaleString()}</div>
                     </div>
-                    <div>
-                      <div className='text-white/60'>Level</div>
-                      <div className='text-white font-bold text-lg'>{currentLevel}</div>
+                    <div className='bg-black/30 rounded-lg p-3 border border-white/20'>
+                      <div className='text-purple-400 text-xs mb-1'>Level</div>
+                      <div className='text-white font-bold text-2xl'>{currentLevel}</div>
                     </div>
                   </div>
                 </div>
 
-                <div className='text-white/60 text-xs mb-2'>Share your progress:</div>
+                {/* Call to Action */}
+                <div className='bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg p-3 border border-yellow-500/30'>
+                  <div className='text-yellow-300 text-xs text-center font-semibold'>
+                    ✨ Share your progress and inspire others to join the Stellar Nexus! ✨
+                  </div>
+                </div>
+
+                <div className='text-white font-semibold text-sm mb-1'>Choose your platform:</div>
                 
-                <button
-                  onClick={shareToTwitter}
-                  className='w-full p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>🐦</span>
-                  <span>Share on Twitter/X</span>
-                </button>
-                
-                <button
-                  onClick={shareToFacebook}
-                  className='w-full p-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>📘</span>
-                  <span>Share on Facebook</span>
-                </button>
-                
-                <button
-                  onClick={copyShareLink}
-                  className='w-full p-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
-                >
-                  <span className='text-xl'>📋</span>
-                  <span>Copy Share Link</span>
-                </button>
+                {/* Social Buttons Grid */}
+                <div className='space-y-2'>
+                  <button
+                    onClick={shareToTwitter}
+                    className='w-full p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/50 transform hover:scale-105'
+                  >
+                    <span className='text-xl'>🐦</span>
+                    <span>Share on Twitter/X</span>
+                  </button>
+                  
+                  <button
+                    onClick={shareToLinkedIn}
+                    className='w-full p-3 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-700/50 transform hover:scale-105'
+                  >
+                    <span className='text-xl'>💼</span>
+                    <span>Share on LinkedIn</span>
+                  </button>
+                  
+                  <button
+                    onClick={shareToDiscord}
+                    className='w-full p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-purple-500/50 transform hover:scale-105'
+                  >
+                    <span className='text-xl'>💬</span>
+                    <span>Copy for Discord 🎴|nexus-cards</span>
+                  </button>
+                  
+                  <button
+                    onClick={copyShareLink}
+                    className='w-full p-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-pink-500/50 transform hover:scale-105'
+                  >
+                    <span className='text-xl'>📋</span>
+                    <span>Copy Share Link</span>
+                  </button>
+                </div>
+
+                {/* Pro Tip */}
+                <div className='bg-gradient-to-br from-cyan-600/10 to-blue-600/10 rounded-lg p-3 border border-cyan-500/20 mt-4'>
+                  <div className='flex items-start gap-2'>
+                    <span className='text-cyan-400 text-lg'>💡</span>
+                    <div className='flex-1'>
+                      <div className='text-cyan-300 text-xs font-semibold mb-1'>Pro Tip:</div>
+                      <div className='text-white/70 text-xs'>
+                        Share your achievements regularly to build your reputation in the community and attract challengers for bigger milestone rewards!
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

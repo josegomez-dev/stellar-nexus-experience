@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Account } from '@/lib/firebase/firebase-types';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { BadgeEmblem } from '@/components/ui/badges/BadgeEmblem';
 import { UserAvatar } from '@/components/ui/navigation/UserAvatar';
+import { leaderboardService } from '@/lib/services/leaderboard-service';
 
 interface PokemonReferralCardProps {
   account: Account | null;
@@ -19,11 +20,28 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   const [isSharing, setIsSharing] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState(0); // 0: explorer, 1: mid-level, 2: expert
   const [selectedLayout, setSelectedLayout] = useState(0); // 0: classic, 1: modern, 2: minimal
+  const [userRanking, setUserRanking] = useState<number | undefined>(undefined);
   const cardRef = useRef<HTMLDivElement>(null);
 
   if (!account) {
     return null;
   }
+
+  // Fetch actual user ranking from leaderboard
+  useEffect(() => {
+    const fetchRanking = async () => {
+      if (account.walletAddress) {
+        try {
+          const rank = await leaderboardService.getUserRank(account.walletAddress);
+          setUserRanking(rank);
+        } catch (error) {
+          console.error('Error fetching user ranking:', error);
+        }
+      }
+    };
+    
+    fetchRanking();
+  }, [account.walletAddress]);
 
   // Generate referral code from account data
   const referralCode = account.walletAddress
@@ -34,14 +52,14 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
   // Get user level and ranking
   const userLevel = Math.floor((account.experience || 0) / 1000) + 1;
 
-  // Mock ranking based on total points (in a real app, this would come from a leaderboard)
-  const mockRanking = Math.min(3, Math.max(1, Math.floor((account.totalPoints || 0) / 100) + 1));
+  // Use actual ranking from leaderboard, default to rank 1 if not loaded yet
+  const currentRanking = userRanking || 1;
 
-  // Define ranking themes
+  // Define ranking themes - Gold for 1st, Silver for 2nd, Bronze for 3rd
   const rankingThemes = {
     1: {
       // Gold
-        background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
+      background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)',
       border: '#FFD700',
       text: '#000000',
       shadow: 'shadow-yellow-500/50',
@@ -57,35 +75,46 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     },
     3: {
       // Bronze
-        background: 'linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%)',
+      background: 'linear-gradient(135deg, #CD7F32 0%, #B8860B 50%, #8B4513 100%)',
       border: '#CD7F32',
       text: '#FFFFFF',
       shadow: 'shadow-orange-600/50',
       glow: 'from-orange-400/50 to-red-600/50',
     },
+    default: {
+      // Default theme for ranks 4+
+      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
+      border: '#8b5cf6',
+      text: '#FFFFFF',
+      shadow: 'shadow-purple-500/50',
+      glow: 'from-purple-400/50 to-pink-400/50',
+    },
   };
 
-  const currentTheme = rankingThemes[mockRanking as keyof typeof rankingThemes];
+  // Get theme based on ranking, use default for ranks 4+
+  const currentTheme = currentRanking <= 3 
+    ? rankingThemes[currentRanking as keyof typeof rankingThemes]
+    : rankingThemes.default;
 
   // Define background options
   const backgroundOptions = [
     {
       id: 0,
-      name: 'Explorer',
+      name: 'Trustless Scout',
       level: 1,
       image: '/images/games/escrow-puzzle-master.png',
       available: true,
     },
     {
       id: 1,
-      name: 'Mid-Level',
+      name: 'Blockchain Sailor',
       level: 2,
       image: '/images/games/defi-trading-arena.png',
       available: userLevel >= 2,
     },
     {
       id: 2,
-      name: 'Expert',
+      name: 'Stellar Shark',
       level: 3,
       image: '/images/games/web3-basics-adventure.png',
       available: userLevel >= 3,
@@ -127,7 +156,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
       ? Object.values(account.badgesEarned)
       : [];
 
-  const handleShare = async (platform: 'twitter' | 'facebook' | 'linkedin' | 'copy') => {
+  const handleShare = async (platform: 'twitter' | 'discord' | 'linkedin' | 'copy') => {
     setIsSharing(true);
     try {
       const text = `🚀 Join me on Stellar Nexus Experience! Master Trustless Work on Stellar blockchain and earn badges! 🏆`;
@@ -141,11 +170,16 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
             '_blank'
           );
           break;
-        case 'facebook':
-          window.open(
-            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-            '_blank'
-          );
+        case 'discord':
+          const discordMessage = `🎴 **Check out my Stellar Nexus Card!**\n\n**${account.displayName || 'Nexus Explorer'}** - Level ${userLevel}\n\n🏆 Total Points: ${account.totalPoints || 0}\n⚡ Experience: ${account.experience || 0}\n🎖️ Badges: ${earnedBadges.length}\n\n${text}\n\n👉 Join using my referral code: **${referralCode}**\n${url}\n\nShare your card in 🎴|nexus-cards too!`;
+          
+          await navigator.clipboard.writeText(discordMessage);
+          addToast({
+            type: 'success',
+            title: '💬 Discord Message Copied!',
+            message: 'Paste it in the 🎴|nexus-cards channel!',
+            duration: 3000,
+          });
           break;
         case 'linkedin':
           window.open(
@@ -184,51 +218,59 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
         <div className='flex justify-center'>
           <div className='relative'>
             {/* Ranking Medal */}
-            {mockRanking <= 3 && (
+            {userRanking && (
               <div className='absolute -top-4 left-1/2 transform -translate-x-1/2 z-30'>
                 <div
-                  className={`relative w-16 h-16 rounded-full border-4 shadow-2xl ${
-                    mockRanking === 1
+                  className={`relative w-10 h-10 rounded-full border-4 shadow-2xl ${
+                    currentRanking === 1
                       ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-300'
-                      : mockRanking === 2
+                      : currentRanking === 2
                         ? 'bg-gradient-to-br from-gray-300 to-gray-500 border-gray-200'
-                        : 'bg-gradient-to-br from-orange-400 to-orange-600 border-orange-300'
+                        : currentRanking === 3
+                          ? 'bg-gradient-to-br from-orange-400 to-orange-600 border-orange-300'
+                          : 'bg-gradient-to-br from-purple-500 to-purple-700 border-purple-400'
                   }`}
                 >
                   {/* Medal Number */}
                   <div className='absolute inset-0 flex items-center justify-center'>
                     <span
-                      className={`text-2xl font-bold ${
-                        mockRanking === 1
+                      className={`${currentRanking > 9 ? 'text-sm' : 'text-lg'} font-bold ${
+                        currentRanking === 1
                           ? 'text-yellow-900'
-                          : mockRanking === 2
-                            ? 'text-gray-900'
-                            : 'text-orange-900'
+                          : currentRanking === 2
+                            ? 'text-gray-800'
+                            : currentRanking === 3
+                              ? 'text-orange-900'
+                              : 'text-white'
                       }`}
                     >
-                      {mockRanking === 1 ? '🥇' : mockRanking === 2 ? '🥈' : '🥉'}
+                      #{currentRanking}
                     </span>
                   </div>
 
                   {/* Medal Glow Effect */}
                   <div
                     className={`absolute inset-0 rounded-full blur-lg opacity-50 ${
-                      mockRanking === 1
+                      currentRanking === 1
                         ? 'bg-yellow-400'
-                        : mockRanking === 2
+                        : currentRanking === 2
                           ? 'bg-gray-300'
-                          : 'bg-orange-400'
+                          : currentRanking === 3
+                            ? 'bg-orange-400'
+                            : 'bg-purple-500'
                     }`}
                   ></div>
 
                   {/* Animated Ring */}
                   <div
                     className={`absolute -inset-2 rounded-full border-2 animate-ping opacity-75 ${
-                      mockRanking === 1
+                      currentRanking === 1
                         ? 'border-yellow-400'
-                        : mockRanking === 2
+                        : currentRanking === 2
                           ? 'border-gray-300'
-                          : 'border-orange-400'
+                          : currentRanking === 3
+                            ? 'border-orange-400'
+                            : 'border-purple-400'
                     }`}
                   ></div>
                 </div>
@@ -261,13 +303,16 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               <div className='relative z-10 p-4'>
                 {currentLayout.id === 0 && (
                   /* Classic Layout - 2 Column Grid */
-                  <div className='grid grid-cols-2 gap-4 items-start'>
+                  <div className='grid grid-cols-2 gap-4 items-start' style={{ marginBottom: '-25px' }}>
                     {/* Left Column - Nexus Card Info */}
                     <div className='flex flex-col items-center'>
                       <div className='text-center mb-3'>
-                        <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
-                          NEXUS CARD <br/>
-                          Trustless Worker
+                        <div className='text-sm font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'>
+                          NEXUS CARD
+                        </div>
+                        {/* Badge Name */}
+                        <div className='mt-2 bg-gradient-to-r from-yellow-400/90 to-orange-400/90 text-black text-xs font-bold px-2 py-1 rounded-full border-2 border-yellow-300 shadow-lg'>
+                          {currentBackground.name}
                         </div>
                       </div>
                     </div>
@@ -275,7 +320,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                     {/* Right Column - Account Info */}
                     <div className='flex flex-col items-center'>
                       <div className='text-center mb-3'>
-                        <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
+                        <div className='text-sm font-bold text-white'>
                           ACCOUNT INFO
                         </div>
                       </div>
@@ -294,7 +339,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
                       {/* Name and Ranking */}
                       <div className='text-center'>
-                        <div className='text-sm font-bold' style={{ color: currentTheme.text }}>
+                        <div className='text-sm font-bold text-white'>
                           {account.displayName || 'Nexus Explorer'}
                         </div>
                       </div>
@@ -305,16 +350,13 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 {currentLayout.id === 1 && (
                   /* Modern Layout - Profile Card Style */
                   <div className='flex flex-col h-full'>
-                    {/* Top Section - Card Type and Icon */}
+                    {/* Top Section - Card Type and Badge */}
                     <br/>
-                    {/* <div className='flex justify-between items-start mb-4'>
-                      <div className='text-sm font-bold text-white/90'>
-                        COMMON
+                    <div className='flex justify-center items-start mb-4'>
+                      <div className='text-sm font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'>
+                        NEXUS CARD
                       </div>
-                      <div className='w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center'>
-                        <div className='w-3 h-3 bg-white rounded-full'></div>
-                      </div>
-                    </div> */}
+                    </div>
 
                     {/* Center Section - Avatar and Name */}
                     <div className='flex flex-col items-center mb-6'>
@@ -335,8 +377,9 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                         <div className='text-lg font-bold text-white mb-1'>
                           {account.displayName || 'Nexus Explorer'}
                         </div>
-                        <div className='text-sm text-yellow-400 font-semibold'>
-                          TRUSTLESS WORKER
+                        {/* Badge Name */}
+                        <div className='inline-block bg-gradient-to-r from-yellow-400/90 to-orange-400/90 text-black text-xs font-bold px-3 py-1 rounded-full border-2 border-yellow-300 shadow-lg'>
+                          {currentBackground.name}
                         </div>
                       </div>
                     </div>
@@ -388,9 +431,8 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                 {currentLayout.id === 2 && (
                   /* Minimal Layout - Clean Design */
                   <div className='flex flex-col items-center text-center space-y-2 -mb-10'>
-                    <br/>
-                    <div className='text-xs font-medium opacity-60' style={{ color: currentTheme.text }}>
-                      NEXUS
+                    <div className='text-xs font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]'>
+                      NEXUS CARD
                     </div>
                     
                     {/* Avatar */}
@@ -405,11 +447,15 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                       </div>
                     </div>
 
-                    <div className='text-base font-bold' style={{ color: currentTheme.text }}>
+                    <div className='text-base font-bold text-white'>
                       {account.displayName || 'Nexus Explorer'}
                     </div>
-                    <div className='text-xs opacity-50' style={{ color: currentTheme.text }}>
+                    <div className='text-xs text-white/70'>
                       {account.totalPoints || 0} pts
+                    </div>
+                    {/* Badge Name */}
+                    <div className='inline-block bg-gradient-to-r from-yellow-400/90 to-orange-400/90 text-black text-xs font-bold px-2 py-0.5 rounded-full border-2 border-yellow-300 shadow-lg'>
+                      {currentBackground.name}
                     </div>
                   </div>
                 )}
@@ -456,21 +502,18 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
                   <div className='relative z-10 px-6 mb-4 space-y-3'>
                     {/* Stats */}
                     <div className='bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/30'>
-                      <div
-                        className='grid grid-cols-3 gap-2 text-sm'
-                        style={{ color: currentTheme.text }}
-                      >
+                      <div className='grid grid-cols-3 gap-2 text-sm'>
                         <div className='text-center'>
-                          <div className='font-bold text-lg'>{account.totalPoints || 0}</div>
-                          <div className='text-xs opacity-80'>Points</div>
+                          <div className='font-bold text-lg text-white'>{account.totalPoints || 0}</div>
+                          <div className='text-xs text-white/80'>Points</div>
                         </div>
                         <div className='text-center'>
-                          <div className='font-bold text-lg'>{account.experience || 0}</div>
-                          <div className='text-xs opacity-80'>Experience</div>
+                          <div className='font-bold text-lg text-white'>{account.experience || 0}</div>
+                          <div className='text-xs text-white/80'>Experience</div>
                         </div>
                         <div className='text-center'>
-                          <div className='font-bold text-lg'>{earnedBadges.length}</div>
-                          <div className='text-xs opacity-80'>Badges</div>
+                          <div className='font-bold text-lg text-white'>{earnedBadges.length}</div>
+                          <div className='text-xs text-white/80'>Badges</div>
                         </div>
                       </div>
                     </div>
@@ -481,7 +524,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
 
                 {/* Footer */}
                 <div className='absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 via-black/40 to-transparent backdrop-blur-sm rounded-b-2xl'>
-                  <div className='text-center text-xs' style={{ color: currentTheme.text }}>
+                  <div className='text-center text-xs text-white'>
                     <div className='font-bold mb-1'>Join the Nexus Experience!</div>
                     <div className='opacity-80'>Master Trustless Work on Stellar</div>
                   </div>
@@ -659,23 +702,23 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               <button
                 onClick={() => handleShare('twitter')}
                 disabled={isSharing}
-                className='bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1'
+                className='bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1 shadow-lg hover:shadow-blue-500/50'
               >
                 <span>🐦</span>
                 <span className='text-xs'>Twitter</span>
               </button>
               <button
-                onClick={() => handleShare('facebook')}
+                onClick={() => handleShare('discord')}
                 disabled={isSharing}
-                className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1'
+                className='bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1 shadow-lg hover:shadow-indigo-500/50'
               >
-                <span>📘</span>
-                <span className='text-xs'>Facebook</span>
+                <span>💬</span>
+                <span className='text-xs'>Discord</span>
               </button>
               <button
                 onClick={() => handleShare('linkedin')}
                 disabled={isSharing}
-                className='bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1'
+                className='bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1 shadow-lg hover:shadow-blue-700/50'
               >
                 <span>💼</span>
                 <span className='text-xs'>LinkedIn</span>
@@ -683,7 +726,7 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
               <button
                 onClick={() => handleShare('copy')}
                 disabled={isSharing}
-                className='bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1'
+                className='bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-1 shadow-lg hover:shadow-gray-500/50'
               >
                 <span>📋</span>
                 <span className='text-xs'>Copy Link</span>
