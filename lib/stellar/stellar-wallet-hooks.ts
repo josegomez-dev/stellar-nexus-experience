@@ -247,13 +247,12 @@ export const useWallet = (): UseWalletReturn => {
             try {
               const savedData = JSON.parse(saved);
               // Don't mark as connected if check failed, but keep the data
-              console.log('Using saved wallet data, connection will be re-established');
             } catch (e) {
-              console.warn('Failed to parse saved wallet data:', e);
+              // Failed to parse saved wallet data
             }
           }
         }
-        console.warn('Failed to check connection status:', error);
+        // Failed to check connection status
       }
     };
 
@@ -297,7 +296,6 @@ export const useWallet = (): UseWalletReturn => {
             setWalletKit(currentKit);
           } catch (initError) {
             // Wallet kit initialization failed, continue without kit
-            console.warn('Failed to initialize wallet kit:', initError);
           }
         }
 
@@ -357,7 +355,6 @@ export const useWallet = (): UseWalletReturn => {
             return;
           } catch (kitError) {
             // Kit connection failed, continue to fallback
-            console.warn('Kit connection failed:', kitError);
           }
         }
 
@@ -733,7 +730,6 @@ export const useWallet = (): UseWalletReturn => {
         isInitializing = false;
       } catch (initError) {
         isInitializing = false;
-        console.error('Failed to initialize wallet kit:', initError);
         throw new Error('Wallet kit not initialized. Please refresh the page and try again.');
       }
     }
@@ -756,7 +752,6 @@ export const useWallet = (): UseWalletReturn => {
         notAvailableText: 'Wallet not available',
       });
     } catch (err) {
-      console.error('Error opening wallet modal:', err);
       throw err;
     }
   }, [walletKit, connect]);

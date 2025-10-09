@@ -425,18 +425,22 @@ export const WalletManager = () => {
 
               <button
                 onClick={() => {
-                  console.log({
-                    walletData,
-                    isConnected,
-                    isLoading,
-                    error,
-                    selectedWallet,
-                    availableWallets,
-                  });
+                  // Log wallet state for debugging
+                  if (typeof window !== 'undefined') {
+                    (window as any).__walletDebugState = {
+                      walletData,
+                      isConnected,
+                      isLoading,
+                      error,
+                      selectedWallet,
+                      availableWallets,
+                    };
+                    alert('Wallet state saved to window.__walletDebugState (check browser console)');
+                  }
                 }}
                 className='w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 px-4 rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg'
               >
-                📋 Log Wallet State to Console
+                📋 Save Wallet State for Debugging
               </button>
 
               <button
@@ -466,15 +470,12 @@ export const WalletManager = () => {
                     };
 
                     // Test 5: Test signTransaction function
-                    try {
-                      const testXdr = `test_xdr_${Date.now()}`;
-                      const signedResult = await signTransaction(testXdr);
-                    } catch (signErr) {
-                      console.log(
-                        '⚠️ signTransaction test failed (this is expected in POC mode):',
-                        signErr
-                      );
-                    }
+                  try {
+                    const testXdr = `test_xdr_${Date.now()}`;
+                    const signedResult = await signTransaction(testXdr);
+                  } catch (signErr) {
+                    // signTransaction test failed (expected in POC mode)
+                  }
 
                     alert(
                       '✅ All wallet functionality tests passed! Check console for detailed results.'

@@ -213,10 +213,9 @@ export const playBadgeSound = (): void => {
     audio.volume = 0.3; // Keep volume moderate
     audio.play().catch(() => {
       // Silently fail if audio can't play (user hasn't interacted with page yet)
-      console.log('Badge sound could not play - user interaction required');
     });
   } catch (error) {
-    console.log('Badge sound error:', error);
+    // Badge sound error
   }
 };
 

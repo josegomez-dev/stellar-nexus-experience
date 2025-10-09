@@ -195,7 +195,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       
       // If no stats exist, initialize them for all demos
       if (stats.length === 0) {
-        console.log('No demo stats found, initializing...');
         const demos = [
           { id: 'hello-milestone', name: 'Baby Steps to Riches' },
           { id: 'dispute-resolution', name: 'Drama Queen Escrow' },
@@ -206,9 +205,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
         for (const demo of demos) {
           try {
             await demoStatsService.initializeDemoStats(demo.id, demo.name);
-            console.log(`✅ Initialized stats for ${demo.name} (${demo.id})`);
           } catch (error) {
-            console.error(`❌ Failed to initialize stats for ${demo.name} (${demo.id}):`, error);
+            // Failed to initialize stats
           }
         }
         
@@ -296,7 +294,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
     if (!walletData?.publicKey || !account) return;
     
     try {
-      console.log('FirebaseContext: Starting completeDemo for:', demoId, 'with score:', score, 'completion time:', completionTimeMinutes);
       
       // Handle both array and object formats for demosCompleted (Firebase sometimes stores arrays as objects)
       let demosCompletedArray: string[] = [];
@@ -308,7 +305,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       
       // Check if demo already completed
       if (demosCompletedArray.includes(demoId)) {
-        console.log('FirebaseContext: Demo already completed, skipping');
         return;
       }
 
@@ -320,12 +316,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       
       // Add demo to completed list in account (but not for nexus-master as it's not a real demo)
       if (demoId !== 'nexus-master') {
-        console.log('FirebaseContext: Adding demo to completed list:', demoId);
         await accountService.addCompletedDemo(walletData.publicKey, demoId);
       }
       
       // Add experience and points (experience is 2x points)
-      console.log('FirebaseContext: Adding experience and points:', pointsEarned * 2, pointsEarned);
       await accountService.addExperienceAndPoints(walletData.publicKey, pointsEarned * 2, pointsEarned);
 
       // Update demo stats for global tracking
@@ -354,7 +348,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       }
       
       if (badgeToAward) {
-        console.log('FirebaseContext: Awarding badge:', badgeToAward);
         await accountService.addEarnedBadge(walletData.publicKey, badgeToAward);
         
         // Show badge animation
@@ -381,7 +374,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       }
       
       if (updatedAccount && updatedDemosCompletedArray.length === 3) {
-        console.log('FirebaseContext: All 3 demos completed, Nexus Master demo card should now be unlocked');
         // Note: Nexus Master badge is NOT auto-awarded here
         // It will only be awarded when user manually claims it from the 4th demo card
       }
@@ -415,11 +407,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       }
       
       // Refresh account data and demo stats
-      console.log('FirebaseContext: Refreshing account data and demo stats');
       await Promise.all([loadAccountData(), loadDemoStats()]);
-      console.log('FirebaseContext: Demo completion process finished successfully');
     } catch (error) {
-      console.error('FirebaseContext: Demo completion failed:', error);
       addToast({
         title: 'Error',
         message: 'Failed to complete demo.',

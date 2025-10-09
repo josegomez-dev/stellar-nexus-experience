@@ -11,28 +11,21 @@ export const initializeAllDemoStats = async () => {
     { id: 'nexus-master', name: 'Nexus Master Achievement' },
   ];
 
-  console.log('Initializing demo stats for all demos...');
-
   for (const demo of demos) {
     try {
       await demoStatsService.initializeDemoStats(demo.id, demo.name);
-      console.log(`✅ Initialized stats for ${demo.name} (${demo.id})`);
     } catch (error) {
-      console.error(`❌ Failed to initialize stats for ${demo.name} (${demo.id}):`, error);
+      // Failed to initialize stats
     }
   }
-
-  console.log('Demo stats initialization complete!');
 };
 
 // Function to check and display current demo stats
 export const checkDemoStats = async () => {
   try {
     const stats = await demoStatsService.getAllDemoStats();
-    console.log('Current demo stats:', stats);
     return stats;
   } catch (error) {
-    console.error('Error checking demo stats:', error);
     return [];
   }
 };

@@ -359,7 +359,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   useEffect(() => {
     if (gameState === 'ready') {
       // Play menu music on ready screen
-      menuMusicRef.current?.play().catch(err => console.log('Menu music autoplay prevented:', err));
+      menuMusicRef.current?.play().catch(() => {});
     } else {
       // Stop menu music when game starts or ends
       if (menuMusicRef.current) {
@@ -404,12 +404,10 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   }, []);
 
   // Enter fullscreen on game start
-  const enterFullscreen = useCallback(() => {
+    const enterFullscreen = useCallback(() => {
     const elem = document.documentElement;
     if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch((err) => {
-        console.log('Error attempting to enable fullscreen:', err);
-      });
+      elem.requestFullscreen().catch(() => {});
     }
   }, []);
 
@@ -500,11 +498,11 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     // Give player 5 seconds of invulnerability at start
     setInvulnerableUntil(Date.now() + 5000);
     
-    // Play win sound when starting game
-    if (winSoundRef.current) {
-      winSoundRef.current.currentTime = 0;
-      winSoundRef.current.play().catch(err => console.log('Win sound play error:', err));
-    }
+            // Play win sound when starting game
+            if (winSoundRef.current) {
+              winSoundRef.current.currentTime = 0;
+              winSoundRef.current.play().catch(() => {});
+            }
     
     // Don't auto-enter fullscreen - let user choose with button
   }, [account, addToast]);
@@ -542,7 +540,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             // Play jump sound
             if (jumpSoundRef.current) {
               jumpSoundRef.current.currentTime = 0;
-              jumpSoundRef.current.play().catch(err => console.log('Jump sound play error:', err));
+              jumpSoundRef.current.play().catch(() => {});
             }
           }
           break;
@@ -623,7 +621,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             // Play level up sound
             if (levelUpSoundRef.current) {
               levelUpSoundRef.current.currentTime = 0;
-              levelUpSoundRef.current.play().catch(err => console.log('Level up sound play error:', err));
+              levelUpSoundRef.current.play().catch(() => {});
             }
             
             // Pause game and show quiz
@@ -809,7 +807,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         // Play hit sound on collision
         if (hitSoundRef.current) {
           hitSoundRef.current.currentTime = 0;
-          hitSoundRef.current.play().catch(err => console.log('Hit sound play error:', err));
+          hitSoundRef.current.play().catch(() => {});
         }
         
         if (isPoweredUp) {
@@ -832,7 +830,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           setTimeout(() => {
             if (gameOverSoundRef.current) {
               gameOverSoundRef.current.currentTime = 0;
-              gameOverSoundRef.current.play().catch(err => console.log('Game over sound play error:', err));
+              gameOverSoundRef.current.play().catch(() => {});
             }
           }, 200);
           
@@ -878,7 +876,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             // Play grab coin sound
             if (grabCoinSoundRef.current) {
               grabCoinSoundRef.current.currentTime = 0;
-              grabCoinSoundRef.current.play().catch(err => console.log('Grab coin sound play error:', err));
+              grabCoinSoundRef.current.play().catch(() => {});
             }
             
             return { ...coin, collected: true };
@@ -914,7 +912,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             // Play extra life sound for power-up
             if (extraLifeSoundRef.current) {
               extraLifeSoundRef.current.currentTime = 0;
-              extraLifeSoundRef.current.play().catch(err => console.log('Extra life sound play error:', err));
+              extraLifeSoundRef.current.play().catch(() => {});
             }
             
             // Add visual feedback
@@ -1595,11 +1593,11 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                             setIsAnswerCorrect(isCorrect);
                             
                             if (isCorrect) {
-                              // Play win sound for correct answer
-                              if (winSoundRef.current) {
-                                winSoundRef.current.currentTime = 0;
-                                winSoundRef.current.play().catch(err => console.log('Win sound play error:', err));
-                              }
+              // Play win sound for correct answer
+              if (winSoundRef.current) {
+                winSoundRef.current.currentTime = 0;
+                winSoundRef.current.play().catch(() => {});
+              }
                               
                               // Correct answer - level up!
                               setLevel(l => {
@@ -1633,7 +1631,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                                       account.profile?.username || account.profile?.displayName || 'Anonymous',
                                       `Reached Level ${newLevel}! 🎉`,
                                       'achievement'
-                                    ).catch(err => console.log('Failed to post achievement:', err));
+                                    ).catch(() => {});
                                   }, 500);
                                 }
 

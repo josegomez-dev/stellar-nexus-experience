@@ -140,15 +140,12 @@ export const MicroTaskMarketplaceDemo = ({
           const completionTimeInMinutes = Math.round(completionTimeInSeconds / 60);
 
           // Use the centralized account system for completion
-          console.log('MicroTaskMarketplaceDemo: Attempting to complete demo with score:', score);
           await completeDemo('micro-marketplace', score);
-          console.log('MicroTaskMarketplaceDemo: Demo completed successfully');
 
           // Demo completion is now handled by FirebaseContext
 
           // Note: Feedback modal will be triggered when user clicks "Complete Demo" button
         } catch (error) {
-          console.error('MicroTaskMarketplaceDemo: Demo completion failed:', error);
           addToast({
             type: 'error',
             title: '❌ Demo Completion Failed',

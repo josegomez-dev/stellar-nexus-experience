@@ -253,9 +253,9 @@ export const ImmersiveDemoModal = ({
 
       // Demo completion tracking is now handled by FirebaseContext
       if (isConnected && walletData?.publicKey) {
-        console.log('Demo completion with wallet connected');
+        // Demo completion with wallet connected
       } else {
-        console.log('Demo completion without wallet');
+        // Demo completion without wallet
       }
 
       // Call the external feedback handler if provided
@@ -329,7 +329,6 @@ export const ImmersiveDemoModal = ({
           wouldRecommend: feedback.wouldRecommend,
           completionTime: Math.round(elapsedTime / 60), // Convert seconds to minutes
         });
-        console.log('Mandatory feedback submitted to Firebase');
       }
 
       // Save feedback to localStorage as backup

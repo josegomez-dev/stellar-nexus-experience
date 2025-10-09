@@ -101,7 +101,7 @@ export const UserDropdown = () => {
             if (parsed.customName) return parsed.customName;
           }
         } catch (error) {
-          console.error('Error loading profile:', error);
+          // Error loading profile
         }
       }
       return null;
@@ -135,8 +135,6 @@ export const UserDropdown = () => {
   };
 
   const handleAutoGenerate = async () => {
-    console.log('handleAutoGenerate called');
-
     if (!walletData?.publicKey) {
       addToast({
         type: 'error',
@@ -209,8 +207,6 @@ export const UserDropdown = () => {
   };
 
   const handleSaveName = async () => {
-    console.log('handleSaveName called with tempName:', tempName);
-
     if (!tempName.trim()) {
       addToast({
         type: 'error',
@@ -251,20 +247,14 @@ export const UserDropdown = () => {
 
       // Always save to Firebase regardless of authentication status
       if (walletData?.publicKey) {
-        console.log('Saving to Firebase:', { id: walletData.publicKey, displayName });
-
         await accountService.createOrUpdateAccount({
           id: walletData.publicKey,
           displayName: displayName,
           walletAddress: walletData.publicKey,
         });
 
-        console.log('Firebase save completed, refreshing account data...');
-
         // Refresh Firebase account data to reflect changes immediately
         await refreshAccountData();
-
-        console.log('Account data refreshed');
       }
 
       addToast({
@@ -495,17 +485,6 @@ export const UserDropdown = () => {
 
                   <button
                     onClick={() => {
-                      setIsReferralModalOpen(true);
-                      setIsOpen(false);
-                    }}
-                    className='w-full flex items-center space-x-3 text-purple-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
-                  >
-                    <span className='text-lg'>🎴</span>
-                    <span>Referral Center</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
                       // Close the dropdown
                       setIsOpen(false);
                       
@@ -527,6 +506,17 @@ export const UserDropdown = () => {
                   >
                     <span className='text-lg'>🏆</span>
                     <span>Global Leaderboard</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsReferralModalOpen(true);
+                      setIsOpen(false);
+                    }}
+                    className='w-full flex items-center space-x-3 text-purple-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
+                  >
+                    <span className='text-lg'>🎴</span>
+                    <span>Referral Center</span>
                   </button>
                 </div>
 

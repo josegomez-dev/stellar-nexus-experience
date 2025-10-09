@@ -67,7 +67,6 @@ export class EmailJSService {
         templateParams
       );
 
-      console.log('EmailJS response:', response);
       return response.status === 200;
     } catch (error) {
       console.error('EmailJS error:', error);
