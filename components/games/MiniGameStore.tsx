@@ -10,8 +10,6 @@ import { useToast } from '@/contexts/ui/ToastContext';
 import { VideoPreloaderScreen } from '@/components/ui/VideoPreloaderScreen';
 import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
 import { ToastContainer } from '@/components/ui/Toast';
-import { AuthBanner } from '@/components/ui/auth/AuthBanner';
-import { AuthModal } from '@/components/ui/auth/AuthModal';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
 import Image from 'next/image';
@@ -33,10 +31,6 @@ export default function MiniGameStore() {
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
-  
-  // Authentication modals
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'signup' | 'signin'>('signup');
   const [showUserProfile, setShowUserProfile] = useState(false);
 
   // Epic promotional banners
@@ -162,17 +156,6 @@ export default function MiniGameStore() {
       window.removeEventListener('openUserProfile', handleOpenUserProfile);
     };
   }, []);
-
-  // Authentication handlers
-  const handleSignUpClick = () => {
-    setAuthModalMode('signup');
-    setShowAuthModal(true);
-  };
-
-  const handleSignInClick = () => {
-    setAuthModalMode('signin');
-    setShowAuthModal(true);
-  };
 
   // Enhanced mini games with epic descriptions and thumbnails
   const miniGames = [
@@ -483,13 +466,6 @@ export default function MiniGameStore() {
           {!isLoading && (
             <div className='animate-fadeIn'>
               <Header />
-            </div>
-          )}
-
-          {/* Authentication Banner */}
-          {!isLoading && preloaderComplete && (
-            <div className='animate-fadeIn'>
-              <AuthBanner onSignUpClick={handleSignUpClick} onSignInClick={handleSignInClick} />
             </div>
           )}
 
@@ -1152,13 +1128,6 @@ export default function MiniGameStore() {
               <Footer />
             </div>
           )}
-
-          {/* Authentication Modal */}
-          <AuthModal
-            isOpen={showAuthModal}
-            onClose={() => setShowAuthModal(false)}
-            mode={authModalMode}
-          />
 
           {/* User Profile Modal */}
           <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
