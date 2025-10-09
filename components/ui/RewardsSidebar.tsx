@@ -137,8 +137,8 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   const getAvailableCharacterPhases = () => {
     const phases = [
       { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 2 },
-      { id: 2, name: 'Nexus Prime', image: '/images/character/nexus-prime-chat.png', minLevel: 3 }
+      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 5 },
+      { id: 2, name: 'Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
     ];
     return phases.filter(phase => level >= phase.minLevel);
   };
@@ -151,8 +151,8 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
     // Find the highest available phase based on current level
     const phases = [
       { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 2 },
-      { id: 2, name: 'Nexus Prime', image: '/images/character/nexus-prime-chat.png', minLevel: 3 }
+      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 5 },
+      { id: 2, name: 'Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
     ];
     
     // Find the highest phase the user has unlocked
@@ -241,7 +241,7 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
               {/* Level Badge */}
               <div className='absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20'>
-                {level === 1 ? 'Explorer' : level === 2 ? 'Mid-Level' : level === 3 ? 'Expert' : `Lv.${level}`}
+                {level < 5 ? 'Baby' : level < 10 ? 'Teen' : 'Expert'} Lv.{level}
               </div>
 
               {/* Phase Indicator */}
@@ -299,22 +299,22 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
           {/* Motivational Message */}
           <div className='mt-3 text-center'>
             <p className='text-xs text-gray-400 flex items-center justify-center gap-2'>
-              {level < 2 ? (
+              {level < 5 ? (
                 <>
                   <span className='text-purple-400 animate-pulse'>✨</span>
-                  <span>Help <span className='text-purple-300 font-semibold'>Nexus Prime</span> evolve to Teen form!</span>
+                  <span>Help <span className='text-purple-300 font-semibold'>Nexus Prime</span> evolve to Teen form! (Reach Level 5)</span>
                   <span className='text-purple-400 animate-pulse'>✨</span>
                 </>
-              ) : level < 3 ? (
+              ) : level < 10 ? (
                 <>
                   <span className='text-blue-400 animate-pulse'>🌟</span>
-                  <span>Keep going! Help <span className='text-blue-300 font-semibold'>Nexus Prime</span> reach Final form!</span>
+                  <span>Keep going! Help <span className='text-blue-300 font-semibold'>Nexus Prime</span> reach Expert form! (Reach Level 10)</span>
                   <span className='text-blue-400 animate-pulse'>🌟</span>
                 </>
               ) : (
                 <>
                   <span className='text-cyan-400 animate-pulse'>👑</span>
-                  <span><span className='text-cyan-300 font-semibold'>Nexus Prime</span> has reached full power! Keep earning XP to master the universe!</span>
+                  <span><span className='text-cyan-300 font-semibold'>Nexus Prime</span> has reached Expert form! Keep earning XP to master the universe!</span>
                   <span className='text-cyan-400 animate-pulse'>👑</span>
                 </>
               )}
