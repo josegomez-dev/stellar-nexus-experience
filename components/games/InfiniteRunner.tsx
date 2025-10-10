@@ -54,6 +54,28 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [isMounted, setIsMounted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false); // For collapsible controls
+  
+  // Speed/Difficulty mode
+  type SpeedMode = 'snail' | 'casual' | 'coffee' | 'rocket' | 'lightspeed';
+  const [speedMode, setSpeedMode] = useState<SpeedMode>('coffee');
+  const [showSpeedSelector, setShowSpeedSelector] = useState(false);
+  
+  // Load saved speed mode from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSpeed = localStorage.getItem('infiniteRunnerSpeedMode') as SpeedMode | null;
+      if (savedSpeed && SPEED_CONFIGS[savedSpeed]) {
+        setSpeedMode(savedSpeed);
+      }
+    }
+  }, []);
+  
+  // Save speed mode to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isMounted) {
+      localStorage.setItem('infiniteRunnerSpeedMode', speedMode);
+    }
+  }, [speedMode, isMounted]);
 
   // Audio refs
   const menuMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -125,6 +147,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const lastPowerUpRef = useRef(0);
   const levelTimerRef = useRef(0);
   const frameCountRef = useRef(0);
+  const lastFrameTimeRef = useRef<number>(0); // For delta time calculation
 
   // Constants
   const GRAVITY = 0.6;
@@ -136,6 +159,36 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const PLAYER_HEIGHT = 50;
   const DUCKING_HEIGHT = 20; // Make ducking more effective (lower to ground)
   const MAX_JUMPS = 2; // Allow double jump
+  const TARGET_FPS = 60; // Target frame rate for consistent gameplay
+  
+  // Speed mode configuration - normalized for 60 FPS
+  const SPEED_CONFIGS = {
+    snail: { 
+      baseSpeed: 3, 
+      label: '🐌 Snail Mail', 
+      description: 'Perfect for beginners or a chill vibe'
+    },
+    casual: { 
+      baseSpeed: 4.5, 
+      label: '🚶 Casual Stroll', 
+      description: 'Nice and easy, no rush'
+    },
+    coffee: { 
+      baseSpeed: 6, 
+      label: '☕ Coffee Break', 
+      description: 'Just right - recommended!'
+    },
+    rocket: { 
+      baseSpeed: 8, 
+      label: '🚀 Rocket Fuel', 
+      description: 'Fast-paced action for pros'
+    },
+    lightspeed: { 
+      baseSpeed: 10, 
+      label: '⚡ Lightspeed', 
+      description: 'Insane mode - are you ready?'
+    }
+  };
 
   // Web3 Quiz Questions
   const quizQuestions = [
@@ -841,6 +894,9 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       return;
     }
     
+    // Get the base speed from selected mode
+    const modeSpeed = SPEED_CONFIGS[speedMode].baseSpeed;
+    
     setGameState('playing');
     setScore(0);
     setLevel(1);
@@ -852,8 +908,8 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     setIsJumping(false);
     setIsDucking(false);
     setJumpCount(0);
-    setGameSpeed(5);
-    setBaseSpeed(5);
+    setGameSpeed(modeSpeed);
+    setBaseSpeed(modeSpeed);
     setObstacles([]);
     setCoins([]);
     setPowerUps([]);
@@ -871,6 +927,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     lastPowerUpRef.current = 0;
     levelTimerRef.current = 0;
     frameCountRef.current = 0;
+    lastFrameTimeRef.current = 0;
     
     // Give player 5 seconds of invulnerability at start
     setInvulnerableUntil(Date.now() + 5000);
@@ -882,7 +939,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             }
     
     // Don't auto-enter fullscreen - let user choose with button
-  }, [account, addToast]);
+  }, [account, addToast, speedMode]);
 
   // Handle keyboard input
   useEffect(() => {
@@ -981,11 +1038,21 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       return;
     }
 
-    const gameLoop = () => {
-      // Update player physics
-      setPlayerVelocity(v => v + GRAVITY);
+    const gameLoop = (currentTime: number) => {
+      // Calculate delta time for frame-rate independence
+      if (lastFrameTimeRef.current === 0) {
+        lastFrameTimeRef.current = currentTime;
+      }
+      const deltaTime = currentTime - lastFrameTimeRef.current;
+      lastFrameTimeRef.current = currentTime;
+      
+      // Normalize to 60 FPS (16.67ms per frame)
+      const deltaMultiplier = deltaTime / (1000 / TARGET_FPS);
+      
+      // Update player physics with delta time
+      setPlayerVelocity(v => v + (GRAVITY * deltaMultiplier));
       setPlayerY(y => {
-        const newY = y + playerVelocity;
+        const newY = y + (playerVelocity * deltaMultiplier);
         if (newY >= GROUND_Y) {
           setIsJumping(false);
           setJumpCount(0); // Reset jump count when landing
@@ -994,9 +1061,10 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         return newY;
       });
 
-      // Update background
-      setBgOffset(offset => (offset + gameSpeed) % 1000);
-      setBgImageOffset(offset => (offset + gameSpeed * 0.5) % 2000); // Slower parallax for background image
+      // Update background with delta time normalization
+      const normalizedSpeed = gameSpeed * deltaMultiplier;
+      setBgOffset(offset => (offset + normalizedSpeed) % 1000);
+      setBgImageOffset(offset => (offset + normalizedSpeed * 0.5) % 2000); // Slower parallax for background image
 
       // Update score - only if not in safe zone
       const isInSafeZone = Date.now() < invulnerableUntil;
@@ -1146,7 +1214,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         }
       }
 
-      // Move obstacles with dynamic vertical movement
+      // Move obstacles with dynamic vertical movement (normalized with delta time)
       setObstacles(obs =>
         obs
           .map(o => {
@@ -1161,22 +1229,22 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               newY = Math.max(GROUND_Y - 220, Math.min(GROUND_Y - 50, newY));
             }
             
-            return { ...o, x: o.x - gameSpeed, y: newY };
+            return { ...o, x: o.x - normalizedSpeed, y: newY };
           })
           .filter(o => o.x > -100)
       );
 
-      // Move coins
+      // Move coins (normalized with delta time)
       setCoins(c =>
         c
-          .map(coin => ({ ...coin, x: coin.x - gameSpeed }))
+          .map(coin => ({ ...coin, x: coin.x - normalizedSpeed }))
           .filter(coin => coin.x > -50)
       );
 
-      // Move power-ups
+      // Move power-ups (normalized with delta time)
       setPowerUps(p =>
         p
-          .map(powerUp => ({ ...powerUp, x: powerUp.x - gameSpeed }))
+          .map(powerUp => ({ ...powerUp, x: powerUp.x - normalizedSpeed }))
           .filter(powerUp => powerUp.x > -50)
       );
 
@@ -1663,6 +1731,9 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             <div className='text-white font-bold text-2xl mb-1'>Score: {score}</div>
             <div className='text-white/80 text-sm'>High Score: {highScore}</div>
             <div className='text-cyan-400 text-sm font-semibold'>Level: {level}</div>
+            <div className='text-purple-400 text-xs font-semibold mt-1'>
+              {SPEED_CONFIGS[speedMode].label}
+            </div>
             {/* Power-up status indicator */}
             {isPoweredUp && (
               <div className='text-yellow-400 text-xs font-bold mt-2 animate-pulse'>
@@ -2083,6 +2154,17 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                 <p className='text-cyan-300 font-semibold text-sm'>🎯 Level up every 1,000 points • 🧠 Answer Web3 quizzes</p>
               </div>
               
+              {/* Current Speed Mode Indicator */}
+              <div className='bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl p-3 mb-4 border border-cyan-400/30'>
+                <div className='flex items-center justify-center gap-2'>
+                  <span className='text-white/70 text-sm'>Current Speed:</span>
+                  <span className='text-cyan-300 font-bold text-sm'>{SPEED_CONFIGS[speedMode].label}</span>
+                </div>
+                <p className='text-white/50 text-xs mt-1'>
+                  ⚙️ Change speed when starting or replaying
+                </p>
+              </div>
+              
               {/* Compact Controls */}
               <div className='bg-black/30 rounded-xl p-4 mb-4 border border-white/10'>
                 <div className='grid grid-cols-2 gap-2 text-white/70 text-xs'>
@@ -2465,9 +2547,41 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               </div>
 
               {/* Description */}
-              <p className='text-white/80 text-sm mb-6 leading-relaxed'>
+              <p className='text-white/80 text-sm mb-4 leading-relaxed'>
                 Starting this game will deduct 250 points from your account. You'll earn XP and rewards based on your performance!
               </p>
+
+              {/* Speed Mode Selector */}
+              <div className='bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-2xl p-3 mb-6 border border-cyan-400/30'>
+                <div className='text-cyan-300 text-xs mb-2 font-semibold text-center'>⚡ Game Speed</div>
+                <div className='flex justify-center gap-2 mb-2'>
+                  {(Object.keys(SPEED_CONFIGS) as SpeedMode[]).map((mode) => {
+                    const icon = SPEED_CONFIGS[mode].label.split(' ')[0]; // Extract emoji
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() => setSpeedMode(mode)}
+                        title={`${SPEED_CONFIGS[mode].label}\n${SPEED_CONFIGS[mode].description}`}
+                        className={`relative w-12 h-12 rounded-lg border-2 transition-all duration-200 ${
+                          speedMode === mode
+                            ? 'bg-gradient-to-r from-cyan-500/30 to-purple-600/30 border-cyan-400 shadow-lg scale-110'
+                            : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10 hover:scale-105'
+                        }`}
+                      >
+                        <div className='text-2xl'>{icon}</div>
+                        {speedMode === mode && (
+                          <div className='absolute -top-1 -right-1 bg-cyan-400 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center'>
+                            ✓
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className='text-white/50 text-[10px] text-center'>
+                  Hover to see speed names • Frame-rate normalized!
+                </div>
+              </div>
 
               {/* Buttons */}
               <div className='grid grid-cols-2 gap-3'>
@@ -2513,9 +2627,41 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               </div>
 
               {/* Description */}
-              <p className='text-white/80 text-sm mb-6 leading-relaxed'>
+              <p className='text-white/80 text-sm mb-4 leading-relaxed'>
                 Playing again will deduct 100 points from your account. Try to beat your high score of {highScore} points!
               </p>
+
+              {/* Speed Mode Selector */}
+              <div className='bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-2xl p-3 mb-6 border border-cyan-400/30'>
+                <div className='text-cyan-300 text-xs mb-2 font-semibold text-center'>⚡ Game Speed</div>
+                <div className='flex justify-center gap-2 mb-2'>
+                  {(Object.keys(SPEED_CONFIGS) as SpeedMode[]).map((mode) => {
+                    const icon = SPEED_CONFIGS[mode].label.split(' ')[0]; // Extract emoji
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() => setSpeedMode(mode)}
+                        title={`${SPEED_CONFIGS[mode].label}\n${SPEED_CONFIGS[mode].description}`}
+                        className={`relative w-12 h-12 rounded-lg border-2 transition-all duration-200 ${
+                          speedMode === mode
+                            ? 'bg-gradient-to-r from-cyan-500/30 to-purple-600/30 border-cyan-400 shadow-lg scale-110'
+                            : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10 hover:scale-105'
+                        }`}
+                      >
+                        <div className='text-2xl'>{icon}</div>
+                        {speedMode === mode && (
+                          <div className='absolute -top-1 -right-1 bg-cyan-400 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center'>
+                            ✓
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className='text-white/50 text-[10px] text-center'>
+                  Hover to see speed names • Frame-rate normalized!
+                </div>
+              </div>
 
               {/* Buttons */}
               <div className='grid grid-cols-2 gap-3'>
