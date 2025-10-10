@@ -59,9 +59,6 @@ export class AccountService {
       createdAt: now,
       updatedAt: now,
       lastLoginAt: now,
-      profile: {
-        level: 1,
-      },
       stats: {
         totalPoints: 0, // Will be updated when badges are earned
         lastActiveDate: new Date().toISOString().split('T')[0],

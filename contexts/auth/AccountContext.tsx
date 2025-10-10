@@ -132,14 +132,23 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
         timeoutPromise,
       ])) as UserAccount;
 
-      setAccount(newAccount);
+      // Award Welcome Explorer badge for new account (using firebase accountService)
+      const { accountService: firebaseAccountService } = await import('@/lib/firebase/firebase-service');
+      await firebaseAccountService.addEarnedBadge(walletData.publicKey, 'welcome_explorer');
+      
+      // Add experience and points for account creation
+      await firebaseAccountService.addExperienceAndPoints(walletData.publicKey, 20, 10);
+
+      // Reload account to get updated data
+      const updatedAccount = await accountService.getAccountByWallet(walletData.publicKey);
+      setAccount(updatedAccount);
       // Account info set (Bugfender removed)
 
       // Success message for new account
       addToast({
         type: 'success',
         title: '🎉 Account Created!',
-        message: 'Welcome to Trustless Work! You earned 150 points and the Welcome Explorer badge!',
+        message: 'Welcome to Trustless Work! You earned the Welcome Explorer badge and 30 points!',
         duration: 5000,
       });
 
@@ -155,7 +164,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
               earnedAt: new Date().toISOString(),
               rarity: welcomeExplorerBadge.rarity as 'common' | 'rare' | 'epic' | 'legendary',
               category: welcomeExplorerBadge.category as 'demo' | 'milestone' | 'achievement' | 'special'
-            }, 50);
+            }, welcomeExplorerBadge.earningPoints);
           }
         }, 1000);
       }

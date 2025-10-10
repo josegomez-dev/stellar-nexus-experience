@@ -47,9 +47,8 @@ export const accountService = {
       // Initialize new fields if they don't exist (match Firebase example structure)
       completedQuests: accountData.completedQuests || existingData.completedQuests || [],
       questProgress: accountData.questProgress || existingData.questProgress || {},
-      profile: accountData.profile || existingData.profile || {
-        level: accountData.level || 1,
-      },
+      // Only preserve existing profile if it exists, don't create empty one
+      ...(existingData.profile && { profile: existingData.profile }),
       stats: accountData.stats || existingData.stats || {
         totalPoints: accountData.totalPoints || 0,
         lastActiveDate: new Date().toISOString().split('T')[0],
@@ -155,17 +154,23 @@ export const accountService = {
       const newTotalPoints = account.totalPoints + points;
       const newLevel = Math.floor(newExperience / 1000) + 1;
 
-      // Update both root-level and nested fields (match Firebase structure)
+      // Update root-level fields and stats
       const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
-      await updateDoc(accountRef, {
+      const updateData: any = {
         experience: newExperience,
         totalPoints: newTotalPoints,
         level: newLevel,
-        'profile.level': newLevel, // Update nested profile.level
         'stats.totalPoints': newTotalPoints, // Update nested stats.totalPoints
         'stats.lastActiveDate': new Date().toISOString().split('T')[0], // Update last active date
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      // Only update profile.level if profile object exists
+      if (account.profile) {
+        updateData['profile.level'] = newLevel;
+      }
+
+      await updateDoc(accountRef, updateData);
     }
   },
 
