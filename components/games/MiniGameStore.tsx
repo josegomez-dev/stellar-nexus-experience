@@ -492,6 +492,16 @@ export default function MiniGameStore() {
 
                     <button
                       onClick={() => {
+                        if (!isConnected) {
+                          // Open wallet sidebar if not connected
+                          window.dispatchEvent(
+                            new CustomEvent('walletSidebarToggle', {
+                              detail: { isOpen: true, isExpanded: true },
+                            })
+                          );
+                          return;
+                        }
+                        
                         const filterSection = document.getElementById('filter-games-section');
                         if (filterSection) {
                           filterSection.scrollIntoView({
@@ -504,6 +514,8 @@ export default function MiniGameStore() {
                       className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 flex items-center space-x-3 ${
                         isConnected && firebaseLoading && !isInitialized
                           ? 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                          : !isConnected
+                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white hover:scale-105 hover:shadow-yellow-500/25 border-white/20 hover:border-white/40'
                           : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:scale-105 hover:shadow-purple-500/25 border-white/20 hover:border-white/40'
                       }`}
                     >
@@ -511,6 +523,10 @@ export default function MiniGameStore() {
                         <>
                           <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
                           <span>Loading...</span>
+                        </>
+                      ) : !isConnected ? (
+                        <>
+                          <span>🔗 Connect to Explore Games</span>
                         </>
                       ) : (
                         <>
@@ -521,6 +537,41 @@ export default function MiniGameStore() {
                     </button>
                   </div>
                 </div>
+
+                {/* Wallet Not Connected State */}
+                {!isConnected && (
+                  <div className='text-center py-16'>
+                    {/* Wallet Icon */}
+                    <div className='inline-block mb-6'>
+                      <div className='text-8xl mb-4 animate-bounce'>💼</div>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className='text-2xl font-semibold text-white mb-2'>
+                      Connect Your Wallet
+                    </h3>
+
+                    {/* Description */}
+                    <p className='text-white/70 text-sm mb-8 max-w-md mx-auto'>
+                      Connect your Stellar wallet to access the Nexus Web3 Playground, track your progress, and compete on the leaderboard!
+                    </p>
+
+                    {/* Connect Button */}
+                    <button
+                      onClick={() => {
+                        // Dispatch wallet sidebar toggle event
+                        window.dispatchEvent(
+                          new CustomEvent('walletSidebarToggle', {
+                            detail: { isOpen: true, isExpanded: true },
+                          })
+                        );
+                      }}
+                      className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 border-2 border-white/20 hover:border-white/40'
+                    >
+                      🔗 Connect Wallet
+                    </button>
+                  </div>
+                )}
 
                 {/* Loading State */}
                 {isConnected && firebaseLoading && !isInitialized && (
@@ -562,8 +613,8 @@ export default function MiniGameStore() {
                   </div>
                 )}
 
-                {/* Main Content - Show when not loading */}
-                {(!isConnected || !firebaseLoading || isInitialized) && (
+                {/* Main Content - Show only when wallet is connected AND account is initialized */}
+                {isConnected && isInitialized && (
                   <>
                 {/* Featured Game Spotlight */}
                 <div className='mb-16'>
