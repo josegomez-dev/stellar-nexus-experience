@@ -1011,7 +1011,11 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           const newScore = shouldIncrement ? s + 1 : s;
           
           // Level up at 1000, 2000, 3000, 4000, 5000, etc.
-          if (newScore > 0 && newScore % 1000 === 0 && newScore !== lastLevelUpScore) {
+          // Check if we've crossed a 1000-point threshold (handles cases where score jumps past exact multiples)
+          const currentThreshold = Math.floor(newScore / 1000);
+          const lastThreshold = Math.floor(lastLevelUpScore / 1000);
+          
+          if (newScore > 0 && currentThreshold > lastThreshold) {
             setLastLevelUpScore(newScore);
             
             // Play level up sound
@@ -1267,7 +1271,34 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             playerTop < coinBottom &&
             playerBottom > coin.y
           ) {
-            setScore(s => s + 50);
+            setScore(s => {
+              const newScore = s + 50;
+              
+              // Check if collecting this coin causes a level-up threshold crossing
+              const currentThreshold = Math.floor(newScore / 1000);
+              const lastThreshold = Math.floor(lastLevelUpScore / 1000);
+              
+              if (newScore > 0 && currentThreshold > lastThreshold) {
+                setLastLevelUpScore(newScore);
+                
+                // Play level up sound
+                if (levelUpSoundRef.current) {
+                  levelUpSoundRef.current.currentTime = 0;
+                  levelUpSoundRef.current.play().catch(() => {});
+                }
+                
+                // Pause game and show quiz
+                setTimeout(() => {
+                  setGameState('paused');
+                  setShowQuiz(true);
+                  setCurrentQuestion(Math.floor(Math.random() * quizQuestions.length));
+                  setQuizAnswered(false);
+                  setIsAnswerCorrect(false);
+                }, 100);
+              }
+              
+              return newScore;
+            });
             
             // Play grab coin sound
             if (grabCoinSoundRef.current) {
@@ -1756,10 +1787,6 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               <circle cx="15" cy="15" r="16" className="fill-blue-400" opacity="0.4">
                 <animate attributeName="r" values="16;18;16" dur="0.6s" repeatCount="indefinite" />
               </circle>
-              {/* Core plasma ball */}
-              <circle cx="15" cy="15" r="12" className="fill-cyan-300" stroke="#00FFFF" strokeWidth="2" opacity="0.9" />
-              <circle cx="15" cy="15" r="10" className="fill-blue-500" opacity="0.7" />
-              <circle cx="15" cy="15" r="8" className="fill-white" opacity="0.8" />
               {/* Electric arcs */}
               <path d="M 15 3 Q 12 8 15 15" stroke="#00FFFF" strokeWidth="1.5" fill="none" opacity="0.8">
                 <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.3s" repeatCount="indefinite" />
@@ -2015,24 +2042,6 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                 {/* Sweat/Speed effect droplets around character - Rendered on top */}
                 {gameState === 'playing' && (
                   <g>
-                    {/* Sweat droplet 1 */}
-                    <ellipse cx="30" cy="-5" rx="2" ry="3" className="fill-cyan-300" opacity="0.7">
-                      <animate attributeName="cx" values="30;35;40" dur="0.6s" repeatCount="indefinite" />
-                      <animate attributeName="cy" values="-5;-10;-15" dur="0.6s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.7;0.5;0" dur="0.6s" repeatCount="indefinite" />
-                    </ellipse>
-                    {/* Sweat droplet 2 */}
-                    <ellipse cx="20" cy="-2" rx="1.5" ry="2.5" className="fill-blue-300" opacity="0.6">
-                      <animate attributeName="cx" values="20;24;28" dur="0.8s" repeatCount="indefinite" />
-                      <animate attributeName="cy" values="-2;-6;-10" dur="0.8s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.6;0.4;0" dur="0.8s" repeatCount="indefinite" />
-                    </ellipse>
-                    {/* Sweat droplet 3 */}
-                    <ellipse cx="25" cy="-7" rx="1.8" ry="2.8" className="fill-cyan-400" opacity="0.8">
-                      <animate attributeName="cx" values="25;28;32" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
-                      <animate attributeName="cy" values="-7;-11;-15" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
-                      <animate attributeName="opacity" values="0.8;0.5;0" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
-                    </ellipse>
                     {/* Speed line 1 */}
                     <line x1="15" y1="0" x2="5" y2="2" stroke="#FFFFFF" strokeWidth="1.5" opacity="0.4">
                       <animate attributeName="opacity" values="0.4;0.6;0" dur="0.5s" repeatCount="indefinite" />
@@ -2043,20 +2052,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                       <animate attributeName="opacity" values="0.3;0.5;0" dur="0.6s" repeatCount="indefinite" begin="0.1s" />
                       <animate attributeName="x1" values="18;12;6" dur="0.6s" repeatCount="indefinite" begin="0.1s" />
                     </line>
-                    {/* Energy spark 1 */}
-                    <circle cx="32" cy="-2" r="1.5" className="fill-yellow-300" opacity="0.9">
-                      <animate attributeName="cx" values="32;36;40" dur="0.4s" repeatCount="indefinite" />
-                      <animate attributeName="cy" values="-2;-4;-6" dur="0.4s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.9;0.6;0" dur="0.4s" repeatCount="indefinite" />
-                      <animate attributeName="r" values="1.5;2;0.5" dur="0.4s" repeatCount="indefinite" />
-                    </circle>
-                    {/* Energy spark 2 */}
-                    <circle cx="22" cy="-5" r="1.2" className="fill-orange-300" opacity="0.8">
-                      <animate attributeName="cx" values="22;26;30" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
-                      <animate attributeName="cy" values="-5;-7;-9" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
-                      <animate attributeName="opacity" values="0.8;0.5;0" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
-                      <animate attributeName="r" values="1.2;1.8;0.5" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
-                    </circle>
+                  
                   </g>
                 )}
               </g>
