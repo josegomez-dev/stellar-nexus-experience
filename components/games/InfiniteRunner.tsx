@@ -64,6 +64,9 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const hitSoundRef = useRef<HTMLAudioElement | null>(null);
   const grabCoinSoundRef = useRef<HTMLAudioElement | null>(null);
   const extraLifeSoundRef = useRef<HTMLAudioElement | null>(null);
+  const groundSlamSoundRef = useRef<HTMLAudioElement | null>(null);
+  const plasmaBallSoundRef = useRef<HTMLAudioElement | null>(null);
+  const safeZoneSoundRef = useRef<HTMLAudioElement | null>(null);
 
   // Game state
   const [gameState, setGameState] = useState<GameState>('ready');
@@ -81,6 +84,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   const [isDucking, setIsDucking] = useState(false);
   const [jumpCount, setJumpCount] = useState(0); // For double jump
   const [isPoweredUp, setIsPoweredUp] = useState(false); // Power-up transformation state
+  const [runningFrame, setRunningFrame] = useState(0); // For running animation (0-6)
 
   // Game speed
   const [gameSpeed, setGameSpeed] = useState(5);
@@ -94,6 +98,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
   // Background
   const [bgOffset, setBgOffset] = useState(0);
   const [theme, setTheme] = useState<'day' | 'sunset' | 'night' | 'cyber'>('day');
+  const [bgImageOffset, setBgImageOffset] = useState(0);
 
   // Web3 Quiz state
   const [showQuiz, setShowQuiz] = useState(false);
@@ -575,6 +580,16 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       
       extraLifeSoundRef.current = new Audio('/sounds/infiniteRunner/extralife.mp3');
       extraLifeSoundRef.current.volume = 0.6;
+      
+      groundSlamSoundRef.current = new Audio('/sounds/infiniteRunner/groundslam.mp3');
+      groundSlamSoundRef.current.volume = 0.5;
+      
+      plasmaBallSoundRef.current = new Audio('/sounds/infiniteRunner/plasmaball.mp3');
+      plasmaBallSoundRef.current.volume = 0.4;
+      
+      safeZoneSoundRef.current = new Audio('/sounds/infiniteRunner/safezone.mp3');
+      safeZoneSoundRef.current.loop = true;
+      safeZoneSoundRef.current.volume = 0.3;
     }
     
     return () => {
@@ -590,6 +605,12 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       if (hitSoundRef.current) hitSoundRef.current = null;
       if (grabCoinSoundRef.current) grabCoinSoundRef.current = null;
       if (extraLifeSoundRef.current) extraLifeSoundRef.current = null;
+      if (groundSlamSoundRef.current) groundSlamSoundRef.current = null;
+      if (plasmaBallSoundRef.current) plasmaBallSoundRef.current = null;
+      if (safeZoneSoundRef.current) {
+        safeZoneSoundRef.current.pause();
+        safeZoneSoundRef.current = null;
+      }
     };
   }, []);
 
@@ -702,6 +723,62 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Running animation - cycle through sprite frames
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    
+    const animationSpeed = 100; // milliseconds per frame (adjust for faster/slower animation)
+    const totalFrames = 7; // We have 7 frames: 1.png through 7.png
+    
+    const interval = setInterval(() => {
+      setRunningFrame(prev => (prev + 1) % totalFrames);
+    }, animationSpeed);
+    
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  // SafeZone sound - play when invulnerable
+  useEffect(() => {
+    if (gameState !== 'playing') {
+      // Stop safezone sound if game is not playing
+      if (safeZoneSoundRef.current) {
+        safeZoneSoundRef.current.pause();
+        safeZoneSoundRef.current.currentTime = 0;
+      }
+      return;
+    }
+
+    const checkInvulnerability = () => {
+      const isInvulnerable = Date.now() < invulnerableUntil;
+      
+      if (isInvulnerable && safeZoneSoundRef.current) {
+        // Play safezone sound if not already playing
+        if (safeZoneSoundRef.current.paused) {
+          safeZoneSoundRef.current.currentTime = 0;
+          safeZoneSoundRef.current.play().catch(() => {});
+        }
+      } else if (safeZoneSoundRef.current && !safeZoneSoundRef.current.paused) {
+        // Stop safezone sound when invulnerability ends
+        safeZoneSoundRef.current.pause();
+        safeZoneSoundRef.current.currentTime = 0;
+      }
+    };
+
+    // Check immediately
+    checkInvulnerability();
+
+    // Check every 100ms to ensure sound stops when invulnerability ends
+    const interval = setInterval(checkInvulnerability, 100);
+
+    return () => {
+      clearInterval(interval);
+      if (safeZoneSoundRef.current) {
+        safeZoneSoundRef.current.pause();
+        safeZoneSoundRef.current.currentTime = 0;
+      }
+    };
+  }, [gameState, invulnerableUntil]);
+
   // Enter fullscreen on game start
     const enterFullscreen = useCallback(() => {
     const elem = document.documentElement;
@@ -783,6 +860,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     setIsPoweredUp(false);
     setPowerUpSpawnedThisLevel(false);
     setBgOffset(0);
+    setBgImageOffset(0);
     setTheme('day');
     setLastLevelUpScore(0);
     obstacleIdRef.current = 0;
@@ -842,7 +920,27 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           }
           break;
         case 'ArrowDown':
-          setIsDucking(true);
+          // Ground slam if in the air, otherwise duck
+          if (playerY < GROUND_Y) {
+            // Fast fall / Ground slam!
+            setPlayerVelocity(20); // Strong downward velocity for quick descent
+            setIsDucking(false); // Don't duck while falling
+            
+            // Play ground slam sound
+            if (groundSlamSoundRef.current) {
+              groundSlamSoundRef.current.currentTime = 0;
+              groundSlamSoundRef.current.play().catch(() => {});
+            }
+          } else {
+            // Normal duck on ground - Transform to plasma ball!
+            setIsDucking(true);
+            
+            // Play plasma ball sound
+            if (plasmaBallSoundRef.current) {
+              plasmaBallSoundRef.current.currentTime = 0;
+              plasmaBallSoundRef.current.play().catch(() => {});
+            }
+          }
           break;
         case 'ArrowRight':
           setGameSpeed(Math.min(baseSpeed * 1.5, 15));
@@ -898,6 +996,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
       // Update background
       setBgOffset(offset => (offset + gameSpeed) % 1000);
+      setBgImageOffset(offset => (offset + gameSpeed * 0.5) % 2000); // Slower parallax for background image
 
       // Update score - only if not in safe zone
       const isInSafeZone = Date.now() < invulnerableUntil;
@@ -1080,11 +1179,11 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       // Check collisions with obstacles (skip if invulnerable)
       const isInvulnerableNow = Date.now() < invulnerableUntil;
       
-      // Adjust hitbox when ducking - make it smaller and lower
-      const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
-      const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
-      const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
-      const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
+      // Adjust hitbox when ducking (plasma ball form) - make it smaller and circular
+      const playerWidth = isDucking ? 30 : PLAYER_WIDTH; // Plasma ball is 30px diameter
+      const playerHeight = isDucking ? 30 : PLAYER_HEIGHT; // Circular hitbox
+      const playerTop = isDucking ? GROUND_Y - 15 : playerY; // Center the plasma ball vertically
+      const playerLeft = isDucking ? PLAYER_X + 10 : PLAYER_X; // Center the plasma ball horizontally
       
       const collision = !isInvulnerableNow && obstacles.some(obs => {
         const playerRight = playerLeft + playerWidth;
@@ -1116,7 +1215,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
           addToast({
             type: 'warning',
             title: '⚠️ Power-Up Lost!',
-            message: 'Transform back to baby mode!',
+            message: 'Energy aura faded!',
             duration: 2000,
           });
         } else {
@@ -1147,15 +1246,15 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         }
       }
 
-      // Check coin collection (use adjusted hitbox for ducking)
+      // Check coin collection (use adjusted hitbox for plasma ball form)
       setCoins(c =>
         c.map(coin => {
           if (coin.collected) return coin;
           
-          const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
-          const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
-          const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
-          const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
+          const playerWidth = isDucking ? 30 : PLAYER_WIDTH; // Match plasma ball size
+          const playerHeight = isDucking ? 30 : PLAYER_HEIGHT;
+          const playerTop = isDucking ? GROUND_Y - 15 : playerY;
+          const playerLeft = isDucking ? PLAYER_X + 10 : PLAYER_X;
           
           const playerRight = playerLeft + playerWidth;
           const playerBottom = playerTop + playerHeight;
@@ -1187,10 +1286,10 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
         p.map(powerUp => {
           if (powerUp.collected) return powerUp;
           
-          const playerWidth = isDucking ? PLAYER_WIDTH * 0.8 : PLAYER_WIDTH;
-          const playerHeight = isDucking ? DUCKING_HEIGHT : PLAYER_HEIGHT;
-          const playerTop = isDucking ? GROUND_Y - DUCKING_HEIGHT : playerY;
-          const playerLeft = isDucking ? PLAYER_X + (PLAYER_WIDTH * 0.1) : PLAYER_X;
+          const playerWidth = isDucking ? 30 : PLAYER_WIDTH; // Match plasma ball size
+          const playerHeight = isDucking ? 30 : PLAYER_HEIGHT;
+          const playerTop = isDucking ? GROUND_Y - 15 : playerY;
+          const playerLeft = isDucking ? PLAYER_X + 10 : PLAYER_X;
           
           const playerRight = playerLeft + playerWidth;
           const playerBottom = playerTop + playerHeight;
@@ -1215,8 +1314,8 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             // Add visual feedback
             addToast({
               type: 'success',
-              title: '⚡ Plasma Power!',
-              message: 'Transformed to Teen Mode! Extra life activated!',
+              title: '⚡ Power Surge!',
+              message: 'Energy Aura Activated! Extra life granted!',
               duration: 3000,
             });
             
@@ -1472,6 +1571,13 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
   const currentTheme = themes[theme];
 
+  // Get background image based on level
+  const getBackgroundImage = () => {
+    // Use level 1-5, cycling back to level 5 for higher levels
+    const bgLevel = Math.min(level, 5);
+    return `/images/loop-bg/level${bgLevel}.jpg`;
+  };
+
   // Prevent hydration issues - only render on client
   if (!isMounted) {
     return (
@@ -1502,7 +1608,24 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                }}>
             
             {/* Game Canvas */}
-            <div className='relative w-full h-full flex items-center justify-center bg-black'>
+            <div className='relative w-full h-full flex items-center justify-center bg-black overflow-hidden'>
+        {/* Parallax Background Image */}
+        <div 
+          className='absolute inset-0 w-[200%] h-full'
+          style={{
+            transform: `translateX(-${bgImageOffset}px)`,
+            backgroundImage: `url('${getBackgroundImage()}'), url('${getBackgroundImage()}')`,
+            backgroundSize: '100% 100%',
+            backgroundPosition: `0 0, 100% 0`,
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.6,
+            filter: 'brightness(0.7)',
+          }}
+        />
+        
+        {/* Dark overlay to maintain game visibility */}
+        <div className='absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40' />
+        
         {/* Stats Overlay */}
         <div className='absolute top-4 left-4 right-20 flex justify-between items-start z-10'>
           <div className='bg-black/50 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-xl'>
@@ -1512,7 +1635,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             {/* Power-up status indicator */}
             {isPoweredUp && (
               <div className='text-yellow-400 text-xs font-bold mt-2 animate-pulse'>
-                ⭐ Teen Mode! Extra Life!
+                ⚡ Energy Aura! Extra Life!
               </div>
             )}
             {/* Invulnerability indicator */}
@@ -1527,7 +1650,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             <div className='text-white/80 text-xs mb-2 font-semibold'>Controls:</div>
             <div className='text-white text-xs space-y-1'>
               <div>⬆️ SPACE/↑: Jump (x2!)</div>
-              <div>⬇️ ↓: Crouch (toggle)</div>
+              <div>⬇️ ↓: Crouch / Ground Slam</div>
               <div>➡️ →: Speed Up</div>
               <div>⬅️ ←: Slow Down</div>
               <div>⏸️ ESC: Pause</div>
@@ -1537,100 +1660,39 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
         {/* Game SVG */}
         <svg
-          className='w-full h-full'
+          className='w-full h-full relative z-10'
           viewBox="0 0 800 400"
           preserveAspectRatio="xMidYMid slice"
           style={{ 
-            background: theme === 'day' ? 'linear-gradient(to bottom, #0f172a, #1e1b4b, #0c0a1e)' :
-                       theme === 'sunset' ? 'linear-gradient(to bottom, #1e1b4b, #312e81, #1e3a8a)' :
-                       theme === 'night' ? 'linear-gradient(to bottom, #020617, #0f172a, #000000)' :
-                       'linear-gradient(to bottom, #0c0a1e, #1e1b4b, #0f172a)'
+            background: 'transparent'
           }}
         >
-          {/* Animated Space Background */}
-          <g id="background">
-            {/* Distant stars (background layer) - slow moving */}
-            {[...Array(50)].map((_, i) => (
-              <circle
-                key={`far-star-${i}`}
-                cx={(bgOffset * 0.1 + i * 50) % 1000}
-                cy={10 + (i * 17) % 300}
-                r={0.5 + (i % 2) * 0.5}
-                className="fill-white"
-                opacity={0.3 + (i % 3) * 0.1}
-              >
-                <animate attributeName="opacity" values={`${0.3 + (i % 3) * 0.1};${0.5 + (i % 3) * 0.1};${0.3 + (i % 3) * 0.1}`} dur={`${2 + (i % 3)}s`} repeatCount="indefinite" />
-              </circle>
-            ))}
-            
-            {/* Medium stars - medium speed */}
-            {[...Array(30)].map((_, i) => (
-              <circle
-                key={`mid-star-${i}`}
-                cx={(bgOffset * 0.3 + i * 80) % 1000}
-                cy={15 + (i * 23) % 300}
-                r={1 + (i % 2)}
-                className="fill-white"
-                opacity={0.5 + (i % 4) * 0.1}
-              >
-                <animate attributeName="opacity" values={`${0.5 + (i % 4) * 0.1};${0.8};${0.5 + (i % 4) * 0.1}`} dur={`${1.5 + (i % 2)}s`} repeatCount="indefinite" />
-              </circle>
-            ))}
-            
-            {/* Close bright stars - faster movement */}
-            {[...Array(15)].map((_, i) => (
+          {/* Overlay stars for depth */}
+          <g id="background" opacity="0.4">
+            {/* Close bright stars - faster movement for parallax */}
+            {[...Array(20)].map((_, i) => (
               <g key={`bright-star-${i}`}>
                 <circle
-                  cx={(bgOffset * 0.5 + i * 120) % 1000}
+                  cx={(bgOffset * 0.7 + i * 120) % 1000}
                   cy={20 + (i * 31) % 250}
                   r={1.5 + (i % 2) * 0.5}
                   className="fill-white"
                   opacity="0.9"
                 >
-                  <animate attributeName="opacity" values="0.9;0.5;0.9" dur={`${1 + (i % 3) * 0.5}s`} repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.9;0.4;0.9" dur={`${1 + (i % 3) * 0.5}s`} repeatCount="indefinite" />
                 </circle>
                 {/* Star glow */}
                 <circle
-                  cx={(bgOffset * 0.5 + i * 120) % 1000}
+                  cx={(bgOffset * 0.7 + i * 120) % 1000}
                   cy={20 + (i * 31) % 250}
                   r={3 + (i % 2)}
                   className="fill-white"
-                  opacity="0.2"
+                  opacity="0.3"
                 >
                   <animate attributeName="r" values={`${3 + (i % 2)};${5 + (i % 2)};${3 + (i % 2)}`} dur={`${1 + (i % 3) * 0.5}s`} repeatCount="indefinite" />
                 </circle>
               </g>
             ))}
-            
-            {/* Distant planets */}
-            {level >= 2 && (
-              <g transform={`translate(${(bgOffset * 0.15 + 650) % 1000}, 80)`}>
-                {/* Blue planet */}
-                <circle cx="0" cy="0" r="30" className="fill-blue-400" opacity="0.8" />
-                <circle cx="0" cy="0" r="28" className="fill-blue-500" opacity="0.6" />
-                <ellipse cx="-8" cy="0" rx="12" ry="25" className="fill-blue-600" opacity="0.4" />
-                <circle cx="-10" cy="-8" r="8" className="fill-white" opacity="0.3" />
-              </g>
-            )}
-            
-            {level >= 3 && (
-              <g transform={`translate(${(bgOffset * 0.12 + 200) % 1000}, 120)`}>
-                {/* Red planet */}
-                <circle cx="0" cy="0" r="25" className="fill-red-500" opacity="0.7" />
-                <circle cx="0" cy="0" r="23" className="fill-red-600" opacity="0.5" />
-                <ellipse cx="5" cy="-5" rx="8" ry="15" className="fill-red-700" opacity="0.4" />
-              </g>
-            )}
-            
-            {level >= 4 && (
-              <g transform={`translate(${(bgOffset * 0.18 + 400) % 1000}, 60)`}>
-                {/* Purple ringed planet */}
-                <ellipse cx="0" cy="0" rx="50" ry="8" className="fill-purple-400" opacity="0.5" />
-                <circle cx="0" cy="0" r="20" className="fill-purple-500" opacity="0.8" />
-                <circle cx="0" cy="0" r="18" className="fill-purple-600" opacity="0.6" />
-                <ellipse cx="0" cy="0" rx="50" ry="5" className="fill-purple-300" opacity="0.3" />
-              </g>
-            )}
             
             {/* Shooting stars occasionally */}
             {score % 500 < 50 && (
@@ -1740,36 +1802,265 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
               </g>
             )}
             
-            <foreignObject x="-5" y={isDucking ? "-20" : "-5"} width={PLAYER_WIDTH + 10} height={PLAYER_HEIGHT + 10}>
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                transformOrigin: 'bottom center'
-              }}>
-                <Image 
-                  src={isPoweredUp ? "/images/character/teen-full.png" : "/images/character/baby-full.png"}
-                  alt={isPoweredUp ? "Teen character" : "Baby character"}
-                  width={PLAYER_WIDTH}
-                  height={PLAYER_HEIGHT}
-                  style={{ 
-                    objectFit: 'contain',
-                    imageRendering: 'pixelated',
-                    transform: isDucking ? 'scaleY(0.4)' : 'scaleY(1)',
+            {/* Character or Plasma Ball when ducking */}
+            {isDucking ? (
+              // Plasma Ball Form when ducking
+              <g transform="translate(10, 15)">
+                {/* Outer glow pulse */}
+                <circle cx="15" cy="15" r="25" className="fill-cyan-400" opacity="0.2">
+                  <animate attributeName="r" values="25;30;25" dur="0.4s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.2;0.4;0.2" dur="0.4s" repeatCount="indefinite" />
+                </circle>
+                {/* Middle glow */}
+                <circle cx="15" cy="15" r="20" className="fill-blue-400" opacity="0.5">
+                  <animate attributeName="r" values="20;22;20" dur="0.3s" repeatCount="indefinite" />
+                </circle>
+                {/* Core plasma ball */}
+                <circle cx="15" cy="15" r="15" className="fill-cyan-300" stroke="#00FFFF" strokeWidth="2" opacity="0.9" />
+                <circle cx="15" cy="15" r="12" className="fill-blue-500" opacity="0.8" />
+                <circle cx="15" cy="15" r="9" className="fill-white" opacity="0.9">
+                  <animate attributeName="opacity" values="0.9;0.6;0.9" dur="0.5s" repeatCount="indefinite" />
+                </circle>
+                {/* Electric arcs - faster animation for speed effect */}
+                <path d="M 15 0 Q 12 7 15 15" stroke="#00FFFF" strokeWidth="2" fill="none" opacity="0.8">
+                  <animate attributeName="opacity" values="0.8;0.2;0.8" dur="0.2s" repeatCount="indefinite" />
+                </path>
+                <path d="M 30 15 Q 23 12 15 15" stroke="#FFFFFF" strokeWidth="2" fill="none" opacity="0.7">
+                  <animate attributeName="opacity" values="0.7;0.2;0.7" dur="0.25s" repeatCount="indefinite" />
+                </path>
+                <path d="M 15 30 Q 18 23 15 15" stroke="#00FFFF" strokeWidth="2" fill="none" opacity="0.6">
+                  <animate attributeName="opacity" values="0.6;0.2;0.6" dur="0.22s" repeatCount="indefinite" />
+                </path>
+                <path d="M 0 15 Q 7 18 15 15" stroke="#FFFFFF" strokeWidth="2" fill="none" opacity="0.8">
+                  <animate attributeName="opacity" values="0.8;0.2;0.8" dur="0.28s" repeatCount="indefinite" />
+                </path>
+                {/* Energy particles spinning */}
+                <circle cx="10" cy="8" r="2" className="fill-cyan-300">
+                  <animate attributeName="cy" values="8;5;8" dur="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="cx" values="10;12;10" dur="0.4s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="20" cy="22" r="2" className="fill-white">
+                  <animate attributeName="cy" values="22;25;22" dur="0.35s" repeatCount="indefinite" />
+                  <animate attributeName="cx" values="20;18;20" dur="0.3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="8" cy="15" r="1.5" className="fill-cyan-400">
+                  <animate attributeName="cx" values="8;5;8" dur="0.4s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="22" cy="15" r="1.5" className="fill-blue-300">
+                  <animate attributeName="cx" values="22;25;22" dur="0.45s" repeatCount="indefinite" />
+                </circle>
+                {/* Speed trail effect */}
+                <ellipse cx="-5" cy="15" rx="8" ry="12" className="fill-cyan-400" opacity="0.3">
+                  <animate attributeName="opacity" values="0.3;0.1;0.3" dur="0.3s" repeatCount="indefinite" />
+                </ellipse>
+              </g>
+            ) : (
+              // Normal Character Form
+              <g>
+                {/* Powered-Up Energy Aura - Purple Neon Effect */}
+                {isPoweredUp && (
+                  <g>
+                    {/* Outer energy ring - purple neon glow */}
+                    <circle cx="25" cy="25" r="40" className="fill-purple-400" opacity="0.2">
+                      <animate attributeName="r" values="40;45;40" dur="1.2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.2;0.35;0.2" dur="1.2s" repeatCount="indefinite" />
+                    </circle>
+                    
+                    {/* Middle energy ring - magenta */}
+                    <circle cx="25" cy="25" r="35" className="fill-fuchsia-500" opacity="0.25">
+                      <animate attributeName="r" values="35;38;35" dur="1s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.25;0.4;0.25" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                    
+                    {/* Inner power ring - bright neon purple */}
+                    <circle cx="25" cy="25" r="32" stroke="#A855F7" strokeWidth="2" fill="none" opacity="0.7">
+                      <animate attributeName="r" values="30;34;30" dur="0.8s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.7;1;0.7" dur="0.8s" repeatCount="indefinite" />
+                    </circle>
+                    
+                    {/* Rotating energy particles */}
+                    <g>
+                      {/* Particle 1 - Purple */}
+                      <circle cx="45" cy="25" r="3" className="fill-purple-400" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Particle glow 1 */}
+                      <circle cx="45" cy="25" r="5" className="fill-purple-300" opacity="0.5">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      
+                      {/* Particle 2 - Pink */}
+                      <circle cx="5" cy="25" r="3" className="fill-pink-400" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Particle glow 2 */}
+                      <circle cx="5" cy="25" r="5" className="fill-pink-300" opacity="0.5">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      
+                      {/* Particle 3 - Violet */}
+                      <circle cx="25" cy="5" r="3" className="fill-violet-400" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Particle glow 3 */}
+                      <circle cx="25" cy="5" r="5" className="fill-violet-300" opacity="0.5">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      
+                      {/* Particle 4 - Fuchsia */}
+                      <circle cx="25" cy="45" r="3" className="fill-fuchsia-400" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Particle glow 4 */}
+                      <circle cx="25" cy="45" r="5" className="fill-fuchsia-300" opacity="0.5">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* Counter-rotating energy particles (faster) */}
+                    <g>
+                      {/* Diagonal particle 1 */}
+                      <circle cx="40" cy="10" r="2.5" className="fill-purple-300" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="360 25 25" to="0 25 25" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Diagonal particle 2 */}
+                      <circle cx="10" cy="40" r="2.5" className="fill-pink-300" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="360 25 25" to="0 25 25" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Diagonal particle 3 */}
+                      <circle cx="40" cy="40" r="2.5" className="fill-fuchsia-300" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="360 25 25" to="0 25 25" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      {/* Diagonal particle 4 */}
+                      <circle cx="10" cy="10" r="2.5" className="fill-violet-300" opacity="0.9">
+                        <animateTransform attributeName="transform" type="rotate" from="360 25 25" to="0 25 25" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* Floating sparkles around character */}
+                    <g>
+                      <circle cx="15" cy="10" r="1.5" className="fill-white" opacity="0.9">
+                        <animate attributeName="cy" values="10;5;10" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx="35" cy="15" r="1.5" className="fill-cyan-200" opacity="0.9">
+                        <animate attributeName="cy" values="15;10;15" dur="1.8s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.8s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx="10" cy="30" r="1.5" className="fill-white" opacity="0.9">
+                        <animate attributeName="cy" values="30;25;30" dur="2.2s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.2s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx="40" cy="30" r="1.5" className="fill-purple-200" opacity="0.9">
+                        <animate attributeName="cy" values="30;35;30" dur="1.9s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.9s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx="25" cy="8" r="1.5" className="fill-pink-200" opacity="0.9">
+                        <animate attributeName="cy" values="8;3;8" dur="2.1s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.1s" repeatCount="indefinite" />
+                      </circle>
+                    </g>
+                    
+                    {/* Energy burst effect - Star shape */}
+                    <g opacity="0.4">
+                      <path d="M 25 15 L 27 20 L 32 20 L 28 24 L 30 29 L 25 26 L 20 29 L 22 24 L 18 20 L 23 20 Z" className="fill-purple-400">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="4s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.4;0.7;0.4" dur="2s" repeatCount="indefinite" />
+                      </path>
+                    </g>
+                  </g>
+                )}
+                
+                {/* Character Sprite - Running Animation */}
+                <foreignObject x="-15" y="-15" width={PLAYER_WIDTH + 30} height={PLAYER_HEIGHT + 30}>
+                  <div style={{ 
+                    width: '100%', 
+                    height: 'auto', 
+                    display: 'flex', 
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
                     transformOrigin: 'bottom center',
-                    transition: 'transform 0.15s ease-out',
-                    filter: Date.now() < invulnerableUntil 
-                      ? 'drop-shadow(0 0 10px rgba(0,255,255,0.8)) drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
-                      : isPoweredUp
-                      ? 'drop-shadow(0 0 8px rgba(255,215,0,0.6)) drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
-                      : 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
-                  }}
-                  priority
-                />
-              </div>
-            </foreignObject>
+                    overflow: 'visible'
+                  }}>
+                    <Image 
+                      src={`/images/sprites/run/${runningFrame + 1}.png`}
+                      alt="Running character"
+                      width={PLAYER_WIDTH - 10}
+                      height={PLAYER_HEIGHT - 10}
+                      style={{ 
+                        objectFit: 'contain',
+                        imageRendering: 'pixelated',
+                        transformOrigin: 'bottom center',
+                        transition: 'transform 0.15s ease-out',
+                        maxWidth: 'none',
+                        filter: Date.now() < invulnerableUntil 
+                          ? 'drop-shadow(0 0 10px rgba(0,255,255,0.8)) drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
+                          : isPoweredUp
+                          ? 'drop-shadow(0 0 15px rgba(168,85,247,0.9)) drop-shadow(0 0 25px rgba(217,70,239,0.6)) drop-shadow(0 3px 6px rgba(0,0,0,0.4)) brightness(1.15) saturate(1.2)'
+                          : 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))'
+                      }}
+                      priority
+                    />
+                  </div>
+                </foreignObject>
+
+                {/* Sweat/Speed effect droplets around character - Rendered on top */}
+                {gameState === 'playing' && (
+                  <g>
+                    {/* Sweat droplet 1 */}
+                    <ellipse cx="30" cy="-5" rx="2" ry="3" className="fill-cyan-300" opacity="0.7">
+                      <animate attributeName="cx" values="30;35;40" dur="0.6s" repeatCount="indefinite" />
+                      <animate attributeName="cy" values="-5;-10;-15" dur="0.6s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.7;0.5;0" dur="0.6s" repeatCount="indefinite" />
+                    </ellipse>
+                    {/* Sweat droplet 2 */}
+                    <ellipse cx="20" cy="-2" rx="1.5" ry="2.5" className="fill-blue-300" opacity="0.6">
+                      <animate attributeName="cx" values="20;24;28" dur="0.8s" repeatCount="indefinite" />
+                      <animate attributeName="cy" values="-2;-6;-10" dur="0.8s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.6;0.4;0" dur="0.8s" repeatCount="indefinite" />
+                    </ellipse>
+                    {/* Sweat droplet 3 */}
+                    <ellipse cx="25" cy="-7" rx="1.8" ry="2.8" className="fill-cyan-400" opacity="0.8">
+                      <animate attributeName="cx" values="25;28;32" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
+                      <animate attributeName="cy" values="-7;-11;-15" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
+                      <animate attributeName="opacity" values="0.8;0.5;0" dur="0.7s" repeatCount="indefinite" begin="0.2s" />
+                    </ellipse>
+                    {/* Speed line 1 */}
+                    <line x1="15" y1="0" x2="5" y2="2" stroke="#FFFFFF" strokeWidth="1.5" opacity="0.4">
+                      <animate attributeName="opacity" values="0.4;0.6;0" dur="0.5s" repeatCount="indefinite" />
+                      <animate attributeName="x1" values="15;10;5" dur="0.5s" repeatCount="indefinite" />
+                    </line>
+                    {/* Speed line 2 */}
+                    <line x1="18" y1="5" x2="8" y2="7" stroke="#00FFFF" strokeWidth="1.5" opacity="0.3">
+                      <animate attributeName="opacity" values="0.3;0.5;0" dur="0.6s" repeatCount="indefinite" begin="0.1s" />
+                      <animate attributeName="x1" values="18;12;6" dur="0.6s" repeatCount="indefinite" begin="0.1s" />
+                    </line>
+                    {/* Energy spark 1 */}
+                    <circle cx="32" cy="-2" r="1.5" className="fill-yellow-300" opacity="0.9">
+                      <animate attributeName="cx" values="32;36;40" dur="0.4s" repeatCount="indefinite" />
+                      <animate attributeName="cy" values="-2;-4;-6" dur="0.4s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.9;0.6;0" dur="0.4s" repeatCount="indefinite" />
+                      <animate attributeName="r" values="1.5;2;0.5" dur="0.4s" repeatCount="indefinite" />
+                    </circle>
+                    {/* Energy spark 2 */}
+                    <circle cx="22" cy="-5" r="1.2" className="fill-orange-300" opacity="0.8">
+                      <animate attributeName="cx" values="22;26;30" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
+                      <animate attributeName="cy" values="-5;-7;-9" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
+                      <animate attributeName="opacity" values="0.8;0.5;0" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
+                      <animate attributeName="r" values="1.2;1.8;0.5" dur="0.5s" repeatCount="indefinite" begin="0.15s" />
+                    </circle>
+                  </g>
+                )}
+              </g>
+            )}
             {/* Double jump indicator */}
             {jumpCount === 2 && (
               <g>
@@ -1805,7 +2096,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                   </div>
                   <div className='flex items-center gap-1.5'>
                     <span>⬇️</span>
-                    <span>Crouch (toggle)</span>
+                    <span>Crouch / Slam</span>
                   </div>
                   <div className='flex items-center gap-1.5'>
                     <span>➡️</span>
@@ -1872,7 +2163,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
         {/* Web3 Quiz Modal */}
         {showQuiz && gameState === 'paused' && (
-          <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+          <div className='absolute inset-0 flex items-center justify-center z-50'>
             <div className='text-center bg-gradient-to-br from-purple-900/90 to-cyan-900/90 p-6 rounded-3xl border-2 border-cyan-400/50 max-w-xl w-full mx-4 shadow-2xl'>
               {/* Header */}
               <h2 className='text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2'>
@@ -2029,7 +2320,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
         {/* Game Over Screen */}
         {gameState === 'gameOver' && (
-          <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+          <div className='absolute inset-0 flex items-center justify-center z-50'>
             <div className='text-center bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-3xl border border-white/20 max-w-lg w-full mx-4'>
               {/* Header */}
               <div className='text-5xl mb-3'>💀</div>
@@ -2159,7 +2450,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
       {/* Start Game Confirmation Modal */}
       {showStartConfirmation && (
-        <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+        <div className='absolute inset-0 flex items-center justify-center z-50'>
           <div className='bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 rounded-3xl border-2 border-cyan-400/50 p-8 max-w-md w-full mx-4 shadow-2xl'>
             <div className='text-center'>
               {/* Icon */}
@@ -2207,7 +2498,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
 
       {/* Replay Game Confirmation Modal */}
       {showReplayConfirmation && (
-        <div className='absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50'>
+        <div className='absolute inset-0 flex items-center justify-center z-50'>
           <div className='bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 rounded-3xl border-2 border-cyan-400/50 p-8 max-w-md w-full mx-4 shadow-2xl'>
             <div className='text-center'>
               {/* Icon */}
