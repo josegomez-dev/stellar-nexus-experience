@@ -45,7 +45,7 @@ export class AccountService {
     // Match the exact structure from firebase-service.ts and Firebase example
     const newAccount = {
       id: accountId,
-      displayName: publicKey.slice(0, 6) + '...' + publicKey.slice(-4), // Default display name
+      displayName: 'Anonymous User', // Default display name
       walletAddress,
       network: network.toUpperCase(), // Match "TESTNET" format from example
       level: 1,

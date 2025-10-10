@@ -119,7 +119,7 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       // Add timeout to prevent hanging
       const accountCreationPromise = accountService.createAccount(
         walletData.publicKey,
-        walletData.publicKey,
+        walletData.publicKey, // publicKey parameter (not used for displayName anymore)
         walletData.network
       );
 
