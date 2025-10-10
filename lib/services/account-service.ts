@@ -31,120 +31,40 @@ export class AccountService {
     return AccountService.instance;
   }
 
-  // Create new account
+  // Create new account - matches the structure used in firebase-service.ts
   async createAccount(
     walletAddress: string,
     publicKey: string,
     network: string
-  ): Promise<UserAccount> {
-    // Use wallet address as account ID (not auto-generated UUID)
+  ): Promise<any> {
+    // Use wallet address as account ID (matches Firebase example structure)
     const accountId = walletAddress;
 
     const now = Timestamp.now();
 
-    const newAccount: UserAccount = {
+    // Match the exact structure from firebase-service.ts and Firebase example
+    const newAccount = {
       id: accountId,
+      displayName: publicKey.slice(0, 6) + '...' + publicKey.slice(-4), // Default display name
       walletAddress,
-      publicKey,
-      network,
+      network: network.toUpperCase(), // Match "TESTNET" format from example
+      level: 1,
+      experience: 0,
+      totalPoints: 0,
+      demosCompleted: [],
+      badgesEarned: [],
+      clappedDemos: [],
+      completedQuests: [],
+      questProgress: {},
       createdAt: now,
       updatedAt: now,
       lastLoginAt: now,
-      level: 1, // Root level for backward compatibility
-      experience: 150, // Experience points
-      totalPoints: 150, // Account creation bonus (100) + Welcome Explorer (10) + margin
-
       profile: {
         level: 1,
-        totalPoints: 150, // Account creation bonus (100) + Trust Guardian (50)
-        experience: 150, // Experience points (same as points for now)
       },
-
-      demos: {
-        demo1: {
-          demoId: 'demo1',
-          demoName: 'Baby Steps to Riches',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        'hello-milestone': {
-          demoId: 'hello-milestone',
-          demoName: 'Baby Steps to Riches',
-          status: 'available',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        demo2: {
-          demoId: 'demo2',
-          demoName: 'Milestone Voting',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        'milestone-voting': {
-          demoId: 'milestone-voting',
-          demoName: 'Democracy in Action',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        demo3: {
-          demoId: 'demo3',
-          demoName: 'Dispute Resolution',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        'dispute-resolution': {
-          demoId: 'dispute-resolution',
-          demoName: 'Drama Queen Escrow',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        demo4: {
-          demoId: 'demo4',
-          demoName: 'Micro Task Marketplace',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-        'micro-marketplace': {
-          demoId: 'micro-marketplace',
-          demoName: 'Gig Economy Madness',
-          status: 'locked',
-          attempts: 0,
-          pointsEarned: 0,
-        },
-      },
-
-      badges: [
-        // Award Welcome Explorer badge for account creation
-        {
-          id: uuidv4(),
-          name: 'Welcome Explorer',
-          description: 'Joined the Nexus Experience community',
-          imageUrl: '🌟',
-          rarity: 'common' as const,
-          earnedAt: now,
-          pointsValue: 10,
-        },
-      ],
-      rewards: [],
-
       stats: {
-        totalDemosCompleted: 0,
-        totalPointsEarned: 110, // Account creation bonus (100) + Welcome Explorer (10)
-        totalTimeSpent: 0,
-        streakDays: 1, // Start with 1 day streak
+        totalPoints: 0, // Will be updated when badges are earned
         lastActiveDate: new Date().toISOString().split('T')[0],
-      },
-
-      settings: {
-        notifications: true,
-        publicProfile: false,
-        shareProgress: true,
       },
     };
 

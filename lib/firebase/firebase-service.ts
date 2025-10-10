@@ -37,11 +37,23 @@ export const accountService = {
   // Create or update account
   async createOrUpdateAccount(accountData: Partial<Account>): Promise<void> {
     const accountRef = doc(db, COLLECTIONS.ACCOUNTS, accountData.id!);
+    
+    // Get existing account to preserve fields
+    const existingDoc = await getDoc(accountRef);
+    const existingData = existingDoc.exists() ? existingDoc.data() : {};
+    
     const accountDoc = {
       ...accountData,
-      // Initialize new fields if they don't exist
-      completedQuests: accountData.completedQuests || [],
-      questProgress: accountData.questProgress || {},
+      // Initialize new fields if they don't exist (match Firebase example structure)
+      completedQuests: accountData.completedQuests || existingData.completedQuests || [],
+      questProgress: accountData.questProgress || existingData.questProgress || {},
+      profile: accountData.profile || existingData.profile || {
+        level: accountData.level || 1,
+      },
+      stats: accountData.stats || existingData.stats || {
+        totalPoints: accountData.totalPoints || 0,
+        lastActiveDate: new Date().toISOString().split('T')[0],
+      },
       updatedAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
     };
@@ -143,10 +155,16 @@ export const accountService = {
       const newTotalPoints = account.totalPoints + points;
       const newLevel = Math.floor(newExperience / 1000) + 1;
 
-      await this.updateAccountProgress(walletAddress, {
+      // Update both root-level and nested fields (match Firebase structure)
+      const accountRef = doc(db, COLLECTIONS.ACCOUNTS, walletAddress);
+      await updateDoc(accountRef, {
         experience: newExperience,
         totalPoints: newTotalPoints,
         level: newLevel,
+        'profile.level': newLevel, // Update nested profile.level
+        'stats.totalPoints': newTotalPoints, // Update nested stats.totalPoints
+        'stats.lastActiveDate': new Date().toISOString().split('T')[0], // Update last active date
+        updatedAt: serverTimestamp(),
       });
     }
   },
@@ -660,7 +678,7 @@ export const firebaseUtils = {
     return Math.floor(experience / 1000) + 1;
   },
 
-  // Create account
+  // Create account - matches exact Firebase structure from example
   async createAccount(
     walletAddress: string,
     displayName: string,
@@ -670,13 +688,15 @@ export const firebaseUtils = {
       id: walletAddress,
       displayName,
       walletAddress,
-      network,
+      network: network.toUpperCase(), // Match "TESTNET" format
       level: 1,
       experience: 0,
       totalPoints: 0,
       demosCompleted: [],
       badgesEarned: [],
       clappedDemos: [],
+      completedQuests: [],
+      questProgress: {},
       createdAt: new Date(),
       updatedAt: new Date(),
       lastLoginAt: new Date(),

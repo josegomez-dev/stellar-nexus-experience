@@ -48,6 +48,24 @@ export interface Account {
   completedQuests: string[]; // Array of quest IDs completed
   questProgress: Record<string, number>; // Progress tracking for multi-step quests
 
+  // Profile (nested object for additional user data)
+  profile?: {
+    level?: number;
+    totalPoints?: number;
+    experience?: number;
+    displayName?: string;
+    username?: string;
+  };
+
+  // Stats (nested object for tracking statistics)
+  stats?: {
+    totalPoints?: number;
+    lastActiveDate?: string; // Format: "YYYY-MM-DD"
+    totalDemosCompleted?: number;
+    totalPointsEarned?: number;
+    totalTimeSpent?: number;
+    streakDays?: number;
+  };
 
   // Transaction history - now stored in separate collection
 }
