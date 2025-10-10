@@ -107,14 +107,14 @@ export const PokemonReferralCard: React.FC<PokemonReferralCardProps> = ({
     },
     {
       id: 1,
-      name: 'Blockchain Sailor',
+      name: 'Blockchain Explorer',
       level: 2,
       image: '/images/games/defi-trading-arena.png',
       available: userLevel >= 2,
     },
     {
       id: 2,
-      name: 'Stellar Shark',
+      name: 'Stellar Expert',
       level: 3,
       image: '/images/games/web3-basics-adventure.png',
       available: userLevel >= 3,

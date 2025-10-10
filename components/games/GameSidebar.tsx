@@ -463,66 +463,68 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             {/* LEADERBOARD VIEW */}
             {currentView === 'leaderboard' && (
               <div className='space-y-4'>
-                {/* Game Stats */}
-                <div className='bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-xl p-4 border-2 border-yellow-500/40 shadow-lg'>
-                  <div className='text-center mb-3'>
-                    <div className='text-yellow-400 font-bold text-lg mb-1'>📊 Game Statistics</div>
+                {/* Winner's Circle - Highlight the Champion */}
+                {topScores.length > 0 && (
+                  <div className='bg-gradient-to-br from-yellow-500/30 to-orange-500/30 rounded-xl p-4 border-2 border-yellow-400/60 shadow-lg'>
+                    <div className='text-center mb-3'>
+                      <div className='text-yellow-300 font-bold text-sm mb-2'>👑 Current Champion</div>
+                    </div>
+                    <div className='flex items-center justify-between bg-black/40 rounded-lg p-3 border border-yellow-400/40'>
+                      <div className='flex-1'>
+                        <div className='text-yellow-400 font-bold text-lg'>{topScores[0].username}</div>
+                        <div className='text-white/60 text-xs'>Reigning Champion</div>
+                      </div>
+                      <div className='text-right'>
+                        <div className='text-yellow-300 font-bold text-2xl'>{topScores[0].score.toLocaleString()}</div>
+                        <div className='text-white/60 text-xs'>High Score</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className='grid grid-cols-2 gap-2'>
-                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                      <div className='text-yellow-400 text-xs mb-1'>Total Plays</div>
-                      <div className='text-white font-bold text-lg'>{gameStats.totalPlays.toLocaleString()}</div>
+                )}
+
+                {/* Simple Game Stats */}
+                <div className='bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-4 border border-purple-500/30'>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='text-center'>
+                      <div className='text-purple-400 font-bold text-2xl'>{gameStats.uniquePlayers}</div>
+                      <div className='text-white/60 text-xs'>Players</div>
                     </div>
-                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                      <div className='text-orange-400 text-xs mb-1'>Players</div>
-                      <div className='text-white font-bold text-lg'>{gameStats.uniquePlayers.toLocaleString()}</div>
-                    </div>
-                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                      <div className='text-cyan-400 text-xs mb-1'>Avg Score</div>
-                      <div className='text-white font-bold text-lg'>{gameStats.averageScore.toLocaleString()}</div>
-                    </div>
-                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                      <div className='text-green-400 text-xs mb-1'>High Score</div>
-                      <div className='text-white font-bold text-lg'>{gameStats.highestScore.toLocaleString()}</div>
+                    <div className='text-center'>
+                      <div className='text-cyan-400 font-bold text-2xl'>{gameStats.highestScore.toLocaleString()}</div>
+                      <div className='text-white/60 text-xs'>High Score</div>
                     </div>
                   </div>
                 </div>
 
                 {/* User's Best Score (if logged in and has played) */}
                 {account && userBestScore && (
-                  <div className='bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-4 border-2 border-purple-500/40 shadow-lg'>
+                  <div className='bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 border-2 border-purple-500/40 shadow-lg'>
                     <div className='text-center mb-2'>
-                      <div className='text-purple-400 font-bold text-sm mb-2'>🎮 Your Best Score</div>
+                      <div className='text-purple-400 font-bold text-sm'>🎮 Your Best</div>
                     </div>
-                    <div className='grid grid-cols-2 gap-2'>
-                      <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                        <div className='text-yellow-400 text-xs mb-1'>Score</div>
-                        <div className='text-white font-bold text-xl'>{userBestScore.score.toLocaleString()}</div>
-                      </div>
-                      <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
-                        <div className='text-cyan-400 text-xs mb-1'>Your Rank</div>
+                    <div className='flex items-center justify-between bg-black/40 rounded-lg p-2 border border-purple-400/30'>
+                      <div>
+                        <div className='text-purple-300 text-xs'>Rank</div>
                         <div className='text-white font-bold text-xl'>#{userRank}</div>
                       </div>
-                    </div>
-                    {userBestScore.level && (
-                      <div className='mt-2 bg-black/30 rounded-lg p-2 border border-white/20 text-center'>
-                        <div className='text-green-400 text-xs mb-1'>Level Reached</div>
-                        <div className='text-white font-bold text-lg'>{userBestScore.level}</div>
+                      <div className='text-right'>
+                        <div className='text-purple-300 text-xs'>Best Score</div>
+                        <div className='text-yellow-400 font-bold text-xl'>{userBestScore.score.toLocaleString()}</div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
 
                 {/* Top 10 Leaderboard */}
                 <div>
-                  <div className='text-white font-semibold text-sm mb-2 flex items-center justify-between'>
-                    <span>🏆 Top 10 Players</span>
-                    <span className='text-yellow-400 text-xs'>{gameTitle}</span>
+                  <div className='text-white font-semibold text-sm mb-3 text-center'>
+                    <span className='text-lg'>🏆 Top 10 Players</span>
                   </div>
                   
                   <div className='space-y-2'>
                     {topScores.length === 0 && (
-                      <div className='text-white/40 text-xs text-center py-8'>
+                      <div className='text-white/40 text-xs text-center py-8 bg-white/5 rounded-lg border border-white/10'>
+                        <div className='text-4xl mb-2'>🎮</div>
                         No scores yet. Be the first to set a record!
                       </div>
                     )}
@@ -530,61 +532,43 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
                     {topScores.map((scoreEntry, index) => (
                       <div
                         key={scoreEntry.id}
-                        className={`rounded-lg p-3 border transition-all ${
+                        className={`rounded-lg p-2.5 border transition-all ${
                           scoreEntry.userId === account?.id
-                            ? 'bg-gradient-to-br from-purple-600/30 to-pink-600/30 border-purple-400/50'
+                            ? 'bg-gradient-to-br from-purple-600/30 to-pink-600/30 border-purple-400/50 shadow-lg'
                             : 'bg-gradient-to-br from-white/5 to-white/10 border-white/10 hover:border-yellow-400/30'
                         }`}
                       >
-                        <div className='flex items-center justify-between'>
-                          <div className='flex items-center gap-3 flex-1 min-w-0'>
-                            {/* Rank */}
-                            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                              index === 0
-                                ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black'
-                                : index === 1
-                                ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black'
-                                : index === 2
-                                ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-black'
-                                : 'bg-white/20 text-white'
-                            }`}>
-                              {index === 0 && '🥇'}
-                              {index === 1 && '🥈'}
-                              {index === 2 && '🥉'}
-                              {index > 2 && (index + 1)}
-                            </div>
-                            
-                            {/* Player Info */}
-                            <div className='flex-1 min-w-0'>
-                              <div className='text-white font-semibold text-xs truncate flex items-center gap-1'>
-                                {scoreEntry.username}
-                                {scoreEntry.userId === account?.id && (
-                                  <span className='text-purple-400 text-xs'>(You)</span>
-                                )}
-                              </div>
-                              {scoreEntry.level && (
-                                <div className='text-cyan-400 text-xs'>Level {scoreEntry.level}</div>
+                        <div className='flex items-center justify-between gap-2'>
+                          {/* Rank Badge */}
+                          <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
+                            index === 0
+                              ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black shadow-lg'
+                              : index === 1
+                              ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black shadow-lg'
+                              : index === 2
+                              ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-black shadow-lg'
+                              : 'bg-white/20 text-white'
+                          }`}>
+                            {index === 0 && '🥇'}
+                            {index === 1 && '🥈'}
+                            {index === 2 && '🥉'}
+                            {index > 2 && `#${index + 1}`}
+                          </div>
+                          
+                          {/* Player Name */}
+                          <div className='flex-1 min-w-0'>
+                            <div className='text-white font-semibold text-sm truncate flex items-center gap-1'>
+                              {scoreEntry.username}
+                              {scoreEntry.userId === account?.id && (
+                                <span className='text-purple-400 text-xs'>(You)</span>
                               )}
                             </div>
                           </div>
                           
                           {/* Score */}
                           <div className='text-right flex-shrink-0'>
-                            <div className='text-yellow-400 font-bold text-lg'>{scoreEntry.score.toLocaleString()}</div>
-                            {scoreEntry.metadata?.distance && (
-                              <div className='text-cyan-300 text-xs'>{scoreEntry.metadata.distance}m</div>
-                            )}
+                            <div className='text-yellow-400 font-bold text-base'>{scoreEntry.score.toLocaleString()}</div>
                           </div>
-                        </div>
-                        
-                        {/* Timestamp */}
-                        <div className='text-white/40 text-xs mt-2'>
-                          {scoreEntry.timestamp ? new Date(scoreEntry.timestamp).toLocaleDateString([], { 
-                            month: 'short', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          }) : 'Recently'}
                         </div>
                       </div>
                     ))}
@@ -672,20 +656,23 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             {/* SOCIAL SHARE VIEW */}
             {currentView === 'social' && (
               <div className='space-y-4'>
-                {/* Epic Stats Card */}
+                {/* Epic Stats Card - Current Session */}
                 <div className='bg-gradient-to-br from-pink-600/20 to-purple-600/20 rounded-xl p-4 border-2 border-pink-500/40 shadow-lg'>
                   <div className='text-center mb-3'>
                     <div className='text-yellow-400 font-bold text-lg mb-1'>🏆 Epic Achievement!</div>
                     <div className='text-white/80 text-xs'>Show off your gaming skills</div>
+                    <div className='text-cyan-300 text-xs mt-1'>📊 Current Session Stats</div>
                   </div>
                   <div className='grid grid-cols-2 gap-3'>
                     <div className='bg-black/30 rounded-lg p-3 border border-white/20'>
-                      <div className='text-cyan-400 text-xs mb-1'>Score</div>
+                      <div className='text-cyan-400 text-xs mb-1'>Current Score</div>
                       <div className='text-white font-bold text-2xl'>{currentScore.toLocaleString()}</div>
+                      <div className='text-white/50 text-xs mt-1'>This Session</div>
                     </div>
                     <div className='bg-black/30 rounded-lg p-3 border border-white/20'>
                       <div className='text-purple-400 text-xs mb-1'>Level</div>
                       <div className='text-white font-bold text-2xl'>{currentLevel}</div>
+                      <div className='text-white/50 text-xs mt-1'>Current</div>
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useAccount } from '@/contexts/auth/AccountContext';
+import { useToast } from '@/contexts/ui/ToastContext';
+import { gameScoresService } from '@/lib/firebase/firebase-service';
+import GameSidebar from './GameSidebar';
 
 interface Puzzle {
   id: number;
@@ -65,6 +69,9 @@ const puzzles: Puzzle[] = [
 ];
 
 export default function EscrowPuzzleMaster() {
+  const { account } = useAccount();
+  const { addToast } = useToast();
+  
   const [currentPuzzle, setCurrentPuzzle] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -72,6 +79,10 @@ export default function EscrowPuzzleMaster() {
   const [gameState, setGameState] = useState<'intro' | 'playing' | 'completed'>('intro');
   const [timeLeft, setTimeLeft] = useState(60);
   const [achievements, setAchievements] = useState<string[]>([]);
+  const [scoreSaved, setScoreSaved] = useState(false);
+  
+  const gameId = 'escrow-puzzle-master';
+  const gameTitle = 'Escrow Puzzle Master';
 
   useEffect(() => {
     if (gameState === 'playing' && timeLeft > 0) {
@@ -119,6 +130,41 @@ export default function EscrowPuzzleMaster() {
     }
   };
 
+  const saveScoreToLeaderboard = async (finalScore: number) => {
+    if (!account || scoreSaved) return;
+    
+    try {
+      await gameScoresService.submitScore(
+        gameId,
+        account.id,
+        account.profile?.displayName || account.profile?.username || account.displayName || 'Anonymous',
+        finalScore,
+        1, // Level not applicable for puzzle game
+        {
+          puzzlesSolved: currentPuzzle + 1,
+          achievementsUnlocked: achievements.length,
+        }
+      );
+      
+      setScoreSaved(true);
+      
+      addToast({
+        type: 'success',
+        title: '🏆 Score Saved!',
+        message: `Your score of ${finalScore} has been recorded!`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Failed to save score:', error);
+      addToast({
+        type: 'error',
+        title: 'Save Failed',
+        message: 'Could not save your score to the leaderboard.',
+        duration: 3000,
+      });
+    }
+  };
+
   const resetGame = () => {
     setGameState('intro');
     setScore(0);
@@ -126,7 +172,15 @@ export default function EscrowPuzzleMaster() {
     setSelectedAnswer(null);
     setShowResult(false);
     setAchievements([]);
+    setScoreSaved(false);
   };
+  
+  // Save score when game completes
+  useEffect(() => {
+    if (gameState === 'completed' && !scoreSaved && account) {
+      saveScoreToLeaderboard(score);
+    }
+  }, [gameState, scoreSaved, score, account]);
 
   if (gameState === 'intro') {
     return (
@@ -356,5 +410,9 @@ export default function EscrowPuzzleMaster() {
     );
   }
 
-  return null;
+  return (
+    <>
+      <GameSidebar gameId={gameId} gameTitle={gameTitle} currentScore={score} currentLevel={1} />
+    </>
+  );
 }

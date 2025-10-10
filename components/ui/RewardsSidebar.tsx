@@ -136,9 +136,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   // Character phase logic
   const getAvailableCharacterPhases = () => {
     const phases = [
-      { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 5 },
-      { id: 2, name: 'Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
+      { id: 0, name: 'Trustless Scout', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Blockchain Explorer', image: '/images/character/teen.png', minLevel: 5 },
+      { id: 2, name: 'Stellar Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
     ];
     return phases.filter(phase => level >= phase.minLevel);
   };
@@ -150,9 +150,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   useEffect(() => {
     // Find the highest available phase based on current level
     const phases = [
-      { id: 0, name: 'Baby', image: '/images/character/baby.png', minLevel: 1 },
-      { id: 1, name: 'Teen', image: '/images/character/teen.png', minLevel: 5 },
-      { id: 2, name: 'Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
+      { id: 0, name: 'Trustless Scout', image: '/images/character/baby.png', minLevel: 1 },
+      { id: 1, name: 'Blockchain Explorer', image: '/images/character/teen.png', minLevel: 5 },
+      { id: 2, name: 'Stellar Expert', image: '/images/character/nexus-prime-chat.png', minLevel: 10 }
     ];
     
     // Find the highest phase the user has unlocked
@@ -169,15 +169,19 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
   }, [level]);
 
   const handlePreviousPhase = () => {
-    setSelectedCharacterPhase(prev => 
-      prev > 0 ? prev - 1 : availablePhases.length - 1
-    );
+    setSelectedCharacterPhase(prev => {
+      const newPhase = prev > 0 ? prev - 1 : availablePhases.length - 1;
+      // Add visual feedback when changing phases
+      return newPhase;
+    });
   };
 
   const handleNextPhase = () => {
-    setSelectedCharacterPhase(prev => 
-      prev < availablePhases.length - 1 ? prev + 1 : 0
-    );
+    setSelectedCharacterPhase(prev => {
+      const newPhase = prev < availablePhases.length - 1 ? prev + 1 : 0;
+      // Add visual feedback when changing phases
+      return newPhase;
+    });
   };
 
   const tabs = [
@@ -239,9 +243,9 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
                 />
               )}
 
-              {/* Level Badge */}
-              <div className='absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20'>
-                {level < 5 ? 'Baby' : level < 10 ? 'Teen' : 'Expert'} Lv.{level}
+              {/* Phase Badge - Changes with arrow navigation */}
+              <div className='absolute -top-6 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-sm font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white/20 transition-all duration-300'>
+                {currentPhase?.name || 'Trustless Scout'}
               </div>
 
               {/* Phase Indicator */}
@@ -262,6 +266,35 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
 
               {/* Glow Effect */}
               <div className='absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full blur-lg scale-110'></div>
+            </div>
+            
+            {/* Badge Display for Current Phase */}
+            <div className='mt-3 flex flex-col items-center'>
+              <div className='text-xs text-gray-400 mb-1'>Current Badge</div>
+              <div className={`
+                w-36 px-4 py-2 rounded-lg border-2 shadow-lg transition-all duration-300
+                ${selectedCharacterPhase === 0 ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50' : 
+                  selectedCharacterPhase === 1 ? 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-blue-400/50' : 
+                  'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400/50'}
+              `}>
+                <div className='flex items-center gap-2'>
+                  <span className='text-2xl'>
+                    {selectedCharacterPhase === 0 ? '🌱' : selectedCharacterPhase === 1 ? '🚀' : '⭐'}
+                  </span>
+                  <div className='text-center'>
+                    <div className={`text-sm font-bold transition-colors duration-300
+                      ${selectedCharacterPhase === 0 ? 'text-green-300' : 
+                        selectedCharacterPhase === 1 ? 'text-blue-300' : 
+                        'text-purple-300'}
+                    `}>
+                      {currentPhase?.name || 'Trustless Scout'}
+                    </div>
+                    <div className='text-xs text-gray-400'>
+                      {selectedCharacterPhase === 0 ? 'Level 1+' : selectedCharacterPhase === 1 ? 'Level 5+' : 'Level 10+'}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -302,19 +335,19 @@ export const RewardsSidebar: React.FC<RewardsDropdownProps> = ({ isOpen, onClose
               {level < 5 ? (
                 <>
                   <span className='text-purple-400 animate-pulse'>✨</span>
-                  <span>Help <span className='text-purple-300 font-semibold'>Nexus Prime</span> evolve to Teen form! (Reach Level 5)</span>
+                  <span>Help <span className='text-purple-300 font-semibold'>Nexus Prime</span> evolve to Blockchain Explorer form! (Reach Level 5)</span>
                   <span className='text-purple-400 animate-pulse'>✨</span>
                 </>
               ) : level < 10 ? (
                 <>
                   <span className='text-blue-400 animate-pulse'>🌟</span>
-                  <span>Keep going! Help <span className='text-blue-300 font-semibold'>Nexus Prime</span> reach Expert form! (Reach Level 10)</span>
+                  <span>Keep going! Help <span className='text-blue-300 font-semibold'>Nexus Prime</span> reach Stellar Expert form! (Reach Level 10)</span>
                   <span className='text-blue-400 animate-pulse'>🌟</span>
                 </>
               ) : (
                 <>
                   <span className='text-cyan-400 animate-pulse'>👑</span>
-                  <span><span className='text-cyan-300 font-semibold'>Nexus Prime</span> has reached Expert form! Keep earning XP to master the universe!</span>
+                  <span><span className='text-cyan-300 font-semibold'>Nexus Prime</span> has reached Stellar Expert form! Keep earning XP to master the universe!</span>
                   <span className='text-cyan-400 animate-pulse'>👑</span>
                 </>
               )}
