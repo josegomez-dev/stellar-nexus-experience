@@ -137,7 +137,7 @@ export default function EscrowPuzzleMaster() {
       await gameScoresService.submitScore(
         gameId,
         account.id,
-        account.profile?.displayName || account.profile?.username || account.displayName || 'Anonymous',
+        account.profile?.displayName || account.profile?.username || 'Anonymous',
         finalScore,
         1, // Level not applicable for puzzle game
         {

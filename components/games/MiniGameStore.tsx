@@ -68,14 +68,14 @@ export default function MiniGameStore() {
     {
       id: 4,
       title: '🌟 FEATURED GAME OF THE WEEK 🌟',
-      subtitle: 'Web3 Basics Adventure',
+      subtitle: 'NEXUS Web3 Infinite Runner',
       description:
-        'Master blockchain fundamentals through interactive gameplay. Join 1,247+ learners and earn crypto rewards!',
-      image: '/images/games/web3-basics-adventure.png',
+        'Master blockchain fundamentals through interactive gameplay!',
+      image: '/videos/infinite-runner.mp4',
       gradient: 'from-yellow-500 via-orange-500 to-red-500',
       cta: 'Play Now',
       badge: '⭐ FEATURED',
-      players: '1,247 Active Players',
+      // players: '1,247 Active Players',
     },
   ];
 
@@ -122,7 +122,7 @@ export default function MiniGameStore() {
   const miniGames = [
     {
       id: 'web3-basics-adventure',
-      title: 'Web3 Basics Adventure',
+      title: 'Web3 Basics Adventure | NEXUS Infinite Runner',
       description:
         'Embark on an epic journey through blockchain fundamentals. Learn smart contracts, wallets, and DeFi while earning crypto rewards!',
       shortDescription: 'Master blockchain basics through interactive gameplay',
@@ -130,11 +130,11 @@ export default function MiniGameStore() {
       status: 'beta', // available
       category: 'learning',
       difficulty: 'Beginner',
-      estimatedTime: '2-3 hours',
+      estimatedTime: 'NEXUS Web3 Infinite Runner',
       rewards: '50 XLM + NFT Badge',
-      currentPlayers: 1247,
+      // currentPlayers: 1247,
       rating: 4.8,
-      thumbnail: '/images/games/web3-basics-adventure.png',
+      thumbnail: '/images/games/infinite-runner.png',
       progress: 20,
       estimatedRelease: 'Available Now',
       donationGoal: 0,
@@ -641,11 +641,13 @@ export default function MiniGameStore() {
                       {/* Game Thumbnail */}
                       <div className='relative'>
                         <div className='relative h-80 rounded-2xl overflow-hidden'>
-                          <Image
-                            src='/images/games/web3-basics-adventure.png'
-                            alt='Web3 Basics Adventure'
-                            fill
-                            className='object-cover'
+                          <video
+                            src='/videos/infinite-runner.mp4'
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className='w-full h-full object-cover'
                           />
                           <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent'></div>
 
@@ -660,7 +662,7 @@ export default function MiniGameStore() {
                           <div className='absolute bottom-4 left-4 flex items-center space-x-2'>
                             <span className='text-yellow-400 text-2xl'>⭐</span>
                             <span className='text-white text-xl font-bold'>4.8</span>
-                            <span className='text-white/80 text-sm'>(1,247 players)</span>
+                            {/* <span className='text-white/80 text-sm'>(1,247 players)</span> */}
                           </div>
                         </div>
                       </div>
@@ -669,7 +671,9 @@ export default function MiniGameStore() {
                       <div className='space-y-6'>
                         <div>
                           <h3 className='text-4xl font-bold text-white mb-4'>
-                            🌐 Web3 Basics Adventure
+                            🌐 Web3 Basics Adventure | <br /> <span className='text-brand-300 text-2xl font-bold'>
+                          NEXUS Infinite Runner
+                          </span>
                           </h3>
                           <p className='text-white/90 text-lg leading-relaxed mb-6'>
                             Embark on an epic journey through blockchain fundamentals. Learn smart
@@ -681,7 +685,7 @@ export default function MiniGameStore() {
                         <div className='grid grid-cols-2 gap-4'>
                           <div className='text-center p-3 bg-white/10 rounded-xl'>
                             <div className='text-2xl mb-2'>⏱️</div>
-                            <div className='text-white font-semibold'>2-3 hours</div>
+                            <div className='text-white font-semibold'><span className='text-cyan-400 font-bold'>Infinite</span></div>
                             <div className='text-white/60 text-sm'>Duration</div>
                           </div>
                           <div className='text-center p-3 bg-white/10 rounded-xl'>
@@ -779,12 +783,23 @@ export default function MiniGameStore() {
                     >
                       {/* Game Thumbnail */}
                       <div className='relative h-48 overflow-hidden'>
-                        <Image
-                          src={game.thumbnail}
-                          alt={game.title}
-                          fill
-                          className='object-cover transition-transform duration-500 group-hover:scale-110'
-                        />
+                        {game.thumbnail.endsWith('.mp4') ? (
+                          <video
+                            src={game.thumbnail}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
+                          />
+                        ) : (
+                          <Image
+                            src={game.thumbnail}
+                            alt={game.title}
+                            fill
+                            className='object-cover transition-transform duration-500 group-hover:scale-110'
+                          />
+                        )}
 
                         {/* Overlay Effects */}
                         <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent'></div>
@@ -830,7 +845,7 @@ export default function MiniGameStore() {
                         )}
 
                         {/* Players Count */}
-                        {game.currentPlayers > 0 && (
+                        {game.currentPlayers !== undefined && game.currentPlayers > 0 && (
                           <div className='absolute bottom-4 right-4'>
                             <span className='text-white/80 text-xs'>
                               👥 {game.currentPlayers.toLocaleString()}
@@ -995,14 +1010,25 @@ export default function MiniGameStore() {
                       ></div>
                       <div className='absolute inset-0 bg-black/20'></div>
 
-                      {/* Background Image */}
+                      {/* Background Image/Video */}
                       <div className='absolute inset-0'>
-                        <Image
-                          src={banner.image}
-                          alt={banner.title}
-                          fill
-                          className='object-cover opacity-30'
-                        />
+                        {banner.image.endsWith('.mp4') ? (
+                          <video
+                            src={banner.image}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className='w-full h-full object-cover opacity-30'
+                          />
+                        ) : (
+                          <Image
+                            src={banner.image}
+                            alt={banner.title}
+                            fill
+                            className='object-cover opacity-30'
+                          />
+                        )}
                       </div>
 
                       {/* Content */}

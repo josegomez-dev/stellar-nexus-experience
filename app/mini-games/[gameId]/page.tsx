@@ -20,7 +20,7 @@ import Image from 'next/image';
 const gameLibrary = {
   'web3-basics-adventure': {
     id: 'web3-basics-adventure',
-    title: 'Web3 Basics Adventure',
+    title: 'NEXUS INFINITE RUNNER',
     subtitle: 'Master blockchain basics through interactive gameplay',
     description:
       'Embark on an epic journey through blockchain fundamentals. Learn smart contracts, wallets, and DeFi while earning crypto rewards!',
@@ -30,7 +30,7 @@ const gameLibrary = {
     difficulty: 'Beginner',
     estimatedTime: '2-3 hours',
     rewards: '50 XLM + NFT Badge',
-    currentPlayers: 1247,
+    // currentPlayers: 1247,
     rating: 4.8,
     thumbnail: '/images/games/web3-basics-adventure.png',
     progress: 5,
@@ -87,7 +87,7 @@ const gameLibrary = {
         role: 'Core Engine',
         avatar: '/images/logo/logoicon.png',
       },
-      { name: 'Trustless Work Labs', role: 'Game Design', avatar: '/images/logo/logoicon.png' },
+      { name: 'NEXUS Labs', role: 'Game Design', avatar: '/images/logo/logoicon.png' },
       { name: 'Blockchain Gaming Studio', role: 'UI/UX', avatar: '/images/logo/logoicon.png' },
     ],
     technologies: ['Stellar Blockchain', 'Smart Contracts', 'React Hooks', 'TypeScript'],
@@ -491,6 +491,7 @@ export default function GamePage() {
         currentPage='mini-games' 
         walletConnected={isConnected}
         autoOpen={false}
+        gameId={gameId}
       />
 
       {/* Leaderboard Sidebar */}

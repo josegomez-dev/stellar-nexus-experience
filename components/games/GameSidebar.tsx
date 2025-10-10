@@ -349,10 +349,13 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
               setCurrentView('leaderboard');
               setIsOpen(true);
             }}
-            className='bg-gradient-to-l from-yellow-600 to-orange-700 hover:from-yellow-500 hover:to-orange-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-yellow-400'
-            title="Leaderboard"
+            className='bg-gradient-to-l from-yellow-600 to-orange-700 hover:from-yellow-500 hover:to-orange-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-yellow-400 relative'
+            title="Leaderboard (WIP - Beta)"
           >
             <span className='text-2xl'>🏆</span>
+            <span className='absolute -top-1 -left-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-lg'>
+              WIP
+            </span>
           </button>
           
           <button
@@ -399,8 +402,15 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
           {/* Header */}
           <div className='bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-b border-purple-500/30 p-4'>
             <div className='flex items-center justify-between mb-3'>
-              <h3 className='text-white font-bold text-lg'>
-                {currentView === 'leaderboard' && '🏆 Leaderboard'}
+              <h3 className='text-white font-bold text-lg flex items-center gap-2'>
+                {currentView === 'leaderboard' && (
+                  <>
+                    <span>🏆 Games Leaderboard | Infinite Runner</span>
+                    <span className='bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse'>
+                      WIP
+                    </span>
+                  </>
+                )}
                 {currentView === 'chat' && '💬 Chat'}
                 {currentView === 'social' && '🔗 Share'}
                 {currentView === 'milestones' && '🎯 Milestones'}
@@ -417,13 +427,16 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             <div className='grid grid-cols-4 gap-1 bg-black/30 p-1 rounded-lg'>
               <button
                 onClick={() => setCurrentView('leaderboard')}
-                className={`py-2 text-xs rounded transition-all ${
+                className={`py-2 text-xs rounded transition-all relative ${
                   currentView === 'leaderboard'
                     ? 'bg-yellow-600 text-white font-bold'
                     : 'text-white/60 hover:text-white/80'
                 }`}
               >
                 🏆
+                <span className='absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[8px] font-bold px-1 rounded-full animate-pulse'>
+                  WIP
+                </span>
               </button>
               <button
                 onClick={() => setCurrentView('chat')}
@@ -463,6 +476,21 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             {/* LEADERBOARD VIEW */}
             {currentView === 'leaderboard' && (
               <div className='space-y-4'>
+                {/* Beta/WIP Notice */}
+                <div className='bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-3 border-2 border-orange-500/40 shadow-lg'>
+                  <div className='flex items-start gap-2'>
+                    <span className='text-2xl'>🚧</span>
+                    <div className='flex-1'>
+                      <div className='text-orange-300 font-bold text-sm mb-1'>
+                        ⚠️ Work In Progress - Beta Version
+                      </div>
+                      <div className='text-white/80 text-xs leading-relaxed'>
+                        The leaderboard feature is currently in beta testing. Some features may be incomplete or under development. Thank you for your patience as we continue to improve! 🚀
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Winner's Circle - Highlight the Champion */}
                 {topScores.length > 0 && (
                   <div className='bg-gradient-to-br from-yellow-500/30 to-orange-500/30 rounded-xl p-4 border-2 border-yellow-400/60 shadow-lg'>

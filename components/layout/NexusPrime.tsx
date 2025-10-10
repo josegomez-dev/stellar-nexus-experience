@@ -9,6 +9,7 @@ interface NexusPrimeProps {
   walletConnected?: boolean;
   autoOpen?: boolean;
   showDuringLoading?: boolean;
+  gameId?: string;
 }
 
 export const NexusPrime: React.FC<NexusPrimeProps> = ({
@@ -17,6 +18,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
   walletConnected = false,
   autoOpen = false,
   showDuringLoading = false,
+  gameId,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -89,6 +91,40 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         'Welcome to the Gaming Store, adventurer! 🎮 Epic Web3 learning games await you!',
       loading:
         'Preparing your gaming arsenal... Get ready to level up your blockchain skills! 🚀',
+      games: {
+        'web3-basics-adventure': {
+          welcome:
+            '🌐 Welcome to Web3 Basics Adventure! This infinite runner will test your reflexes while you master blockchain fundamentals. Jump, dodge obstacles, and collect crypto rewards!',
+          tips:
+            '💡 Pro Tips: Use SPACE or UP ARROW to jump. Time your jumps perfectly to avoid obstacles. The longer you survive, the higher your score! Collect power-ups to boost your abilities.',
+          encouragement:
+            '🚀 Ready to run through the blockchain? This is your first step into the Web3 universe. Show me what you\'ve got, adventurer!',
+        },
+        'escrow-puzzle-master': {
+          welcome:
+            '⭐ Escrow Puzzle Master - The art of trustless transactions awaits! This game teaches you the fundamentals of escrow systems on Stellar.',
+          tips:
+            '💡 Coming Soon: Solve complex puzzles involving multi-signature wallets, smart contract escrows, and trustless fund management. Master the mechanics that power decentralized work!',
+          encouragement:
+            '🎯 This game is in development! Want to see it sooner? Check out our donation options to speed up development and unlock exclusive beta access!',
+        },
+        'defi-trading-arena': {
+          welcome:
+            '📈 DeFi Trading Arena - Enter the competitive world of decentralized finance! Learn liquidity pools, yield farming, and automated market making.',
+          tips:
+            '💡 Coming Soon: Compete with other traders, manage risk, optimize yields, and climb the DeFi leaderboard. Advanced strategies unlock as you progress!',
+          encouragement:
+            '⚡ Advanced DeFi mechanics await! This game is currently in development. Support us to accelerate its release and get early access!',
+        },
+        'nft-creation': {
+          welcome:
+            '🎨 NFT Creation Studio - Unleash your creativity in the NFT universe! Design, mint, and trade unique digital assets.',
+          tips:
+            '💡 Coming Soon: Use intuitive design tools to create NFTs, learn about IPFS storage, metadata standards, and marketplace dynamics. Your creativity meets blockchain!',
+          encouragement:
+            '🌟 The ultimate NFT creation experience is under construction! Help us bring it to life faster with your support!',
+        },
+      },
     },
     wallet: {
       connected:
@@ -120,7 +156,16 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
         message = characterMessages.demos.welcome;
       }
     } else if (currentPage === 'mini-games') {
-      message = characterMessages['mini-games'].welcome;
+      // If we have a specific gameId, provide game-specific guidance
+      if (gameId && characterMessages['mini-games'].games[gameId as keyof typeof characterMessages['mini-games']['games']]) {
+        const gameMessages = characterMessages['mini-games'].games[gameId as keyof typeof characterMessages['mini-games']['games']];
+        // Rotate through different message types for variety
+        const messageTypes = [gameMessages.welcome, gameMessages.tips, gameMessages.encouragement];
+        const randomIndex = Math.floor(Math.random() * messageTypes.length);
+        message = messageTypes[randomIndex];
+      } else {
+        message = characterMessages['mini-games'].welcome;
+      }
     } else if (currentPage === 'wallet') {
       message = walletConnected
         ? characterMessages.wallet.connected
@@ -133,7 +178,7 @@ export const NexusPrime: React.FC<NexusPrimeProps> = ({
     return String(message)
       .replace(/undefined/g, '')
       .trim();
-  }, [currentPage, currentDemo, walletConnected, hasShownWelcome, characterMessages]);
+  }, [currentPage, currentDemo, walletConnected, hasShownWelcome, characterMessages, gameId]);
 
   // Simple typewriter effect for messages
   const startTypewriter = useCallback((message: string, onComplete?: () => void) => {
