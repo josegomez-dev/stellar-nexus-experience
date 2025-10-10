@@ -10,7 +10,7 @@ export const LeaderboardSection = ({ onOpenLeaderboard }: LeaderboardSectionProp
   return (
     <div data-leaderboard-section>
       {/* Leaderboard Button - Centered between Tutorial and Footer */}
-      <div className='text-center mb-12'>
+      <div className='text-center mb-12 mt-20'>
         <h3 className='text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400 mb-6 drop-shadow-2xl'>
           🏆 Global Leaderboard
         </h3>
@@ -19,7 +19,7 @@ export const LeaderboardSection = ({ onOpenLeaderboard }: LeaderboardSectionProp
         </p>
       </div>
 
-      <div className='flex justify-center items-center px-4'>
+      <div className='flex justify-center items-center px-4 mb-24'>
         <div className='relative animate-pulse hover:animate-none cursor-pointer'>
           {/* Pulsing Ring Animation */}
           <div className='absolute -inset-4 rounded-2xl bg-gradient-to-r from-purple-500/30 to-pink-500/30 blur-lg animate-ping opacity-75'></div>
