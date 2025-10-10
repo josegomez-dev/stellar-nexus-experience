@@ -6,6 +6,7 @@ import { useAccount } from '@/contexts/auth/AccountContext';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { accountService } from '@/lib/services/account-service';
 import { gameSocialService } from '@/lib/services/game-social-service';
+import { gameScoresService } from '@/lib/firebase/firebase-service';
 import Image from 'next/image';
 import GameSidebar from './GameSidebar';
 
@@ -504,6 +505,25 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
       // Save to account
       await accountService.addExperienceAndPoints(account.id, earnedXP, pointsEarned);
       
+      // Submit score to game leaderboard
+      try {
+        await gameScoresService.submitScore(
+          gameId,
+          account.id,
+          account.profile?.displayName || account.profile?.username || 'Anonymous',
+          finalScore,
+          finalLevel,
+          {
+            distance: Math.floor(finalScore / 10), // Estimate distance traveled
+            coinsCollected: Math.floor(finalScore / 50), // Estimate coins
+            timeAlive: Math.floor(finalScore / 100), // Estimate time in seconds
+          }
+        );
+      } catch (scoreError) {
+        console.error('Failed to submit score to leaderboard:', scoreError);
+        // Don't fail the entire save if leaderboard submission fails
+      }
+      
       setProgressSaved(true);
       
       addToast({
@@ -523,7 +543,7 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
     } finally {
       setIsSavingProgress(false);
     }
-  }, [account, progressSaved, isSavingProgress, addToast]);
+  }, [account, progressSaved, isSavingProgress, addToast, gameId]);
 
   // Client-side only mounting
   useEffect(() => {

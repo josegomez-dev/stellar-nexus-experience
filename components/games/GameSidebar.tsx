@@ -5,6 +5,8 @@ import { useAccount } from '@/contexts/auth/AccountContext';
 import { useToast } from '@/contexts/ui/ToastContext';
 import { gameSocialService, GameMessage, Challenge, ChallengeTimeLimit } from '@/lib/services/game-social-service';
 import { accountService } from '@/lib/services/account-service';
+import { gameScoresService } from '@/lib/firebase/firebase-service';
+import { GameScore } from '@/lib/firebase/firebase-types';
 
 interface GameSidebarProps {
   gameId: string;
@@ -13,7 +15,7 @@ interface GameSidebarProps {
   currentLevel?: number;
 }
 
-type SidebarView = 'social' | 'milestones' | 'chat';
+type SidebarView = 'social' | 'milestones' | 'chat' | 'leaderboard';
 
 const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentScore = 0, currentLevel = 1 }) => {
   const { account } = useAccount();
@@ -31,6 +33,22 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [targetUserId, setTargetUserId] = useState<string | undefined>(undefined);
   const [targetUsername, setTargetUsername] = useState<string | undefined>(undefined);
+  
+  // Leaderboard state
+  const [topScores, setTopScores] = useState<GameScore[]>([]);
+  const [userBestScore, setUserBestScore] = useState<GameScore | null>(null);
+  const [userRank, setUserRank] = useState<number>(0);
+  const [gameStats, setGameStats] = useState<{
+    totalPlays: number;
+    uniquePlayers: number;
+    averageScore: number;
+    highestScore: number;
+  }>({
+    totalPlays: 0,
+    uniquePlayers: 0,
+    averageScore: 0,
+    highestScore: 0,
+  });
   
   // @ Mention functionality
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
@@ -83,6 +101,38 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
     
     loadUsers();
   }, [isOpen]);
+
+  // Load leaderboard data
+  useEffect(() => {
+    if (!isOpen || currentView !== 'leaderboard') return;
+    
+    const loadLeaderboard = async () => {
+      try {
+        // Load top scores
+        const scores = await gameScoresService.getTopScores(gameId, 10);
+        setTopScores(scores);
+        
+        // Load user's best score and rank if logged in
+        if (account) {
+          const bestScore = await gameScoresService.getUserBestScore(gameId, account.id);
+          setUserBestScore(bestScore);
+          
+          if (bestScore) {
+            const rank = await gameScoresService.getUserRank(gameId, account.id);
+            setUserRank(rank);
+          }
+        }
+        
+        // Load game stats
+        const stats = await gameScoresService.getGameStats(gameId);
+        setGameStats(stats);
+      } catch (error) {
+        console.error('Failed to load leaderboard:', error);
+      }
+    };
+    
+    loadLeaderboard();
+  }, [isOpen, currentView, gameId, account]);
 
   // Search users when mention search changes
   useEffect(() => {
@@ -296,6 +346,17 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
         >
           <button
             onClick={() => {
+              setCurrentView('leaderboard');
+              setIsOpen(true);
+            }}
+            className='bg-gradient-to-l from-yellow-600 to-orange-700 hover:from-yellow-500 hover:to-orange-600 text-white p-3 rounded-l-xl shadow-xl transition-all duration-300 border-l-4 border-yellow-400'
+            title="Leaderboard"
+          >
+            <span className='text-2xl'>🏆</span>
+          </button>
+          
+          <button
+            onClick={() => {
               setCurrentView('chat');
               setIsOpen(true);
             }}
@@ -339,6 +400,7 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
           <div className='bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-b border-purple-500/30 p-4'>
             <div className='flex items-center justify-between mb-3'>
               <h3 className='text-white font-bold text-lg'>
+                {currentView === 'leaderboard' && '🏆 Leaderboard'}
                 {currentView === 'chat' && '💬 Chat'}
                 {currentView === 'social' && '🔗 Share'}
                 {currentView === 'milestones' && '🎯 Milestones'}
@@ -352,7 +414,17 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
             </div>
             
             {/* View Tabs */}
-            <div className='grid grid-cols-3 gap-1 bg-black/30 p-1 rounded-lg'>
+            <div className='grid grid-cols-4 gap-1 bg-black/30 p-1 rounded-lg'>
+              <button
+                onClick={() => setCurrentView('leaderboard')}
+                className={`py-2 text-xs rounded transition-all ${
+                  currentView === 'leaderboard'
+                    ? 'bg-yellow-600 text-white font-bold'
+                    : 'text-white/60 hover:text-white/80'
+                }`}
+              >
+                🏆
+              </button>
               <button
                 onClick={() => setCurrentView('chat')}
                 className={`py-2 text-xs rounded transition-all ${
@@ -388,6 +460,146 @@ const GameSidebar: React.FC<GameSidebarProps> = ({ gameId, gameTitle, currentSco
 
           {/* Content Area */}
           <div className='flex-1 overflow-y-auto p-4'>
+            {/* LEADERBOARD VIEW */}
+            {currentView === 'leaderboard' && (
+              <div className='space-y-4'>
+                {/* Game Stats */}
+                <div className='bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-xl p-4 border-2 border-yellow-500/40 shadow-lg'>
+                  <div className='text-center mb-3'>
+                    <div className='text-yellow-400 font-bold text-lg mb-1'>📊 Game Statistics</div>
+                  </div>
+                  <div className='grid grid-cols-2 gap-2'>
+                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                      <div className='text-yellow-400 text-xs mb-1'>Total Plays</div>
+                      <div className='text-white font-bold text-lg'>{gameStats.totalPlays.toLocaleString()}</div>
+                    </div>
+                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                      <div className='text-orange-400 text-xs mb-1'>Players</div>
+                      <div className='text-white font-bold text-lg'>{gameStats.uniquePlayers.toLocaleString()}</div>
+                    </div>
+                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                      <div className='text-cyan-400 text-xs mb-1'>Avg Score</div>
+                      <div className='text-white font-bold text-lg'>{gameStats.averageScore.toLocaleString()}</div>
+                    </div>
+                    <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                      <div className='text-green-400 text-xs mb-1'>High Score</div>
+                      <div className='text-white font-bold text-lg'>{gameStats.highestScore.toLocaleString()}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User's Best Score (if logged in and has played) */}
+                {account && userBestScore && (
+                  <div className='bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-4 border-2 border-purple-500/40 shadow-lg'>
+                    <div className='text-center mb-2'>
+                      <div className='text-purple-400 font-bold text-sm mb-2'>🎮 Your Best Score</div>
+                    </div>
+                    <div className='grid grid-cols-2 gap-2'>
+                      <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                        <div className='text-yellow-400 text-xs mb-1'>Score</div>
+                        <div className='text-white font-bold text-xl'>{userBestScore.score.toLocaleString()}</div>
+                      </div>
+                      <div className='bg-black/30 rounded-lg p-2 border border-white/20'>
+                        <div className='text-cyan-400 text-xs mb-1'>Your Rank</div>
+                        <div className='text-white font-bold text-xl'>#{userRank}</div>
+                      </div>
+                    </div>
+                    {userBestScore.level && (
+                      <div className='mt-2 bg-black/30 rounded-lg p-2 border border-white/20 text-center'>
+                        <div className='text-green-400 text-xs mb-1'>Level Reached</div>
+                        <div className='text-white font-bold text-lg'>{userBestScore.level}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Top 10 Leaderboard */}
+                <div>
+                  <div className='text-white font-semibold text-sm mb-2 flex items-center justify-between'>
+                    <span>🏆 Top 10 Players</span>
+                    <span className='text-yellow-400 text-xs'>{gameTitle}</span>
+                  </div>
+                  
+                  <div className='space-y-2'>
+                    {topScores.length === 0 && (
+                      <div className='text-white/40 text-xs text-center py-8'>
+                        No scores yet. Be the first to set a record!
+                      </div>
+                    )}
+                    
+                    {topScores.map((scoreEntry, index) => (
+                      <div
+                        key={scoreEntry.id}
+                        className={`rounded-lg p-3 border transition-all ${
+                          scoreEntry.userId === account?.id
+                            ? 'bg-gradient-to-br from-purple-600/30 to-pink-600/30 border-purple-400/50'
+                            : 'bg-gradient-to-br from-white/5 to-white/10 border-white/10 hover:border-yellow-400/30'
+                        }`}
+                      >
+                        <div className='flex items-center justify-between'>
+                          <div className='flex items-center gap-3 flex-1 min-w-0'>
+                            {/* Rank */}
+                            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                              index === 0
+                                ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black'
+                                : index === 1
+                                ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black'
+                                : index === 2
+                                ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-black'
+                                : 'bg-white/20 text-white'
+                            }`}>
+                              {index === 0 && '🥇'}
+                              {index === 1 && '🥈'}
+                              {index === 2 && '🥉'}
+                              {index > 2 && (index + 1)}
+                            </div>
+                            
+                            {/* Player Info */}
+                            <div className='flex-1 min-w-0'>
+                              <div className='text-white font-semibold text-xs truncate flex items-center gap-1'>
+                                {scoreEntry.username}
+                                {scoreEntry.userId === account?.id && (
+                                  <span className='text-purple-400 text-xs'>(You)</span>
+                                )}
+                              </div>
+                              {scoreEntry.level && (
+                                <div className='text-cyan-400 text-xs'>Level {scoreEntry.level}</div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Score */}
+                          <div className='text-right flex-shrink-0'>
+                            <div className='text-yellow-400 font-bold text-lg'>{scoreEntry.score.toLocaleString()}</div>
+                            {scoreEntry.metadata?.distance && (
+                              <div className='text-cyan-300 text-xs'>{scoreEntry.metadata.distance}m</div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Timestamp */}
+                        <div className='text-white/40 text-xs mt-2'>
+                          {scoreEntry.timestamp ? new Date(scoreEntry.timestamp).toLocaleDateString([], { 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Recently'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                {!account && (
+                  <div className='bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30 text-center'>
+                    <span className='text-yellow-300 text-xs'>🔒 Connect wallet to track your scores</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* CHAT VIEW */}
             {currentView === 'chat' && (
               <div className='flex flex-col h-full'>

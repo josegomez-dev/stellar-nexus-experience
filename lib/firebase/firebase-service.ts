@@ -15,7 +15,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { Account, TransactionRecord, DemoStats, MandatoryFeedback, COLLECTIONS } from './firebase-types';
+import { Account, TransactionRecord, DemoStats, MandatoryFeedback, GameScore, COLLECTIONS } from './firebase-types';
 
 // Helper function to convert Firestore timestamps to Date objects
 const convertTimestamps = (data: any): any => {
@@ -683,5 +683,168 @@ export const firebaseUtils = {
     };
 
     await accountService.createOrUpdateAccount(accountData);
+  },
+};
+
+// Game Scores Service - for tracking high scores across all games
+export const gameScoresService = {
+  // Submit a new game score
+  async submitScore(
+    gameId: string,
+    userId: string,
+    username: string,
+    score: number,
+    level: number = 1,
+    metadata?: GameScore['metadata']
+  ): Promise<string> {
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const docRef = await addDoc(scoresRef, {
+      gameId,
+      userId,
+      username,
+      score,
+      level,
+      metadata: metadata || {},
+      timestamp: serverTimestamp(),
+    });
+    return docRef.id;
+  },
+
+  // Get top scores for a specific game
+  async getTopScores(gameId: string, limitCount: number = 10): Promise<GameScore[]> {
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const q = query(
+      scoresRef,
+      where('gameId', '==', gameId),
+      orderBy('score', 'desc'),
+      limit(limitCount)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const scores: GameScore[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      scores.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as GameScore);
+    });
+
+    return scores;
+  },
+
+  // Get user's best score for a specific game
+  async getUserBestScore(gameId: string, userId: string): Promise<GameScore | null> {
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const q = query(
+      scoresRef,
+      where('gameId', '==', gameId),
+      where('userId', '==', userId),
+      orderBy('score', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...convertTimestamps(data),
+    } as GameScore;
+  },
+
+  // Get user's rank for a specific game
+  async getUserRank(gameId: string, userId: string): Promise<number> {
+    const userBestScore = await this.getUserBestScore(gameId, userId);
+    if (!userBestScore) {
+      return 0; // User hasn't played yet
+    }
+
+    // Count how many scores are better than the user's best
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const q = query(
+      scoresRef,
+      where('gameId', '==', gameId),
+      where('score', '>', userBestScore.score)
+    );
+
+    const querySnapshot = await getDocs(q);
+    
+    // Get unique user IDs with better scores
+    const betterScoreUsers = new Set<string>();
+    querySnapshot.forEach(doc => {
+      betterScoreUsers.add(doc.data().userId);
+    });
+
+    return betterScoreUsers.size + 1; // +1 because rank starts at 1
+  },
+
+  // Get all scores for a user across all games
+  async getUserScores(userId: string, limitCount: number = 50): Promise<GameScore[]> {
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const q = query(
+      scoresRef,
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc'),
+      limit(limitCount)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const scores: GameScore[] = [];
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      scores.push({
+        id: doc.id,
+        ...convertTimestamps(data),
+      } as GameScore);
+    });
+
+    return scores;
+  },
+
+  // Get game statistics (total plays, average score, etc.)
+  async getGameStats(gameId: string): Promise<{
+    totalPlays: number;
+    uniquePlayers: number;
+    averageScore: number;
+    highestScore: number;
+  }> {
+    const scoresRef = collection(db, COLLECTIONS.GAME_SCORES);
+    const q = query(scoresRef, where('gameId', '==', gameId));
+
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return {
+        totalPlays: 0,
+        uniquePlayers: 0,
+        averageScore: 0,
+        highestScore: 0,
+      };
+    }
+
+    let totalScore = 0;
+    let highestScore = 0;
+    const uniquePlayers = new Set<string>();
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      totalScore += data.score || 0;
+      highestScore = Math.max(highestScore, data.score || 0);
+      uniquePlayers.add(data.userId);
+    });
+
+    return {
+      totalPlays: querySnapshot.size,
+      uniquePlayers: uniquePlayers.size,
+      averageScore: Math.round(totalScore / querySnapshot.size),
+      highestScore,
+    };
   },
 };

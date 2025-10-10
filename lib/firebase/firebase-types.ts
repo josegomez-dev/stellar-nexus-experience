@@ -66,6 +66,24 @@ export interface DemoStats {
   updatedAt: Date;
 }
 
+// Game high score tracking
+export interface GameScore {
+  id: string; // Auto-generated document ID
+  gameId: string; // Game identifier (e.g., 'web3-basics-adventure', 'infinite-runner')
+  userId: string; // Wallet address
+  username: string; // Display name
+  score: number; // Score achieved
+  level: number; // Level reached (if applicable)
+  timestamp: Date; // When the score was achieved
+  metadata?: {
+    // Optional game-specific data
+    distance?: number; // For runner games
+    coinsCollected?: number;
+    timeAlive?: number;
+    [key: string]: any;
+  };
+}
+
 // Collection names
 export const COLLECTIONS = {
   ACCOUNTS: 'accounts',
@@ -73,6 +91,7 @@ export const COLLECTIONS = {
   DEMO_STATS: 'demo_stats',
   QUESTS: 'quests',
   MANDATORY_FEEDBACK: 'mandatory_feedback',
+  GAME_SCORES: 'game_scores',
 } as const;
 
 // Predefined demos configuration (static data)
