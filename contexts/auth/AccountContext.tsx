@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { UserAccount, PointsTransaction } from '@/utils/types/account';
+import { UserAccount } from '@/utils/types/account';
 import { accountService } from '@/lib/services/account-service';
 import { useGlobalWallet } from '../wallet/WalletContext';
 import { useToast } from '../ui/ToastContext';
@@ -12,7 +12,6 @@ interface AccountContextType {
   account: UserAccount | null;
   loading: boolean;
   error: string | null;
-  pointsTransactions: PointsTransaction[];
   createAccount: () => Promise<void>;
   updateProfile: (updates: Partial<UserAccount['profile']>) => Promise<void>;
   updateSettings: (updates: Partial<UserAccount['settings']>) => Promise<void>;
@@ -45,7 +44,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
   const [account, setAccount] = useState<UserAccount | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pointsTransactions, setPointsTransactions] = useState<PointsTransaction[]>([]);
 
   // Track demo completions in progress to prevent duplicates
   const completionInProgress = useRef(new Set<string>()).current;
@@ -61,7 +59,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       loadAccount();
     } else {
       setAccount(null);
-      setPointsTransactions([]);
     }
   }, [isConnected, walletData?.publicKey]);
 
@@ -93,10 +90,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
 
         setAccount(userAccount);
         // Account info set (Bugfender removed)
-
-        // Load points transactions
-        const transactions = await accountService.getPointsTransactions(userAccount.id);
-        setPointsTransactions(transactions);
 
         // Welcome back message
         // addToast({
@@ -141,25 +134,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
 
       setAccount(newAccount);
       // Account info set (Bugfender removed)
-
-      // Load initial points transactions with timeout
-      try {
-        const transactionPromise = accountService.getPointsTransactions(newAccount.id);
-        const transactionTimeoutPromise = new Promise((_, reject) => {
-          setTimeout(
-            () => reject(new Error('Loading transactions timed out after 15 seconds')),
-            15000
-          );
-        });
-
-        const transactions = (await Promise.race([
-          transactionPromise,
-          transactionTimeoutPromise,
-        ])) as PointsTransaction[];
-        setPointsTransactions(transactions);
-      } catch (transactionError) {
-        setPointsTransactions([]);
-      }
 
       // Success message for new account
       addToast({
@@ -312,10 +286,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
       // Refresh account data to get new badges and points
       await refreshAccount();
 
-      // Refresh points transactions
-      const transactions = await accountService.getPointsTransactions(account.id);
-      setPointsTransactions(transactions);
-
       // Check if a new badge was earned (only on first completion)
       if (isFirstCompletion && typeof window !== 'undefined') {
         const updatedAccount = await accountService.getAccountById(account.id);
@@ -413,7 +383,6 @@ export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) =>
     account,
     loading,
     error,
-    pointsTransactions,
     createAccount,
     updateProfile,
     updateSettings,

@@ -37,7 +37,8 @@ export class AccountService {
     publicKey: string,
     network: string
   ): Promise<UserAccount> {
-    const accountId = uuidv4();
+    // Use wallet address as account ID (not auto-generated UUID)
+    const accountId = walletAddress;
 
     const now = Timestamp.now();
 
@@ -149,10 +150,7 @@ export class AccountService {
 
     await setDoc(doc(db, 'accounts', accountId), newAccount);
 
-    // Log the account creation and badge rewards
-    await this.logPointsTransaction(accountId, 'bonus', 100, 'Account Creation Bonus');
-
-    await this.logPointsTransaction(accountId, 'earn', 10, 'Badge: Welcome Explorer');
+    // Points tracking is done in the account document itself (no separate pointsTransactions collection)
 
     return newAccount;
   }
@@ -251,13 +249,7 @@ export class AccountService {
     const accountRef = doc(db, 'accounts', accountId);
     await updateDoc(accountRef, updateData);
 
-    // Log points transaction (only if not already completed to prevent duplicates)
-    if (isFirstCompletion || !currentDemo?.pointsEarned) {
-      const transactionReason = isFirstCompletion
-        ? `Completed ${demoId}`
-        : `Replay bonus for ${demoId}`;
-      await this.logPointsTransaction(accountId, 'earn', pointsEarned, transactionReason, demoId);
-    }
+    // Points tracking is done in the account document itself (no separate pointsTransactions collection)
 
     // Demo progress is tracked separately by markDemoComplete to avoid duplicates
 
@@ -341,13 +333,7 @@ export class AccountService {
       updatedAt: serverTimestamp(),
     });
 
-    // Log points transaction
-    await this.logPointsTransaction(
-      accountId,
-      'earn',
-      badgePoints,
-      `Badge: ${badge?.name || badgeId}`
-    );
+    // Points tracking is done in the account document itself (no separate pointsTransactions collection)
   }
 
   // Check and award badges based on demo completion order
@@ -506,45 +492,7 @@ export class AccountService {
     }
   }
 
-  // Log points transaction
-  async logPointsTransaction(
-    userId: string,
-    type: 'earn' | 'spend' | 'bonus' | 'penalty',
-    amount: number,
-    reason: string,
-    demoId?: string
-  ): Promise<void> {
-    // Create transaction object, only including demoId if it's defined
-    const transaction: any = {
-      id: uuidv4(),
-      userId,
-      type,
-      amount,
-      reason,
-      timestamp: Timestamp.now(),
-    };
-
-    // Only add demoId if it's defined (not undefined)
-    if (demoId !== undefined && demoId !== null) {
-      transaction.demoId = demoId;
-    }
-
-    await addDoc(collection(db, 'pointsTransactions'), transaction);
-  }
-
-  // Get points transactions for user
-  async getPointsTransactions(userId: string, limitCount: number = 50): Promise<any[]> {
-    const transactionsRef = collection(db, 'pointsTransactions');
-    const q = query(
-      transactionsRef,
-      where('userId', '==', userId),
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
-    );
-
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data());
-  }
+  // Points transactions removed - all tracking is done in the account document itself
 
   // Leaderboard functionality removed - will be derived from accounts collection in the future
 
