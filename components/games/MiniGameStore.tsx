@@ -500,14 +500,71 @@ export default function MiniGameStore() {
                           });
                         }
                       }}
-                      className='px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 border-2 border-white/20 hover:border-white/40 flex items-center space-x-3'
+                      disabled={isConnected && firebaseLoading && !isInitialized}
+                      className={`px-8 py-4 font-bold rounded-xl transition-all duration-300 transform shadow-lg border-2 flex items-center space-x-3 ${
+                        isConnected && firebaseLoading && !isInitialized
+                          ? 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:scale-105 hover:shadow-purple-500/25 border-white/20 hover:border-white/40'
+                      }`}
                     >
-                      <span>Explore Games</span>
-                      <span className='text-xl'>🔍</span>
+                      {isConnected && firebaseLoading && !isInitialized ? (
+                        <>
+                          <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                          <span>Loading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Explore Games</span>
+                          <span className='text-xl'>🔍</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
 
+                {/* Loading State */}
+                {isConnected && firebaseLoading && !isInitialized && (
+                  <div className='text-center py-16'>
+                    {/* Loading Spinner */}
+                    <div className='inline-block'>
+                      <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-purple-400 mb-4'></div>
+                    </div>
+
+                    {/* Loading Title */}
+                    <h3 className='text-lg font-semibold text-white mb-2'>
+                      Loading Your Account...
+                    </h3>
+
+                    {/* Loading Description */}
+                    <p className='text-white/70 text-sm mb-6'>
+                      Preparing game library and loading your progress data
+                    </p>
+
+                    {/* Animated Loading Dots */}
+                    <div className='flex justify-center items-center space-x-2'>
+                      <div className='animate-pulse bg-purple-400/30 rounded-full h-3 w-3'></div>
+                      <div
+                        className='animate-pulse bg-purple-400/50 rounded-full h-3 w-3'
+                        style={{ animationDelay: '0.3s' }}
+                      ></div>
+                      <div
+                        className='animate-pulse bg-purple-400/30 rounded-full h-3 w-3'
+                        style={{ animationDelay: '0.6s' }}
+                      ></div>
+                    </div>
+
+                    {/* Progress Steps */}
+                    <div className='mt-6 space-y-2'>
+                      <div className='text-xs text-white/60'>• Loading account information</div>
+                      <div className='text-xs text-white/60'>• Fetching game statistics</div>
+                      <div className='text-xs text-white/60'>• Preparing game interfaces</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Main Content - Show when not loading */}
+                {(!isConnected || !firebaseLoading || isInitialized) && (
+                  <>
                 {/* Featured Game Spotlight */}
                 <div className='mb-16'>
                   <div className='text-center mb-8'>
@@ -860,7 +917,8 @@ export default function MiniGameStore() {
                     </p>
                   </div>
                 )}
-              </div>
+                  </>
+                )}
 
               {/* Epic Promotional Banner Carousel */}
               <div id='news-banner-carousel' className='relative'>
@@ -941,6 +999,7 @@ export default function MiniGameStore() {
                     ))}
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           </main>

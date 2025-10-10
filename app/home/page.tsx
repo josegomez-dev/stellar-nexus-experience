@@ -273,6 +273,7 @@ export default function HomePageContent() {
               }}
               onTechTreeClick={() => setShowTechTree(true)}
               isConnected={isConnected}
+              isLoadingAccount={firebaseLoading && !isInitialized}
             />
 
             {/* Demo Cards Section - with fade-in animation */}

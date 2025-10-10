@@ -9,6 +9,7 @@ interface HeroSectionProps {
   onTutorialClick: () => void;
   onTechTreeClick: () => void;
   isConnected: boolean;
+  isLoadingAccount?: boolean;
 }
 
 export const HeroSection = ({
@@ -17,6 +18,7 @@ export const HeroSection = ({
   onTutorialClick,
   onTechTreeClick,
   isConnected,
+  isLoadingAccount = false,
 }: HeroSectionProps) => {
   return (
     <section className={`container mx-auto px-4 py-16 ${!isVideoPlaying ? 'animate-fadeIn' : 'opacity-0'}`}>
@@ -155,7 +157,9 @@ export const HeroSection = ({
               <Tooltip
                 position='bottom'
                 content={
-                  miniGamesUnlocked
+                  isLoadingAccount && isConnected
+                    ? 'Loading your account...'
+                    : miniGamesUnlocked
                     ? 'Explore the Nexus Web3 Playground'
                     : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
                 }
@@ -173,24 +177,35 @@ export const HeroSection = ({
                       : 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
                   }`}
                   title={
-                    miniGamesUnlocked
+                    isLoadingAccount && isConnected
+                      ? 'Loading your account...'
+                      : miniGamesUnlocked
                       ? 'Explore the Nexus Web3 Playground'
                       : 'Complete all demos and earn all badges to unlock the Nexus Web3 Playground'
                   }
                 >
-                  <span className='text-center md:text-left'>
-                    {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
-                  </span>
-                  <span className='text-xl'>
-                    <Image
-                      src={'/images/icons/console.png'}
-                      alt='Nexus Web3 Playground'
-                      width={50}
-                      height={20}
-                      className={miniGamesUnlocked ? '' : 'grayscale'}
-                      style={{ width: 'auto', height: 'auto' }}
-                    />
-                  </span>
+                  {isLoadingAccount && isConnected ? (
+                    <>
+                      <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                      <span className='text-center md:text-left'>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className='text-center md:text-left'>
+                        {miniGamesUnlocked ? 'Nexus Web3 Playground' : '🔒 Nexus Web3 Playground'}
+                      </span>
+                      <span className='text-xl'>
+                        <Image
+                          src={'/images/icons/console.png'}
+                          alt='Nexus Web3 Playground'
+                          width={50}
+                          height={20}
+                          className={miniGamesUnlocked ? '' : 'grayscale'}
+                          style={{ width: 'auto', height: 'auto' }}
+                        />
+                      </span>
+                    </>
+                  )}
                 </a>
               </Tooltip>
             </div>
