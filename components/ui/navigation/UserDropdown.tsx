@@ -488,19 +488,8 @@ export const UserDropdown = () => {
                       // Close the dropdown
                       setIsOpen(false);
                       
-                      // Scroll to the leaderboard section
-                      const leaderboardSection = document.querySelector('[data-leaderboard-section]');
-                      if (leaderboardSection) {
-                        leaderboardSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
-                      
-                      // Wait for scroll to complete, then trigger the button click
-                      setTimeout(() => {
-                        const leaderboardButton = document.querySelector('[data-leaderboard-button]') as HTMLButtonElement;
-                        if (leaderboardButton) {
-                          leaderboardButton.click();
-                        }
-                      }, 500);
+                      // Dispatch event to open leaderboard sidebar (works on all pages)
+                      window.dispatchEvent(new CustomEvent('openLeaderboard'));
                     }}
                     className='w-full flex items-center space-x-3 text-yellow-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200 text-sm px-3 py-2'
                   >

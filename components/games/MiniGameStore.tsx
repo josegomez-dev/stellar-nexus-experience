@@ -11,6 +11,8 @@ import { WalletSidebar } from '@/components/ui/wallet/WalletSidebar';
 import { ToastContainer } from '@/components/ui/Toast';
 import { UserProfile } from '@/components/ui/navigation/UserProfile';
 import { AccountStatusIndicator } from '@/components/ui/AccountStatusIndicator';
+import { LeaderboardSection } from '@/components/home/LeaderboardSection';
+import { LeaderboardSidebar } from '@/components/ui/LeaderboardSidebar';
 import Image from 'next/image';
 
 export default function MiniGameStore() {
@@ -26,6 +28,7 @@ export default function MiniGameStore() {
   const [walletSidebarOpen, setWalletSidebarOpen] = useState(false);
   const [walletExpanded, setWalletExpanded] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [leaderboardSidebarOpen, setLeaderboardSidebarOpen] = useState(false);
 
   // Epic promotional banners
   const promotionalBanners = [
@@ -101,11 +104,17 @@ export default function MiniGameStore() {
       setShowUserProfile(true);
     };
 
+    const handleOpenLeaderboard = () => {
+      setLeaderboardSidebarOpen(true);
+    };
+
     window.addEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
     window.addEventListener('openUserProfile', handleOpenUserProfile);
+    window.addEventListener('openLeaderboard', handleOpenLeaderboard);
     return () => {
       window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
       window.removeEventListener('openUserProfile', handleOpenUserProfile);
+      window.removeEventListener('openLeaderboard', handleOpenLeaderboard);
     };
   }, []);
 
@@ -1055,6 +1064,9 @@ export default function MiniGameStore() {
             </div>
           </main>
 
+          {/* Leaderboard Section */}
+          <LeaderboardSection onOpenLeaderboard={() => setLeaderboardSidebarOpen(true)} />
+
           {/* Wallet Sidebar */}
           <WalletSidebar
             isOpen={walletSidebarOpen}
@@ -1082,6 +1094,12 @@ export default function MiniGameStore() {
           <div className='animate-fadeIn'>
             <Footer />
           </div>
+
+          {/* Leaderboard Sidebar */}
+          <LeaderboardSidebar
+            isOpen={leaderboardSidebarOpen}
+            onClose={() => setLeaderboardSidebarOpen(false)}
+          />
 
           {/* User Profile Modal */}
           <UserProfile isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />

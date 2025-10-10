@@ -108,11 +108,17 @@ export default function HomePageContent() {
       setShowUserProfile(true);
     };
 
+    const handleOpenLeaderboard = () => {
+      setLeaderboardSidebarOpen(true);
+    };
+
     window.addEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
     window.addEventListener('openUserProfile', handleOpenUserProfile);
+    window.addEventListener('openLeaderboard', handleOpenLeaderboard);
     return () => {
       window.removeEventListener('walletSidebarToggle', handleWalletSidebarToggle as EventListener);
       window.removeEventListener('openUserProfile', handleOpenUserProfile);
+      window.removeEventListener('openLeaderboard', handleOpenLeaderboard);
     };
   }, []);
 
