@@ -132,7 +132,7 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
         </div>
 
         {/* Additional stats row */}
-        <div className='mt-3 pt-3 border-t border-white/10'>
+        {/* <div className='mt-3 pt-3 border-t border-white/10'>
           <div className='grid grid-cols-3 gap-4 text-center'>
             <div>
               <div className='text-sm font-semibold text-blue-400'>Lv.{entry.level}</div>
@@ -147,7 +147,7 @@ export const LeaderboardSidebar: React.FC<LeaderboardSidebarProps> = ({ isOpen, 
               <div className='text-xs text-gray-400'>Badges</div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   };

@@ -245,7 +245,7 @@ export default function GamePage() {
             onClick={() => router.push('/mini-games')}
             className='px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-300'
           >
-            ← Back to Arcade
+            ← Back to Gaming Station
           </button>
         </div>
       </div>
@@ -264,6 +264,24 @@ export default function GamePage() {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
       <Header />
+
+      {/* Floating Back Button */}
+      <button
+        onClick={() => router.push('/mini-games')}
+        className='fixed top-24 left-4 z-50 group bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border-2 border-cyan-400/30 hover:border-cyan-400 text-white px-3 py-2 md:px-4 md:py-3 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-cyan-500/50 flex items-center gap-2'
+        aria-label='Back to Arcade'
+      >
+        <svg 
+          className='w-5 h-5 md:w-5 md:h-5 transform group-hover:-translate-x-1 transition-transform duration-300' 
+          fill='none' 
+          stroke='currentColor' 
+          viewBox='0 0 24 24'
+        >
+          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
+        </svg>
+        <span className='font-bold text-xs md:text-sm hidden sm:inline'>Back to Arcade</span>
+        <span className='font-bold text-xs sm:hidden'>Back</span>
+      </button>
 
       {/* Main Content */}
       <main className='relative z-10 pt-20 pb-32'>

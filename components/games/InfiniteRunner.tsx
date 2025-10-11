@@ -1708,15 +1708,14 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
             
             {/* Game Canvas */}
             <div className='relative w-full h-full flex items-center justify-center bg-black overflow-hidden'>
-        {/* Parallax Background Image */}
+        {/* Parallax Background Image - Scrolling */}
         <div 
-          className='absolute inset-0 w-[200%] h-full'
+          className='absolute inset-0 w-full h-full'
           style={{
-            transform: `translateX(-${bgImageOffset}px)`,
-            backgroundImage: `url('${getBackgroundImage()}'), url('${getBackgroundImage()}')`,
-            backgroundSize: '100% 100%',
-            backgroundPosition: `0 0, 100% 0`,
-            backgroundRepeat: 'no-repeat',
+            backgroundImage: `url('${getBackgroundImage()}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: `${-bgImageOffset * 0.3}px center`,
+            backgroundRepeat: 'repeat-x',
             opacity: 0.6,
             filter: 'brightness(0.7)',
           }}
@@ -2282,6 +2281,10 @@ const InfiniteRunner: React.FC<InfiniteRunnerProps> = ({ gameId, gameTitle, embe
                                 if (newLevel === 2) setTheme('sunset');
                                 else if (newLevel === 3) setTheme('night');
                                 else if (newLevel >= 4) setTheme('cyber');
+
+                                // Reset background offsets for smooth transition
+                                setBgOffset(0);
+                                setBgImageOffset(0);
 
                                 // Give 4 seconds of invulnerability after level up
                                 setInvulnerableUntil(Date.now() + 4000);

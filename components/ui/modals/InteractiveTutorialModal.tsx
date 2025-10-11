@@ -384,17 +384,6 @@ export const InteractiveTutorialModal: React.FC<InteractiveTutorialModalProps> =
                         {currentStepData.description}
                       </p>
                     </div>
-
-                    {/* Action Items */}
-                    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
-                      <h4 className="text-white font-semibold mb-2 sm:mb-3 text-base sm:text-lg">💡 What to do next:</h4>
-                      <ul className="text-white/80 space-y-1 sm:space-y-2 text-xs sm:text-base">
-                        <li>• Follow the step instructions carefully</li>
-                        <li>• Use the navigation buttons <span className="hidden sm:inline">or keyboard arrows</span></li>
-                        <li>• Take your time to understand each concept</li>
-                        <li>• Complete each step before moving to the next</li>
-                      </ul>
-                    </div>
                   </div>
                 </div>
               )}

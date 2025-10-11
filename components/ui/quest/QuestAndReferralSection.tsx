@@ -162,7 +162,12 @@ export const QuestAndReferralSection: React.FC<QuestAndReferralSectionProps> = (
               
               <div className="grid md:grid-cols-3 gap-4">
                 {/* Box 1: Starter Kits */}
-                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-400/30 hover:border-green-400/50 transition-all duration-300 flex flex-col">
+                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-400/30 hover:border-green-400/50 transition-all duration-300 flex flex-col relative">
+                  {/* Coming Soon Badge */}
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                    Coming Soon
+                  </div>
+                  
                   <div className="text-center mb-3">
                     <div className="text-4xl mb-2 flex justify-center items-center">
                       <Image

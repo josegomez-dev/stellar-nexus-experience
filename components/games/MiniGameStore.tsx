@@ -376,33 +376,6 @@ export default function MiniGameStore() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden'>
-          {/* Epic Background Effects */}
-          <div className='absolute inset-0'>
-            {/* Floating Particles */}
-            <div className='absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping opacity-60'></div>
-            <div
-              className='absolute top-40 right-20 w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping opacity-80'
-              style={{ animationDelay: '1s' }}
-            ></div>
-            <div
-              className='absolute bottom-40 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-ping opacity-70'
-              style={{ animationDelay: '2s' }}
-            ></div>
-            <div
-              className='absolute bottom-20 right-1/3 w-2.5 h-2.5 bg-blue-400 rounded-full animate-ping opacity-90'
-              style={{ animationDelay: '0.5s' }}
-            ></div>
-
-            {/* Energy Grid Lines */}
-            <div className='absolute inset-0 opacity-20'>
-              <div className='absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'></div>
-              <div className='absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent'></div>
-              <div className='absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-pink-400 to-transparent'></div>
-              <div className='absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent'></div>
-              <div className='absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent'></div>
-            </div>
-          </div>
-
           {/* Header */}
           <div className='animate-fadeIn'>
             <Header />
@@ -459,7 +432,7 @@ export default function MiniGameStore() {
                       className='text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 drop-shadow-2xl mb-6 animate-pulse'
                       style={{ marginTop: '-200px' }}
                     >
-                      GAMING STORE
+                      GAMING STATION
                     </h1>
 
                     <h2 className='text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 drop-shadow-xl mb-8'>
